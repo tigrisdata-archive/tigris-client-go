@@ -120,7 +120,7 @@ func testTxCRUDClientBasic(t *testing.T, c Tx, mc *mockServer) {
 	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), &ReadOptions{})
 	require.NoError(t, err)
 
-	require.False(t, it.More())
+	require.False(t, it.Next(nil))
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
@@ -190,7 +190,7 @@ func testCRUDClientBasic(t *testing.T, c Driver, mc *mockServer) {
 	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &ReadOptions{})
 	require.NoError(t, err)
 
-	require.False(t, it.More())
+	require.False(t, it.Next(nil))
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{

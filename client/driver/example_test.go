@@ -14,10 +14,12 @@ func ExampleDriver() {
 
 	it, _ := c.Read(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), nil)
 
-	for it.More() {
-		doc, _ := it.Next()
+	var doc Document
+	for it.Next(&doc) {
 		fmt.Printf("doc: %v\n", doc)
 	}
+
+	_ = it.Err()
 
 	_, _ = c.Delete(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), nil)
 
@@ -28,10 +30,11 @@ func ExampleDriver() {
 
 	it, _ = tx.Read(ctx, "c1", Filter(`{"F1":"V1"}`), nil)
 
-	for it.More() {
-		doc, _ := it.Next()
+	for it.Next(&doc) {
 		fmt.Printf("doc: %v\n", doc)
 	}
+
+	_ = it.Err()
 
 	_, _ = tx.Delete(ctx, "c1", Filter(`{"F1":"V1"}`), nil)
 

@@ -1,6 +1,9 @@
 package driver
 
-import "context"
+import (
+	"context"
+	"os"
+)
 
 type driverWithOptions interface {
 	insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (InsertResponse, error)
@@ -26,4 +29,12 @@ type txWithOptions interface {
 	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)
 	Commit(ctx context.Context) error
 	Rollback(ctx context.Context) error
+}
+
+func getAuthToken(config *Config) string {
+	token := config.AuthToken
+	if os.Getenv(AUTH_TOKEN_ENV) != "" {
+		token = os.Getenv(AUTH_TOKEN_ENV)
+	}
+	return token
 }

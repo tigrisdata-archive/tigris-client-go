@@ -198,7 +198,7 @@ func validateOptionsParam(options interface{}) (interface{}, error) {
 	return v.Index(0).Interface(), nil
 }
 
-func NewDriver(ctx context.Context, url string, config Config) (Driver, error) {
+func NewDriver(ctx context.Context, url string, config *Config) (Driver, error) {
 	if DefaultProtocol == GRPC {
 		return NewGRPCClient(ctx, url, config)
 	} else if DefaultProtocol == HTTP {

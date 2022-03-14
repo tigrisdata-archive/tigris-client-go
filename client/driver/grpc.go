@@ -19,10 +19,11 @@ import (
 	"fmt"
 	"unsafe"
 
-	"google.golang.org/grpc/credentials/insecure"
-
 	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/oauth"
 )
 
 type grpcDriver struct {
@@ -30,8 +31,16 @@ type grpcDriver struct {
 	conn *grpc.ClientConn
 }
 
-func NewGRPCClient(_ context.Context, url string, _ Config) (Driver, error) {
-	conn, err := grpc.Dial(url, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.FailOnNonTempDialError(true), grpc.WithBlock())
+func NewGRPCClient(_ context.Context, url string, config *Config) (Driver, error) {
+	rpcCreds := oauth.NewOauthAccess(&oauth2.Token{AccessToken: getAuthToken(config)})
+	conn, err := grpc.Dial(url,
+		grpc.WithTransportCredentials(credentials.NewTLS(config.TLS)),
+		grpc.WithPerRPCCredentials(rpcCreds),
+		//grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.FailOnNonTempDialError(true),
+		grpc.WithReturnConnectionError(),
+		grpc.WithBlock(),
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"unsafe"
 
-	"github.com/davecgh/go-spew/spew"
-
+	"github.com/deepmap/oapi-codegen/pkg/securityprovider"
 	userHTTP "github.com/tigrisdata/tigrisdb-client-go/api/client/v1/user"
 )
 
@@ -31,8 +30,22 @@ type httpDriver struct {
 	*httpCRUD
 }
 
-func NewHTTPClient(_ context.Context, url string, _ Config) (Driver, error) {
-	c, err := userHTTP.NewClientWithResponses(url)
+func NewHTTPClient(_ context.Context, url string, config *Config) (Driver, error) {
+	auth, err := securityprovider.NewSecurityProviderBearerToken(getAuthToken(config))
+	if err != nil {
+		return nil, err
+	}
+
+	t := &http.Transport{
+		TLSClientConfig: config.TLS,
+	}
+
+	hc := http.Client{Transport: t}
+
+	c, err := userHTTP.NewClientWithResponses(url,
+		userHTTP.WithRequestEditorFn(auth.Intercept),
+		userHTTP.WithHTTPClient(&hc),
+	)
 	return &driver{driverWithOptions: &httpDriver{httpCRUD: &httpCRUD{api: c}}}, err
 }
 
@@ -112,7 +125,6 @@ func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options 
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
-	spew.Dump(resp.JSON200)
 	if resp.JSON200.TxCtx == nil {
 		return nil, fmt.Errorf("empty transaction context in response")
 	}

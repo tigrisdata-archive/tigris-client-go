@@ -8,7 +8,7 @@ import (
 func ExampleDriver() {
 	ctx := context.TODO()
 
-	c, _ := NewDriver(ctx, "localhost", Config{})
+	c, _ := NewDriver(ctx, "localhost", &Config{})
 
 	_, _ = c.Insert(ctx, "db1", "c1", []Document{Document(`{"F1":"V1"}`)}, nil)
 

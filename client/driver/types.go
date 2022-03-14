@@ -1,7 +1,9 @@
 package driver
 
 import (
+	"crypto/tls"
 	"encoding/json"
+
 	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
 )
 
@@ -9,6 +11,8 @@ const (
 	GRPC            = iota
 	HTTP            = iota
 	DefaultProtocol = GRPC
+
+	AUTH_TOKEN_ENV = "TIGRISDB_AUTH_TOKEN"
 )
 
 type Document json.RawMessage
@@ -32,5 +36,6 @@ type UpdateResponse *api.UpdateResponse
 type DeleteResponse *api.DeleteResponse
 
 type Config struct {
-	AuthToken string `json:"auth_token"`
+	AuthToken string      `json:"auth_token"`
+	TLS       *tls.Config `json:"tls"`
 }

@@ -19,6 +19,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -295,25 +296,25 @@ func testTxBasic(t *testing.T, c Driver, mc *mockServer) {
 }
 
 func TestGRPCDriver(t *testing.T) {
-	client, mockServer, cancel := setupGRPCTests(t, &Config{})
+	client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
 }
 
 func TestHTTPDriver(t *testing.T) {
-	client, mockServer, cancel := setupHTTPTests(t, &Config{})
+	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "aaa"})
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
 }
 
 func TestTxGRPCDriver(t *testing.T) {
-	client, mockServer, cancel := setupGRPCTests(t, &Config{})
+	client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
 	defer cancel()
 	testTxBasic(t, client, mockServer)
 }
 
 func TestTxHTTPDriver(t *testing.T) {
-	client, mockServer, cancel := setupHTTPTests(t, &Config{})
+	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "aaa"})
 	defer cancel()
 	testTxBasic(t, client, mockServer)
 }
@@ -391,6 +392,13 @@ func setupTests(t *testing.T) (*mockServer, func()) {
 	r.HandleFunc(apiPathPrefix+documentPathPattern, func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
 	})
+	r.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
+		b, err := ioutil.ReadAll(r.Body)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`grant_type=refresh_token&refresh_token=refresh_token_123`), b)
+		_, err = w.Write([]byte(`access_token=refreshed_token_config_123`))
+		require.NoError(t, err)
+	})
 
 	var wg sync.WaitGroup
 
@@ -438,14 +446,14 @@ func testDriverAuth(t *testing.T, d Driver, mc *mockServer, token string) {
 
 func TestGRPCDriverAuth(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
-		client, mockServer, cancel := setupGRPCTests(t, &Config{AuthToken: "token_config_123"})
+		client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "token_config_123"})
 		defer cancel()
 
 		testDriverAuth(t, client, mockServer, "token_config_123")
 	})
 
 	t.Run("env", func(t *testing.T) {
-		err := os.Setenv(AUTH_TOKEN_ENV, "token_env_567")
+		err := os.Setenv(TOKEN_ENV, "token_env_567")
 		require.NoError(t, err)
 
 		client, mockServer, cancel := setupGRPCTests(t, &Config{})
@@ -453,21 +461,21 @@ func TestGRPCDriverAuth(t *testing.T) {
 
 		testDriverAuth(t, client, mockServer, "token_env_567")
 
-		err = os.Unsetenv(AUTH_TOKEN_ENV)
+		err = os.Unsetenv(TOKEN_ENV)
 		require.NoError(t, err)
 	})
 }
 
 func TestHTTPDriverAuth(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
-		client, mockServer, cancel := setupHTTPTests(t, &Config{AuthToken: "token_config_123"})
+		client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "token_config_123"})
 		defer cancel()
 
 		testDriverAuth(t, client, mockServer, "token_config_123")
 	})
 
 	t.Run("env", func(t *testing.T) {
-		err := os.Setenv(AUTH_TOKEN_ENV, "token_env_567")
+		err := os.Setenv(TOKEN_ENV, "token_env_567")
 		require.NoError(t, err)
 
 		client, mockServer, cancel := setupHTTPTests(t, &Config{})
@@ -475,9 +483,27 @@ func TestHTTPDriverAuth(t *testing.T) {
 
 		testDriverAuth(t, client, mockServer, "token_env_567")
 
-		err = os.Unsetenv(AUTH_TOKEN_ENV)
+		err = os.Unsetenv(TOKEN_ENV)
 		require.NoError(t, err)
 	})
+}
+
+func TestGRPCTokenRefresh(t *testing.T) {
+	TOKEN_REFRESH_URL = TestHTTPURL + "/token"
+
+	client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "token_config_123:refresh_token_123"})
+	defer cancel()
+
+	testDriverAuth(t, client, mockServer, "refreshed_token_config_123")
+}
+
+func TestHTTPTokenRefresh(t *testing.T) {
+	TOKEN_REFRESH_URL = TestHTTPURL + "/token"
+
+	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "token_config_123:refresh_token_123"})
+	defer cancel()
+
+	testDriverAuth(t, client, mockServer, "refreshed_token_config_123")
 }
 
 var testServerKey = `

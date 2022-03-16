@@ -2,7 +2,12 @@ package driver
 
 import (
 	"context"
+	"net/http"
 	"os"
+	"strings"
+	"time"
+
+	"golang.org/x/oauth2"
 )
 
 type driverWithOptions interface {
@@ -31,10 +36,31 @@ type txWithOptions interface {
 	Rollback(ctx context.Context) error
 }
 
-func getAuthToken(config *Config) string {
-	token := config.AuthToken
-	if os.Getenv(AUTH_TOKEN_ENV) != "" {
-		token = os.Getenv(AUTH_TOKEN_ENV)
+func getAuthToken(ctx context.Context, config *Config) (*oauth2.Token, *oauth2.Config, context.Context) {
+	token := config.Token
+	if os.Getenv(TOKEN_ENV) != "" {
+		token = os.Getenv(TOKEN_ENV)
 	}
-	return token
+
+	parts := strings.Split(token, ":")
+
+	t := oauth2.Token{}
+
+	if len(parts) > 0 {
+		t.AccessToken = parts[0]
+	}
+
+	if len(parts) > 1 {
+		t.RefreshToken = parts[1]
+		// So as we have refresh token, just disregard current access token and refresh immediately
+		t.Expiry = time.Now()
+	}
+
+	tr := &http.Transport{
+		TLSClientConfig: config.TLS,
+	}
+
+	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: TOKEN_REFRESH_URL}}
+
+	return &t, ocfg, context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: tr})
 }

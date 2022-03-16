@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"unsafe"
 
-	"github.com/deepmap/oapi-codegen/pkg/securityprovider"
 	userHTTP "github.com/tigrisdata/tigrisdb-client-go/api/client/v1/user"
 )
 
@@ -30,21 +29,13 @@ type httpDriver struct {
 	*httpCRUD
 }
 
-func NewHTTPClient(_ context.Context, url string, config *Config) (Driver, error) {
-	auth, err := securityprovider.NewSecurityProviderBearerToken(getAuthToken(config))
-	if err != nil {
-		return nil, err
-	}
+func NewHTTPClient(ctx context.Context, url string, config *Config) (Driver, error) {
+	token, oCfg, ctxClient := getAuthToken(ctx, config)
 
-	t := &http.Transport{
-		TLSClientConfig: config.TLS,
-	}
-
-	hc := http.Client{Transport: t}
+	hc := oCfg.Client(ctxClient, token)
 
 	c, err := userHTTP.NewClientWithResponses(url,
-		userHTTP.WithRequestEditorFn(auth.Intercept),
-		userHTTP.WithHTTPClient(&hc),
+		userHTTP.WithHTTPClient(hc),
 	)
 	return &driver{driverWithOptions: &httpDriver{httpCRUD: &httpCRUD{api: c}}}, err
 }

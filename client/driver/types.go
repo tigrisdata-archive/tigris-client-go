@@ -8,11 +8,15 @@ import (
 )
 
 const (
-	GRPC            = iota
-	HTTP            = iota
-	DefaultProtocol = GRPC
+	GRPC = iota
+	HTTP = iota
 
-	AUTH_TOKEN_ENV = "TIGRISDB_AUTH_TOKEN"
+	TOKEN_ENV = "TIGRISDB_TOKEN"
+)
+
+var (
+	DefaultProtocol   = GRPC
+	TOKEN_REFRESH_URL = "https://tigrisdata-dev.us.auth0.com/oauth/token"
 )
 
 type Document json.RawMessage
@@ -36,6 +40,6 @@ type UpdateResponse *api.UpdateResponse
 type DeleteResponse *api.DeleteResponse
 
 type Config struct {
-	AuthToken string      `json:"auth_token"`
-	TLS       *tls.Config `json:"tls"`
+	TLS   *tls.Config `json:"tls,omitempty"`
+	Token string      `json:",omitempty"`
 }

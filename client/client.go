@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/tigrisdata/tigrisdb-client-go/client/driver"
+	"github.com/tigrisdata/tigrisdb-client-go/driver"
 )
 
 type Client interface {

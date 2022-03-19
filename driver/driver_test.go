@@ -28,8 +28,9 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/fullstorydev/grpchan/inprocgrpc"
-	chi "github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5"
 	"github.com/golang/mock/gomock"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -38,7 +39,9 @@ import (
 	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
 	"github.com/tigrisdata/tigrisdb-client-go/mock"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -53,6 +56,60 @@ var (
 	collectionPathPattern = "/collections/*"
 	documentPathPattern   = "/documents/*"
 )
+
+func testError(t *testing.T, d Driver, mc *mockServer, in error, exp error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var r *api.DeleteResponse
+	if in == nil {
+		r = &api.DeleteResponse{}
+	}
+	mc.EXPECT().Delete(gomock.Any(),
+		pm(&api.DeleteRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Options:    &api.DeleteRequestOptions{WriteOptions: &api.WriteOptions{}},
+		})).Return(r, in)
+
+	_, err := d.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
+
+	require.Equal(t, exp, err)
+}
+
+func testErrors(t *testing.T, d Driver, mc *mockServer) {
+	cases := []struct {
+		name string
+		in   error
+		exp  error
+	}{
+		{"tigrisdb_error", &api.RestError{Code: codes.Unauthenticated, Message: "some error"},
+			&api.RestError{Code: codes.Unauthenticated, Message: "some error"}},
+		{"error", fmt.Errorf("some error 1"),
+			&api.RestError{Code: codes.Unknown, Message: "some error 1"}},
+		{"grpc_error", status.Error(codes.PermissionDenied, "some error 1"),
+			&api.RestError{Code: codes.PermissionDenied, Message: "some error 1"}},
+		{"no_error", nil, nil},
+	}
+
+	for _, c := range cases {
+		spew.Dump(c)
+		testError(t, d, mc, c.in, c.exp)
+	}
+}
+
+func TestGRPCError(t *testing.T) {
+	client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
+	defer cancel()
+	testErrors(t, client, mockServer)
+}
+
+func TestHTTPError(t *testing.T) {
+	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "aaa"})
+	defer cancel()
+	testErrors(t, client, mockServer)
+}
 
 type protoMatcher struct {
 	message proto.Message

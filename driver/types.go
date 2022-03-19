@@ -11,12 +11,15 @@ const (
 	GRPC = iota
 	HTTP = iota
 
-	TOKEN_ENV = "TIGRISDB_TOKEN"
+	TokenEnv = "TIGRISDB_TOKEN"
+
+	Version   = "v1.0.0"
+	UserAgent = "tigrisdb-client-go/" + Version
 )
 
 var (
-	DefaultProtocol   = GRPC
-	TOKEN_REFRESH_URL = "https://tigrisdata-dev.us.auth0.com/oauth/token"
+	DefaultProtocol  = GRPC
+	ToekenRefreshURL = "https://tigrisdata-dev.us.auth0.com/oauth/token"
 )
 
 type Document json.RawMessage

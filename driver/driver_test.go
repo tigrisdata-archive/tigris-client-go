@@ -23,13 +23,14 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 	"unsafe"
 
 	"github.com/fullstorydev/grpchan/inprocgrpc"
-	chi "github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5"
 	"github.com/golang/mock/gomock"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -38,7 +39,9 @@ import (
 	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
 	"github.com/tigrisdata/tigrisdb-client-go/mock"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -53,6 +56,59 @@ var (
 	collectionPathPattern = "/collections/*"
 	documentPathPattern   = "/documents/*"
 )
+
+func testError(t *testing.T, d Driver, mc *mock.MockTigrisDBServer, in error, exp error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var r *api.DeleteResponse
+	if in == nil {
+		r = &api.DeleteResponse{}
+	}
+	mc.EXPECT().Delete(gomock.Any(),
+		pm(&api.DeleteRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Options:    &api.DeleteRequestOptions{WriteOptions: &api.WriteOptions{}},
+		})).Return(r, in)
+
+	_, err := d.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
+
+	require.Equal(t, exp, err)
+}
+
+func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisDBServer) {
+	cases := []struct {
+		name string
+		in   error
+		exp  error
+	}{
+		{"tigrisdb_error", &api.TigrisDBError{Code: codes.Unauthenticated, Message: "some error"},
+			&api.TigrisDBError{Code: codes.Unauthenticated, Message: "some error"}},
+		{"error", fmt.Errorf("some error 1"),
+			&api.TigrisDBError{Code: codes.Unknown, Message: "some error 1"}},
+		{"grpc_error", status.Error(codes.PermissionDenied, "some error 1"),
+			&api.TigrisDBError{Code: codes.PermissionDenied, Message: "some error 1"}},
+		{"no_error", nil, nil},
+	}
+
+	for _, c := range cases {
+		testError(t, d, mc, c.in, c.exp)
+	}
+}
+
+func TestGRPCError(t *testing.T) {
+	client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
+	defer cancel()
+	testErrors(t, client, mockServer)
+}
+
+func TestHTTPError(t *testing.T) {
+	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "aaa"})
+	defer cancel()
+	testErrors(t, client, mockServer)
+}
 
 type protoMatcher struct {
 	message proto.Message
@@ -75,7 +131,7 @@ func pm(m proto.Message) gomock.Matcher {
 	return &protoMatcher{m}
 }
 
-func testTxCRUDBasic(t *testing.T, c Tx, mc *mockServer) {
+func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
@@ -147,7 +203,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mockServer) {
 	require.NoError(t, err)
 }
 
-func testCRUDBasic(t *testing.T, c Driver, mc *mockServer) {
+func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
@@ -217,22 +273,40 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mockServer) {
 	require.NoError(t, err)
 }
 
-func testDriverBasic(t *testing.T, c Driver, mc *mockServer) {
+func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
+
+	// Test empty list response
+	mc.EXPECT().ListDatabases(gomock.Any(),
+		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Dbs: nil}, nil)
+
+	dbs, err := c.ListDatabases(ctx)
+	require.NoError(t, err)
+	require.Equal(t, []string(nil), dbs)
 
 	mc.EXPECT().ListDatabases(gomock.Any(),
 		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Dbs: []string{"ldb1", "ldb2"}}, nil)
 
-	dbs, err := c.ListDatabases(ctx)
+	dbs, err = c.ListDatabases(ctx)
 	require.NoError(t, err)
 	require.Equal(t, []string{"ldb1", "ldb2"}, dbs)
+
+	// Test empty list response
+	mc.EXPECT().ListCollections(gomock.Any(),
+		pm(&api.ListCollectionsRequest{
+			Db: "db1",
+		})).Return(&api.ListCollectionsResponse{Collections: nil}, nil)
+
+	colls, err := c.ListCollections(ctx, "db1")
+	require.NoError(t, err)
+	require.Equal(t, []string(nil), colls)
 
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
 			Db: "db1",
 		})).Return(&api.ListCollectionsResponse{Collections: []string{"lc1", "lc2"}}, nil)
 
-	colls, err := c.ListCollections(ctx, "db1")
+	colls, err = c.ListCollections(ctx, "db1")
 	require.NoError(t, err)
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
 
@@ -260,7 +334,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mockServer) {
 	testCRUDBasic(t, c, mc)
 }
 
-func testTxBasic(t *testing.T, c Driver, mc *mockServer) {
+func testTxBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
@@ -319,7 +393,7 @@ func TestTxHTTPDriver(t *testing.T) {
 	testTxBasic(t, client, mockServer)
 }
 
-func setupGRPCTests(t *testing.T, config *Config) (Driver, *mockServer, func()) {
+func setupGRPCTests(t *testing.T, config *Config) (Driver, *mock.MockTigrisDBServer, func()) {
 	mockServer, cancel := setupTests(t)
 
 	certPool := x509.NewCertPool()
@@ -333,7 +407,7 @@ func setupGRPCTests(t *testing.T, config *Config) (Driver, *mockServer, func()) 
 	return client, mockServer, func() { cancel(); _ = client.Close() }
 }
 
-func setupHTTPTests(t *testing.T, config *Config) (Driver, *mockServer, func()) {
+func setupHTTPTests(t *testing.T, config *Config) (Driver, *mock.MockTigrisDBServer, func()) {
 	mockServer, cancel := setupTests(t)
 
 	certPool := x509.NewCertPool()
@@ -350,16 +424,10 @@ func setupHTTPTests(t *testing.T, config *Config) (Driver, *mockServer, func()) 
 	return client, mockServer, func() { cancel(); _ = client.Close() }
 }
 
-type mockServer struct {
-	*mock.MockTigrisDBServer
-}
-
-func setupTests(t *testing.T) (*mockServer, func()) {
+func setupTests(t *testing.T) (*mock.MockTigrisDBServer, func()) {
 	c := gomock.NewController(t)
 
-	m := mockServer{
-		MockTigrisDBServer: mock.NewMockTigrisDBServer(c),
-	}
+	m := mock.NewMockTigrisDBServer(c)
 
 	inproc := &inprocgrpc.Channel{}
 	client := api.NewTigrisDBClient(inproc)
@@ -367,8 +435,7 @@ func setupTests(t *testing.T) (*mockServer, func()) {
 	mux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONBuiltin{}))
 	err := api.RegisterTigrisDBHandlerClient(context.TODO(), mux, client)
 	require.NoError(t, err)
-
-	api.RegisterTigrisDBServer(inproc, &m)
+	api.RegisterTigrisDBServer(inproc, m)
 
 	cert, err := tls.X509KeyPair([]byte(testServerCert), []byte(testServerKey))
 	require.NoError(t, err)
@@ -379,7 +446,7 @@ func setupTests(t *testing.T) (*mockServer, func()) {
 	}
 
 	s := grpc.NewServer(grpc.Creds(credentials.NewTLS(tlsConfig)))
-	api.RegisterTigrisDBServer(s, &m)
+	api.RegisterTigrisDBServer(s, m)
 
 	r := chi.NewRouter()
 
@@ -419,14 +486,14 @@ func setupTests(t *testing.T) (*mockServer, func()) {
 		_ = server.ListenAndServeTLS("", "")
 	}()
 
-	return &m, func() {
+	return m, func() {
 		_ = server.Shutdown(context.Background())
 		s.Stop()
 		wg.Wait()
 	}
 }
 
-func testDriverAuth(t *testing.T, d Driver, mc *mockServer, token string) {
+func testDriverAuth(t *testing.T, d Driver, mc *mock.MockTigrisDBServer, token string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -438,6 +505,11 @@ func testDriverAuth(t *testing.T, d Driver, mc *mockServer, token string) {
 			Options:    &api.DeleteRequestOptions{WriteOptions: &api.WriteOptions{}},
 		})).Do(func(ctx context.Context, r *api.DeleteRequest) {
 		assert.Equal(t, "Bearer "+token, metautils.ExtractIncoming(ctx).Get("authorization"))
+		ua := "grpcgateway-user-agent"
+		if metautils.ExtractIncoming(ctx).Get(ua) == "" {
+			ua = "user-agent"
+		}
+		assert.True(t, strings.Contains(metautils.ExtractIncoming(ctx).Get(ua), UserAgent))
 	}).Return(&api.DeleteResponse{}, nil)
 
 	_, err := d.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
@@ -453,7 +525,7 @@ func TestGRPCDriverAuth(t *testing.T) {
 	})
 
 	t.Run("env", func(t *testing.T) {
-		err := os.Setenv(TOKEN_ENV, "token_env_567")
+		err := os.Setenv(TokenEnv, "token_env_567")
 		require.NoError(t, err)
 
 		client, mockServer, cancel := setupGRPCTests(t, &Config{})
@@ -461,7 +533,7 @@ func TestGRPCDriverAuth(t *testing.T) {
 
 		testDriverAuth(t, client, mockServer, "token_env_567")
 
-		err = os.Unsetenv(TOKEN_ENV)
+		err = os.Unsetenv(TokenEnv)
 		require.NoError(t, err)
 	})
 }
@@ -475,7 +547,7 @@ func TestHTTPDriverAuth(t *testing.T) {
 	})
 
 	t.Run("env", func(t *testing.T) {
-		err := os.Setenv(TOKEN_ENV, "token_env_567")
+		err := os.Setenv(TokenEnv, "token_env_567")
 		require.NoError(t, err)
 
 		client, mockServer, cancel := setupHTTPTests(t, &Config{})
@@ -483,13 +555,13 @@ func TestHTTPDriverAuth(t *testing.T) {
 
 		testDriverAuth(t, client, mockServer, "token_env_567")
 
-		err = os.Unsetenv(TOKEN_ENV)
+		err = os.Unsetenv(TokenEnv)
 		require.NoError(t, err)
 	})
 }
 
 func TestGRPCTokenRefresh(t *testing.T) {
-	TOKEN_REFRESH_URL = TestHTTPURL + "/token"
+	ToekenRefreshURL = TestHTTPURL + "/token"
 
 	client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "token_config_123:refresh_token_123"})
 	defer cancel()
@@ -498,7 +570,7 @@ func TestGRPCTokenRefresh(t *testing.T) {
 }
 
 func TestHTTPTokenRefresh(t *testing.T) {
-	TOKEN_REFRESH_URL = TestHTTPURL + "/token"
+	ToekenRefreshURL = TestHTTPURL + "/token"
 
 	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "token_config_123:refresh_token_123"})
 	defer cancel()

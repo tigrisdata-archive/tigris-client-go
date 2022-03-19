@@ -38,8 +38,8 @@ type txWithOptions interface {
 
 func getAuthToken(ctx context.Context, config *Config) (*oauth2.Token, *oauth2.Config, context.Context) {
 	token := config.Token
-	if os.Getenv(TOKEN_ENV) != "" {
-		token = os.Getenv(TOKEN_ENV)
+	if os.Getenv(TokenEnv) != "" {
+		token = os.Getenv(TokenEnv)
 	}
 
 	parts := strings.Split(token, ":")
@@ -60,7 +60,7 @@ func getAuthToken(ctx context.Context, config *Config) (*oauth2.Token, *oauth2.C
 		TLSClientConfig: config.TLS,
 	}
 
-	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: TOKEN_REFRESH_URL}}
+	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: ToekenRefreshURL}}
 
 	return &t, ocfg, context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: tr})
 }

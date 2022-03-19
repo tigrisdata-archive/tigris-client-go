@@ -36,7 +36,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
+	api "github.com/tigrisdata/tigrisdb-api/server/v1"
 	"github.com/tigrisdata/tigrisdb-client-go/mock"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -84,12 +84,12 @@ func testErrors(t *testing.T, d Driver, mc *mockServer) {
 		in   error
 		exp  error
 	}{
-		{"tigrisdb_error", &api.RestError{Code: codes.Unauthenticated, Message: "some error"},
-			&api.RestError{Code: codes.Unauthenticated, Message: "some error"}},
+		{"tigrisdb_error", &api.TigrisDBError{Code: codes.Unauthenticated, Message: "some error"},
+			&api.TigrisDBError{Code: codes.Unauthenticated, Message: "some error"}},
 		{"error", fmt.Errorf("some error 1"),
-			&api.RestError{Code: codes.Unknown, Message: "some error 1"}},
+			&api.TigrisDBError{Code: codes.Unknown, Message: "some error 1"}},
 		{"grpc_error", status.Error(codes.PermissionDenied, "some error 1"),
-			&api.RestError{Code: codes.PermissionDenied, Message: "some error 1"}},
+			&api.TigrisDBError{Code: codes.PermissionDenied, Message: "some error 1"}},
 		{"no_error", nil, nil},
 	}
 

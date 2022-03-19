@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"unsafe"
 
-	userHTTP "github.com/tigrisdata/tigrisdb-client-go/api/client/v1/user"
-	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
+	userHTTP "github.com/tigrisdata/tigrisdb-api/client/v1/user"
+	api "github.com/tigrisdata/tigrisdb-api/server/v1"
 	"google.golang.org/grpc/codes"
 )
 
 func HTTPError(err error, resp *http.Response) error {
 	if err != nil {
-		return &api.RestError{Code: codes.Unknown, Message: err.Error()}
+		return &api.TigrisDBError{Code: codes.Unknown, Message: err.Error()}
 	}
 
 	if resp == nil {
@@ -32,7 +32,7 @@ func HTTPError(err error, resp *http.Response) error {
 		}
 	}()
 
-	var e api.RestError
+	var e api.TigrisDBError
 	if err := respDecode(resp.Body, &e); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func respDecode(body io.ReadCloser, v interface{}) error {
 	}()
 
 	if err := json.NewDecoder(body).Decode(v); err != nil {
-		return &api.RestError{Code: codes.Unknown, Message: err.Error()}
+		return &api.TigrisDBError{Code: codes.Unknown, Message: err.Error()}
 	}
 	return nil
 }

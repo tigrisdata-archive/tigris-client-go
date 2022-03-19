@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 
-	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
+	api "github.com/tigrisdata/tigrisdb-api/server/v1"
 )
 
 const (

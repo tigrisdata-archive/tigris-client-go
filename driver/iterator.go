@@ -9,6 +9,7 @@ type Iterator interface {
 
 type streamReader interface {
 	read() (Document, error)
+	close() error
 }
 
 type readIterator struct {
@@ -25,11 +26,13 @@ func (i *readIterator) Next(d *Document) bool {
 	doc, err := i.read()
 	if err == io.EOF {
 		i.eof = true
+		_ = i.close()
 		return false
 	}
 	if err != nil {
 		i.eof = true
 		i.err = err
+		_ = i.close()
 		return false
 	}
 

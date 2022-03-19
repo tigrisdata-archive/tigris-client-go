@@ -14,7 +14,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.9.0
 	github.com/json-iterator/go v1.1.12
 	github.com/stretchr/testify v1.7.1
-	github.com/tigrisdata/tigrisdb-api v0.0.0-20220319075859-ef696695b1b4
+	github.com/tigrisdata/tigrisdb-api v0.0.0-20220319084050-6017c4a75fd6
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 	google.golang.org/genproto v0.0.0-20220317150908-0efb43f6373e
 	google.golang.org/grpc v1.45.0

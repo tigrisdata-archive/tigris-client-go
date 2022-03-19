@@ -239,6 +239,8 @@ github.com/tigrisdata/tigrisdb-api v0.0.0-20220319071731-6aa76bdee57a h1:QN8zfQc
 github.com/tigrisdata/tigrisdb-api v0.0.0-20220319071731-6aa76bdee57a/go.mod h1:6+3EH4z5scUqtuKgLeTEMV+WDgsP7e4xdvKl8kX0Uhs=
 github.com/tigrisdata/tigrisdb-api v0.0.0-20220319075859-ef696695b1b4 h1:askTaupeqqXZ4NHvQRgbVaLchFgn11mUUg+4dh8uQ20=
 github.com/tigrisdata/tigrisdb-api v0.0.0-20220319075859-ef696695b1b4/go.mod h1:6+3EH4z5scUqtuKgLeTEMV+WDgsP7e4xdvKl8kX0Uhs=
+github.com/tigrisdata/tigrisdb-api v0.0.0-20220319084050-6017c4a75fd6 h1:y2ygVxgKqdwoRNL0VIm1ZSvIIgybirZN9hBrKRbL0Uk=
+github.com/tigrisdata/tigrisdb-api v0.0.0-20220319084050-6017c4a75fd6/go.mod h1:6+3EH4z5scUqtuKgLeTEMV+WDgsP7e4xdvKl8kX0Uhs=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go v1.2.6/go.mod h1:anCg0y61KIhDlPZmnH+so+RQbysYVyDko0IMgJv0Nn0=
 github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLYF3GoBXY=

@@ -17,6 +17,7 @@ package driver
 import (
 	"context"
 	"fmt"
+	"strings"
 	"unsafe"
 
 	api "github.com/tigrisdata/tigrisdb-api/server/v1"
@@ -24,6 +25,10 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
 	"google.golang.org/grpc/status"
+)
+
+const (
+	DEFAULT_GRPC_PORT = 443
 )
 
 type grpcDriver struct {
@@ -36,6 +41,7 @@ func GRPCError(err error) error {
 		return nil
 	}
 	s := status.Convert(err)
+	//TODO: Convert error details
 	return &api.TigrisDBError{Code: s.Code(), Message: s.Message()}
 }
 
@@ -43,6 +49,10 @@ func NewGRPCClient(ctx context.Context, url string, config *Config) (Driver, err
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 
 	ts := oCfg.TokenSource(ctxClient, token)
+
+	if !strings.Contains(url, ":") {
+		url = fmt.Sprintf("%s:%d", url, DEFAULT_GRPC_PORT)
+	}
 
 	conn, err := grpc.Dial(url,
 		grpc.WithTransportCredentials(credentials.NewTLS(config.TLS)),

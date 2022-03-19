@@ -6,11 +6,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"unsafe"
 
 	userHTTP "github.com/tigrisdata/tigrisdb-api/client/v1/user"
 	api "github.com/tigrisdata/tigrisdb-api/server/v1"
 	"google.golang.org/grpc/codes"
+)
+
+const (
+	DEFAULT_HTTP_PORT = 443
 )
 
 func HTTPError(err error, resp *http.Response) error {
@@ -57,6 +62,10 @@ func respDecode(body io.ReadCloser, v interface{}) error {
 
 func NewHTTPClient(ctx context.Context, url string, config *Config) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
+
+	if !strings.Contains(url, ":") {
+		url = fmt.Sprintf("%s:%d", url, DEFAULT_HTTP_PORT)
+	}
 
 	hc := oCfg.Client(ctxClient, token)
 	c, err := userHTTP.NewClientWithResponses(url, userHTTP.WithHTTPClient(hc))

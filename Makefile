@@ -10,9 +10,11 @@ TEST_PARAM=-cover -race -tags=test $(shell printenv TEST_PARAM)
 all: ${GO_SRC}
 	#go build ${BUILD_PARAM} .
 
-mock:
+mock/user_grpc.go:
 	mkdir -p mock
-	mockgen -source=api/server/v1/user_grpc.pb.go -package=mock >mock/user_grpc.go
+	mockgen -package mock -destination mock/user_grpc.go github.com/tigrisdata/tigrisdb-api/server/v1 TigrisDBServer
+
+mock: mock/user_grpc.go
 
 lint:
 	yq --exit-status 'tag == "!!map" or tag== "!!seq"' .github/workflows/*.yaml
@@ -30,6 +32,3 @@ release:
 
 %-release:
 	sh scripts/make-release.sh $(*F)
-
-clean:
-	rm -rf mock

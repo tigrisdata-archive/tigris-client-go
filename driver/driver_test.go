@@ -57,7 +57,7 @@ var (
 	documentPathPattern   = "/documents/*"
 )
 
-func testError(t *testing.T, d Driver, mc *mockServer, in error, exp error) {
+func testError(t *testing.T, d Driver, mc *mock.MockTigrisDBServer, in error, exp error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -78,7 +78,7 @@ func testError(t *testing.T, d Driver, mc *mockServer, in error, exp error) {
 	require.Equal(t, exp, err)
 }
 
-func testErrors(t *testing.T, d Driver, mc *mockServer) {
+func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisDBServer) {
 	cases := []struct {
 		name string
 		in   error
@@ -132,7 +132,7 @@ func pm(m proto.Message) gomock.Matcher {
 	return &protoMatcher{m}
 }
 
-func testTxCRUDBasic(t *testing.T, c Tx, mc *mockServer) {
+func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
@@ -204,7 +204,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mockServer) {
 	require.NoError(t, err)
 }
 
-func testCRUDBasic(t *testing.T, c Driver, mc *mockServer) {
+func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
@@ -274,7 +274,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mockServer) {
 	require.NoError(t, err)
 }
 
-func testDriverBasic(t *testing.T, c Driver, mc *mockServer) {
+func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
 
 	mc.EXPECT().ListDatabases(gomock.Any(),
@@ -317,7 +317,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mockServer) {
 	testCRUDBasic(t, c, mc)
 }
 
-func testTxBasic(t *testing.T, c Driver, mc *mockServer) {
+func testTxBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	ctx := context.TODO()
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
@@ -376,7 +376,7 @@ func TestTxHTTPDriver(t *testing.T) {
 	testTxBasic(t, client, mockServer)
 }
 
-func setupGRPCTests(t *testing.T, config *Config) (Driver, *mockServer, func()) {
+func setupGRPCTests(t *testing.T, config *Config) (Driver, *mock.MockTigrisDBServer, func()) {
 	mockServer, cancel := setupTests(t)
 
 	certPool := x509.NewCertPool()
@@ -390,7 +390,7 @@ func setupGRPCTests(t *testing.T, config *Config) (Driver, *mockServer, func()) 
 	return client, mockServer, func() { cancel(); _ = client.Close() }
 }
 
-func setupHTTPTests(t *testing.T, config *Config) (Driver, *mockServer, func()) {
+func setupHTTPTests(t *testing.T, config *Config) (Driver, *mock.MockTigrisDBServer, func()) {
 	mockServer, cancel := setupTests(t)
 
 	certPool := x509.NewCertPool()
@@ -407,16 +407,10 @@ func setupHTTPTests(t *testing.T, config *Config) (Driver, *mockServer, func()) 
 	return client, mockServer, func() { cancel(); _ = client.Close() }
 }
 
-type mockServer struct {
-	*mock.MockTigrisDBServer
-}
-
-func setupTests(t *testing.T) (*mockServer, func()) {
+func setupTests(t *testing.T) (*mock.MockTigrisDBServer, func()) {
 	c := gomock.NewController(t)
 
-	m := mockServer{
-		MockTigrisDBServer: mock.NewMockTigrisDBServer(c),
-	}
+	m := mock.NewMockTigrisDBServer(c)
 
 	inproc := &inprocgrpc.Channel{}
 	client := api.NewTigrisDBClient(inproc)
@@ -424,8 +418,7 @@ func setupTests(t *testing.T) (*mockServer, func()) {
 	mux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONBuiltin{}))
 	err := api.RegisterTigrisDBHandlerClient(context.TODO(), mux, client)
 	require.NoError(t, err)
-
-	api.RegisterTigrisDBServer(inproc, &m)
+	api.RegisterTigrisDBServer(inproc, m)
 
 	cert, err := tls.X509KeyPair([]byte(testServerCert), []byte(testServerKey))
 	require.NoError(t, err)
@@ -436,7 +429,7 @@ func setupTests(t *testing.T) (*mockServer, func()) {
 	}
 
 	s := grpc.NewServer(grpc.Creds(credentials.NewTLS(tlsConfig)))
-	api.RegisterTigrisDBServer(s, &m)
+	api.RegisterTigrisDBServer(s, m)
 
 	r := chi.NewRouter()
 
@@ -476,14 +469,14 @@ func setupTests(t *testing.T) (*mockServer, func()) {
 		_ = server.ListenAndServeTLS("", "")
 	}()
 
-	return &m, func() {
+	return m, func() {
 		_ = server.Shutdown(context.Background())
 		s.Stop()
 		wg.Wait()
 	}
 }
 
-func testDriverAuth(t *testing.T, d Driver, mc *mockServer, token string) {
+func testDriverAuth(t *testing.T, d Driver, mc *mock.MockTigrisDBServer, token string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

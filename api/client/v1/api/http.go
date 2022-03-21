@@ -14,9 +14,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -429,7 +431,16 @@ func (c *Client) TigrisDBListDatabases(ctx context.Context, reqEditors ...Reques
 	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
 		return nil, err
 	}
-	return c.Client.Do(req)
+
+	fmt.Fprintf(os.Stderr, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n")
+	spew.Dump(req)
+
+	resp, err := c.Client.Do(req)
+
+	fmt.Fprintf(os.Stderr, "bbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaa\n")
+	spew.Dump(resp)
+
+	return resp, err
 }
 
 func (c *Client) TigrisDBListCollections(ctx context.Context, db string, reqEditors ...RequestEditorFn) (*http.Response, error) {

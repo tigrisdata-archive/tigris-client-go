@@ -68,6 +68,8 @@ func respDecode(body io.ReadCloser, v interface{}) error {
 
 func setHeaders(_ context.Context, req *http.Request) error {
 	req.Header["Host"] = []string{req.Host}
+	req.Header["User-Agent"] = []string{"tigrisdb-client-go/1.0.0"}
+	req.Header["Accept"] = []string{"*/*"}
 	return nil
 }
 

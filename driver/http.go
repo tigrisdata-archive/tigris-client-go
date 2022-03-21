@@ -66,6 +66,11 @@ func respDecode(body io.ReadCloser, v interface{}) error {
 	return nil
 }
 
+func setHeaders(_ context.Context, req *http.Request) error {
+	req.Header["Host"] = []string{req.Host}
+	return nil
+}
+
 func NewHTTPClient(ctx context.Context, url string, config *Config) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 
@@ -73,8 +78,12 @@ func NewHTTPClient(ctx context.Context, url string, config *Config) (Driver, err
 		url = fmt.Sprintf("%s:%d", url, DEFAULT_HTTP_PORT)
 	}
 
+	if !strings.Contains(url, "://") {
+		url = "https://" + url
+	}
+
 	hc := oCfg.Client(ctxClient, token)
-	c, err := apiHTTP.NewClientWithResponses(url, apiHTTP.WithHTTPClient(hc))
+	c, err := apiHTTP.NewClientWithResponses(url, apiHTTP.WithHTTPClient(hc), apiHTTP.WithRequestEditorFn(setHeaders))
 
 	return &driver{driverWithOptions: &httpDriver{httpCRUD: &httpCRUD{api: c}}}, err
 }

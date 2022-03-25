@@ -9,9 +9,10 @@ import (
 )
 
 type mockStreamReader struct {
-	docs []Document
-	err  error
-	cur  int
+	docs        []Document
+	err         error
+	cur         int
+	closeCalled int
 }
 
 func (m *mockStreamReader) read() (Document, error) {
@@ -24,6 +25,11 @@ func (m *mockStreamReader) read() (Document, error) {
 	d := m.docs[m.cur]
 	m.cur++
 	return d, nil
+}
+
+func (m *mockStreamReader) close() error {
+	m.closeCalled++
+	return nil
 }
 
 func TestIterator(t *testing.T) {
@@ -43,17 +49,21 @@ func TestIterator(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			it := readIterator{streamReader: &mockStreamReader{docs: c.docs, err: c.err}}
+			mci := &mockStreamReader{docs: c.docs, err: c.err}
+			it := readIterator{streamReader: mci}
 			var d Document
 			var i int
 			for it.Next(&d) {
 				assert.NoError(t, it.Err())
 				assert.Equal(t, c.docs[i], d)
 				i++
+				assert.Equal(t, 0, mci.closeCalled)
 			}
+			assert.Equal(t, 1, mci.closeCalled)
 			assert.False(t, it.Next(&d))
 			assert.Equal(t, c.expError, it.Err())
 			assert.Equal(t, c.expCount, i)
+			assert.Equal(t, 1, mci.closeCalled)
 		})
 	}
 }

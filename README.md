@@ -17,23 +17,31 @@ go get github.com/tigrisdata/tigrisdb-client-go@latest
     import "github.com/tigrisdata/tigrisdb-client-go/driver"
 
     token := "{auth token here}"
+	
+    drv, err := driver.NewDriver(context.Background(),
+		"{namespace}.{env}.tigrisdata.cloud", &driver.Config{Token: token})
+    if err != nil {
+        return err
+    }
 
-	drv, err := driver.NewDriver(context.Background(), "{namespace}.{env}.tigrisdata.cloud", &driver.Config{Token: token})
-	if err != nil {
-		return err
-	}
-
-    err := drv.CreateCollection(ctx, "db1", "coll1", `{"Key1" : "string", "Field1" : "int", "primary_key" : ["Key1"]}`))
+    err := c.CreateCollection(ctx, "db1", "coll1",
+        Schema(`{ "properties": {
+                    "Key1": { "type": "string" },
+                    "Field1": { "type": "int" }
+                    },
+                    "primary_key": ["Key1"] }`
+		        ), &CollectionOptions{})
     if err != nil {
 		return err
     }
 
-    _, err := drv.Insert(ctx, "db1", "coll1", `{"Key1": "vK1", "Field1": 1}`)
+    _, err := drv.Insert(ctx, "db1", "coll1",
+		[]driver.Document(driver.Document(`{"Key1": "vK1", "Field1": 1}`)))
     if err != nil {
 		return err
     }
 
-
+	// Filter value {} means full table scan
     it, err := drv.Read(ctx, "db1", "coll1", driver.Filter("{}"))
     if err != nil {
 		return err

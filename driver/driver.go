@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+
+	"github.com/tigrisdata/tigris-client-go/config"
 )
 
 // Driver implements Tigris API
@@ -317,14 +319,14 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 
 // NewDriver connect to Tigris at the specified URL
 // URL should be in the form: {hostname}:{port}
-func NewDriver(ctx context.Context, url string, config *Config) (Driver, error) {
-	if config == nil {
-		config = &Config{}
+func NewDriver(ctx context.Context, cfg *config.Config) (Driver, error) {
+	if cfg == nil {
+		cfg = &config.Config{}
 	}
 	if DefaultProtocol == GRPC {
-		return NewGRPCClient(ctx, url, config)
+		return NewGRPCClient(ctx, cfg.URL, cfg)
 	} else if DefaultProtocol == HTTP {
-		return NewHTTPClient(ctx, url, config)
+		return NewHTTPClient(ctx, cfg.URL, cfg)
 	}
 	return nil, fmt.Errorf("unsupported protocol")
 }

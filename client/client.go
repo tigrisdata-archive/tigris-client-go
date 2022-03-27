@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
@@ -47,10 +48,9 @@ type client struct {
 
 func NewClient(
 	ctx context.Context,
-	url string,
-	config *driver.Config,
+	config *config.Config,
 ) (Client, error) {
-	d, err := driver.NewDriver(ctx, url, config)
+	d, err := driver.NewDriver(ctx, config)
 	if err != nil {
 		return nil, err
 	}
@@ -77,5 +77,6 @@ func (c *client) CreateDatabaseIfNotExist(
 
 		return fmt.Errorf("error creating database: %w", err)
 	}
+
 	return nil
 }

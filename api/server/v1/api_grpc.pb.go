@@ -22,23 +22,43 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TigrisDBClient interface {
-	// Transactional APIs
+	// Starts a new transaction and returns a transactional object.
+	// All reads/writes performed within a transaction will run with
+	// serializable isolation.
 	BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*BeginTransactionResponse, error)
+	// Commit transaction atomically commit all the changes
+	// performed in the context of the transaction.
+	// All the changes committed or none of them committed in
+	// the case of error.
 	CommitTransaction(ctx context.Context, in *CommitTransactionRequest, opts ...grpc.CallOption) (*CommitTransactionResponse, error)
+	// Rollback transaction discards all the changes
+	// performed in the transaction
 	RollbackTransaction(ctx context.Context, in *RollbackTransactionRequest, opts ...grpc.CallOption) (*RollbackTransactionResponse, error)
-	// Following APIs are related to DMLs supported by TigrisDB
+	// Insert creates new documents in the collection or replaces existing
+	// documents if mustNotExist option is specified
 	Insert(ctx context.Context, in *InsertRequest, opts ...grpc.CallOption) (*InsertResponse, error)
+	// Delete documents from the collection according to specified filter
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	// Update range of documents in the collection according to
+	// the specified filter and the fields projection
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
+	//  Read range of documents from the collection according to
+	//  the specified filter
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (TigrisDB_ReadClient, error)
-	// The following APIs are related to DDLs supported by TigrisDB
+	// Create new collection of documents in the specified database
 	CreateCollection(ctx context.Context, in *CreateCollectionRequest, opts ...grpc.CallOption) (*CreateCollectionResponse, error)
+	// Change the schema of existing collection
 	AlterCollection(ctx context.Context, in *AlterCollectionRequest, opts ...grpc.CallOption) (*AlterCollectionResponse, error)
+	// Drop the collection
 	DropCollection(ctx context.Context, in *DropCollectionRequest, opts ...grpc.CallOption) (*DropCollectionResponse, error)
-	TruncateCollection(ctx context.Context, in *TruncateCollectionRequest, opts ...grpc.CallOption) (*TruncateCollectionResponse, error)
+	// List databases in the current namespace
 	ListDatabases(ctx context.Context, in *ListDatabasesRequest, opts ...grpc.CallOption) (*ListDatabasesResponse, error)
+	// List collections in the specified database
 	ListCollections(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error)
+	// Create database in the current namespace
 	CreateDatabase(ctx context.Context, in *CreateDatabaseRequest, opts ...grpc.CallOption) (*CreateDatabaseResponse, error)
+	// Drop database deletes all the collections in the database
+	// along with all it documents
 	DropDatabase(ctx context.Context, in *DropDatabaseRequest, opts ...grpc.CallOption) (*DropDatabaseResponse, error)
 }
 
@@ -163,15 +183,6 @@ func (c *tigrisDBClient) DropCollection(ctx context.Context, in *DropCollectionR
 	return out, nil
 }
 
-func (c *tigrisDBClient) TruncateCollection(ctx context.Context, in *TruncateCollectionRequest, opts ...grpc.CallOption) (*TruncateCollectionResponse, error) {
-	out := new(TruncateCollectionResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/TruncateCollection", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *tigrisDBClient) ListDatabases(ctx context.Context, in *ListDatabasesRequest, opts ...grpc.CallOption) (*ListDatabasesResponse, error) {
 	out := new(ListDatabasesResponse)
 	err := c.cc.Invoke(ctx, "/TigrisDB/ListDatabases", in, out, opts...)
@@ -212,23 +223,43 @@ func (c *tigrisDBClient) DropDatabase(ctx context.Context, in *DropDatabaseReque
 // All implementations should embed UnimplementedTigrisDBServer
 // for forward compatibility
 type TigrisDBServer interface {
-	// Transactional APIs
+	// Starts a new transaction and returns a transactional object.
+	// All reads/writes performed within a transaction will run with
+	// serializable isolation.
 	BeginTransaction(context.Context, *BeginTransactionRequest) (*BeginTransactionResponse, error)
+	// Commit transaction atomically commit all the changes
+	// performed in the context of the transaction.
+	// All the changes committed or none of them committed in
+	// the case of error.
 	CommitTransaction(context.Context, *CommitTransactionRequest) (*CommitTransactionResponse, error)
+	// Rollback transaction discards all the changes
+	// performed in the transaction
 	RollbackTransaction(context.Context, *RollbackTransactionRequest) (*RollbackTransactionResponse, error)
-	// Following APIs are related to DMLs supported by TigrisDB
+	// Insert creates new documents in the collection or replaces existing
+	// documents if mustNotExist option is specified
 	Insert(context.Context, *InsertRequest) (*InsertResponse, error)
+	// Delete documents from the collection according to specified filter
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	// Update range of documents in the collection according to
+	// the specified filter and the fields projection
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
+	//  Read range of documents from the collection according to
+	//  the specified filter
 	Read(*ReadRequest, TigrisDB_ReadServer) error
-	// The following APIs are related to DDLs supported by TigrisDB
+	// Create new collection of documents in the specified database
 	CreateCollection(context.Context, *CreateCollectionRequest) (*CreateCollectionResponse, error)
+	// Change the schema of existing collection
 	AlterCollection(context.Context, *AlterCollectionRequest) (*AlterCollectionResponse, error)
+	// Drop the collection
 	DropCollection(context.Context, *DropCollectionRequest) (*DropCollectionResponse, error)
-	TruncateCollection(context.Context, *TruncateCollectionRequest) (*TruncateCollectionResponse, error)
+	// List databases in the current namespace
 	ListDatabases(context.Context, *ListDatabasesRequest) (*ListDatabasesResponse, error)
+	// List collections in the specified database
 	ListCollections(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error)
+	// Create database in the current namespace
 	CreateDatabase(context.Context, *CreateDatabaseRequest) (*CreateDatabaseResponse, error)
+	// Drop database deletes all the collections in the database
+	// along with all it documents
 	DropDatabase(context.Context, *DropDatabaseRequest) (*DropDatabaseResponse, error)
 }
 
@@ -265,9 +296,6 @@ func (UnimplementedTigrisDBServer) AlterCollection(context.Context, *AlterCollec
 }
 func (UnimplementedTigrisDBServer) DropCollection(context.Context, *DropCollectionRequest) (*DropCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropCollection not implemented")
-}
-func (UnimplementedTigrisDBServer) TruncateCollection(context.Context, *TruncateCollectionRequest) (*TruncateCollectionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TruncateCollection not implemented")
 }
 func (UnimplementedTigrisDBServer) ListDatabases(context.Context, *ListDatabasesRequest) (*ListDatabasesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDatabases not implemented")
@@ -476,24 +504,6 @@ func _TigrisDB_DropCollection_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_TruncateCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TruncateCollectionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TigrisDBServer).TruncateCollection(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/TigrisDB/TruncateCollection",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).TruncateCollection(ctx, req.(*TruncateCollectionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TigrisDB_ListDatabases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListDatabasesRequest)
 	if err := dec(in); err != nil {
@@ -608,10 +618,6 @@ var TigrisDB_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DropCollection",
 			Handler:    _TigrisDB_DropCollection_Handler,
-		},
-		{
-			MethodName: "TruncateCollection",
-			Handler:    _TigrisDB_TruncateCollection_Handler,
 		},
 		{
 			MethodName: "ListDatabases",

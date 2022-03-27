@@ -90,11 +90,13 @@ func (x *ErrorDetails) GetMsg() string {
 	return ""
 }
 
+// WriteOptions contain write behavior modifying options
 type WriteOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Perform operation in the context of this transaction
 	TxCtx *TransactionCtx `protobuf:"bytes,1,opt,name=tx_ctx,json=txCtx,proto3" json:"tx_ctx,omitempty"`
 }
 
@@ -137,15 +139,20 @@ func (x *WriteOptions) GetTxCtx() *TransactionCtx {
 	return nil
 }
 
+// ReadRequestOptions contain read behavior modifying options
 type ReadRequestOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TxCtx  *TransactionCtx `protobuf:"bytes,1,opt,name=tx_ctx,json=txCtx,proto3" json:"tx_ctx,omitempty"`
-	Limit  int64           `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Skip   int64           `protobuf:"varint,3,opt,name=skip,proto3" json:"skip,omitempty"`
-	Offset []byte          `protobuf:"bytes,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	// Perform operation in the context of this transaction
+	TxCtx *TransactionCtx `protobuf:"bytes,1,opt,name=tx_ctx,json=txCtx,proto3" json:"tx_ctx,omitempty"`
+	// Limit the number of documents returned by the read operation
+	Limit int64 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Number of documents to skip before starting to return resulting documents
+	Skip int64 `protobuf:"varint,3,opt,name=skip,proto3" json:"skip,omitempty"`
+	// Start returning document start from this primary key
+	Offset []byte `protobuf:"bytes,4,opt,name=offset,proto3" json:"offset,omitempty"`
 }
 
 func (x *ReadRequestOptions) Reset() {
@@ -208,6 +215,7 @@ func (x *ReadRequestOptions) GetOffset() []byte {
 	return nil
 }
 
+// Database requests modifying options
 type DatabaseOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -246,6 +254,7 @@ func (*DatabaseOptions) Descriptor() ([]byte, []int) {
 	return file_server_v1_api_proto_rawDescGZIP(), []int{3}
 }
 
+// Collection requests modifying options
 type CollectionOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -284,6 +293,7 @@ func (*CollectionOptions) Descriptor() ([]byte, []int) {
 	return file_server_v1_api_proto_rawDescGZIP(), []int{4}
 }
 
+// Modify start transaction behavior
 type TransactionOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -322,6 +332,12 @@ func (*TransactionOptions) Descriptor() ([]byte, []int) {
 	return file_server_v1_api_proto_rawDescGZIP(), []int{5}
 }
 
+//
+//Contains ID which uniquely identifies transaction.
+//This context is returned by StartTransaction request and
+//should be passed in the options of document modification
+//requests in order to run them in the context of the same
+//transaction
 type TransactionCtx struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -377,11 +393,13 @@ func (x *TransactionCtx) GetOrigin() string {
 	return ""
 }
 
+// Start new transaction in database specified by "db"
 type BeginTransactionRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Database name this transaction belongs to
 	Db      string              `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
 	Options *TransactionOptions `protobuf:"bytes,2,opt,name=options,proto3" json:"options,omitempty"`
 }
@@ -432,6 +450,8 @@ func (x *BeginTransactionRequest) GetOptions() *TransactionOptions {
 	return nil
 }
 
+//  Start transaction returns transaction context
+//  which uniquely identifies the transaction
 type BeginTransactionResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -479,12 +499,15 @@ func (x *BeginTransactionResponse) GetTxCtx() *TransactionCtx {
 	return nil
 }
 
+// Commit transaction with the given ID
 type CommitTransactionRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db    string          `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Database name this transaction belongs to
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Contains unique transaction ID
 	TxCtx *TransactionCtx `protobuf:"bytes,2,opt,name=tx_ctx,json=txCtx,proto3" json:"tx_ctx,omitempty"`
 }
 
@@ -572,12 +595,15 @@ func (*CommitTransactionResponse) Descriptor() ([]byte, []int) {
 	return file_server_v1_api_proto_rawDescGZIP(), []int{10}
 }
 
+// Rollback transaction with the given ID
 type RollbackTransactionRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db    string          `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Database name this transaction belongs to
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Contains unique transaction ID
 	TxCtx *TransactionCtx `protobuf:"bytes,2,opt,name=tx_ctx,json=txCtx,proto3" json:"tx_ctx,omitempty"`
 }
 
@@ -665,13 +691,17 @@ func (*RollbackTransactionResponse) Descriptor() ([]byte, []int) {
 	return file_server_v1_api_proto_rawDescGZIP(), []int{12}
 }
 
+// Insert request options
 type InsertRequestOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
 	WriteOptions *WriteOptions `protobuf:"bytes,1,opt,name=write_options,json=writeOptions,proto3" json:"write_options,omitempty"`
-	MustNotExist bool          `protobuf:"varint,2,opt,name=must_not_exist,json=mustNotExist,proto3" json:"must_not_exist,omitempty"`
+	// The must_not_exist, when set to true,
+	// prevents overwriting if the documents with the same ID
+	// already exist in the collection
+	MustNotExist bool `protobuf:"varint,2,opt,name=must_not_exist,json=mustNotExist,proto3" json:"must_not_exist,omitempty"`
 }
 
 func (x *InsertRequestOptions) Reset() {
@@ -725,10 +755,14 @@ type InsertRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db         string                `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
-	Collection string                `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
-	Documents  [][]byte              `protobuf:"bytes,3,rep,name=documents,proto3" json:"documents,omitempty"`
-	Options    *InsertRequestOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
+	// Database name where to insert documents
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Collection name where to insert documents
+	Collection string `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
+	// Array of documents to insert.
+	// Should be proper JSON object
+	Documents [][]byte              `protobuf:"bytes,3,rep,name=documents,proto3" json:"documents,omitempty"`
+	Options   *InsertRequestOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
 }
 
 func (x *InsertRequest) Reset() {
@@ -881,10 +915,15 @@ type DeleteRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db         string                `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
-	Collection string                `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
-	Filter     []byte                `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
-	Options    *DeleteRequestOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
+	// Database name where to insert documents
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Collection name where to insert documents
+	Collection string `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
+	// Delete documents which matching specified filter.
+	// The filter should proper JSON object.
+	// Filter syntax described here: {TBD}
+	Filter  []byte                `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
+	Options *DeleteRequestOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
 }
 
 func (x *DeleteRequest) Reset() {
@@ -1037,11 +1076,19 @@ type UpdateRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db         string                `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
-	Collection string                `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
-	Fields     []byte                `protobuf:"bytes,3,opt,name=fields,proto3" json:"fields,omitempty"`
-	Filter     []byte                `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
-	Options    *UpdateRequestOptions `protobuf:"bytes,5,opt,name=options,proto3" json:"options,omitempty"`
+	// Database name where to update documents
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Collection name where to update documents
+	Collection string `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
+	// Fields contains set of fields
+	// with the values which need to be updated.
+	// Should be proper JSON object.
+	Fields []byte `protobuf:"bytes,3,opt,name=fields,proto3" json:"fields,omitempty"`
+	// Update documents which matching specified filter.
+	// The filter should proper JSON object
+	// Filter syntax described here: {TBD}
+	Filter  []byte                `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
+	Options *UpdateRequestOptions `protobuf:"bytes,5,opt,name=options,proto3" json:"options,omitempty"`
 }
 
 func (x *UpdateRequest) Reset() {
@@ -1163,11 +1210,19 @@ type ReadRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db         string              `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
-	Collection string              `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
-	Filter     []byte              `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
-	Fields     []byte              `protobuf:"bytes,4,opt,name=fields,proto3" json:"fields,omitempty"`
-	Options    *ReadRequestOptions `protobuf:"bytes,5,opt,name=options,proto3" json:"options,omitempty"`
+	// Database name to read documents from
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Collection name to read documents from
+	Collection string `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
+	// Returns documents matching this filter.
+	// The filter should proper JSON object
+	// Filter syntax described here: {TBD}
+	Filter []byte `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
+	// Limit fields returned by the read
+	// by this subset of the fields
+	// The fields should proper JSON object
+	Fields  []byte              `protobuf:"bytes,4,opt,name=fields,proto3" json:"fields,omitempty"`
+	Options *ReadRequestOptions `protobuf:"bytes,5,opt,name=options,proto3" json:"options,omitempty"`
 }
 
 func (x *ReadRequest) Reset() {
@@ -1242,7 +1297,10 @@ type ReadResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Doc is the JSON object representing requested fields
 	Doc []byte `protobuf:"bytes,1,opt,name=doc,proto3" json:"doc,omitempty"`
+	// Key is internal key, which uniquely identify the document.
+	// This fields is used to
 	Key []byte `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
 }
 
@@ -1297,6 +1355,7 @@ type CreateDatabaseRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Create database with this name
 	Db      string           `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
 	Options *DatabaseOptions `protobuf:"bytes,2,opt,name=options,proto3" json:"options,omitempty"`
 }
@@ -1399,6 +1458,9 @@ type DropDatabaseRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Drop database with this name.
+	// Deletes all the collections in the database.
+	// Use with caution.
 	Db      string           `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
 	Options *DatabaseOptions `protobuf:"bytes,2,opt,name=options,proto3" json:"options,omitempty"`
 }
@@ -1501,10 +1563,15 @@ type CreateCollectionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db         string             `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
-	Collection string             `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
-	Schema     []byte             `protobuf:"bytes,3,opt,name=schema,proto3" json:"schema,omitempty"`
-	Options    *CollectionOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
+	// Database name where to create collection
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Collection name to create
+	Collection string `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
+	// Schema of the documents in this collection.
+	// Should be proper JSON object.
+	// Schema syntax described here: {TBD}
+	Schema  []byte             `protobuf:"bytes,3,opt,name=schema,proto3" json:"schema,omitempty"`
+	Options *CollectionOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
 }
 
 func (x *CreateCollectionRequest) Reset() {
@@ -1619,10 +1686,15 @@ type AlterCollectionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db         string             `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
-	Collection string             `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
-	Schema     []byte             `protobuf:"bytes,3,opt,name=schema,proto3" json:"schema,omitempty"`
-	Options    *CollectionOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
+	// Database name of the collection
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Collection name to change schema
+	Collection string `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
+	// Schema of the documents in this collection.
+	// Should be proper JSON object.
+	// Schema syntax described here: {TBD}
+	Schema  []byte             `protobuf:"bytes,3,opt,name=schema,proto3" json:"schema,omitempty"`
+	Options *CollectionOptions `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
 }
 
 func (x *AlterCollectionRequest) Reset() {
@@ -1737,7 +1809,9 @@ type DropCollectionRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Db         string             `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Database name of the collection
+	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	// Collection name to dtop
 	Collection string             `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
 	Options    *CollectionOptions `protobuf:"bytes,3,opt,name=options,proto3" json:"options,omitempty"`
 }
@@ -1987,6 +2061,7 @@ type ListDatabasesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// List of the databases in the namespace
 	Dbs []string `protobuf:"bytes,1,rep,name=dbs,proto3" json:"dbs,omitempty"`
 }
 
@@ -2034,6 +2109,7 @@ type ListCollectionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// List collection in this database
 	Db string `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
 }
 
@@ -2081,6 +2157,7 @@ type ListCollectionsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// List of the collections in the database
 	Collections []string `protobuf:"bytes,1,rep,name=collections,proto3" json:"collections,omitempty"`
 }
 
@@ -2306,7 +2383,7 @@ var file_server_v1_api_proto_rawDesc = []byte{
 	0x43, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
 	0x6e, 0x73, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f,
 	0x6e, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x32, 0xc5, 0x0e, 0x0a, 0x08, 0x54, 0x69, 0x67, 0x72, 0x69, 0x73,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x32, 0xb3, 0x0d, 0x0a, 0x08, 0x54, 0x69, 0x67, 0x72, 0x69, 0x73,
 	0x44, 0x42, 0x12, 0x7d, 0x0a, 0x10, 0x42, 0x65, 0x67, 0x69, 0x6e, 0x54, 0x72, 0x61, 0x6e, 0x73,
 	0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x18, 0x2e, 0x42, 0x65, 0x67, 0x69, 0x6e, 0x54, 0x72,
 	0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
@@ -2387,47 +2464,38 @@ var file_server_v1_api_proto_rawDesc = []byte{
 	0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x2f,
 	0x7b, 0x64, 0x62, 0x7d, 0x2f, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73,
 	0x2f, 0x7b, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x7d, 0x2f, 0x64, 0x72,
-	0x6f, 0x70, 0x12, 0x8f, 0x01, 0x0a, 0x12, 0x54, 0x72, 0x75, 0x6e, 0x63, 0x61, 0x74, 0x65, 0x43,
-	0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1a, 0x2e, 0x54, 0x72, 0x75, 0x6e,
-	0x63, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x54, 0x72, 0x75, 0x6e, 0x63, 0x61, 0x74, 0x65,
-	0x43, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x40, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x3a, 0x2a, 0x38, 0x2f, 0x61, 0x70, 0x69,
-	0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x2f, 0x7b, 0x64,
-	0x62, 0x7d, 0x2f, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x7b,
-	0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x7d, 0x2f, 0x74, 0x72, 0x75, 0x6e,
-	0x63, 0x61, 0x74, 0x65, 0x12, 0x5e, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x44, 0x61, 0x74, 0x61,
-	0x62, 0x61, 0x73, 0x65, 0x73, 0x12, 0x15, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x44, 0x61, 0x74, 0x61,
-	0x62, 0x61, 0x73, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x4c,
-	0x69, 0x73, 0x74, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1e, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x18, 0x12, 0x16, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x2f,
-	0x6c, 0x69, 0x73, 0x74, 0x12, 0x75, 0x0a, 0x0f, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x6c, 0x6c,
-	0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x17, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f,
-	0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x18, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f,
-	0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x2f, 0x82, 0xd3, 0xe4, 0x93,
-	0x02, 0x29, 0x12, 0x27, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61,
-	0x62, 0x61, 0x73, 0x65, 0x73, 0x2f, 0x7b, 0x64, 0x62, 0x7d, 0x2f, 0x63, 0x6f, 0x6c, 0x6c, 0x65,
-	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x6c, 0x69, 0x73, 0x74, 0x12, 0x6b, 0x0a, 0x0e, 0x43,
-	0x72, 0x65, 0x61, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x12, 0x16, 0x2e,
-	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x44, 0x61,
-	0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x28,
-	0x82, 0xd3, 0xe4, 0x93, 0x02, 0x22, 0x22, 0x1d, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f,
-	0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x2f, 0x7b, 0x64, 0x62, 0x7d, 0x2f, 0x63,
-	0x72, 0x65, 0x61, 0x74, 0x65, 0x3a, 0x01, 0x2a, 0x12, 0x63, 0x0a, 0x0c, 0x44, 0x72, 0x6f, 0x70,
-	0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x12, 0x14, 0x2e, 0x44, 0x72, 0x6f, 0x70, 0x44,
-	0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15,
-	0x2e, 0x44, 0x72, 0x6f, 0x70, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x26, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x20, 0x2a, 0x1b, 0x2f,
-	0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73,
-	0x2f, 0x7b, 0x64, 0x62, 0x7d, 0x2f, 0x64, 0x72, 0x6f, 0x70, 0x3a, 0x01, 0x2a, 0x42, 0x43, 0x0a,
-	0x1d, 0x63, 0x6f, 0x6d, 0x2e, 0x74, 0x69, 0x67, 0x72, 0x69, 0x73, 0x64, 0x61, 0x74, 0x61, 0x2e,
-	0x64, 0x62, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x76, 0x31, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5a, 0x22,
-	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x69, 0x67, 0x72, 0x69,
-	0x73, 0x64, 0x61, 0x74, 0x61, 0x2f, 0x74, 0x69, 0x67, 0x72, 0x69, 0x73, 0x64, 0x62, 0x2f, 0x61,
-	0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x70, 0x12, 0x5e, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61,
+	0x73, 0x65, 0x73, 0x12, 0x15, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61,
+	0x73, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x4c, 0x69, 0x73,
+	0x74, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x1e, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x18, 0x12, 0x16, 0x2f, 0x61, 0x70, 0x69,
+	0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x2f, 0x6c, 0x69,
+	0x73, 0x74, 0x12, 0x75, 0x0a, 0x0f, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x6c, 0x6c, 0x65, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x17, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x6c, 0x6c,
+	0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18,
+	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x2f, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x29,
+	0x12, 0x27, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61,
+	0x73, 0x65, 0x73, 0x2f, 0x7b, 0x64, 0x62, 0x7d, 0x2f, 0x63, 0x6f, 0x6c, 0x6c, 0x65, 0x63, 0x74,
+	0x69, 0x6f, 0x6e, 0x73, 0x2f, 0x6c, 0x69, 0x73, 0x74, 0x12, 0x6b, 0x0a, 0x0e, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x12, 0x16, 0x2e, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61,
+	0x62, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x28, 0x82, 0xd3,
+	0xe4, 0x93, 0x02, 0x22, 0x22, 0x1d, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61,
+	0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x2f, 0x7b, 0x64, 0x62, 0x7d, 0x2f, 0x63, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x3a, 0x01, 0x2a, 0x12, 0x63, 0x0a, 0x0c, 0x44, 0x72, 0x6f, 0x70, 0x44, 0x61,
+	0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x12, 0x14, 0x2e, 0x44, 0x72, 0x6f, 0x70, 0x44, 0x61, 0x74,
+	0x61, 0x62, 0x61, 0x73, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x44,
+	0x72, 0x6f, 0x70, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x26, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x20, 0x2a, 0x1b, 0x2f, 0x61, 0x70,
+	0x69, 0x2f, 0x76, 0x31, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x73, 0x2f, 0x7b,
+	0x64, 0x62, 0x7d, 0x2f, 0x64, 0x72, 0x6f, 0x70, 0x3a, 0x01, 0x2a, 0x42, 0x43, 0x0a, 0x1d, 0x63,
+	0x6f, 0x6d, 0x2e, 0x74, 0x69, 0x67, 0x72, 0x69, 0x73, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x64, 0x62,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x76, 0x31, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5a, 0x22, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x69, 0x67, 0x72, 0x69, 0x73, 0x64,
+	0x61, 0x74, 0x61, 0x2f, 0x74, 0x69, 0x67, 0x72, 0x69, 0x73, 0x64, 0x62, 0x2f, 0x61, 0x70, 0x69,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -2514,28 +2582,26 @@ var file_server_v1_api_proto_depIdxs = []int32{
 	28, // 25: TigrisDB.CreateCollection:input_type -> CreateCollectionRequest
 	30, // 26: TigrisDB.AlterCollection:input_type -> AlterCollectionRequest
 	32, // 27: TigrisDB.DropCollection:input_type -> DropCollectionRequest
-	34, // 28: TigrisDB.TruncateCollection:input_type -> TruncateCollectionRequest
-	36, // 29: TigrisDB.ListDatabases:input_type -> ListDatabasesRequest
-	38, // 30: TigrisDB.ListCollections:input_type -> ListCollectionsRequest
-	24, // 31: TigrisDB.CreateDatabase:input_type -> CreateDatabaseRequest
-	26, // 32: TigrisDB.DropDatabase:input_type -> DropDatabaseRequest
-	8,  // 33: TigrisDB.BeginTransaction:output_type -> BeginTransactionResponse
-	10, // 34: TigrisDB.CommitTransaction:output_type -> CommitTransactionResponse
-	12, // 35: TigrisDB.RollbackTransaction:output_type -> RollbackTransactionResponse
-	15, // 36: TigrisDB.Insert:output_type -> InsertResponse
-	18, // 37: TigrisDB.Delete:output_type -> DeleteResponse
-	21, // 38: TigrisDB.Update:output_type -> UpdateResponse
-	23, // 39: TigrisDB.Read:output_type -> ReadResponse
-	29, // 40: TigrisDB.CreateCollection:output_type -> CreateCollectionResponse
-	31, // 41: TigrisDB.AlterCollection:output_type -> AlterCollectionResponse
-	33, // 42: TigrisDB.DropCollection:output_type -> DropCollectionResponse
-	35, // 43: TigrisDB.TruncateCollection:output_type -> TruncateCollectionResponse
-	37, // 44: TigrisDB.ListDatabases:output_type -> ListDatabasesResponse
-	39, // 45: TigrisDB.ListCollections:output_type -> ListCollectionsResponse
-	25, // 46: TigrisDB.CreateDatabase:output_type -> CreateDatabaseResponse
-	27, // 47: TigrisDB.DropDatabase:output_type -> DropDatabaseResponse
-	33, // [33:48] is the sub-list for method output_type
-	18, // [18:33] is the sub-list for method input_type
+	36, // 28: TigrisDB.ListDatabases:input_type -> ListDatabasesRequest
+	38, // 29: TigrisDB.ListCollections:input_type -> ListCollectionsRequest
+	24, // 30: TigrisDB.CreateDatabase:input_type -> CreateDatabaseRequest
+	26, // 31: TigrisDB.DropDatabase:input_type -> DropDatabaseRequest
+	8,  // 32: TigrisDB.BeginTransaction:output_type -> BeginTransactionResponse
+	10, // 33: TigrisDB.CommitTransaction:output_type -> CommitTransactionResponse
+	12, // 34: TigrisDB.RollbackTransaction:output_type -> RollbackTransactionResponse
+	15, // 35: TigrisDB.Insert:output_type -> InsertResponse
+	18, // 36: TigrisDB.Delete:output_type -> DeleteResponse
+	21, // 37: TigrisDB.Update:output_type -> UpdateResponse
+	23, // 38: TigrisDB.Read:output_type -> ReadResponse
+	29, // 39: TigrisDB.CreateCollection:output_type -> CreateCollectionResponse
+	31, // 40: TigrisDB.AlterCollection:output_type -> AlterCollectionResponse
+	33, // 41: TigrisDB.DropCollection:output_type -> DropCollectionResponse
+	37, // 42: TigrisDB.ListDatabases:output_type -> ListDatabasesResponse
+	39, // 43: TigrisDB.ListCollections:output_type -> ListCollectionsResponse
+	25, // 44: TigrisDB.CreateDatabase:output_type -> CreateDatabaseResponse
+	27, // 45: TigrisDB.DropDatabase:output_type -> DropDatabaseResponse
+	32, // [32:46] is the sub-list for method output_type
+	18, // [18:32] is the sub-list for method input_type
 	18, // [18:18] is the sub-list for extension type_name
 	18, // [18:18] is the sub-list for extension extendee
 	0,  // [0:18] is the sub-list for field type_name

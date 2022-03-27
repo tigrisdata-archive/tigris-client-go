@@ -159,7 +159,6 @@ func convertTransactionOptions(_ *TxOptions) *apiHTTP.TransactionOptions {
 
 func (c *httpDriver) createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
 	resp, err := c.api.TigrisDBCreateDatabase(ctx, db, apiHTTP.TigrisDBCreateDatabaseJSONRequestBody{
-		Db:      &db,
 		Options: convertDatabaseOptions(options),
 	})
 	return HTTPError(err, resp)
@@ -167,7 +166,6 @@ func (c *httpDriver) createDatabaseWithOptions(ctx context.Context, db string, o
 
 func (c *httpDriver) dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
 	resp, err := c.api.TigrisDBDropDatabase(ctx, db, apiHTTP.TigrisDBDropDatabaseJSONRequestBody{
-		Db:      &db,
 		Options: convertDatabaseOptions(options),
 	})
 	return HTTPError(err, resp)

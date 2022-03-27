@@ -23,10 +23,11 @@ import (
 
 // AlterCollectionRequest defines model for AlterCollectionRequest.
 type AlterCollectionRequest struct {
-	Collection *string            `json:"collection,omitempty"`
-	Db         *string            `json:"db,omitempty"`
-	Options    *CollectionOptions `json:"options,omitempty"`
-	Schema     json.RawMessage    `json:"schema,omitempty"`
+	// Collection requests modifying options
+	Options *CollectionOptions `json:"options,omitempty"`
+
+	// Schema of the documents in this collection. Should be proper JSON object. Schema syntax described here: {TBD}
+	Schema json.RawMessage `json:"schema,omitempty"`
 }
 
 // AlterCollectionResponse defines model for AlterCollectionResponse.
@@ -34,23 +35,24 @@ type AlterCollectionResponse struct {
 	Msg *string `json:"msg,omitempty"`
 }
 
-// BeginTransactionRequest defines model for BeginTransactionRequest.
+// Start new transaction in database specified by "db"
 type BeginTransactionRequest struct {
-	Db      *string             `json:"db,omitempty"`
+	// Modify start transaction behavior
 	Options *TransactionOptions `json:"options,omitempty"`
 }
 
-// BeginTransactionResponse defines model for BeginTransactionResponse.
+// Start transaction returns transaction context  which uniquely identifies the transaction
 type BeginTransactionResponse struct {
+	// Contains ID which uniquely identifies transaction.This context is returned by StartTransaction request andshould be passed in the options of document modificationrequests in order to run them in the context of the sametransaction
 	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
 }
 
-// CollectionOptions defines model for CollectionOptions.
+// Collection requests modifying options
 type CollectionOptions map[string]interface{}
 
-// CommitTransactionRequest defines model for CommitTransactionRequest.
+// Commit transaction with the given ID
 type CommitTransactionRequest struct {
-	Db    *string         `json:"db,omitempty"`
+	// Contains ID which uniquely identifies transaction.This context is returned by StartTransaction request andshould be passed in the options of document modificationrequests in order to run them in the context of the sametransaction
 	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
 }
 
@@ -59,10 +61,11 @@ type CommitTransactionResponse map[string]interface{}
 
 // CreateCollectionRequest defines model for CreateCollectionRequest.
 type CreateCollectionRequest struct {
-	Collection *string            `json:"collection,omitempty"`
-	Db         *string            `json:"db,omitempty"`
-	Options    *CollectionOptions `json:"options,omitempty"`
-	Schema     json.RawMessage    `json:"schema,omitempty"`
+	// Collection requests modifying options
+	Options *CollectionOptions `json:"options,omitempty"`
+
+	// Schema of the documents in this collection. Should be proper JSON object. Schema syntax described here: {TBD}
+	Schema json.RawMessage `json:"schema,omitempty"`
 }
 
 // CreateCollectionResponse defines model for CreateCollectionResponse.
@@ -72,7 +75,7 @@ type CreateCollectionResponse struct {
 
 // CreateDatabaseRequest defines model for CreateDatabaseRequest.
 type CreateDatabaseRequest struct {
-	Db      *string          `json:"db,omitempty"`
+	// Database requests modifying options
 	Options *DatabaseOptions `json:"options,omitempty"`
 }
 
@@ -81,19 +84,19 @@ type CreateDatabaseResponse struct {
 	Msg *string `json:"msg,omitempty"`
 }
 
-// DatabaseOptions defines model for DatabaseOptions.
+// Database requests modifying options
 type DatabaseOptions map[string]interface{}
 
 // DeleteRequest defines model for DeleteRequest.
 type DeleteRequest struct {
-	Collection *string               `json:"collection,omitempty"`
-	Db         *string               `json:"db,omitempty"`
-	Filter     json.RawMessage       `json:"filter,omitempty"`
-	Options    *DeleteRequestOptions `json:"options,omitempty"`
+	// Delete documents which matching specified filter. The filter should proper JSON object. Filter syntax described here: {TBD}
+	Filter  json.RawMessage       `json:"filter,omitempty"`
+	Options *DeleteRequestOptions `json:"options,omitempty"`
 }
 
 // DeleteRequestOptions defines model for DeleteRequestOptions.
 type DeleteRequestOptions struct {
+	// WriteOptions contain write behavior modifying options
 	WriteOptions *WriteOptions `json:"write_options,omitempty"`
 }
 
@@ -107,7 +110,7 @@ type DropCollectionResponse struct {
 
 // DropDatabaseRequest defines model for DropDatabaseRequest.
 type DropDatabaseRequest struct {
-	Db      *string          `json:"db,omitempty"`
+	// Database requests modifying options
 	Options *DatabaseOptions `json:"options,omitempty"`
 }
 
@@ -118,15 +121,19 @@ type DropDatabaseResponse struct {
 
 // InsertRequest defines model for InsertRequest.
 type InsertRequest struct {
-	Collection *string               `json:"collection,omitempty"`
-	Db         *string               `json:"db,omitempty"`
-	Documents  *[]json.RawMessage    `json:"documents,omitempty"`
-	Options    *InsertRequestOptions `json:"options,omitempty"`
+	// Array of documents to insert. Should be proper JSON object
+	Documents *[]json.RawMessage `json:"documents,omitempty"`
+
+	// Insert request options
+	Options *InsertRequestOptions `json:"options,omitempty"`
 }
 
-// InsertRequestOptions defines model for InsertRequestOptions.
+// Insert request options
 type InsertRequestOptions struct {
-	MustNotExist *bool         `json:"must_not_exist,omitempty"`
+	// The must_not_exist, when set to true, prevents overwriting if the documents with the same ID already exists in the collection
+	MustNotExist *bool `json:"must_not_exist,omitempty"`
+
+	// WriteOptions contain write behavior modifying options
 	WriteOptions *WriteOptions `json:"write_options,omitempty"`
 }
 
@@ -135,71 +142,83 @@ type InsertResponse map[string]interface{}
 
 // ListCollectionsResponse defines model for ListCollectionsResponse.
 type ListCollectionsResponse struct {
+	// List of the collections in the database
 	Collections *[]string `json:"collections,omitempty"`
 }
 
 // ListDatabasesResponse defines model for ListDatabasesResponse.
 type ListDatabasesResponse struct {
+	// List of the databases in the namespace
 	Dbs *[]string `json:"dbs,omitempty"`
 }
 
 // ReadRequest defines model for ReadRequest.
 type ReadRequest struct {
-	Collection *string             `json:"collection,omitempty"`
-	Db         *string             `json:"db,omitempty"`
-	Fields     *[]byte             `json:"fields,omitempty"`
-	Filter     json.RawMessage     `json:"filter,omitempty"`
-	Options    *ReadRequestOptions `json:"options,omitempty"`
+	// Limit fields returned by the read by this subset of the fields The fields should proper JSON object
+	Fields *[]byte `json:"fields,omitempty"`
+
+	// Returns documents matching this filter. The filter should proper JSON object Filter syntax described here: {TBD}
+	Filter json.RawMessage `json:"filter,omitempty"`
+
+	// ReadRequestOptions contain read behavior modifying options
+	Options *ReadRequestOptions `json:"options,omitempty"`
 }
 
-// ReadRequestOptions defines model for ReadRequestOptions.
+// ReadRequestOptions contain read behavior modifying options
 type ReadRequestOptions struct {
-	Limit  *int64          `json:"limit,omitempty"`
-	Offset *[]byte         `json:"offset,omitempty"`
-	Skip   *int64          `json:"skip,omitempty"`
-	TxCtx  *TransactionCtx `json:"tx_ctx,omitempty"`
+	// Limit the number of documents returned by the read operation
+	Limit *int64 `json:"limit,omitempty"`
+
+	// Start returning document start from this primary key
+	Offset *[]byte `json:"offset,omitempty"`
+
+	// Number of documents to skip before starting to return resulting documents
+	Skip *int64 `json:"skip,omitempty"`
+
+	// Contains ID which uniquely identifies transaction.This context is returned by StartTransaction request andshould be passed in the options of document modificationrequests in order to run them in the context of the sametransaction
+	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
 }
 
 // ReadResponse defines model for ReadResponse.
 type ReadResponse struct {
+	// Doc is the JSON object representing requested fields
 	Doc json.RawMessage `json:"doc,omitempty"`
-	Key *[]byte         `json:"key,omitempty"`
+
+	// Key is internal key, which uniquely identify the document. This fields is used to
+	Key *[]byte `json:"key,omitempty"`
 }
 
-// RollbackTransactionRequest defines model for RollbackTransactionRequest.
+// Rollback transaction with the given ID
 type RollbackTransactionRequest struct {
-	Db    *string         `json:"db,omitempty"`
+	// Contains ID which uniquely identifies transaction.This context is returned by StartTransaction request andshould be passed in the options of document modificationrequests in order to run them in the context of the sametransaction
 	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
 }
 
 // RollbackTransactionResponse defines model for RollbackTransactionResponse.
 type RollbackTransactionResponse map[string]interface{}
 
-// TransactionCtx defines model for TransactionCtx.
+// Contains ID which uniquely identifies transaction.This context is returned by StartTransaction request andshould be passed in the options of document modificationrequests in order to run them in the context of the sametransaction
 type TransactionCtx struct {
 	Id     *string `json:"id,omitempty"`
 	Origin *string `json:"origin,omitempty"`
 }
 
-// TransactionOptions defines model for TransactionOptions.
+// Modify start transaction behavior
 type TransactionOptions map[string]interface{}
-
-// TruncateCollectionResponse defines model for TruncateCollectionResponse.
-type TruncateCollectionResponse struct {
-	Msg *string `json:"msg,omitempty"`
-}
 
 // UpdateRequest defines model for UpdateRequest.
 type UpdateRequest struct {
-	Collection *string               `json:"collection,omitempty"`
-	Db         *string               `json:"db,omitempty"`
-	Fields     json.RawMessage       `json:"fields,omitempty"`
-	Filter     json.RawMessage       `json:"filter,omitempty"`
-	Options    *UpdateRequestOptions `json:"options,omitempty"`
+	// Fields contains set of fields with the values which need to be updated. Should be proper JSON object.
+	Fields json.RawMessage `json:"fields,omitempty"`
+
+	// Update documents which matching specified filter. The filter should proper JSON object Filter syntax described here: {TBD}
+	Filter  json.RawMessage       `json:"filter,omitempty"`
+	Options *UpdateRequestOptions `json:"options,omitempty"`
 }
 
 // UpdateRequestOptions defines model for UpdateRequestOptions.
 type UpdateRequestOptions struct {
+	// WriteOptions contain write behavior modifying options
 	WriteOptions *WriteOptions `json:"write_options,omitempty"`
 }
 
@@ -208,8 +227,9 @@ type UpdateResponse struct {
 	Rc *int32 `json:"rc,omitempty"`
 }
 
-// WriteOptions defines model for WriteOptions.
+// WriteOptions contain write behavior modifying options
 type WriteOptions struct {
+	// Contains ID which uniquely identifies transaction.This context is returned by StartTransaction request andshould be passed in the options of document modificationrequests in order to run them in the context of the sametransaction
 	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
 }
 
@@ -390,9 +410,6 @@ type ClientInterface interface {
 
 	// TigrisDBDropCollection request
 	TigrisDBDropCollection(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// TigrisDBTruncateCollection request
-	TigrisDBTruncateCollection(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// TigrisDBCreateDatabase request with any body
 	TigrisDBCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -590,18 +607,6 @@ func (c *Client) TigrisDBUpdate(ctx context.Context, db string, collection strin
 
 func (c *Client) TigrisDBDropCollection(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewTigrisDBDropCollectionRequest(c.Server, db, collection)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) TigrisDBTruncateCollection(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBTruncateCollectionRequest(c.Server, db, collection)
 	if err != nil {
 		return nil, err
 	}
@@ -1158,47 +1163,6 @@ func NewTigrisDBDropCollectionRequest(server string, db string, collection strin
 	return req, nil
 }
 
-// NewTigrisDBTruncateCollectionRequest generates requests for TigrisDBTruncateCollection
-func NewTigrisDBTruncateCollectionRequest(server string, db string, collection string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "db", runtime.ParamLocationPath, db)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "collection", runtime.ParamLocationPath, collection)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/truncate", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewTigrisDBCreateDatabaseRequest calls the generic TigrisDBCreateDatabase builder with application/json body
 func NewTigrisDBCreateDatabaseRequest(server string, db string, body TigrisDBCreateDatabaseJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1516,9 +1480,6 @@ type ClientWithResponsesInterface interface {
 	// TigrisDBDropCollection request
 	TigrisDBDropCollectionWithResponse(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error)
 
-	// TigrisDBTruncateCollection request
-	TigrisDBTruncateCollectionWithResponse(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*TigrisDBTruncateCollectionResponse, error)
-
 	// TigrisDBCreateDatabase request with any body
 	TigrisDBCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCreateDatabaseResponse, error)
 
@@ -1737,28 +1698,6 @@ func (r TigrisDBDropCollectionResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r TigrisDBDropCollectionResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type TigrisDBTruncateCollectionResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *TruncateCollectionResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r TigrisDBTruncateCollectionResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBTruncateCollectionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2002,15 +1941,6 @@ func (c *ClientWithResponses) TigrisDBDropCollectionWithResponse(ctx context.Con
 		return nil, err
 	}
 	return ParseTigrisDBDropCollectionResponse(rsp)
-}
-
-// TigrisDBTruncateCollectionWithResponse request returning *TigrisDBTruncateCollectionResponse
-func (c *ClientWithResponses) TigrisDBTruncateCollectionWithResponse(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*TigrisDBTruncateCollectionResponse, error) {
-	rsp, err := c.TigrisDBTruncateCollection(ctx, db, collection, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseTigrisDBTruncateCollectionResponse(rsp)
 }
 
 // TigrisDBCreateDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisDBCreateDatabaseResponse
@@ -2332,32 +2262,6 @@ func ParseTigrisDBDropCollectionResponse(rsp *http.Response) (*TigrisDBDropColle
 	return response, nil
 }
 
-// ParseTigrisDBTruncateCollectionResponse parses an HTTP response from a TigrisDBTruncateCollectionWithResponse call
-func ParseTigrisDBTruncateCollectionResponse(rsp *http.Response) (*TigrisDBTruncateCollectionResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &TigrisDBTruncateCollectionResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest TruncateCollectionResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseTigrisDBCreateDatabaseResponse parses an HTTP response from a TigrisDBCreateDatabaseWithResponse call
 func ParseTigrisDBCreateDatabaseResponse(rsp *http.Response) (*TigrisDBCreateDatabaseResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -2491,26 +2395,43 @@ func ParseTigrisDBRollbackTransactionResponse(rsp *http.Response) (*TigrisDBRoll
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -1,5 +1,6 @@
 # TigrisDB Golang client
 
+[![Go Report](https://goreportcard.com/badge/github.com/tigrisdata/tigrisdb-client-go)](https://goreportcard.com/report/github.com/tigrisdata/tigrisdb-client-go)
 [![Build Status](https://github.com/tigrisdata/tigrisdb-client-go/workflows/go-test/badge.svg)]()
 [![Build Status](https://github.com/tigrisdata/tigrisdb-client-go/workflows/go-lint/badge.svg)]()
 

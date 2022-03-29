@@ -98,16 +98,6 @@ func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	return r.GetDbs(), nil
 }
 
-func (c *grpcDriver) ListCollections(ctx context.Context, db string) ([]string, error) {
-	r, err := c.api.ListCollections(ctx, &api.ListCollectionsRequest{
-		Db: db,
-	})
-	if err != nil {
-		return nil, GRPCError(err)
-	}
-	return r.GetCollections(), nil
-}
-
 func (c *grpcDriver) createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
 	_, err := c.api.CreateDatabase(ctx, &api.CreateDatabaseRequest{
 		Db:      db,
@@ -120,35 +110,6 @@ func (c *grpcDriver) dropDatabaseWithOptions(ctx context.Context, db string, opt
 	_, err := c.api.DropDatabase(ctx, &api.DropDatabaseRequest{
 		Db:      db,
 		Options: (*api.DatabaseOptions)(options),
-	})
-	return GRPCError(err)
-}
-
-func (c *grpcDriver) createCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
-	_, err := c.api.CreateCollection(ctx, &api.CreateCollectionRequest{
-		Db:         db,
-		Collection: collection,
-		Schema:     schema,
-		Options:    (*api.CollectionOptions)(options),
-	})
-	return GRPCError(err)
-}
-
-func (c *grpcDriver) alterCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
-	_, err := c.api.AlterCollection(ctx, &api.AlterCollectionRequest{
-		Db:         db,
-		Collection: collection,
-		Schema:     schema,
-		Options:    (*api.CollectionOptions)(options),
-	})
-	return GRPCError(err)
-}
-
-func (c *grpcDriver) dropCollectionWithOptions(ctx context.Context, db string, collection string, options *CollectionOptions) error {
-	_, err := c.api.DropCollection(ctx, &api.DropCollectionRequest{
-		Db:         db,
-		Collection: collection,
-		Options:    (*api.CollectionOptions)(options),
 	})
 	return GRPCError(err)
 }
@@ -204,7 +165,30 @@ func (c *grpcTx) readWithOptions(ctx context.Context, collection string, filter 
 	return c.grpcCRUD.readWithOptions(ctx, c.db, collection, filter, options)
 }
 
+func (c *grpcTx) createCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+	return c.grpcCRUD.createCollectionWithOptions(ctx, c.db, collection, schema, options)
+}
+
+func (c *grpcTx) alterCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+	return c.grpcCRUD.alterCollectionWithOptions(ctx, c.db, collection, schema, options)
+}
+
+func (c *grpcTx) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
+	return c.grpcCRUD.dropCollectionWithOptions(ctx, c.db, collection, options)
+}
+
+func (c *grpcTx) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
+	return c.grpcCRUD.listCollectionsWithOptions(ctx, c.db, options)
+}
+
 func setGRPCTxCtx(txCtx *api.TransactionCtx, options *api.WriteOptions) {
+	if txCtx == nil || txCtx.Id == "" {
+		return
+	}
+	options.TxCtx = &api.TransactionCtx{Id: txCtx.Id, Origin: txCtx.Origin}
+}
+
+func setGRPCCollectionTxCtx(txCtx *api.TransactionCtx, options *api.CollectionOptions) {
 	if txCtx == nil || txCtx.Id == "" {
 		return
 	}
@@ -214,6 +198,50 @@ func setGRPCTxCtx(txCtx *api.TransactionCtx, options *api.WriteOptions) {
 type grpcCRUD struct {
 	api   api.TigrisDBClient
 	txCtx api.TransactionCtx
+}
+
+func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, db string, options *CollectionOptions) ([]string, error) {
+	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
+	r, err := c.api.ListCollections(ctx, &api.ListCollectionsRequest{
+		Db:      db,
+		Options: (*api.CollectionOptions)(options),
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+	return r.GetCollections(), nil
+}
+
+func (c *grpcCRUD) createCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
+	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
+	_, err := c.api.CreateCollection(ctx, &api.CreateCollectionRequest{
+		Db:         db,
+		Collection: collection,
+		Schema:     schema,
+		Options:    (*api.CollectionOptions)(options),
+	})
+	return GRPCError(err)
+}
+
+func (c *grpcCRUD) alterCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
+	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
+	_, err := c.api.AlterCollection(ctx, &api.AlterCollectionRequest{
+		Db:         db,
+		Collection: collection,
+		Schema:     schema,
+		Options:    (*api.CollectionOptions)(options),
+	})
+	return GRPCError(err)
+}
+
+func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, db string, collection string, options *CollectionOptions) error {
+	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
+	_, err := c.api.DropCollection(ctx, &api.DropCollectionRequest{
+		Db:         db,
+		Collection: collection,
+		Options:    (*api.CollectionOptions)(options),
+	})
+	return GRPCError(err)
 }
 
 func (c *grpcCRUD) insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (InsertResponse, error) {

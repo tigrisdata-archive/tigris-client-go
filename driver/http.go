@@ -130,27 +130,16 @@ func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	return *l.Dbs, nil
 }
 
-func (c *httpDriver) ListCollections(ctx context.Context, db string) ([]string, error) {
-	resp, err := c.api.TigrisDBListCollections(ctx, db)
-	if err := HTTPError(err, resp); err != nil {
-		return nil, err
-	}
-	var l apiHTTP.ListCollectionsResponse
-	if err := respDecode(resp.Body, &l); err != nil {
-		return nil, err
-	}
-	if l.Collections == nil {
-		return nil, nil
-	}
-	return *l.Collections, nil
-}
-
 func convertDatabaseOptions(_ *DatabaseOptions) *apiHTTP.DatabaseOptions {
 	return &apiHTTP.DatabaseOptions{}
 }
 
-func convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
-	return &apiHTTP.CollectionOptions{}
+func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
+	opts := apiHTTP.CollectionOptions{}
+	if c.txCtx.Id != nil && *c.txCtx.Id != "" {
+		opts.TxCtx = &apiHTTP.TransactionCtx{Id: c.txCtx.Id, Origin: c.txCtx.Origin}
+	}
+	return &opts
 }
 
 func convertTransactionOptions(_ *TxOptions) *apiHTTP.TransactionOptions {
@@ -168,27 +157,6 @@ func (c *httpDriver) dropDatabaseWithOptions(ctx context.Context, db string, opt
 	resp, err := c.api.TigrisDBDropDatabase(ctx, db, apiHTTP.TigrisDBDropDatabaseJSONRequestBody{
 		Options: convertDatabaseOptions(options),
 	})
-	return HTTPError(err, resp)
-}
-
-func (c *httpDriver) createCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
-	resp, err := c.api.TigrisDBCreateCollection(ctx, db, collection, apiHTTP.TigrisDBCreateCollectionJSONRequestBody{
-		Schema:  json.RawMessage(schema),
-		Options: convertCollectionOptions(options),
-	})
-	return HTTPError(err, resp)
-}
-
-func (c *httpDriver) alterCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
-	resp, err := c.api.TigrisDBAlterCollection(ctx, db, collection, apiHTTP.TigrisDBAlterCollectionJSONRequestBody{
-		Schema:  json.RawMessage(schema),
-		Options: convertCollectionOptions(options),
-	})
-	return HTTPError(err, resp)
-}
-
-func (c *httpDriver) dropCollectionWithOptions(ctx context.Context, db string, collection string, _ *CollectionOptions) error {
-	resp, err := c.api.TigrisDBDropCollection(ctx, db, collection)
 	return HTTPError(err, resp)
 }
 
@@ -247,6 +215,22 @@ func (c *httpTx) readWithOptions(ctx context.Context, collection string, filter 
 	return c.httpCRUD.readWithOptions(ctx, c.db, collection, filter, options)
 }
 
+func (c *httpTx) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
+	return c.httpCRUD.listCollectionsWithOptions(ctx, c.db, options)
+}
+
+func (c *httpTx) createCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+	return c.httpCRUD.createCollectionWithOptions(ctx, c.db, collection, schema, options)
+}
+
+func (c *httpTx) alterCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+	return c.httpCRUD.alterCollectionWithOptions(ctx, c.db, collection, schema, options)
+}
+
+func (c *httpTx) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
+	return c.httpCRUD.dropCollectionWithOptions(ctx, c.db, collection, options)
+}
+
 type httpCRUD struct {
 	api   *apiHTTP.ClientWithResponses
 	txCtx apiHTTP.TransactionCtx
@@ -278,6 +262,46 @@ func (c *httpCRUD) convertReadOptions(_ *ReadOptions) *apiHTTP.ReadRequestOption
 		opts.TxCtx = &apiHTTP.TransactionCtx{Id: c.txCtx.Id, Origin: c.txCtx.Origin}
 	}
 	return &opts
+}
+
+func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, db string, options *CollectionOptions) ([]string, error) {
+	resp, err := c.api.TigrisDBListCollections(ctx, db, apiHTTP.TigrisDBListCollectionsJSONRequestBody{
+		Options: c.convertCollectionOptions(options),
+	})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+	var l apiHTTP.ListCollectionsResponse
+	if err := respDecode(resp.Body, &l); err != nil {
+		return nil, err
+	}
+	if l.Collections == nil {
+		return nil, nil
+	}
+	return *l.Collections, nil
+}
+
+func (c *httpCRUD) createCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
+	resp, err := c.api.TigrisDBCreateCollection(ctx, db, collection, apiHTTP.TigrisDBCreateCollectionJSONRequestBody{
+		Schema:  json.RawMessage(schema),
+		Options: c.convertCollectionOptions(options),
+	})
+	return HTTPError(err, resp)
+}
+
+func (c *httpCRUD) alterCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
+	resp, err := c.api.TigrisDBAlterCollection(ctx, db, collection, apiHTTP.TigrisDBAlterCollectionJSONRequestBody{
+		Schema:  json.RawMessage(schema),
+		Options: c.convertCollectionOptions(options),
+	})
+	return HTTPError(err, resp)
+}
+
+func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, db string, collection string, options *CollectionOptions) error {
+	resp, err := c.api.TigrisDBDropCollection(ctx, db, collection, apiHTTP.TigrisDBDropCollectionJSONRequestBody{
+		Options: c.convertCollectionOptions(options),
+	})
+	return HTTPError(err, resp)
 }
 
 func (c *httpCRUD) insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (InsertResponse, error) {

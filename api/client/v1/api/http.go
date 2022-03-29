@@ -48,7 +48,10 @@ type BeginTransactionResponse struct {
 }
 
 // Collection requests modifying options
-type CollectionOptions map[string]interface{}
+type CollectionOptions struct {
+	// Contains ID which uniquely identifies transaction.This context is returned by StartTransaction request andshould be passed in the options of document modificationrequests in order to run them in the context of the sametransaction
+	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
+}
 
 // Commit transaction with the given ID
 type CommitTransactionRequest struct {
@@ -103,6 +106,12 @@ type DeleteRequestOptions struct {
 // DeleteResponse defines model for DeleteResponse.
 type DeleteResponse map[string]interface{}
 
+// DropCollectionRequest defines model for DropCollectionRequest.
+type DropCollectionRequest struct {
+	// Collection requests modifying options
+	Options *CollectionOptions `json:"options,omitempty"`
+}
+
 // DropCollectionResponse defines model for DropCollectionResponse.
 type DropCollectionResponse struct {
 	Msg *string `json:"msg,omitempty"`
@@ -130,7 +139,7 @@ type InsertRequest struct {
 
 // Insert request options
 type InsertRequestOptions struct {
-	// The must_not_exist, when set to true, prevents overwriting if the documents with the same ID already exists in the collection
+	// The must_not_exist, when set to true, prevents overwriting if the documents with the same ID already exist in the collection
 	MustNotExist *bool `json:"must_not_exist,omitempty"`
 
 	// WriteOptions contain write behavior modifying options
@@ -139,6 +148,12 @@ type InsertRequestOptions struct {
 
 // InsertResponse defines model for InsertResponse.
 type InsertResponse map[string]interface{}
+
+// ListCollectionsRequest defines model for ListCollectionsRequest.
+type ListCollectionsRequest struct {
+	// Collection requests modifying options
+	Options *CollectionOptions `json:"options,omitempty"`
+}
 
 // ListCollectionsResponse defines model for ListCollectionsResponse.
 type ListCollectionsResponse struct {
@@ -233,6 +248,9 @@ type WriteOptions struct {
 	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
 }
 
+// TigrisDBListCollectionsJSONBody defines parameters for TigrisDBListCollections.
+type TigrisDBListCollectionsJSONBody ListCollectionsRequest
+
 // TigrisDBAlterCollectionJSONBody defines parameters for TigrisDBAlterCollection.
 type TigrisDBAlterCollectionJSONBody AlterCollectionRequest
 
@@ -251,6 +269,9 @@ type TigrisDBReadJSONBody ReadRequest
 // TigrisDBUpdateJSONBody defines parameters for TigrisDBUpdate.
 type TigrisDBUpdateJSONBody UpdateRequest
 
+// TigrisDBDropCollectionJSONBody defines parameters for TigrisDBDropCollection.
+type TigrisDBDropCollectionJSONBody DropCollectionRequest
+
 // TigrisDBCreateDatabaseJSONBody defines parameters for TigrisDBCreateDatabase.
 type TigrisDBCreateDatabaseJSONBody CreateDatabaseRequest
 
@@ -265,6 +286,9 @@ type TigrisDBCommitTransactionJSONBody CommitTransactionRequest
 
 // TigrisDBRollbackTransactionJSONBody defines parameters for TigrisDBRollbackTransaction.
 type TigrisDBRollbackTransactionJSONBody RollbackTransactionRequest
+
+// TigrisDBListCollectionsJSONRequestBody defines body for TigrisDBListCollections for application/json ContentType.
+type TigrisDBListCollectionsJSONRequestBody TigrisDBListCollectionsJSONBody
 
 // TigrisDBAlterCollectionJSONRequestBody defines body for TigrisDBAlterCollection for application/json ContentType.
 type TigrisDBAlterCollectionJSONRequestBody TigrisDBAlterCollectionJSONBody
@@ -283,6 +307,9 @@ type TigrisDBReadJSONRequestBody TigrisDBReadJSONBody
 
 // TigrisDBUpdateJSONRequestBody defines body for TigrisDBUpdate for application/json ContentType.
 type TigrisDBUpdateJSONRequestBody TigrisDBUpdateJSONBody
+
+// TigrisDBDropCollectionJSONRequestBody defines body for TigrisDBDropCollection for application/json ContentType.
+type TigrisDBDropCollectionJSONRequestBody TigrisDBDropCollectionJSONBody
 
 // TigrisDBCreateDatabaseJSONRequestBody defines body for TigrisDBCreateDatabase for application/json ContentType.
 type TigrisDBCreateDatabaseJSONRequestBody TigrisDBCreateDatabaseJSONBody
@@ -375,8 +402,10 @@ type ClientInterface interface {
 	// TigrisDBListDatabases request
 	TigrisDBListDatabases(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBListCollections request
-	TigrisDBListCollections(ctx context.Context, db string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisDBListCollections request with any body
+	TigrisDBListCollectionsWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisDBListCollections(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// TigrisDBAlterCollection request with any body
 	TigrisDBAlterCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -408,8 +437,10 @@ type ClientInterface interface {
 
 	TigrisDBUpdate(ctx context.Context, db string, collection string, body TigrisDBUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBDropCollection request
-	TigrisDBDropCollection(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisDBDropCollection request with any body
+	TigrisDBDropCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisDBDropCollection(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// TigrisDBCreateDatabase request with any body
 	TigrisDBCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -449,8 +480,20 @@ func (c *Client) TigrisDBListDatabases(ctx context.Context, reqEditors ...Reques
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBListCollections(ctx context.Context, db string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBListCollectionsRequest(c.Server, db)
+func (c *Client) TigrisDBListCollectionsWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDBListCollectionsRequestWithBody(c.Server, db, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisDBListCollections(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDBListCollectionsRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -605,8 +648,20 @@ func (c *Client) TigrisDBUpdate(ctx context.Context, db string, collection strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDropCollection(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDropCollectionRequest(c.Server, db, collection)
+func (c *Client) TigrisDBDropCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDBDropCollectionRequestWithBody(c.Server, db, collection, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisDBDropCollection(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDBDropCollectionRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -764,8 +819,19 @@ func NewTigrisDBListDatabasesRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewTigrisDBListCollectionsRequest generates requests for TigrisDBListCollections
-func NewTigrisDBListCollectionsRequest(server string, db string) (*http.Request, error) {
+// NewTigrisDBListCollectionsRequest calls the generic TigrisDBListCollections builder with application/json body
+func NewTigrisDBListCollectionsRequest(server string, db string, body TigrisDBListCollectionsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisDBListCollectionsRequestWithBody(server, db, "application/json", bodyReader)
+}
+
+// NewTigrisDBListCollectionsRequestWithBody generates requests for TigrisDBListCollections with any type of body
+func NewTigrisDBListCollectionsRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -790,10 +856,12 @@ func NewTigrisDBListCollectionsRequest(server string, db string) (*http.Request,
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -1122,8 +1190,19 @@ func NewTigrisDBUpdateRequestWithBody(server string, db string, collection strin
 	return req, nil
 }
 
-// NewTigrisDBDropCollectionRequest generates requests for TigrisDBDropCollection
-func NewTigrisDBDropCollectionRequest(server string, db string, collection string) (*http.Request, error) {
+// NewTigrisDBDropCollectionRequest calls the generic TigrisDBDropCollection builder with application/json body
+func NewTigrisDBDropCollectionRequest(server string, db string, collection string, body TigrisDBDropCollectionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisDBDropCollectionRequestWithBody(server, db, collection, "application/json", bodyReader)
+}
+
+// NewTigrisDBDropCollectionRequestWithBody generates requests for TigrisDBDropCollection with any type of body
+func NewTigrisDBDropCollectionRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1155,10 +1234,12 @@ func NewTigrisDBDropCollectionRequest(server string, db string, collection strin
 		return nil, err
 	}
 
-	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -1444,8 +1525,10 @@ type ClientWithResponsesInterface interface {
 	// TigrisDBListDatabases request
 	TigrisDBListDatabasesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisDBListDatabasesResponse, error)
 
-	// TigrisDBListCollections request
-	TigrisDBListCollectionsWithResponse(ctx context.Context, db string, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error)
+	// TigrisDBListCollections request with any body
+	TigrisDBListCollectionsWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error)
+
+	TigrisDBListCollectionsWithResponse(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error)
 
 	// TigrisDBAlterCollection request with any body
 	TigrisDBAlterCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBAlterCollectionResponse, error)
@@ -1477,8 +1560,10 @@ type ClientWithResponsesInterface interface {
 
 	TigrisDBUpdateWithResponse(ctx context.Context, db string, collection string, body TigrisDBUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBUpdateResponse, error)
 
-	// TigrisDBDropCollection request
-	TigrisDBDropCollectionWithResponse(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error)
+	// TigrisDBDropCollection request with any body
+	TigrisDBDropCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error)
+
+	TigrisDBDropCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error)
 
 	// TigrisDBCreateDatabase request with any body
 	TigrisDBCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCreateDatabaseResponse, error)
@@ -1823,9 +1908,17 @@ func (c *ClientWithResponses) TigrisDBListDatabasesWithResponse(ctx context.Cont
 	return ParseTigrisDBListDatabasesResponse(rsp)
 }
 
-// TigrisDBListCollectionsWithResponse request returning *TigrisDBListCollectionsResponse
-func (c *ClientWithResponses) TigrisDBListCollectionsWithResponse(ctx context.Context, db string, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error) {
-	rsp, err := c.TigrisDBListCollections(ctx, db, reqEditors...)
+// TigrisDBListCollectionsWithBodyWithResponse request with arbitrary body returning *TigrisDBListCollectionsResponse
+func (c *ClientWithResponses) TigrisDBListCollectionsWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error) {
+	rsp, err := c.TigrisDBListCollectionsWithBody(ctx, db, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisDBListCollectionsResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisDBListCollectionsWithResponse(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error) {
+	rsp, err := c.TigrisDBListCollections(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -1934,9 +2027,17 @@ func (c *ClientWithResponses) TigrisDBUpdateWithResponse(ctx context.Context, db
 	return ParseTigrisDBUpdateResponse(rsp)
 }
 
-// TigrisDBDropCollectionWithResponse request returning *TigrisDBDropCollectionResponse
-func (c *ClientWithResponses) TigrisDBDropCollectionWithResponse(ctx context.Context, db string, collection string, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error) {
-	rsp, err := c.TigrisDBDropCollection(ctx, db, collection, reqEditors...)
+// TigrisDBDropCollectionWithBodyWithResponse request with arbitrary body returning *TigrisDBDropCollectionResponse
+func (c *ClientWithResponses) TigrisDBDropCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error) {
+	rsp, err := c.TigrisDBDropCollectionWithBody(ctx, db, collection, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisDBDropCollectionResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisDBDropCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error) {
+	rsp, err := c.TigrisDBDropCollection(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2395,43 +2496,44 @@ func ParseTigrisDBRollbackTransactionResponse(rsp *http.Response) (*TigrisDBRoll
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"9x0vbT4+AAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

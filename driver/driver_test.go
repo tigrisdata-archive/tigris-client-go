@@ -201,6 +201,41 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 
 	_, err = c.Delete(ctx, "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
 	require.NoError(t, err)
+
+	coptions := &api.CollectionOptions{}
+	coptions.TxCtx = &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().ListCollections(gomock.Any(),
+		pm(&api.ListCollectionsRequest{
+			Db:      "db1",
+			Options: coptions,
+		})).Return(&api.ListCollectionsResponse{Collections: []string{"lc1", "lc2"}}, nil)
+
+	colls, err := c.ListCollections(ctx, &CollectionOptions{})
+	require.NoError(t, err)
+	require.Equal(t, []string{"lc1", "lc2"}, colls)
+
+	sch := `{"schema":"field"}`
+	mc.EXPECT().CreateCollection(gomock.Any(),
+		pm(&api.CreateCollectionRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Schema:     []byte(sch),
+			Options:    coptions,
+		})).Return(&api.CreateCollectionResponse{}, nil)
+
+	err = c.CreateCollection(ctx, "c1", Schema(sch), &CollectionOptions{})
+	require.NoError(t, err)
+
+	mc.EXPECT().DropCollection(gomock.Any(),
+		pm(&api.DropCollectionRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Options:    coptions,
+		})).Return(&api.DropCollectionResponse{}, nil)
+
+	err = c.DropCollection(ctx, "c1", &CollectionOptions{})
+	require.NoError(t, err)
 }
 
 func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
@@ -271,6 +306,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 
 	_, err = c.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
 	require.NoError(t, err)
+
 }
 
 func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
@@ -294,19 +330,21 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	// Test empty list response
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
-			Db: "db1",
+			Db:      "db1",
+			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: nil}, nil)
 
-	colls, err := c.ListCollections(ctx, "db1")
+	colls, err := c.ListCollections(ctx, "db1", &CollectionOptions{})
 	require.NoError(t, err)
 	require.Equal(t, []string(nil), colls)
 
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
-			Db: "db1",
+			Db:      "db1",
+			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: []string{"lc1", "lc2"}}, nil)
 
-	colls, err = c.ListCollections(ctx, "db1")
+	colls, err = c.ListCollections(ctx, "db1", &CollectionOptions{})
 	require.NoError(t, err)
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
 
@@ -329,6 +367,16 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 		})).Return(&api.CreateCollectionResponse{}, nil)
 
 	err = c.CreateCollection(ctx, "db1", "c1", Schema(sch), &CollectionOptions{})
+	require.NoError(t, err)
+
+	mc.EXPECT().DropCollection(gomock.Any(),
+		pm(&api.DropCollectionRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Options:    &api.CollectionOptions{},
+		})).Return(&api.DropCollectionResponse{}, nil)
+
+	err = c.DropCollection(ctx, "db1", "c1", &CollectionOptions{})
 	require.NoError(t, err)
 
 	testCRUDBasic(t, c, mc)

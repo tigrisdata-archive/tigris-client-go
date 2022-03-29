@@ -11,7 +11,7 @@ TEST_PARAM=-cover -race -tags=test $(shell printenv TEST_PARAM)
 all: generate ${GO_SRC}
 	#go build ${BUILD_PARAM} .
 
-${GEN_DIR}/%.proto ${GEN_DIR}/%_openapi.yaml:
+${PROTO_DIR}/%.proto ${PROTO_DIR}/%_openapi.yaml:
 	git submodule update --init --recursive --rebase
 
 upgrade_api:

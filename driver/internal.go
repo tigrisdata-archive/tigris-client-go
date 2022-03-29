@@ -36,7 +36,7 @@ type driverWithOptions interface {
 	dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
 	beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error)
 
-	ListCollections(ctx context.Context, db string) ([]string, error)
+	listCollectionsWithOptions(ctx context.Context, db string, options *CollectionOptions) ([]string, error)
 	ListDatabases(ctx context.Context) ([]string, error)
 	Close() error
 }
@@ -46,6 +46,10 @@ type txWithOptions interface {
 	readWithOptions(ctx context.Context, collection string, filter Filter, options *ReadOptions) (Iterator, error)
 	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error)
 	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)
+	createCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error
+	alterCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error
+	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
+	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	Commit(ctx context.Context) error
 	Rollback(ctx context.Context) error
 }

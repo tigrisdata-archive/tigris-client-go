@@ -41,7 +41,7 @@ type Driver interface {
 	// DropDatabase deletes the database and all collections it contains
 	DropDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error
 	// ListCollections lists collectdions in the database
-	ListCollections(ctx context.Context, db string) ([]string, error)
+	ListCollections(ctx context.Context, db string, options ...*CollectionOptions) ([]string, error)
 	// ListDatabases in the current namespace
 	ListDatabases(ctx context.Context) ([]string, error)
 	// BeginTx starts new transaction
@@ -65,6 +65,14 @@ type Tx interface {
 	Commit(ctx context.Context) error
 	// Rollback discard all the modification made by the transaction
 	Rollback(ctx context.Context) error
+	// CreateCollection of documents in the database
+	CreateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
+	// AlterCollection changes the schema of the existing collection
+	AlterCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
+	// DropCollection deletes the collection and all documents it contains
+	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
+	// ListCollections lists collections in the database
+	ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error)
 }
 
 type driver struct {
@@ -134,6 +142,15 @@ func (c *driver) DropCollection(ctx context.Context, db string, collection strin
 	return c.dropCollectionWithOptions(ctx, db, collection, opts.(*CollectionOptions))
 }
 
+func (c *driver) ListCollections(ctx context.Context, db string, options ...*CollectionOptions) ([]string, error) {
+	opts, err := validateOptionsParam(options)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.listCollectionsWithOptions(ctx, db, opts.(*CollectionOptions))
+}
+
 func (c *driver) CreateDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error {
 	opts, err := validateOptionsParam(options)
 	if err != nil {
@@ -151,7 +168,6 @@ func (c *driver) DropDatabase(ctx context.Context, db string, options ...*Databa
 
 	return c.dropDatabaseWithOptions(ctx, db, opts.(*DatabaseOptions))
 }
-
 func (c *driver) BeginTx(ctx context.Context, db string, options ...*TxOptions) (Tx, error) {
 	opts, err := validateOptionsParam(options)
 	if err != nil {
@@ -204,6 +220,41 @@ func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filte
 	}
 
 	return c.readWithOptions(ctx, collection, filter, opts.(*ReadOptions))
+}
+
+func (c *driverTxWithOptions) CreateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
+	opts, err := validateOptionsParam(options)
+	if err != nil {
+		return err
+	}
+
+	return c.createCollectionWithOptions(ctx, collection, schema, opts.(*CollectionOptions))
+}
+
+func (c *driverTxWithOptions) AlterCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
+	opts, err := validateOptionsParam(options)
+	if err != nil {
+		return err
+	}
+
+	return c.alterCollectionWithOptions(ctx, collection, schema, opts.(*CollectionOptions))
+}
+
+func (c *driverTxWithOptions) DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error {
+	opts, err := validateOptionsParam(options)
+	if err != nil {
+		return err
+	}
+
+	return c.dropCollectionWithOptions(ctx, collection, opts.(*CollectionOptions))
+}
+
+func (c *driverTxWithOptions) ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error) {
+	opts, err := validateOptionsParam(options)
+	if err != nil {
+		return nil, err
+	}
+	return c.listCollectionsWithOptions(ctx, opts.(*CollectionOptions))
 }
 
 func validateOptionsParam(options interface{}) (interface{}, error) {

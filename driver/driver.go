@@ -80,7 +80,7 @@ type driver struct {
 }
 
 func (c *driver) Insert(ctx context.Context, db string, collection string, docs []Document, options ...*InsertOptions) (InsertResponse, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &InsertOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (c *driver) Insert(ctx context.Context, db string, collection string, docs 
 }
 
 func (c *driver) Update(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (c *driver) Update(ctx context.Context, db string, collection string, filte
 }
 
 func (c *driver) Delete(ctx context.Context, db string, collection string, filter Filter, options ...*DeleteOptions) (DeleteResponse, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &DeleteOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (c *driver) Delete(ctx context.Context, db string, collection string, filte
 }
 
 func (c *driver) Read(ctx context.Context, db string, collection string, filter Filter, options ...*ReadOptions) (Iterator, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &ReadOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (c *driver) Read(ctx context.Context, db string, collection string, filter 
 }
 
 func (c *driver) CreateCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (c *driver) CreateCollection(ctx context.Context, db string, collection str
 }
 
 func (c *driver) AlterCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (c *driver) AlterCollection(ctx context.Context, db string, collection stri
 }
 
 func (c *driver) DropCollection(ctx context.Context, db string, collection string, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func (c *driver) DropCollection(ctx context.Context, db string, collection strin
 }
 
 func (c *driver) ListCollections(ctx context.Context, db string, options ...*CollectionOptions) ([]string, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (c *driver) ListCollections(ctx context.Context, db string, options ...*Col
 }
 
 func (c *driver) CreateDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &DatabaseOptions{})
 	if err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func (c *driver) CreateDatabase(ctx context.Context, db string, options ...*Data
 }
 
 func (c *driver) DropDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &DatabaseOptions{})
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (c *driver) DropDatabase(ctx context.Context, db string, options ...*Databa
 	return c.dropDatabaseWithOptions(ctx, db, opts.(*DatabaseOptions))
 }
 func (c *driver) BeginTx(ctx context.Context, db string, options ...*TxOptions) (Tx, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &TxOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ type driverTxWithOptions struct {
 }
 
 func (c *driverTxWithOptions) Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (InsertResponse, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &InsertOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func (c *driverTxWithOptions) Insert(ctx context.Context, collection string, doc
 }
 
 func (c *driverTxWithOptions) Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (c *driverTxWithOptions) Update(ctx context.Context, collection string, fil
 }
 
 func (c *driverTxWithOptions) Delete(ctx context.Context, collection string, filter Filter, options ...*DeleteOptions) (DeleteResponse, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &DeleteOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func (c *driverTxWithOptions) Delete(ctx context.Context, collection string, fil
 }
 
 func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filter Filter, options ...*ReadOptions) (Iterator, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &ReadOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filte
 }
 
 func (c *driverTxWithOptions) CreateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (c *driverTxWithOptions) CreateCollection(ctx context.Context, collection s
 }
 
 func (c *driverTxWithOptions) AlterCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
@@ -241,7 +241,7 @@ func (c *driverTxWithOptions) AlterCollection(ctx context.Context, collection st
 }
 
 func (c *driverTxWithOptions) DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
@@ -250,14 +250,14 @@ func (c *driverTxWithOptions) DropCollection(ctx context.Context, collection str
 }
 
 func (c *driverTxWithOptions) ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error) {
-	opts, err := validateOptionsParam(options)
+	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return nil, err
 	}
 	return c.listCollectionsWithOptions(ctx, opts.(*CollectionOptions))
 }
 
-func validateOptionsParam(options interface{}) (interface{}, error) {
+func validateOptionsParam(options interface{}, out interface{}) (interface{}, error) {
 	v := reflect.ValueOf(options)
 
 	if (v.Kind() != reflect.Array && v.Kind() != reflect.Slice) || v.Len() > 1 {
@@ -265,7 +265,7 @@ func validateOptionsParam(options interface{}) (interface{}, error) {
 	}
 
 	if v.Len() < 1 {
-		return nil, nil
+		return out, nil
 	}
 
 	return v.Index(0).Interface(), nil

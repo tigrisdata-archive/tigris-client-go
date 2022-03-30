@@ -186,7 +186,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), &ReadOptions{})
+	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -199,7 +199,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    &api.DeleteRequestOptions{WriteOptions: options},
 		})).Return(&api.DeleteResponse{}, nil)
 
-	_, err = c.Delete(ctx, "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
+	_, err = c.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
 
 	coptions := &api.CollectionOptions{}
@@ -211,7 +211,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options: coptions,
 		})).Return(&api.ListCollectionsResponse{Collections: []string{"lc1", "lc2"}}, nil)
 
-	colls, err := c.ListCollections(ctx, &CollectionOptions{})
+	colls, err := c.ListCollections(ctx)
 	require.NoError(t, err)
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
 
@@ -224,7 +224,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    coptions,
 		})).Return(&api.CreateCollectionResponse{}, nil)
 
-	err = c.CreateCollection(ctx, "c1", Schema(sch), &CollectionOptions{})
+	err = c.CreateCollection(ctx, "c1", Schema(sch))
 	require.NoError(t, err)
 
 	mc.EXPECT().DropCollection(gomock.Any(),
@@ -234,7 +234,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    coptions,
 		})).Return(&api.DropCollectionResponse{}, nil)
 
-	err = c.DropCollection(ctx, "c1", &CollectionOptions{})
+	err = c.DropCollection(ctx, "c1")
 	require.NoError(t, err)
 }
 
@@ -266,7 +266,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    &api.InsertRequestOptions{WriteOptions: options},
 		})).Return(&api.InsertResponse{}, nil)
 
-	_, err = c.Insert(ctx, "db1", "c1", doc123, &InsertOptions{})
+	_, err = c.Insert(ctx, "db1", "c1", doc123)
 	require.NoError(t, err)
 
 	mc.EXPECT().Update(gomock.Any(),
@@ -291,7 +291,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &ReadOptions{})
+	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -344,7 +344,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: []string{"lc1", "lc2"}}, nil)
 
-	colls, err = c.ListCollections(ctx, "db1", &CollectionOptions{})
+	colls, err = c.ListCollections(ctx, "db1")
 	require.NoError(t, err)
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
 

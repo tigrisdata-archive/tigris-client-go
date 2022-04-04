@@ -256,6 +256,17 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	_, err := c.Insert(ctx, "db1", "c1", doc1, &InsertOptions{WriteOptions: options})
 	require.NoError(t, err)
 
+	mc.EXPECT().Replace(gomock.Any(),
+		pm(&api.ReplaceRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
+		})).Return(&api.ReplaceResponse{}, nil)
+
+	_, err = c.Replace(ctx, "db1", "c1", doc1, &ReplaceOptions{WriteOptions: options})
+	require.NoError(t, err)
+
 	doc123 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`), Document(`{"K1":"vK1","K2":2,"D1":"vD2"}`), Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`)}
 
 	mc.EXPECT().Insert(gomock.Any(),

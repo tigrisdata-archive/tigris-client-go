@@ -44,6 +44,7 @@ type Schema json.RawMessage
 type WriteOptions api.WriteOptions
 
 type InsertOptions api.InsertRequestOptions
+type ReplaceOptions api.ReplaceRequestOptions
 type UpdateOptions api.UpdateRequestOptions
 type DeleteOptions api.DeleteRequestOptions
 type ReadOptions api.ReadRequestOptions
@@ -53,6 +54,7 @@ type DatabaseOptions api.DatabaseOptions
 type TxOptions api.TransactionOptions
 
 type InsertResponse *api.InsertResponse
+type ReplaceResponse *api.ReplaceResponse
 type UpdateResponse *api.UpdateResponse
 type DeleteResponse *api.DeleteResponse
 

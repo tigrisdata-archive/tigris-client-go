@@ -26,6 +26,7 @@ import (
 
 type driverWithOptions interface {
 	insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (InsertResponse, error)
+	replaceWithOptions(ctx context.Context, db string, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error)
 	readWithOptions(ctx context.Context, db string, collection string, filter Filter, options *ReadOptions) (Iterator, error)
 	updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error)
 	deleteWithOptions(ctx context.Context, db string, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)
@@ -43,6 +44,7 @@ type driverWithOptions interface {
 
 type txWithOptions interface {
 	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (InsertResponse, error)
+	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error)
 	readWithOptions(ctx context.Context, collection string, filter Filter, options *ReadOptions) (Iterator, error)
 	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error)
 	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)

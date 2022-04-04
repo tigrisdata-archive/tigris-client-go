@@ -34,9 +34,12 @@ type TigrisDBClient interface {
 	// Rollback transaction discards all the changes
 	// performed in the transaction
 	RollbackTransaction(ctx context.Context, in *RollbackTransactionRequest, opts ...grpc.CallOption) (*RollbackTransactionResponse, error)
-	// Insert creates new documents in the collection or replaces existing
-	// documents if mustNotExist option is specified
+	// Insert inserts new documents in the collection and returns a conflict if any of the document
+	// passed in the batch already exists. Insert provides idempotency by rejecting request if document
+	// already exists. To replace documents, REPLACE API should be used instead of INSERT.
 	Insert(ctx context.Context, in *InsertRequest, opts ...grpc.CallOption) (*InsertResponse, error)
+	// Replace inserts the documents or replaces the existing documents in the collections.
+	Replace(ctx context.Context, in *ReplaceRequest, opts ...grpc.CallOption) (*ReplaceResponse, error)
 	// Delete documents from the collection according to specified filter
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	// Update range of documents in the collection according to
@@ -100,6 +103,15 @@ func (c *tigrisDBClient) RollbackTransaction(ctx context.Context, in *RollbackTr
 func (c *tigrisDBClient) Insert(ctx context.Context, in *InsertRequest, opts ...grpc.CallOption) (*InsertResponse, error) {
 	out := new(InsertResponse)
 	err := c.cc.Invoke(ctx, "/TigrisDB/Insert", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisDBClient) Replace(ctx context.Context, in *ReplaceRequest, opts ...grpc.CallOption) (*ReplaceResponse, error) {
+	out := new(ReplaceResponse)
+	err := c.cc.Invoke(ctx, "/TigrisDB/Replace", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -235,9 +247,12 @@ type TigrisDBServer interface {
 	// Rollback transaction discards all the changes
 	// performed in the transaction
 	RollbackTransaction(context.Context, *RollbackTransactionRequest) (*RollbackTransactionResponse, error)
-	// Insert creates new documents in the collection or replaces existing
-	// documents if mustNotExist option is specified
+	// Insert inserts new documents in the collection and returns a conflict if any of the document
+	// passed in the batch already exists. Insert provides idempotency by rejecting request if document
+	// already exists. To replace documents, REPLACE API should be used instead of INSERT.
 	Insert(context.Context, *InsertRequest) (*InsertResponse, error)
+	// Replace inserts the documents or replaces the existing documents in the collections.
+	Replace(context.Context, *ReplaceRequest) (*ReplaceResponse, error)
 	// Delete documents from the collection according to specified filter
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	// Update range of documents in the collection according to
@@ -278,6 +293,9 @@ func (UnimplementedTigrisDBServer) RollbackTransaction(context.Context, *Rollbac
 }
 func (UnimplementedTigrisDBServer) Insert(context.Context, *InsertRequest) (*InsertResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Insert not implemented")
+}
+func (UnimplementedTigrisDBServer) Replace(context.Context, *ReplaceRequest) (*ReplaceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Replace not implemented")
 }
 func (UnimplementedTigrisDBServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
@@ -389,6 +407,24 @@ func _TigrisDB_Insert_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisDBServer).Insert(ctx, req.(*InsertRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TigrisDB_Replace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisDBServer).Replace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TigrisDB/Replace",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisDBServer).Replace(ctx, req.(*ReplaceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -598,6 +634,10 @@ var TigrisDB_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Insert",
 			Handler:    _TigrisDB_Insert_Handler,
+		},
+		{
+			MethodName: "Replace",
+			Handler:    _TigrisDB_Replace_Handler,
 		},
 		{
 			MethodName: "Delete",

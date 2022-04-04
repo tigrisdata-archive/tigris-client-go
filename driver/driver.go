@@ -22,8 +22,11 @@ import (
 
 // Driver implements TigrisDB API
 type Driver interface {
-	// Insert or replace array of documents into specified database and collection
+	// Insert array of documents into specified database and collection
 	Insert(ctx context.Context, db string, collection string, docs []Document, options ...*InsertOptions) (InsertResponse, error)
+	// Replace array of documents into specified database and collection
+	// Creates document if it doesn't exist
+	Replace(ctx context.Context, db string, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
 	// Read documents matching specified filter in the specified database and collection
 	Read(ctx context.Context, db string, collection string, filter Filter, options ...*ReadOptions) (Iterator, error)
 	// Update documents matching specified filter, with provided fields projection
@@ -53,8 +56,11 @@ type Driver interface {
 // Tx object is used to atomically modify documents.
 // This object is returned by BeginTx
 type Tx interface {
-	// Insert or replace document into specified collection
+	// Insert array of documents into specified database and collection
 	Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (InsertResponse, error)
+	// Replace array of documents into specified database and collection
+	// Creates document if it doesn't exist
+	Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
 	// Read documents from the collection matching the specified filter
 	Read(ctx context.Context, collection string, filter Filter, options ...*ReadOptions) (Iterator, error)
 	// Update documents in the collection matching the speficied filter
@@ -86,6 +92,15 @@ func (c *driver) Insert(ctx context.Context, db string, collection string, docs 
 	}
 
 	return c.insertWithOptions(ctx, db, collection, docs, opts.(*InsertOptions))
+}
+
+func (c *driver) Replace(ctx context.Context, db string, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error) {
+	opts, err := validateOptionsParam(options, &InsertOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return c.replaceWithOptions(ctx, db, collection, docs, opts.(*ReplaceOptions))
 }
 
 func (c *driver) Update(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error) {
@@ -193,6 +208,15 @@ func (c *driverTxWithOptions) Insert(ctx context.Context, collection string, doc
 	}
 
 	return c.insertWithOptions(ctx, collection, docs, opts.(*InsertOptions))
+}
+
+func (c *driverTxWithOptions) Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error) {
+	opts, err := validateOptionsParam(options, &InsertOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return c.replaceWithOptions(ctx, collection, docs, opts.(*ReplaceOptions))
 }
 
 func (c *driverTxWithOptions) Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error) {

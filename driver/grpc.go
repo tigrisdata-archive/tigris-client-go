@@ -153,6 +153,10 @@ func (c *grpcTx) insertWithOptions(ctx context.Context, collection string, docs 
 	return c.grpcCRUD.insertWithOptions(ctx, c.db, collection, docs, options)
 }
 
+func (c *grpcTx) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error) {
+	return c.grpcCRUD.replaceWithOptions(ctx, c.db, collection, docs, options)
+}
+
 func (c *grpcTx) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error) {
 	return c.grpcCRUD.updateWithOptions(ctx, c.db, collection, filter, fields, options)
 }
@@ -253,6 +257,24 @@ func (c *grpcCRUD) insertWithOptions(ctx context.Context, db string, collection 
 		Collection: collection,
 		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
 		Options:    (*api.InsertRequestOptions)(options),
+	})
+
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return resp, nil
+}
+
+func (c *grpcCRUD) replaceWithOptions(ctx context.Context, db string, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error) {
+	options.WriteOptions = &api.WriteOptions{}
+	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
+
+	resp, err := c.api.Replace(ctx, &api.ReplaceRequest{
+		Db:         db,
+		Collection: collection,
+		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
+		Options:    (*api.ReplaceRequestOptions)(options),
 	})
 
 	if err != nil {

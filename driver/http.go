@@ -203,6 +203,10 @@ func (c *httpTx) insertWithOptions(ctx context.Context, collection string, docs 
 	return c.httpCRUD.insertWithOptions(ctx, c.db, collection, docs, options)
 }
 
+func (c *httpTx) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error) {
+	return c.httpCRUD.replaceWithOptions(ctx, c.db, collection, docs, options)
+}
+
 func (c *httpTx) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error) {
 	return c.httpCRUD.updateWithOptions(ctx, c.db, collection, filter, fields, options)
 }
@@ -246,6 +250,10 @@ func (c *httpCRUD) convertWriteOptions(_ *WriteOptions) *apiHTTP.WriteOptions {
 
 func (c *httpCRUD) convertInsertOptions(_ *InsertOptions) *apiHTTP.InsertRequestOptions {
 	return &apiHTTP.InsertRequestOptions{WriteOptions: c.convertWriteOptions(&WriteOptions{})}
+}
+
+func (c *httpCRUD) convertReplaceOptions(_ *ReplaceOptions) *apiHTTP.ReplaceRequestOptions {
+	return &apiHTTP.ReplaceRequestOptions{WriteOptions: c.convertWriteOptions(&WriteOptions{})}
 }
 
 func (c *httpCRUD) convertUpdateOptions(_ *UpdateOptions) *apiHTTP.UpdateRequestOptions {
@@ -308,6 +316,14 @@ func (c *httpCRUD) insertWithOptions(ctx context.Context, db string, collection 
 	resp, err := c.api.TigrisDBInsert(ctx, db, collection, apiHTTP.TigrisDBInsertJSONRequestBody{
 		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 		Options:   c.convertInsertOptions(options),
+	})
+	return nil, HTTPError(err, resp)
+}
+
+func (c *httpCRUD) replaceWithOptions(ctx context.Context, db string, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error) {
+	resp, err := c.api.TigrisDBReplace(ctx, db, collection, apiHTTP.TigrisDBReplaceJSONRequestBody{
+		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
+		Options:   c.convertReplaceOptions(options),
 	})
 	return nil, HTTPError(err, resp)
 }

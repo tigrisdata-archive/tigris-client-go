@@ -183,10 +183,11 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Db:         "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":"value"}`),
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`))
+	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -299,10 +300,11 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Db:         "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":"value"}`),
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`))
+	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))

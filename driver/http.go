@@ -222,8 +222,8 @@ func (c *httpTx) deleteWithOptions(ctx context.Context, collection string, filte
 	return c.httpCRUD.deleteWithOptions(ctx, c.db, collection, filter, options)
 }
 
-func (c *httpTx) readWithOptions(ctx context.Context, collection string, filter Filter, options *ReadOptions) (Iterator, error) {
-	return c.httpCRUD.readWithOptions(ctx, c.db, collection, filter, options)
+func (c *httpTx) readWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *ReadOptions) (Iterator, error) {
+	return c.httpCRUD.readWithOptions(ctx, c.db, collection, filter, fields, options)
 }
 
 func (c *httpTx) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
@@ -347,9 +347,10 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, db string, collection 
 	return nil, HTTPError(err, resp)
 }
 
-func (c *httpCRUD) readWithOptions(ctx context.Context, db string, collection string, filter Filter, options *ReadOptions) (Iterator, error) {
+func (c *httpCRUD) readWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Fields, options *ReadOptions) (Iterator, error) {
 	resp, err := c.api.TigrisDBRead(ctx, db, collection, apiHTTP.TigrisDBReadJSONRequestBody{
 		Filter:  json.RawMessage(filter),
+		Fields:  json.RawMessage(fields),
 		Options: c.convertReadOptions(options),
 	})
 

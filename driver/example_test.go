@@ -26,7 +26,7 @@ func ExampleDriver() {
 
 	_ = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
 
-	_ = c.CreateCollection(ctx, "db1", "coll1",
+	_ = c.CreateOrUpdateCollection(ctx, "db1", "coll1",
 		Schema(`{ "properties": { "F1": { "type": "string" }, "F2": { "type": "string" } }, "primary_key": ["F1"] }`), &CollectionOptions{})
 
 	_, _ = c.Insert(ctx, "db1", "c1", []Document{Document(`{"F1":"V1"}`)}, &InsertOptions{})

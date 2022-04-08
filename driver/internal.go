@@ -30,8 +30,7 @@ type driverWithOptions interface {
 	readWithOptions(ctx context.Context, db string, collection string, filter Filter, options *ReadOptions) (Iterator, error)
 	updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error)
 	deleteWithOptions(ctx context.Context, db string, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)
-	createCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error
-	alterCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error
+	createOrUpdateCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error
 	dropCollectionWithOptions(ctx context.Context, db string, collection string, options *CollectionOptions) error
 	createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
 	dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
@@ -48,8 +47,7 @@ type txWithOptions interface {
 	readWithOptions(ctx context.Context, collection string, filter Filter, options *ReadOptions) (Iterator, error)
 	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error)
 	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)
-	createCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error
-	alterCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error
+	createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	Commit(ctx context.Context) error

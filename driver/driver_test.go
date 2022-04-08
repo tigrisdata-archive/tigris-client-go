@@ -209,22 +209,22 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 		pm(&api.ListCollectionsRequest{
 			Db:      "db1",
 			Options: coptions,
-		})).Return(&api.ListCollectionsResponse{Collections: []string{"lc1", "lc2"}}, nil)
+		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{&api.CollectionInfo{Name: "lc1"}, &api.CollectionInfo{Name: "lc2"}}}, nil)
 
 	colls, err := c.ListCollections(ctx)
 	require.NoError(t, err)
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
 
 	sch := `{"schema":"field"}`
-	mc.EXPECT().CreateCollection(gomock.Any(),
-		pm(&api.CreateCollectionRequest{
+	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionRequest{
 			Db:         "db1",
 			Collection: "c1",
 			Schema:     []byte(sch),
 			Options:    coptions,
-		})).Return(&api.CreateCollectionResponse{}, nil)
+		})).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
 
-	err = c.CreateCollection(ctx, "c1", Schema(sch))
+	err = c.CreateOrUpdateCollection(ctx, "c1", Schema(sch))
 	require.NoError(t, err)
 
 	mc.EXPECT().DropCollection(gomock.Any(),
@@ -325,14 +325,14 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 
 	// Test empty list response
 	mc.EXPECT().ListDatabases(gomock.Any(),
-		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Dbs: nil}, nil)
+		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Databases: nil}, nil)
 
 	dbs, err := c.ListDatabases(ctx)
 	require.NoError(t, err)
 	require.Equal(t, []string(nil), dbs)
 
 	mc.EXPECT().ListDatabases(gomock.Any(),
-		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Dbs: []string{"ldb1", "ldb2"}}, nil)
+		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Databases: []*api.DatabaseInfo{{Name: "ldb1"}, {Name: "ldb2"}}}, nil)
 
 	dbs, err = c.ListDatabases(ctx)
 	require.NoError(t, err)
@@ -353,7 +353,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 		pm(&api.ListCollectionsRequest{
 			Db:      "db1",
 			Options: &api.CollectionOptions{},
-		})).Return(&api.ListCollectionsResponse{Collections: []string{"lc1", "lc2"}}, nil)
+		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{{Name: "lc1"}, {Name: "lc2"}}}, nil)
 
 	colls, err = c.ListCollections(ctx, "db1")
 	require.NoError(t, err)
@@ -369,15 +369,15 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	require.NoError(t, err)
 
 	sch := `{"schema":"field"}`
-	mc.EXPECT().CreateCollection(gomock.Any(),
-		pm(&api.CreateCollectionRequest{
+	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionRequest{
 			Db:         "db1",
 			Collection: "c1",
 			Schema:     []byte(sch),
 			Options:    &api.CollectionOptions{},
-		})).Return(&api.CreateCollectionResponse{}, nil)
+		})).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
 
-	err = c.CreateCollection(ctx, "db1", "c1", Schema(sch), &CollectionOptions{})
+	err = c.CreateOrUpdateCollection(ctx, "db1", "c1", Schema(sch), &CollectionOptions{})
 	require.NoError(t, err)
 
 	mc.EXPECT().DropCollection(gomock.Any(),

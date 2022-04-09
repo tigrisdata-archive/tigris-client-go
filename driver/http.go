@@ -124,10 +124,17 @@ func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	if err := respDecode(resp.Body, &l); err != nil {
 		return nil, err
 	}
-	if l.Dbs == nil {
+	if l.Databases == nil {
 		return nil, nil
 	}
-	return *l.Dbs, nil
+
+	var databases []string
+	for _, nm := range *l.Databases {
+		if nm.Name != nil {
+			databases = append(databases, *nm.Name)
+		}
+	}
+	return databases, nil
 }
 
 func convertDatabaseOptions(_ *DatabaseOptions) *apiHTTP.DatabaseOptions {
@@ -223,12 +230,8 @@ func (c *httpTx) listCollectionsWithOptions(ctx context.Context, options *Collec
 	return c.httpCRUD.listCollectionsWithOptions(ctx, c.db, options)
 }
 
-func (c *httpTx) createCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
-	return c.httpCRUD.createCollectionWithOptions(ctx, c.db, collection, schema, options)
-}
-
-func (c *httpTx) alterCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
-	return c.httpCRUD.alterCollectionWithOptions(ctx, c.db, collection, schema, options)
+func (c *httpTx) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+	return c.httpCRUD.createOrUpdateCollectionWithOptions(ctx, c.db, collection, schema, options)
 }
 
 func (c *httpTx) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
@@ -286,19 +289,18 @@ func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, db string, op
 	if l.Collections == nil {
 		return nil, nil
 	}
-	return *l.Collections, nil
+
+	var collections []string
+	for _, c := range *l.Collections {
+		if c.Name != nil {
+			collections = append(collections, *c.Name)
+		}
+	}
+	return collections, nil
 }
 
-func (c *httpCRUD) createCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
-	resp, err := c.api.TigrisDBCreateCollection(ctx, db, collection, apiHTTP.TigrisDBCreateCollectionJSONRequestBody{
-		Schema:  json.RawMessage(schema),
-		Options: c.convertCollectionOptions(options),
-	})
-	return HTTPError(err, resp)
-}
-
-func (c *httpCRUD) alterCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
-	resp, err := c.api.TigrisDBAlterCollection(ctx, db, collection, apiHTTP.TigrisDBAlterCollectionJSONRequestBody{
+func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
+	resp, err := c.api.TigrisDBCreateOrUpdateCollection(ctx, db, collection, apiHTTP.TigrisDBCreateOrUpdateCollectionJSONRequestBody{
 		Schema:  json.RawMessage(schema),
 		Options: c.convertCollectionOptions(options),
 	})

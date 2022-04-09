@@ -34,7 +34,7 @@ func example() error {
         return err
     }
 
-    err = drv.CreateCollection(ctx, "db1", "coll1",
+    err = drv.CreateOrUpdateCollection(ctx, "db1", "coll1",
         driver.Schema(`{ "properties": {
                     "Key1": { "type": "string" },
                     "Field1": { "type": "int" }

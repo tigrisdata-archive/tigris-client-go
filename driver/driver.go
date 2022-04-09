@@ -33,10 +33,8 @@ type Driver interface {
 	Update(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)
 	// Delete documents matching specified filter form the specified database and collection
 	Delete(ctx context.Context, db string, collection string, filter Filter, options ...*DeleteOptions) (DeleteResponse, error)
-	// CreateCollection of documents in the database
-	CreateCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error
-	// AlterCollection changes the schema of the existing collection
-	AlterCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error
+	// CreateOrUpdateCollection either creates a collection or update the collection with the new schema
+	CreateOrUpdateCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error
 	// DropCollection deletes the collection and all documents it contains
 	DropCollection(ctx context.Context, db string, collection string, options ...*CollectionOptions) error
 	// CreateDatabase creates new database
@@ -71,10 +69,8 @@ type Tx interface {
 	Commit(ctx context.Context) error
 	// Rollback discard all the modification made by the transaction
 	Rollback(ctx context.Context) error
-	// CreateCollection of documents in the database
-	CreateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
-	// AlterCollection changes the schema of the existing collection
-	AlterCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
+	// CreateOrUpdateCollection either creates a collection or update the collection with the new schema
+	CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
 	// DropCollection deletes the collection and all documents it contains
 	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
 	// ListCollections lists collections in the database
@@ -130,22 +126,13 @@ func (c *driver) Read(ctx context.Context, db string, collection string, filter 
 	return c.readWithOptions(ctx, db, collection, filter, opts.(*ReadOptions))
 }
 
-func (c *driver) CreateCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error {
+func (c *driver) CreateOrUpdateCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error {
 	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
 
-	return c.createCollectionWithOptions(ctx, db, collection, schema, opts.(*CollectionOptions))
-}
-
-func (c *driver) AlterCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options, &CollectionOptions{})
-	if err != nil {
-		return err
-	}
-
-	return c.createCollectionWithOptions(ctx, db, collection, schema, opts.(*CollectionOptions))
+	return c.createOrUpdateCollectionWithOptions(ctx, db, collection, schema, opts.(*CollectionOptions))
 }
 
 func (c *driver) DropCollection(ctx context.Context, db string, collection string, options ...*CollectionOptions) error {
@@ -246,22 +233,13 @@ func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filte
 	return c.readWithOptions(ctx, collection, filter, opts.(*ReadOptions))
 }
 
-func (c *driverTxWithOptions) CreateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
+func (c *driverTxWithOptions) CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
 	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
 	}
 
-	return c.createCollectionWithOptions(ctx, collection, schema, opts.(*CollectionOptions))
-}
-
-func (c *driverTxWithOptions) AlterCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
-	opts, err := validateOptionsParam(options, &CollectionOptions{})
-	if err != nil {
-		return err
-	}
-
-	return c.alterCollectionWithOptions(ctx, collection, schema, opts.(*CollectionOptions))
+	return c.createOrUpdateCollectionWithOptions(ctx, collection, schema, opts.(*CollectionOptions))
 }
 
 func (c *driverTxWithOptions) DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error {

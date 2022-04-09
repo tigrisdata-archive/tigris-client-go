@@ -23,8 +23,9 @@ type Client interface {
 	//       try to use it? Latter is more performant.
 	Database(name string) Database
 
-	// CreateDatabase creates new database.
-	CreateDatabase(
+	// CreateDatabaseIfNotExist creates a database if it doesn't
+	// already exist.
+	CreateDatabaseIfNotExist(
 		ctx context.Context,
 		db string,
 		options ...*driver.DatabaseOptions,
@@ -45,6 +46,7 @@ type Database interface {
 
 	// ApplySchemasFromDirectory reads all the files in the provided
 	// directory and attempts to apply any files with the .json
-	// extension to the database as collection schemas.
+	// extension to the database as collection schemas in a single
+	// transaction.
 	ApplySchemasFromDirectory(path string) error
 }

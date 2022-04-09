@@ -43,11 +43,12 @@ func (c *client) Database(name string) Database {
 	return newDatabase(name, c.driver)
 }
 
-func (c *client) CreateDatabase(
+func (c *client) CreateDatabaseIfNotExist(
 	ctx context.Context,
 	name string,
 	opts ...*driver.DatabaseOptions,
 ) error {
+	// TODO: Is this run transactionally?
 	if err := c.driver.CreateDatabase(ctx, name, opts...); err != nil {
 		return fmt.Errorf("error creating database: %w", err)
 	}

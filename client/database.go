@@ -19,10 +19,10 @@ type TxFunc func(
 // Database is the interface for interacting with a specific database
 // in TigrisDB.
 type Database interface {
-	// Run runs the provided TranactionFunc in a transaction. If the
+	// Transact runs the provided TranactionFunc in a transaction. If the
 	// function returns an error then the transaction will be aborted,
 	// otherwise it will be comitted.
-	Run(ctx context.Context, fn TxFunc) (interface{}, error)
+	Transact(ctx context.Context, fn TxFunc) (interface{}, error)
 
 	// ApplySchemasFromDirectory reads all the files in the provided
 	// directory and attempts to apply any files with the .json
@@ -43,7 +43,7 @@ func newDatabase(name string, driver driver.Driver) Database {
 	}
 }
 
-func (d *database) Run(
+func (d *database) Transact(
 	ctx context.Context,
 	fn TxFunc,
 ) (interface{}, error) {
@@ -107,7 +107,7 @@ func (d *database) ApplySchemasFromDirectory(ctx context.Context, path string) e
 		}
 	}
 
-	_, err = d.Run(ctx, func(ctx context.Context, tx driver.Tx) (interface{}, error) {
+	_, err = d.Transact(ctx, func(ctx context.Context, tx driver.Tx) (interface{}, error) {
 		for _, schema := range schemas {
 			err := tx.CreateOrUpdateCollection(
 				ctx, schema.name, driver.Schema(schema.bytes))

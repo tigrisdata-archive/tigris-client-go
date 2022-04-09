@@ -48,5 +48,5 @@ type Database interface {
 	// directory and attempts to apply any files with the .json
 	// extension to the database as collection schemas in a single
 	// transaction.
-	ApplySchemasFromDirectory(path string) error
+	ApplySchemasFromDirectory(ctx context.Context, path string) error
 }

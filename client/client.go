@@ -38,10 +38,6 @@ type Client interface {
 		db string,
 		options ...*driver.DatabaseOptions,
 	) error
-
-	// Driver returns the lower-level Driver interface
-	// in case the caller needs it for low-level operations.
-	Driver() driver.Driver
 }
 
 type client struct {
@@ -76,8 +72,4 @@ func (c *client) CreateDatabaseIfNotExist(
 		return fmt.Errorf("error creating database: %w", err)
 	}
 	return nil
-}
-
-func (c *client) Driver() driver.Driver {
-	return c.driver
 }

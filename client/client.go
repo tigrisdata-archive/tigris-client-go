@@ -16,21 +16,44 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tigrisdata/tigrisdb-client-go/driver"
 )
-
-type Client interface {
-}
 
 type client struct {
 	driver driver.Driver
 }
 
-func NewClient(ctx context.Context, url string, config *driver.Config) (Client, error) {
+func NewClient(
+	ctx context.Context,
+	url string,
+	config *driver.Config,
+) (Client, error) {
 	d, err := driver.NewDriver(ctx, url, config)
 	if err != nil {
 		return nil, err
 	}
-	return &client{d}, nil
+	return &client{
+		driver: d,
+	}, nil
+}
+
+func (c *client) Database(name string) Database {
+	return newDatabase(name, c.driver)
+}
+
+func (c *client) CreateDatabase(
+	ctx context.Context,
+	name string,
+	opts ...*driver.DatabaseOptions,
+) error {
+	if err := c.driver.CreateDatabase(ctx, name, opts...); err != nil {
+		return fmt.Errorf("error creating database: %w", err)
+	}
+	return nil
+}
+
+func (c *client) Driver() driver.Driver {
+	return c.driver
 }

@@ -21,6 +21,29 @@ import (
 	"github.com/tigrisdata/tigrisdb-client-go/driver"
 )
 
+// Client is the interface for a TigrisDB client.
+type Client interface {
+	// Database returns a Database interface for the provided
+	// database name.
+	//
+	// TODO: Return bool/error if the database exists or not
+	//       or should the client just get the error when they
+	//       try to use it? Latter is more performant.
+	Database(name string) Database
+
+	// CreateDatabaseIfNotExist creates a database if it doesn't
+	// already exist.
+	CreateDatabaseIfNotExist(
+		ctx context.Context,
+		db string,
+		options ...*driver.DatabaseOptions,
+	) error
+
+	// Driver returns the lower-level Driver interface
+	// in case the caller needs it for low-level operations.
+	Driver() driver.Driver
+}
+
 type client struct {
 	driver driver.Driver
 }

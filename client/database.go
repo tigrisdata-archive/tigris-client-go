@@ -9,6 +9,28 @@ import (
 	"github.com/tigrisdata/tigrisdb-client-go/driver"
 )
 
+// TxFunc is a user-provided function that will be run
+// within the context of a tranaction.
+type TxFunc func(
+	ctx context.Context,
+	tr driver.Tx,
+) (interface{}, error)
+
+// Database is the interface for interacting with a specific database
+// in TigrisDB.
+type Database interface {
+	// Run runs the provided TranactionFunc in a transaction. If the
+	// function returns an error then the transaction will be aborted,
+	// otherwise it will be comitted.
+	Run(ctx context.Context, fn TxFunc) (interface{}, error)
+
+	// ApplySchemasFromDirectory reads all the files in the provided
+	// directory and attempts to apply any files with the .json
+	// extension to the database as collection schemas in a single
+	// transaction.
+	ApplySchemasFromDirectory(ctx context.Context, path string) error
+}
+
 type database struct {
 	name   string
 	driver driver.Driver
@@ -23,7 +45,7 @@ func newDatabase(name string, driver driver.Driver) Database {
 
 func (d *database) Run(
 	ctx context.Context,
-	fn TransactionFunc,
+	fn TxFunc,
 ) (interface{}, error) {
 	tx, err := d.driver.BeginTx(ctx, d.name, nil)
 	if err != nil {

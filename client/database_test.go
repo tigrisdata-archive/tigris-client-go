@@ -27,6 +27,7 @@ func TestReadSchemaDir(t *testing.T) {
 
 	tmpDir, err := os.MkdirTemp("", "")
 	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
 
 	for fileName, schema := range inputSchemas {
 		require.NoError(t, ioutil.WriteFile(path.Join(tmpDir, fileName), schema, 0777))

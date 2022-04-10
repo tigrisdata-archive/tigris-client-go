@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path"
+	"path/filepath"
 
 	"github.com/tigrisdata/tigrisdb-client-go/driver"
 )
@@ -91,11 +93,11 @@ type schema struct {
 	bytes []byte
 }
 
-func readSchemaDir(path string) (map[string]schema, error) {
-	files, err := ioutil.ReadDir(path)
+func readSchemaDir(dir string) (map[string]schema, error) {
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"error reading schemas directory: %s, err: %w", path, err)
+			"error reading schemas directory: %s, err: %w", dir, err)
 	}
 
 	type collectionName struct {
@@ -104,7 +106,13 @@ func readSchemaDir(path string) (map[string]schema, error) {
 
 	schemas := map[string]schema{}
 	for _, f := range files {
-		fBytes, err := ioutil.ReadFile(f.Name())
+		fPath := path.Join(dir, f.Name())
+		if ext := filepath.Ext(fPath); ext != ".json" {
+			// TODO: Log once we have a logger.
+			continue
+		}
+
+		fBytes, err := ioutil.ReadFile(fPath)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"error reading schema from file: %s, err: %w",

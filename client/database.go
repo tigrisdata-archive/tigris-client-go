@@ -66,45 +66,9 @@ func (d *database) Transact(
 }
 
 func (d *database) ApplySchemasFromDirectory(ctx context.Context, path string) error {
-	files, err := ioutil.ReadDir(path)
+	schemas, err := readSchemaDir(path)
 	if err != nil {
-		return fmt.Errorf(
-			"error reading schemas directory: %s, err: %w", path, err)
-	}
-
-	type schema struct {
-		name  string
-		bytes []byte
-	}
-
-	type collectionName struct {
-		Name string `json:"name"`
-	}
-
-	schemas := map[string]schema{}
-	for _, f := range files {
-		fBytes, err := ioutil.ReadFile(f.Name())
-		if err != nil {
-			return fmt.Errorf(
-				"error reading schema from file: %s, err: %w",
-				f.Name(), err)
-		}
-
-		name := collectionName{}
-		if err := json.Unmarshal(fBytes, &name); err != nil {
-			return fmt.Errorf(
-				"error parsing JSON for schema in file: %s, err: %w",
-				f.Name(), err)
-		}
-		if name.Name == "" {
-			return fmt.Errorf(
-				"did not find collection name in schema file: %s", f.Name())
-		}
-
-		schemas[f.Name()] = schema{
-			name:  name.Name,
-			bytes: fBytes,
-		}
+		return fmt.Errorf("error reading schema directory: %w", err)
 	}
 
 	_, err = d.Transact(ctx, func(ctx context.Context, tx driver.Tx) (interface{}, error) {
@@ -120,4 +84,49 @@ func (d *database) ApplySchemasFromDirectory(ctx context.Context, path string) e
 		return nil, nil
 	})
 	return err
+}
+
+type schema struct {
+	name  string
+	bytes []byte
+}
+
+func readSchemaDir(path string) (map[string]schema, error) {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error reading schemas directory: %s, err: %w", path, err)
+	}
+
+	type collectionName struct {
+		Name string `json:"name"`
+	}
+
+	schemas := map[string]schema{}
+	for _, f := range files {
+		fBytes, err := ioutil.ReadFile(f.Name())
+		if err != nil {
+			return nil, fmt.Errorf(
+				"error reading schema from file: %s, err: %w",
+				f.Name(), err)
+		}
+
+		name := collectionName{}
+		if err := json.Unmarshal(fBytes, &name); err != nil {
+			return nil, fmt.Errorf(
+				"error parsing JSON for schema in file: %s, err: %w",
+				f.Name(), err)
+		}
+		if name.Name == "" {
+			return nil, fmt.Errorf(
+				"did not find collection name in schema file: %s", f.Name())
+		}
+
+		schemas[f.Name()] = schema{
+			name:  name.Name,
+			bytes: fBytes,
+		}
+	}
+
+	return schemas, nil
 }

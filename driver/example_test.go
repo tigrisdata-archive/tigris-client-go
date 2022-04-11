@@ -27,11 +27,11 @@ func ExampleDriver() {
 	_ = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
 
 	_ = c.CreateOrUpdateCollection(ctx, "db1", "coll1",
-		Schema(`{ "properties": { "F1": { "type": "string" }, "F2": { "type": "string" } }, "primary_key": ["F1"] }`), &CollectionOptions{})
+		Schema(`{ "properties": { "F1": { "type": "string" }, "F2": { "type": "string" } }, "primary_key": ["F1"] }`))
 
-	_, _ = c.Insert(ctx, "db1", "c1", []Document{Document(`{"F1":"V1"}`)}, &InsertOptions{})
+	_, _ = c.Insert(ctx, "db1", "c1", []Document{Document(`{"F1":"V1"}`)})
 
-	it, _ := c.Read(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), &ReadOptions{})
+	it, _ := c.Read(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), Fields(`{}`))
 
 	var doc Document
 	for it.Next(&doc) {
@@ -40,14 +40,14 @@ func ExampleDriver() {
 
 	_ = it.Err()
 
-	_, _ = c.Delete(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), &DeleteOptions{})
+	_, _ = c.Delete(ctx, "db1", "c1", Filter(`{"F1":"V1"}`))
 
 	tx, _ := c.BeginTx(ctx, "db1", nil)
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	_, _ = tx.Insert(ctx, "c1", []Document{Document(`{"F1":"V1"}`)}, &InsertOptions{})
+	_, _ = tx.Insert(ctx, "c1", []Document{Document(`{"F1":"V1"}`)})
 
-	it, _ = tx.Read(ctx, "c1", Filter(`{"F1":"V1"}`), &ReadOptions{})
+	it, _ = tx.Read(ctx, "c1", Filter(`{"F1":"V1"}`), Fields("{}"))
 
 	for it.Next(&doc) {
 		fmt.Printf("doc: %v\n", doc)

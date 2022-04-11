@@ -170,8 +170,8 @@ func (c *grpcTx) deleteWithOptions(ctx context.Context, collection string, filte
 	return c.grpcCRUD.deleteWithOptions(ctx, c.db, collection, filter, options)
 }
 
-func (c *grpcTx) readWithOptions(ctx context.Context, collection string, filter Filter, options *ReadOptions) (Iterator, error) {
-	return c.grpcCRUD.readWithOptions(ctx, c.db, collection, filter, options)
+func (c *grpcTx) readWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *ReadOptions) (Iterator, error) {
+	return c.grpcCRUD.readWithOptions(ctx, c.db, collection, filter, fields, options)
 }
 
 func (c *grpcTx) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
@@ -308,7 +308,7 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, db string, collection 
 	return resp, GRPCError(err)
 }
 
-func (c *grpcCRUD) readWithOptions(ctx context.Context, db string, collection string, filter Filter, options *ReadOptions) (Iterator, error) {
+func (c *grpcCRUD) readWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Fields, options *ReadOptions) (Iterator, error) {
 	if c.txCtx.Id != "" {
 		options.TxCtx = &api.TransactionCtx{Id: c.txCtx.Id, Origin: c.txCtx.Origin}
 	}
@@ -317,6 +317,7 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, db string, collection st
 		Db:         db,
 		Collection: collection,
 		Filter:     filter,
+		Fields:     fields,
 		Options:    (*api.ReadRequestOptions)(options),
 	})
 	if err != nil {

@@ -28,7 +28,7 @@ type Driver interface {
 	// Creates document if it doesn't exist
 	Replace(ctx context.Context, db string, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
 	// Read documents matching specified filter in the specified database and collection
-	Read(ctx context.Context, db string, collection string, filter Filter, options ...*ReadOptions) (Iterator, error)
+	Read(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error)
 	// Update documents matching specified filter, with provided fields projection
 	Update(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)
 	// Delete documents matching specified filter form the specified database and collection
@@ -60,7 +60,7 @@ type Tx interface {
 	// Creates document if it doesn't exist
 	Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
 	// Read documents from the collection matching the specified filter
-	Read(ctx context.Context, collection string, filter Filter, options ...*ReadOptions) (Iterator, error)
+	Read(ctx context.Context, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error)
 	// Update documents in the collection matching the speficied filter
 	Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)
 	// Delete documents from the collection matching specified filter
@@ -91,7 +91,7 @@ func (c *driver) Insert(ctx context.Context, db string, collection string, docs 
 }
 
 func (c *driver) Replace(ctx context.Context, db string, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error) {
-	opts, err := validateOptionsParam(options, &InsertOptions{})
+	opts, err := validateOptionsParam(options, &ReplaceOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -117,13 +117,13 @@ func (c *driver) Delete(ctx context.Context, db string, collection string, filte
 	return c.deleteWithOptions(ctx, db, collection, filter, opts.(*DeleteOptions))
 }
 
-func (c *driver) Read(ctx context.Context, db string, collection string, filter Filter, options ...*ReadOptions) (Iterator, error) {
+func (c *driver) Read(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error) {
 	opts, err := validateOptionsParam(options, &ReadOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.readWithOptions(ctx, db, collection, filter, opts.(*ReadOptions))
+	return c.readWithOptions(ctx, db, collection, filter, fields, opts.(*ReadOptions))
 }
 
 func (c *driver) CreateOrUpdateCollection(ctx context.Context, db string, collection string, schema Schema, options ...*CollectionOptions) error {
@@ -224,13 +224,13 @@ func (c *driverTxWithOptions) Delete(ctx context.Context, collection string, fil
 	return c.deleteWithOptions(ctx, collection, filter, opts.(*DeleteOptions))
 }
 
-func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filter Filter, options ...*ReadOptions) (Iterator, error) {
+func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error) {
 	opts, err := validateOptionsParam(options, &ReadOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.readWithOptions(ctx, collection, filter, opts.(*ReadOptions))
+	return c.readWithOptions(ctx, collection, filter, fields, opts.(*ReadOptions))
 }
 
 func (c *driverTxWithOptions) CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {

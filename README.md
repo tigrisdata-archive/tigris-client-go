@@ -3,6 +3,7 @@
 [![Go Report](https://goreportcard.com/badge/github.com/tigrisdata/tigrisdb-client-go)](https://goreportcard.com/report/github.com/tigrisdata/tigrisdb-client-go)
 [![Build Status](https://github.com/tigrisdata/tigrisdb-client-go/workflows/go-test/badge.svg)]()
 [![Build Status](https://github.com/tigrisdata/tigrisdb-client-go/workflows/go-lint/badge.svg)]()
+[![codecov](https://codecov.io/gh/tigrisdata/tigrisdb-client-go/branch/main/graph/badge.svg)](https://codecov.io/gh/tigrisdata/tigrisdb-client-go)
 
 # Install
 
@@ -25,38 +26,33 @@ import (
 func example() error {
     ctx := context.TODO()
 
-    token := "{auth token here}"
+    token := "{auth token here}" // optional
 
-    drv, err := driver.NewDriver(context.Background(),
-        "{namespace}.{env}.tigrisdata.cloud",
-        &driver.Config{Token: token})
+    drv, err := driver.NewDriver(ctx, "localhost:8081", &driver.Config{Token: token})
     if err != nil {
         return err
     }
 
     err = drv.CreateOrUpdateCollection(ctx, "db1", "coll1",
-        driver.Schema(`{ "properties": {
-                    "Key1": { "type": "string" },
-                    "Field1": { "type": "int" }
-                    },
-                    "primary_key": ["Key1"] }`),
-        &driver.CollectionOptions{})
+        driver.Schema(`{
+            "name" : "coll1",
+            "properties": {
+               "Key1": { "type": "string" },
+               "Field1": { "type": "int" }
+            },
+            "primary_key": ["Key1"] }`))
     if err != nil {
         return err
     }
 
-    _, err = drv.Insert(ctx, "db1", "coll1",
-        []driver.Document{
-            driver.Document(`{"Key1": "vK1", "Field1": 1}`)
-        },
-        &driver.InsertOptions{})
+    _, err = drv.Insert(ctx, "db1", "coll1", []driver.Document{
+            driver.Document(`{"Key1": "vK1", "Field1": 1}`) })
     if err != nil {
         return err
     }
 
-    // Filter value {} means full table scan
-    it, err := drv.Read(ctx, "db1", "coll1",
-            driver.Filter(`{"Key1" : "vK1"}`))
+    // Nil Filter value {} means full table scan, 
+    it, err := drv.Read(ctx, "db1", "coll1", driver.Filter(`{"Key1" : "vK1"}`), nil)
     if err != nil {
         return err
     }

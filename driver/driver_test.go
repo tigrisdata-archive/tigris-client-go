@@ -163,6 +163,17 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 	_, err = c.Insert(ctx, "c1", doc123, &InsertOptions{})
 	require.NoError(t, err)
 
+	mc.EXPECT().Replace(gomock.Any(),
+		pm(&api.ReplaceRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
+		})).Return(&api.ReplaceResponse{}, nil)
+
+	_, err = c.Replace(ctx, "c1", doc123, &ReplaceOptions{})
+	require.NoError(t, err)
+
 	mc.EXPECT().Update(gomock.Any(),
 		pm(&api.UpdateRequest{
 			Db:         "db1",
@@ -370,6 +381,15 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
 	require.NoError(t, err)
 
+	mc.EXPECT().DropDatabase(gomock.Any(),
+		pm(&api.DropDatabaseRequest{
+			Db:      "db1",
+			Options: &api.DatabaseOptions{},
+		})).Return(&api.DropDatabaseResponse{}, nil)
+
+	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{})
+	require.NoError(t, err)
+
 	sch := `{"schema":"field"}`
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
@@ -484,6 +504,17 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 		})).Return(nil, fmt.Errorf("error"))
 
 	_, err = c.Insert(ctx, "c1", doc123, &InsertOptions{})
+	require.Error(t, err)
+
+	mc.EXPECT().Replace(gomock.Any(),
+		pm(&api.ReplaceRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err = c.Replace(ctx, "c1", doc123, &ReplaceOptions{})
 	require.Error(t, err)
 
 	mc.EXPECT().Update(gomock.Any(),
@@ -813,7 +844,7 @@ func TestHTTPTokenRefresh(t *testing.T) {
 }
 
 func TestInvalidDriverAPIOptions(t *testing.T) {
-	c, _, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
+	c, mc, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
 	defer cancel()
 
 	ctx := context.TODO()
@@ -839,6 +870,33 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
 	require.Error(t, err)
 	_, err = c.Read(ctx, "db1", "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
+	require.Error(t, err)
+
+	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Db:      "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
+
+	tx, err := c.BeginTx(ctx, "db1")
+	require.NoError(t, err)
+	_, err = tx.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
+	_, err = tx.Insert(ctx, "coll1", nil, &InsertOptions{}, &InsertOptions{})
+	require.Error(t, err)
+	_, err = tx.Replace(ctx, "coll1", nil, &ReplaceOptions{}, &ReplaceOptions{})
+	require.Error(t, err)
+	_, err = tx.Update(ctx, "coll1", nil, nil, &UpdateOptions{}, &UpdateOptions{})
+	require.Error(t, err)
+	_, err = tx.Delete(ctx, "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
+	require.Error(t, err)
+	_, err = tx.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
+	require.Error(t, err)
+	err = tx.CreateOrUpdateCollection(ctx, "coll1", nil, &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
+	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
 }
 

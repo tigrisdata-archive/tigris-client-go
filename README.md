@@ -38,7 +38,7 @@ func example() error {
             "name" : "coll1",
             "properties": {
                "Key1": { "type": "string" },
-               "Field1": { "type": "int" }
+               "Field1": { "type": "integer" }
             },
             "primary_key": ["Key1"] }`))
     if err != nil {

@@ -54,7 +54,12 @@ type Driver interface {
 // Tx object is used to atomically modify documents.
 // This object is returned by BeginTx
 type Tx interface {
-	CommitableTx
+	// Commit all the modification of the transaction
+	Commit(ctx context.Context) error
+
+	// Rollback discard all the modification made by the transaction
+	Rollback(ctx context.Context) error
+
 	CRUDTx
 }
 
@@ -84,15 +89,6 @@ type CRUDTx interface {
 
 	// ListCollections lists collections in the database.
 	ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error)
-}
-
-// CommitableTx is the interface that encapsulate the Commit()/Rollback portions of the transaction API.
-type CommitableTx interface {
-	// Commit all the modification of the transaction
-	Commit(ctx context.Context) error
-
-	// Rollback discard all the modification made by the transaction
-	Rollback(ctx context.Context) error
 }
 
 type driver struct {

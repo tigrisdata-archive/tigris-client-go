@@ -54,27 +54,51 @@ type Driver interface {
 // Tx object is used to atomically modify documents.
 // This object is returned by BeginTx
 type Tx interface {
-	// Insert array of documents into specified database and collection
+	CommitableTx
+	CRUDTx
+}
+
+// CRUDTx is the interface that encapsulates the CRUD portions of the transaction API.
+type CRUDTx interface {
+	// Insert array of documents into specified database and collection.
 	Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (InsertResponse, error)
+
 	// Replace array of documents into specified database and collection
-	// Creates document if it doesn't exist
+	// Creates document if it doesn't exist.
 	Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
+<<<<<<< Updated upstream
 	// Read documents from the collection matching the specified filter
 	Read(ctx context.Context, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error)
 	// Update documents in the collection matching the speficied filter
+=======
+
+	// Read documents from the collection matching the specified filter.
+	Read(ctx context.Context, collection string, filter Filter, options ...*ReadOptions) (Iterator, error)
+
+	// Update documents in the collection matching the speficied filter.
+>>>>>>> Stashed changes
 	Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)
-	// Delete documents from the collection matching specified filter
+
+	// Delete documents from the collection matching specified filter.
 	Delete(ctx context.Context, collection string, filter Filter, options ...*DeleteOptions) (DeleteResponse, error)
+
+	// CreateOrUpdateCollection either creates a collection or update the collection with the new schema.
+	CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
+
+	// DropCollection deletes the collection and all documents it contains.
+	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
+
+	// ListCollections lists collections in the database.
+	ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error)
+}
+
+// CommitableTx is the interface that encapsulate the Commit()/Rollback portions of the transaction API.
+type CommitableTx interface {
 	// Commit all the modification of the transaction
 	Commit(ctx context.Context) error
+
 	// Rollback discard all the modification made by the transaction
 	Rollback(ctx context.Context) error
-	// CreateOrUpdateCollection either creates a collection or update the collection with the new schema
-	CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
-	// DropCollection deletes the collection and all documents it contains
-	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
-	// ListCollections lists collections in the database
-	ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error)
 }
 
 type driver struct {

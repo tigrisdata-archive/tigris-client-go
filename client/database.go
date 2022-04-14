@@ -15,8 +15,15 @@ import (
 // within the context of a tranaction.
 type TxFunc func(
 	ctx context.Context,
-	tr driver.Tx,
+	tr Tx,
 ) (interface{}, error)
+
+// Tx is the interface for a client-level transaction. It does
+// not expose operations like Commit()/Abort as its meant to be used within
+// the Transact() method which abstracts away those operations.
+type Tx interface {
+	driver.CRUDTx
+}
 
 // Database is the interface for interacting with a specific database
 // in TigrisDB.
@@ -72,8 +79,11 @@ func (d *database) ApplySchemasFromDirectory(ctx context.Context, path string) e
 	if err != nil {
 		return fmt.Errorf("error reading schema directory: %w", err)
 	}
+	if len(schemas) == 0 {
+		return fmt.Errorf("found 0 .json files in directory: %s", path)
+	}
 
-	_, err = d.Transact(ctx, func(ctx context.Context, tx driver.Tx) (interface{}, error) {
+	_, err = d.Transact(ctx, func(ctx context.Context, tx Tx) (interface{}, error) {
 		for _, schema := range schemas {
 			err := tx.CreateOrUpdateCollection(
 				ctx, schema.name, driver.Schema(schema.bytes))

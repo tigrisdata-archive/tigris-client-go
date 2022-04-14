@@ -70,7 +70,7 @@ func (c *client) CreateDatabaseIfNotExist(
 ) error {
 	err := c.driver.CreateDatabase(ctx, name, opts...)
 	if err != nil {
-		// TODO: Replace this with proper error handling
+		// TODO: Replace this with proper error handling.
 		if strings.Contains(err.Error(), "already exists") {
 			return nil
 		}

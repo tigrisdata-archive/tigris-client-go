@@ -51,7 +51,7 @@ func example() error {
         return err
     }
 
-    // Nil Filter value {} means full table scan,
+    // Nil Filter value {} means full table scan.
     it, err := drv.Read(ctx, "db1", "coll1", driver.Filter(`{"Key1" : "vK1"}`), nil)
     if err != nil {
         return err

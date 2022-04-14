@@ -23,4 +23,10 @@ go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.
 go install github.com/google/gnostic/cmd/protoc-gen-openapi@v0.6.6 #generate openapi 3.0 spec
 go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.1 #generate go http client
 go install github.com/mikefarah/yq/v4@latest # used to fix OpenAPI spec in scripts/fix_openapi.sh
-sudo apt-get install -y protobuf-compiler
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	if command -v brew > /dev/null 2>&1; then
+		brew install protobuf
+	fi
+else
+	sudo apt-get install -y protobuf-compiler
+fi

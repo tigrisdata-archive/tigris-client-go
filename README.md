@@ -69,13 +69,15 @@ func example() error {
     return nil
 }
 ```
+# Development
+
+```sh
+sh scripts/install_build_deps.sh
+sh scripts/install_test_deps.sh
+make test
+```
 
 # License
 
 This software is licensed under the [Apache 2.0](LICENSE).
 
-## Development
-
-1. sh scripts/install_build_deps.sh
-2. sh scripts/install_test_deps.sh
-3. make test

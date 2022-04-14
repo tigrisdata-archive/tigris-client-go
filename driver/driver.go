@@ -66,17 +66,11 @@ type CRUDTx interface {
 	// Replace array of documents into specified database and collection
 	// Creates document if it doesn't exist.
 	Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
-<<<<<<< Updated upstream
-	// Read documents from the collection matching the specified filter
-	Read(ctx context.Context, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error)
-	// Update documents in the collection matching the speficied filter
-=======
 
 	// Read documents from the collection matching the specified filter.
 	Read(ctx context.Context, collection string, filter Filter, options ...*ReadOptions) (Iterator, error)
 
 	// Update documents in the collection matching the speficied filter.
->>>>>>> Stashed changes
 	Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)
 
 	// Delete documents from the collection matching specified filter.

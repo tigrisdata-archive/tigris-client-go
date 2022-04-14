@@ -19,8 +19,8 @@ type TxFunc func(
 ) (interface{}, error)
 
 // Tx is the interface for a client-level transaction. It does
-// not expose operations like Commit()/Abort as its meant to be used within
-// the Transact() method which abstracts away those operations.
+// not expose operations like Commit()/Abort as it is meant to be used
+// within the Transact() method which abstracts away those operations.
 type Tx interface {
 	driver.CRUDTx
 }

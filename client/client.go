@@ -17,6 +17,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/tigrisdata/tigrisdb-client-go/driver"
 )
@@ -67,8 +68,13 @@ func (c *client) CreateDatabaseIfNotExist(
 	name string,
 	opts ...*driver.DatabaseOptions,
 ) error {
-	// TODO: Is this run transactionally?
-	if err := c.driver.CreateDatabase(ctx, name, opts...); err != nil {
+	err := c.driver.CreateDatabase(ctx, name, opts...)
+	if err != nil {
+		// TODO: Replace this with proper error handling.
+		if strings.Contains(err.Error(), "already exists") {
+			return nil
+		}
+
 		return fmt.Errorf("error creating database: %w", err)
 	}
 	return nil

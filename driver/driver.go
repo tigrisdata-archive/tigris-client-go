@@ -68,7 +68,7 @@ type CRUDTx interface {
 	Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
 
 	// Read documents from the collection matching the specified filter.
-	Read(ctx context.Context, collection string, filter Filter, options ...*ReadOptions) (Iterator, error)
+	Read(ctx context.Context, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error)
 
 	// Update documents in the collection matching the speficied filter.
 	Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)

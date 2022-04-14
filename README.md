@@ -51,7 +51,7 @@ func example() error {
         return err
     }
 
-    // Nil Filter value {} means full table scan, 
+    // Nil Filter value {} means full table scan,
     it, err := drv.Read(ctx, "db1", "coll1", driver.Filter(`{"Key1" : "vK1"}`), nil)
     if err != nil {
         return err
@@ -71,4 +71,11 @@ func example() error {
 ```
 
 # License
+
 This software is licensed under the [Apache 2.0](LICENSE).
+
+## Development
+
+1. sh scripts/install_build_deps.sh
+2. sh scripts/install_test_deps.sh
+3. make test

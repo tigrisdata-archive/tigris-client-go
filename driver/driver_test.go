@@ -183,7 +183,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(&api.UpdateResponse{}, nil)
 
-	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":1}`), &UpdateOptions{})
+	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
 	require.NoError(t, err)
 
 	roptions := &api.ReadRequestOptions{}
@@ -198,7 +198,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":"value"}`))
+	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -301,7 +301,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(&api.UpdateResponse{}, nil)
 
-	_, err = c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":1}`), &UpdateOptions{})
+	_, err = c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
 	require.NoError(t, err)
 
 	roptions := &api.ReadRequestOptions{}
@@ -315,7 +315,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":"value"}`))
+	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -526,7 +526,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(nil, fmt.Errorf("error"))
 
-	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":1}`), &UpdateOptions{})
+	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
 	require.Error(t, err)
 
 	roptions := &api.ReadRequestOptions{}

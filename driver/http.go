@@ -214,7 +214,7 @@ func (c *httpTx) replaceWithOptions(ctx context.Context, collection string, docs
 	return c.httpCRUD.replaceWithOptions(ctx, c.db, collection, docs, options)
 }
 
-func (c *httpTx) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error) {
+func (c *httpTx) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (UpdateResponse, error) {
 	return c.httpCRUD.updateWithOptions(ctx, c.db, collection, filter, fields, options)
 }
 
@@ -222,7 +222,7 @@ func (c *httpTx) deleteWithOptions(ctx context.Context, collection string, filte
 	return c.httpCRUD.deleteWithOptions(ctx, c.db, collection, filter, options)
 }
 
-func (c *httpTx) readWithOptions(ctx context.Context, collection string, filter Filter, fields Fields, options *ReadOptions) (Iterator, error) {
+func (c *httpTx) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
 	return c.httpCRUD.readWithOptions(ctx, c.db, collection, filter, fields, options)
 }
 
@@ -330,7 +330,7 @@ func (c *httpCRUD) replaceWithOptions(ctx context.Context, db string, collection
 	return nil, HTTPError(err, resp)
 }
 
-func (c *httpCRUD) updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Fields, options *UpdateOptions) (UpdateResponse, error) {
+func (c *httpCRUD) updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Update, options *UpdateOptions) (UpdateResponse, error) {
 	resp, err := c.api.TigrisDBUpdate(ctx, db, collection, apiHTTP.TigrisDBUpdateJSONRequestBody{
 		Filter:  json.RawMessage(filter),
 		Fields:  json.RawMessage(fields),
@@ -347,7 +347,7 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, db string, collection 
 	return nil, HTTPError(err, resp)
 }
 
-func (c *httpCRUD) readWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Fields, options *ReadOptions) (Iterator, error) {
+func (c *httpCRUD) readWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
 	resp, err := c.api.TigrisDBRead(ctx, db, collection, apiHTTP.TigrisDBReadJSONRequestBody{
 		Filter:  json.RawMessage(filter),
 		Fields:  json.RawMessage(fields),

@@ -38,7 +38,8 @@ var (
 
 type Document json.RawMessage
 type Filter json.RawMessage
-type Fields json.RawMessage
+type Projection json.RawMessage
+type Update json.RawMessage
 type Schema json.RawMessage
 
 type WriteOptions api.WriteOptions

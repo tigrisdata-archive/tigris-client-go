@@ -31,7 +31,7 @@ func ExampleDriver() {
 
 	_, _ = c.Insert(ctx, "db1", "c1", []Document{Document(`{"F1":"V1"}`)})
 
-	it, _ := c.Read(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), Fields(`{}`))
+	it, _ := c.Read(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), Projection(`{}`))
 
 	var doc Document
 	for it.Next(&doc) {
@@ -47,7 +47,7 @@ func ExampleDriver() {
 
 	_, _ = tx.Insert(ctx, "c1", []Document{Document(`{"F1":"V1"}`)})
 
-	it, _ = tx.Read(ctx, "c1", Filter(`{"F1":"V1"}`), Fields("{}"))
+	it, _ = tx.Read(ctx, "c1", Filter(`{"F1":"V1"}`), Projection("{}"))
 
 	for it.Next(&doc) {
 		fmt.Printf("doc: %v\n", doc)
@@ -56,7 +56,7 @@ func ExampleDriver() {
 	_ = it.Err()
 
 	_, _ = tx.Update(ctx, "c1", Filter(`{"F1":"V1"}`),
-		Fields(`{"$set" : { "F2" : "V2"}}`), &UpdateOptions{})
+		Update(`{"$set" : { "F2" : "V2"}}`), &UpdateOptions{})
 
 	_, _ = tx.Delete(ctx, "c1", Filter(`{"F1":"V1"}`), &DeleteOptions{})
 

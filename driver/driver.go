@@ -28,9 +28,9 @@ type Driver interface {
 	// Creates document if it doesn't exist
 	Replace(ctx context.Context, db string, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
 	// Read documents matching specified filter in the specified database and collection
-	Read(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error)
+	Read(ctx context.Context, db string, collection string, filter Filter, fields Projection, options ...*ReadOptions) (Iterator, error)
 	// Update documents matching specified filter, with provided fields projection
-	Update(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)
+	Update(ctx context.Context, db string, collection string, filter Filter, fields Update, options ...*UpdateOptions) (UpdateResponse, error)
 	// Delete documents matching specified filter form the specified database and collection
 	Delete(ctx context.Context, db string, collection string, filter Filter, options ...*DeleteOptions) (DeleteResponse, error)
 	// CreateOrUpdateCollection either creates a collection or update the collection with the new schema
@@ -73,10 +73,10 @@ type CRUDTx interface {
 	Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (ReplaceResponse, error)
 
 	// Read documents from the collection matching the specified filter.
-	Read(ctx context.Context, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error)
+	Read(ctx context.Context, collection string, filter Filter, fields Projection, options ...*ReadOptions) (Iterator, error)
 
 	// Update documents in the collection matching the speficied filter.
-	Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error)
+	Update(ctx context.Context, collection string, filter Filter, fields Update, options ...*UpdateOptions) (UpdateResponse, error)
 
 	// Delete documents from the collection matching specified filter.
 	Delete(ctx context.Context, collection string, filter Filter, options ...*DeleteOptions) (DeleteResponse, error)
@@ -113,7 +113,7 @@ func (c *driver) Replace(ctx context.Context, db string, collection string, docs
 	return c.replaceWithOptions(ctx, db, collection, docs, opts.(*ReplaceOptions))
 }
 
-func (c *driver) Update(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error) {
+func (c *driver) Update(ctx context.Context, db string, collection string, filter Filter, fields Update, options ...*UpdateOptions) (UpdateResponse, error) {
 	opts, err := validateOptionsParam(options, &UpdateOptions{})
 	if err != nil {
 		return nil, err
@@ -131,7 +131,7 @@ func (c *driver) Delete(ctx context.Context, db string, collection string, filte
 	return c.deleteWithOptions(ctx, db, collection, filter, opts.(*DeleteOptions))
 }
 
-func (c *driver) Read(ctx context.Context, db string, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error) {
+func (c *driver) Read(ctx context.Context, db string, collection string, filter Filter, fields Projection, options ...*ReadOptions) (Iterator, error) {
 	opts, err := validateOptionsParam(options, &ReadOptions{})
 	if err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (c *driverTxWithOptions) Replace(ctx context.Context, collection string, do
 	return c.replaceWithOptions(ctx, collection, docs, opts.(*ReplaceOptions))
 }
 
-func (c *driverTxWithOptions) Update(ctx context.Context, collection string, filter Filter, fields Fields, options ...*UpdateOptions) (UpdateResponse, error) {
+func (c *driverTxWithOptions) Update(ctx context.Context, collection string, filter Filter, fields Update, options ...*UpdateOptions) (UpdateResponse, error) {
 	opts, err := validateOptionsParam(options, &UpdateOptions{})
 	if err != nil {
 		return nil, err
@@ -238,7 +238,7 @@ func (c *driverTxWithOptions) Delete(ctx context.Context, collection string, fil
 	return c.deleteWithOptions(ctx, collection, filter, opts.(*DeleteOptions))
 }
 
-func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filter Filter, fields Fields, options ...*ReadOptions) (Iterator, error) {
+func (c *driverTxWithOptions) Read(ctx context.Context, collection string, filter Filter, fields Projection, options ...*ReadOptions) (Iterator, error) {
 	opts, err := validateOptionsParam(options, &ReadOptions{})
 	if err != nil {
 		return nil, err

@@ -36,7 +36,7 @@ yq_cmd() {
 	yq -I 4 -i "$1" "$OUT_FILE"
 }
 
-yq_fix_object() {
+yq_fix_json() {
 	yq_cmd ".components.schemas.$1.properties.$2.format=\"json\""
 	yq_cmd ".components.schemas.$1.properties.$2.type=\"string\""
 }
@@ -47,12 +47,12 @@ fix_bytes
 # The original format in proto file is "bytes", which allows to skip
 # unmarshalling in GRPC, we also implement custom unmashalling for HTTP
 for i in DeleteRequest UpdateRequest ReadRequest; do
-	yq_fix_object $i filter
+	yq_fix_json $i filter
 done
 
-yq_fix_object InsertRequest documents.items
-yq_fix_object ReplaceRequest documents.items
-yq_fix_object UpdateRequest fields
-yq_fix_object ReadRequest fields
-yq_fix_object ReadResponse doc
-yq_fix_object CreateOrUpdateCollectionRequest schema
+yq_fix_json InsertRequest documents.items
+yq_fix_json ReplaceRequest documents.items
+yq_fix_json UpdateRequest fields
+yq_fix_json ReadRequest fields
+yq_fix_json ReadResponse data
+yq_fix_json CreateOrUpdateCollectionRequest schema

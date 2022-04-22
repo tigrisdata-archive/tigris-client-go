@@ -337,7 +337,7 @@ func (g *grpcStreamReader) read() (Document, error) {
 		return nil, GRPCError(err)
 	}
 
-	return resp.Doc, nil
+	return resp.Data, nil
 }
 
 func (g *grpcStreamReader) close() error {

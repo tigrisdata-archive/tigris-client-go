@@ -380,7 +380,7 @@ func (g *httpStreamReader) read() (Document, error) {
 		return nil, HTTPError(err, nil)
 	}
 
-	return Document(res.Result.Doc), nil
+	return Document(res.Result.Data), nil
 }
 
 func (g *httpStreamReader) close() error {

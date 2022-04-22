@@ -28,4 +28,7 @@ jobs:
           /bin/bash scripts/install_test_deps.sh
 
       - name: Run tests
-        run: make test
+        run: TEST_PARAM="-coverprofile=coverage.out -covermode=atomic" make test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2

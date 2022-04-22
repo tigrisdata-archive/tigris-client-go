@@ -163,6 +163,17 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 	_, err = c.Insert(ctx, "c1", doc123, &InsertOptions{})
 	require.NoError(t, err)
 
+	mc.EXPECT().Replace(gomock.Any(),
+		pm(&api.ReplaceRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
+		})).Return(&api.ReplaceResponse{}, nil)
+
+	_, err = c.Replace(ctx, "c1", doc123, &ReplaceOptions{})
+	require.NoError(t, err)
+
 	mc.EXPECT().Update(gomock.Any(),
 		pm(&api.UpdateRequest{
 			Db:         "db1",
@@ -172,7 +183,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(&api.UpdateResponse{}, nil)
 
-	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":1}`), &UpdateOptions{})
+	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
 	require.NoError(t, err)
 
 	roptions := &api.ReadRequestOptions{}
@@ -187,7 +198,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":"value"}`))
+	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -210,7 +221,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 		pm(&api.ListCollectionsRequest{
 			Db:      "db1",
 			Options: coptions,
-		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{&api.CollectionInfo{Name: "lc1"}, &api.CollectionInfo{Name: "lc2"}}}, nil)
+		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{{Name: "lc1"}, {Name: "lc2"}}}, nil)
 
 	colls, err := c.ListCollections(ctx)
 	require.NoError(t, err)
@@ -290,7 +301,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(&api.UpdateResponse{}, nil)
 
-	_, err = c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":1}`), &UpdateOptions{})
+	_, err = c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
 	require.NoError(t, err)
 
 	roptions := &api.ReadRequestOptions{}
@@ -304,7 +315,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Fields(`{"fields":"value"}`))
+	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -368,6 +379,15 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 		})).Return(&api.CreateDatabaseResponse{}, nil)
 
 	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
+	require.NoError(t, err)
+
+	mc.EXPECT().DropDatabase(gomock.Any(),
+		pm(&api.DropDatabaseRequest{
+			Db:      "db1",
+			Options: &api.DatabaseOptions{},
+		})).Return(&api.DropDatabaseResponse{}, nil)
+
+	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{})
 	require.NoError(t, err)
 
 	sch := `{"schema":"field"}`
@@ -452,6 +472,190 @@ func TestTxHTTPDriver(t *testing.T) {
 	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "aaa"})
 	defer cancel()
 	testTxBasic(t, client, mockServer)
+}
+
+func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
+	ctx := context.TODO()
+
+	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
+
+	options := &api.WriteOptions{}
+	setGRPCTxCtx(&api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}, options)
+
+	mc.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.InsertRequestOptions{WriteOptions: options},
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err := c.Insert(ctx, "c1", doc1, &InsertOptions{WriteOptions: options})
+	require.Error(t, err)
+
+	doc123 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`), Document(`{"K1":"vK1","K2":2,"D1":"vD2"}`), Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`)}
+
+	mc.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+			Options:    &api.InsertRequestOptions{WriteOptions: options},
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err = c.Insert(ctx, "c1", doc123, &InsertOptions{})
+	require.Error(t, err)
+
+	mc.EXPECT().Replace(gomock.Any(),
+		pm(&api.ReplaceRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err = c.Replace(ctx, "c1", doc123, &ReplaceOptions{})
+	require.Error(t, err)
+
+	mc.EXPECT().Update(gomock.Any(),
+		pm(&api.UpdateRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":1}`),
+			Options:    &api.UpdateRequestOptions{WriteOptions: options},
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
+	require.Error(t, err)
+
+	roptions := &api.ReadRequestOptions{}
+	roptions.TxCtx = &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().Delete(gomock.Any(),
+		pm(&api.DeleteRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Options:    &api.DeleteRequestOptions{WriteOptions: options},
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err = c.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
+	require.Error(t, err)
+
+	coptions := &api.CollectionOptions{}
+	coptions.TxCtx = &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().ListCollections(gomock.Any(),
+		pm(&api.ListCollectionsRequest{
+			Db:      "db1",
+			Options: coptions,
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err = c.ListCollections(ctx)
+	require.Error(t, err)
+
+	sch := `{"schema":"field"}`
+	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Schema:     []byte(sch),
+			Options:    coptions,
+		})).Return(nil, fmt.Errorf("error"))
+
+	err = c.CreateOrUpdateCollection(ctx, "c1", Schema(sch))
+	require.Error(t, err)
+
+	mc.EXPECT().DropCollection(gomock.Any(),
+		pm(&api.DropCollectionRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Options:    coptions,
+		})).Return(nil, fmt.Errorf("error"))
+
+	err = c.DropCollection(ctx, "c1")
+	require.Error(t, err)
+}
+
+func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
+	ctx := context.TODO()
+
+	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Db:      "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(nil, fmt.Errorf("error"))
+
+	_, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	require.Error(t, err)
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Db:      "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
+
+	tx, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	require.NoError(t, err)
+
+	testTxCRUDBasicNegative(t, tx, mc)
+
+	mc.EXPECT().CommitTransaction(gomock.Any(),
+		pm(&api.CommitTransactionRequest{
+			Db:    "db1",
+			TxCtx: txCtx,
+		})).Return(nil, fmt.Errorf("error"))
+
+	err = tx.Commit(ctx)
+	require.Error(t, err)
+
+	mc.EXPECT().RollbackTransaction(gomock.Any(),
+		pm(&api.RollbackTransactionRequest{
+			Db:    "db1",
+			TxCtx: txCtx,
+		})).Return(nil, fmt.Errorf("error"))
+
+	err = tx.Rollback(ctx)
+	require.Error(t, err)
+}
+
+func TestTxGRPCDriverNegative(t *testing.T) {
+	client, mockServer, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
+	defer cancel()
+	testTxBasicNegative(t, client, mockServer)
+}
+
+func TestTxHTTPDriverNegative(t *testing.T) {
+	client, mockServer, cancel := setupHTTPTests(t, &Config{Token: "aaa"})
+	defer cancel()
+	testTxBasicNegative(t, client, mockServer)
+}
+
+func TestNewDriver(t *testing.T) {
+	_, cancel := setupTests(t)
+	defer cancel()
+
+	DefaultProtocol = HTTP
+	client, err := NewDriver(context.Background(), TestHTTPURL, nil)
+	require.NoError(t, err)
+	_ = client.Close()
+
+	DefaultProtocol = GRPC
+
+	certPool := x509.NewCertPool()
+	require.True(t, certPool.AppendCertsFromPEM([]byte(testCaCert)))
+
+	config := Config{TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost"}}
+	client, err = NewDriver(context.Background(), TestGRPCURL, &config)
+	require.NoError(t, err)
+	_ = client.Close()
+
+	DefaultProtocol = 11111
+	_, err = NewDriver(context.Background(), TestGRPCURL, nil)
+	require.Error(t, err)
 }
 
 func setupGRPCTests(t *testing.T, config *Config) (Driver, *mock.MockTigrisDBServer, func()) {
@@ -637,6 +841,63 @@ func TestHTTPTokenRefresh(t *testing.T) {
 	defer cancel()
 
 	testDriverAuth(t, client, mockServer, "refreshed_token_config_123")
+}
+
+func TestInvalidDriverAPIOptions(t *testing.T) {
+	c, mc, cancel := setupGRPCTests(t, &Config{Token: "aaa"})
+	defer cancel()
+
+	ctx := context.TODO()
+
+	_, err := c.ListCollections(ctx, "db1", &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
+	_, err = c.Insert(ctx, "db1", "coll1", nil, &InsertOptions{}, &InsertOptions{})
+	require.Error(t, err)
+	_, err = c.Replace(ctx, "db1", "coll1", nil, &ReplaceOptions{}, &ReplaceOptions{})
+	require.Error(t, err)
+	_, err = c.Update(ctx, "db1", "coll1", nil, nil, &UpdateOptions{}, &UpdateOptions{})
+	require.Error(t, err)
+	_, err = c.Delete(ctx, "db1", "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
+	require.Error(t, err)
+	_, err = c.BeginTx(ctx, "db1", &TxOptions{}, &TxOptions{})
+	require.Error(t, err)
+	err = c.CreateOrUpdateCollection(ctx, "db1", "coll1", nil, &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
+	err = c.DropCollection(ctx, "db1", "coll1", &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
+	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
+	require.Error(t, err)
+	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
+	require.Error(t, err)
+	_, err = c.Read(ctx, "db1", "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
+	require.Error(t, err)
+
+	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Db:      "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
+
+	tx, err := c.BeginTx(ctx, "db1")
+	require.NoError(t, err)
+	_, err = tx.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
+	_, err = tx.Insert(ctx, "coll1", nil, &InsertOptions{}, &InsertOptions{})
+	require.Error(t, err)
+	_, err = tx.Replace(ctx, "coll1", nil, &ReplaceOptions{}, &ReplaceOptions{})
+	require.Error(t, err)
+	_, err = tx.Update(ctx, "coll1", nil, nil, &UpdateOptions{}, &UpdateOptions{})
+	require.Error(t, err)
+	_, err = tx.Delete(ctx, "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
+	require.Error(t, err)
+	_, err = tx.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
+	require.Error(t, err)
+	err = tx.CreateOrUpdateCollection(ctx, "coll1", nil, &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
+	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
+	require.Error(t, err)
 }
 
 var testServerKey = `

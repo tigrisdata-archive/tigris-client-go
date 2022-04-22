@@ -32,6 +32,16 @@ func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
 	switch ty := v.(type) {
 	case *spb.Status:
 		return MarshalStatus(ty)
+	case *ListCollectionsResponse:
+		if len(ty.Collections) == 0 {
+			return []byte(`{"collections":[]}`), nil
+		}
+		return c.JSONBuiltin.Marshal(v)
+	case *ListDatabasesResponse:
+		if len(ty.Databases) == 0 {
+			return []byte(`{"databases":[]}`), nil
+		}
+		return c.JSONBuiltin.Marshal(v)
 	}
 	return c.JSONBuiltin.Marshal(v)
 }
@@ -41,26 +51,26 @@ func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
 // in x.Doc and will return as-is.
 //
 // Note: This also means any changes in ReadResponse proto needs to make sure that we add that here and similarly
-// the openAPI specs needs to be specify Doc as object instead of bytes.
+// the openAPI specs needs to be specified Doc as object instead of bytes.
 func (x *ReadResponse) MarshalJSON() ([]byte, error) {
 	var err error
 	bb := bytebufferpool.Get()
-	_, err = bb.Write([]byte(`{"doc":`))
+	_, err = bb.Write([]byte(`{"data":`))
 	if err != nil {
 		return nil, Errorf(codes.Internal, err.Error())
 	}
 
-	_, err = bb.Write(x.Doc)
+	_, err = bb.Write(x.Data)
 	if err != nil {
 		return nil, Errorf(codes.Internal, err.Error())
 	}
 
-	key, err := jsoniter.Marshal(x.Key)
+	key, err := jsoniter.Marshal(x.ResumeToken)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = bb.Write([]byte(`,"key":`))
+	_, err = bb.Write([]byte(`,"resume_token":`))
 	if err != nil {
 		return nil, Errorf(codes.Internal, err.Error())
 	}
@@ -260,6 +270,10 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "collection":
 			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
+			}
+		case "only_create":
+			if err := jsoniter.Unmarshal(value, &x.OnlyCreate); err != nil {
 				return err
 			}
 		case "schema":

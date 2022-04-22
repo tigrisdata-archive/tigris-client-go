@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -61,7 +62,11 @@ type CreateDatabaseRequest struct {
 
 // CreateDatabaseResponse defines model for CreateDatabaseResponse.
 type CreateDatabaseResponse struct {
-	Msg *string `json:"msg,omitempty"`
+	// a detailed response message.
+	Message *string `json:"message,omitempty"`
+
+	// an enum with value set as "created"
+	Status *string `json:"status,omitempty"`
 }
 
 // CreateOrUpdateCollectionRequest defines model for CreateOrUpdateCollectionRequest.
@@ -71,13 +76,17 @@ type CreateOrUpdateCollectionRequest struct {
 	// Collection requests modifying options
 	Options *CollectionOptions `json:"options,omitempty"`
 
-	// Schema of the documents in this collection. The schema specifications are same as JSON schema specification defined here(https://json-schema.org/specification.html). As an example, the schema looks like below, {  "name": "user",  "description": "Collection of documents with details of users",  "properties": {    "id": {      "description": "A unique identifier for the user",      "type": "bigint"    },    "name": {      "description": "Name of the user",      "type": "string",      "maxLength": 100    },    "balance": {      "description": "User account balance",      "type": "double"    }  },  "primary_key": ["id"] }
+	// Schema of the documents in this collection. The schema specifications are same as JSON schema specification defined here(https://json-schema.org/specification.html). As an example, the schema looks like below, {  "name": "user",  "description": "Collection of documents with details of users",  "properties": {    "id": {      "description": "A unique identifier for the user",      "type": "integer"    },    "name": {      "description": "Name of the user",      "type": "string",      "maxLength": 100    },    "balance": {      "description": "User account balance",      "type": "number"    }  },  "primary_key": ["id"] }
 	Schema json.RawMessage `json:"schema,omitempty"`
 }
 
 // CreateOrUpdateCollectionResponse defines model for CreateOrUpdateCollectionResponse.
 type CreateOrUpdateCollectionResponse struct {
-	Msg *string `json:"msg,omitempty"`
+	// a detailed response message.
+	Message *string `json:"message,omitempty"`
+
+	// an enum with value set as "created" or "updated".
+	Status *string `json:"status,omitempty"`
 }
 
 // DatabaseInfo defines model for DatabaseInfo.
@@ -102,7 +111,13 @@ type DeleteRequestOptions struct {
 }
 
 // DeleteResponse defines model for DeleteResponse.
-type DeleteResponse map[string]interface{}
+type DeleteResponse struct {
+	// an enum with value set as "deleted"
+	Status *string `json:"status,omitempty"`
+
+	// Returns the timestamp when the documents are deleted.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
 
 // DropCollectionRequest defines model for DropCollectionRequest.
 type DropCollectionRequest struct {
@@ -112,7 +127,11 @@ type DropCollectionRequest struct {
 
 // DropCollectionResponse defines model for DropCollectionResponse.
 type DropCollectionResponse struct {
-	Msg *string `json:"msg,omitempty"`
+	// a detailed response message.
+	Message *string `json:"message,omitempty"`
+
+	// an enum with value set as "dropped"
+	Status *string `json:"status,omitempty"`
 }
 
 // DropDatabaseRequest defines model for DropDatabaseRequest.
@@ -123,7 +142,11 @@ type DropDatabaseRequest struct {
 
 // DropDatabaseResponse defines model for DropDatabaseResponse.
 type DropDatabaseResponse struct {
-	Msg *string `json:"msg,omitempty"`
+	// a detailed response message.
+	Message *string `json:"message,omitempty"`
+
+	// an enum with value set as "dropped"
+	Status *string `json:"status,omitempty"`
 }
 
 // InsertRequest defines model for InsertRequest.
@@ -142,7 +165,13 @@ type InsertRequestOptions struct {
 }
 
 // InsertResponse defines model for InsertResponse.
-type InsertResponse map[string]interface{}
+type InsertResponse struct {
+	// an enum with value set as "inserted"
+	Status *string `json:"status,omitempty"`
+
+	// Returns the commit timestamp of the documents.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
 
 // ListCollectionsRequest defines model for ListCollectionsRequest.
 type ListCollectionsRequest struct {
@@ -191,11 +220,11 @@ type ReadRequestOptions struct {
 
 // ReadResponse defines model for ReadResponse.
 type ReadResponse struct {
-	// Doc is the JSON object representing requested fields
-	Doc json.RawMessage `json:"doc,omitempty"`
+	// data has the user requested data
+	Data json.RawMessage `json:"data,omitempty"`
 
-	// Key is internal key, which uniquely identify the document. This fields is used to
-	Key *[]byte `json:"key,omitempty"`
+	// resume_token is internal key, used for pagination.
+	ResumeToken *[]byte `json:"resume_token,omitempty"`
 }
 
 // ReplaceRequest defines model for ReplaceRequest.
@@ -212,7 +241,13 @@ type ReplaceRequestOptions struct {
 }
 
 // ReplaceResponse defines model for ReplaceResponse.
-type ReplaceResponse map[string]interface{}
+type ReplaceResponse struct {
+	// an enum with value set as "replaced"
+	Status *string `json:"status,omitempty"`
+
+	// Returns the commit timestamp of the replaced documents.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
 
 // Rollback transaction with the given ID
 type RollbackTransactionRequest struct {
@@ -250,7 +285,14 @@ type UpdateRequestOptions struct {
 
 // UpdateResponse defines model for UpdateResponse.
 type UpdateResponse struct {
-	Rc *int32 `json:"rc,omitempty"`
+	// Returns the number of documents modified.
+	ModifiedCount *int32 `json:"modified_count,omitempty"`
+
+	// an enum with value set as "updated"
+	Status *string `json:"status,omitempty"`
+
+	// Returns the timestamp when the documents are updated.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
 }
 
 // WriteOptions contain write behavior modifying options
@@ -2507,49 +2549,52 @@ func ParseTigrisDBRollbackTransactionResponse(rsp *http.Response) (*TigrisDBRoll
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"sPPdVWZfN8zEurO3QeDUSlTGCQtXx3TqU/0K1MEJSIP/ZqRUXkxKbOTKpTbtbYUy+yyT4p7RSkN85Nur",
+	"II7iC9XB1TUaaa4JtOFA8q9LO5oNEhPrQqsDYDrkO0n1OxBXdFPWBQwhnnBaBX0cLhKJhO7ePTJznUcp",
+	"hQS2BsJ3neLYkrd8BhA3GdDOnoMvN3oFUsAoppnQyOMdrHa1nLO5axSk6jSWvLPmjShSSxUnNtMJ1+9+",
+	"fX/x9p2JlQ2Otc2Rr+Hqw6d31zf96uqY/J+6TqWuzVr9xOraKkVPp64GxP3Keo2EqpCH8tWXvT5qpGsy",
+	"dA5Duq3BENpiabIYbTTt14Xxeil4YoQ36lRT4tvaZAvxfMAdNdM8QhbG3L2xRr5R5ut6LDUEb8fEy2x5",
+	"x63MJ7bmYxl4bVhvlAYnh3uzMDYd4vPqBh8CvM+kT3jv8CmFl4E/byX+J4b+OPKvC/jNGtDEuG8VEU4O",
+	"eymywVu2FFnoZkGSBJhWXey/NFHabAA+DOydhrbJwhh7fP8JV+lgT/fUV+pwj/exIF7+j9iYxGsJ08Y1",
+	"ue+W3AB26+K6J596WWXuBxHtRldUfM2YKYu115z3D/9n5HdJXXaa34+ErVFWshSdG1WV2obKSSQRfOOE",
+	"7UxqM0jst5VjcdVkrYmqOVyOZ3UOn4sFYpIXLWevFpWhf774DvbuVIis9bOoxQp950zY8tnGoMLw1Rth",
+	"mrav9oYk5b+FXSSJvayrhS2gK8hQroVMkS5d8xXjzbnwwMyU3LdmKZSMJOxfZJUgMCWSslsxjO32lwAO",
+	"zGoYaDd7fYyCKdDiNYO17+MNEwO29ysMpwCt6y/sR+1FVQz1rYilkfIVzxKJPY1o9cY58B8bKFPWJEmW",
+	"tujKhXYdUJgSrlmsYLUD5Co3IgcuICNSM5L4q4xrYWmbcZrbcLCpCGvCklziQITQ/gLBHwLsvR+ImDpk",
+	"6P3+wyngLn3v6ECuONTeSpmKiaSqDf4l78K/2XTZk0nrtrD+IUA30Gc8dWJroIn4MOBVj4v/Z69eP395",
+	"/ncAAAD//9xBcaUtSAAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

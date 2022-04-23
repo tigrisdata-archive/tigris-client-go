@@ -130,8 +130,8 @@ func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
 
 	var databases []string
 	for _, nm := range *l.Databases {
-		if nm.Name != nil {
-			databases = append(databases, *nm.Name)
+		if nm.Db != nil {
+			databases = append(databases, *nm.Db)
 		}
 	}
 	return databases, nil
@@ -292,8 +292,8 @@ func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, db string, op
 
 	var collections []string
 	for _, c := range *l.Collections {
-		if c.Name != nil {
-			collections = append(collections, *c.Name)
+		if c.Collection != nil {
+			collections = append(collections, *c.Collection)
 		}
 	}
 	return collections, nil

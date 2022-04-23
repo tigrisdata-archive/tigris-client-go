@@ -56,6 +56,11 @@ type TigrisDBClient interface {
 	CreateDatabase(ctx context.Context, in *CreateDatabaseRequest, opts ...grpc.CallOption) (*CreateDatabaseResponse, error)
 	// Drop database deletes all the collections in the database along with all it documents.
 	DropDatabase(ctx context.Context, in *DropDatabaseRequest, opts ...grpc.CallOption) (*DropDatabaseResponse, error)
+	// Describe database describes the information related to database along
+	// with all the collections inside database.
+	DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error)
+	// Describe collection describes the information related to collection.
+	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
 }
 
 type tigrisDBClient struct {
@@ -215,6 +220,24 @@ func (c *tigrisDBClient) DropDatabase(ctx context.Context, in *DropDatabaseReque
 	return out, nil
 }
 
+func (c *tigrisDBClient) DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error) {
+	out := new(DescribeDatabaseResponse)
+	err := c.cc.Invoke(ctx, "/TigrisDB/DescribeDatabase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisDBClient) DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error) {
+	out := new(DescribeCollectionResponse)
+	err := c.cc.Invoke(ctx, "/TigrisDB/DescribeCollection", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TigrisDBServer is the server API for TigrisDB service.
 // All implementations should embed UnimplementedTigrisDBServer
 // for forward compatibility
@@ -253,6 +276,11 @@ type TigrisDBServer interface {
 	CreateDatabase(context.Context, *CreateDatabaseRequest) (*CreateDatabaseResponse, error)
 	// Drop database deletes all the collections in the database along with all it documents.
 	DropDatabase(context.Context, *DropDatabaseRequest) (*DropDatabaseResponse, error)
+	// Describe database describes the information related to database along
+	// with all the collections inside database.
+	DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error)
+	// Describe collection describes the information related to collection.
+	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
 }
 
 // UnimplementedTigrisDBServer should be embedded to have forward compatible implementations.
@@ -300,6 +328,12 @@ func (UnimplementedTigrisDBServer) CreateDatabase(context.Context, *CreateDataba
 }
 func (UnimplementedTigrisDBServer) DropDatabase(context.Context, *DropDatabaseRequest) (*DropDatabaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropDatabase not implemented")
+}
+func (UnimplementedTigrisDBServer) DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DescribeDatabase not implemented")
+}
+func (UnimplementedTigrisDBServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DescribeCollection not implemented")
 }
 
 // UnsafeTigrisDBServer may be embedded to opt out of forward compatibility for this service.
@@ -568,6 +602,42 @@ func _TigrisDB_DropDatabase_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TigrisDB_DescribeDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DescribeDatabaseRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisDBServer).DescribeDatabase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TigrisDB/DescribeDatabase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisDBServer).DescribeDatabase(ctx, req.(*DescribeDatabaseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TigrisDB_DescribeCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DescribeCollectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisDBServer).DescribeCollection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TigrisDB/DescribeCollection",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisDBServer).DescribeCollection(ctx, req.(*DescribeCollectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TigrisDB_ServiceDesc is the grpc.ServiceDesc for TigrisDB service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -626,6 +696,14 @@ var TigrisDB_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DropDatabase",
 			Handler:    _TigrisDB_DropDatabase_Handler,
+		},
+		{
+			MethodName: "DescribeDatabase",
+			Handler:    _TigrisDB_DescribeDatabase_Handler,
+		},
+		{
+			MethodName: "DescribeCollection",
+			Handler:    _TigrisDB_DescribeCollection_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

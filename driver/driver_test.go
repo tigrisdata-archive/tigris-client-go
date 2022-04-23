@@ -221,7 +221,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 		pm(&api.ListCollectionsRequest{
 			Db:      "db1",
 			Options: coptions,
-		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{{Name: "lc1"}, {Name: "lc2"}}}, nil)
+		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{{Collection: "lc1"}, {Collection: "lc2"}}}, nil)
 
 	colls, err := c.ListCollections(ctx)
 	require.NoError(t, err)
@@ -345,7 +345,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	require.Equal(t, []string(nil), dbs)
 
 	mc.EXPECT().ListDatabases(gomock.Any(),
-		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Databases: []*api.DatabaseInfo{{Name: "ldb1"}, {Name: "ldb2"}}}, nil)
+		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Databases: []*api.DatabaseInfo{{Db: "ldb1"}, {Db: "ldb2"}}}, nil)
 
 	dbs, err = c.ListDatabases(ctx)
 	require.NoError(t, err)
@@ -366,7 +366,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 		pm(&api.ListCollectionsRequest{
 			Db:      "db1",
 			Options: &api.CollectionOptions{},
-		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{{Name: "lc1"}, {Name: "lc2"}}}, nil)
+		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{{Collection: "lc1"}, {Collection: "lc2"}}}, nil)
 
 	colls, err = c.ListCollections(ctx, "db1")
 	require.NoError(t, err)

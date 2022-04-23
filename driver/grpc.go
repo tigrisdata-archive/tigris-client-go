@@ -98,7 +98,7 @@ func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
 
 	var databases []string
 	for _, c := range r.GetDatabases() {
-		databases = append(databases, c.GetName())
+		databases = append(databases, c.GetDb())
 	}
 	return databases, nil
 }
@@ -217,7 +217,7 @@ func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, db string, op
 
 	var collections []string
 	for _, c := range r.GetCollections() {
-		collections = append(collections, c.GetName())
+		collections = append(collections, c.GetCollection())
 	}
 	return collections, nil
 }

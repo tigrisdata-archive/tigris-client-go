@@ -43,7 +43,7 @@ const (
 )
 
 var (
-	All = driver.Filter(nil)
+	All = driver.Filter(`{}`)
 )
 
 type Expr map[string]interface{}

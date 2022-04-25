@@ -31,7 +31,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/mock"
+	mock "github.com/tigrisdata/tigris-client-go/mock/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/proto"

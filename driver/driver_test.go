@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
-	"github.com/tigrisdata/tigris-client-go/mock"
+	mock "github.com/tigrisdata/tigris-client-go/mock/api"
 	"github.com/tigrisdata/tigris-client-go/test"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -470,12 +470,6 @@ func testTxBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	err = tx.Commit(ctx)
 	require.NoError(t, err)
-
-	mc.EXPECT().RollbackTransaction(gomock.Any(),
-		pm(&api.RollbackTransactionRequest{
-			Db:    "db1",
-			TxCtx: txCtx,
-		})).Return(&api.RollbackTransactionResponse{}, nil)
 
 	err = tx.Rollback(ctx)
 	require.NoError(t, err)

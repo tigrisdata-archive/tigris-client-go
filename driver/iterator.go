@@ -19,6 +19,7 @@ import "io"
 type Iterator interface {
 	Next(d *Document) bool
 	Err() error
+	Close()
 }
 
 type streamReader interface {
@@ -56,4 +57,12 @@ func (i *readIterator) Next(d *Document) bool {
 
 func (i *readIterator) Err() error {
 	return i.err
+}
+
+func (i *readIterator) Close() {
+	if i.eof {
+		return
+	}
+	_ = i.close()
+	i.eof = true
 }

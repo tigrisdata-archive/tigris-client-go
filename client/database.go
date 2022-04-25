@@ -17,90 +17,43 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
 
-	"github.com/rs/zerolog/log"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
-// TxFunc is a user-provided function that will be run
-// within the context of a transaction.
-type TxFunc func(
-	ctx context.Context,
-	tr Tx,
-) (interface{}, error)
-
-// Tx is the interface for a client-level transaction. It does
-// not expose operations like Commit()/Abort as it is meant to be used
-// within the Transact() method which abstracts away those operations.
-type Tx interface {
-	driver.Database
-}
-
-// Database is the interface for interacting with a specific database
-// in Tigris.
-type Database interface {
-	// Transact runs the provided TransactionFunc in a transaction. If the
-	// function returns an error then the transaction will be aborted,
-	// otherwise it will be committed.
-	Transact(ctx context.Context, fn TxFunc) (interface{}, error)
-
-	CreateCollections(ctx context.Context, dbName string, schemas []*schema.Schema) error
-}
-
-type database struct {
+// Database is the interface for interacting with a Tigris Database
+// Due to the limitations of Golang generics instantiations of the collections
+// should be done using GetCollection[Model](ctx, db) top level function instead of
+// method of this interface.
+// Similarly to get access to collection APIs in a transaction
+// top level GetTxCollection(ctx, tx) function should be used
+// instead of method of Tx interface
+type Database struct {
 	name   string
 	driver driver.Driver
 }
 
-func newDatabase(name string, driver driver.Driver) Database {
-	return &database{
+func newDatabase(name string, driver driver.Driver) *Database {
+	return &Database{
 		name:   name,
 		driver: driver,
 	}
 }
 
-func (db *database) Transact(
-	ctx context.Context,
-	fn TxFunc,
-) (interface{}, error) {
-	tx, err := db.driver.BeginTx(ctx, db.name, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error beginning transaction: %w", err)
-	}
-
-	res, err := fn(ctx, tx)
-	if err != nil {
-		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil {
-			return nil, fmt.Errorf(
-				"error trying to rollback transaction: %v, original error: %w",
-				rollbackErr, err)
-		}
-		return nil, fmt.Errorf("error running transaction: %w", err)
-	}
-
-	return res, nil
-}
-
-func (db *database) CreateCollectionsFromModels(ctx context.Context, dbName string, model interface{}, models ...interface{}) error {
-	schemas, err := schema.FromCollectionModels(model, models)
+// CreateCollections creates collections in the Database using provided collection models
+func (db *Database) CreateCollections(ctx context.Context, model schema.Model, models ...schema.Model) error {
+	schemas, err := schema.FromCollectionModels(model, models...)
 	if err != nil {
 		return fmt.Errorf("error parsing model schema: %w", err)
 	}
 
-	return db.CreateCollections(ctx, dbName, schemas)
+	return db.createCollectionsFromSchemas(ctx, db.name, schemas)
 }
 
-func (db *database) CreateCollectionsFromDatabaseModel(ctx context.Context, dbModel interface{}) error {
-	dbName, schemas, err := schema.FromDatabaseModel(dbModel)
-	if err != nil {
-		return err
-	}
-
-	return db.CreateCollections(ctx, dbName, schemas)
-}
-
-func (db *database) CreateCollections(ctx context.Context, dbName string, schemas []*schema.Schema) error {
+// createCollectionsFromSchemas transactionally creates collections from the provided schema map
+func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName string, schemas map[string]*schema.Schema) error {
 	tx, err := db.driver.BeginTx(ctx, dbName)
 	if err != nil {
 		return err
@@ -112,12 +65,100 @@ func (db *database) CreateCollections(ctx context.Context, dbName string, schema
 		if err != nil {
 			return err
 		}
-		log.Debug().Interface("schema", v).Str("collection", v.Name).Msg("migrateModel")
 		err = tx.CreateOrUpdateCollection(ctx, v.Name, sch)
 		if err != nil {
 			return err
 		}
 	}
 
-	return tx.Commit(ctx)
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Drop Database.
+// All the collections in the Database will be dropped
+func (db *Database) Drop(ctx context.Context) error {
+	return db.driver.DropDatabase(ctx, db.name)
+}
+
+// Tx executes given set of operations in a transaction
+func (db *Database) Tx(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) error {
+	dtx, err := db.driver.BeginTx(ctx, db.name)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = dtx.Rollback(ctx) }()
+
+	tx := &Tx{db, dtx}
+
+	if err = fn(ctx, tx); err != nil {
+		return err
+	}
+
+	return dtx.Commit(ctx)
+}
+
+// openDatabaseFromModels creates Database and collections from the provided collection models
+func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *DatabaseConfig, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+	// optionally creates database if it's allowed
+	if !cfg.MustExist {
+		err := d.CreateDatabase(ctx, dbName)
+		if err != nil {
+			if !strings.Contains(err.Error(), "already exist") {
+				return nil, err
+			}
+		}
+	}
+
+	db := newDatabase(dbName, d)
+
+	err := db.CreateCollections(ctx, model, models...)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+// OpenDatabase initializes Database from a bunch of collections models.
+// It creates Database if necessary.
+// Creates and migrates schemas of the collections which constitutes the Database
+func OpenDatabase(ctx context.Context, cfg *DatabaseConfig, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+	d, err := driver.NewDriver(ctx, &cfg.Config)
+	if err != nil {
+		return nil, err
+	}
+
+	return openDatabaseFromModels(ctx, d, cfg, dbName, model, models...)
+}
+
+// GetCollection returns collection object corresponding to collection model T
+func GetCollection[T schema.Model](db *Database) *Collection[T] {
+	var m T
+	name := schema.ModelName(&m)
+	return getNamedCollection[T](db, name)
+}
+
+func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {
+	return &Collection[T]{name: name, crud: db.driver.UseDatabase(db.name)}
+}
+
+// Tx is the interface for accessing APIs in a transactional way
+type Tx struct {
+	db *Database
+	tx driver.Tx
+}
+
+// GetTxCollection returns collection object corresponding to collection model T
+func GetTxCollection[T schema.Model](tx *Tx) *Collection[T] {
+	var m T
+	name := schema.ModelName(&m)
+	return getNamedTxCollection[T](tx, name)
+}
+
+func getNamedTxCollection[T schema.Model](tx *Tx, name string) *Collection[T] {
+	return &Collection[T]{name: name, crud: tx.tx}
 }

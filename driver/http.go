@@ -218,10 +218,17 @@ func (c *httpCRUD) Commit(ctx context.Context) error {
 	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{
 		TxCtx: &c.txCtx,
 	})
-	return HTTPError(err, resp)
+	err = HTTPError(err, resp)
+	if err == nil {
+		c.committed = true
+	}
+	return err
 }
 
 func (c *httpCRUD) Rollback(ctx context.Context) error {
+	if c.committed {
+		return nil
+	}
 	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{
 		TxCtx: &c.txCtx,
 	})
@@ -232,6 +239,8 @@ type httpCRUD struct {
 	db    string
 	api   *apiHTTP.ClientWithResponses
 	txCtx apiHTTP.TransactionCtx
+
+	committed bool
 }
 
 func (c *httpCRUD) convertWriteOptions(_ *WriteOptions) *apiHTTP.WriteOptions {

@@ -155,10 +155,17 @@ func (c *grpcCRUD) Commit(ctx context.Context) error {
 		Db:    c.db,
 		TxCtx: &c.txCtx,
 	})
-	return GRPCError(err)
+	err = GRPCError(err)
+	if err == nil {
+		c.committed = true
+	}
+	return err
 }
 
 func (c *grpcCRUD) Rollback(ctx context.Context) error {
+	if c.committed {
+		return nil
+	}
 	_, err := c.api.RollbackTransaction(ctx, &api.RollbackTransactionRequest{
 		Db:    c.db,
 		TxCtx: &c.txCtx,
@@ -184,6 +191,8 @@ type grpcCRUD struct {
 	db    string
 	api   api.TigrisClient
 	txCtx api.TransactionCtx
+
+	committed bool
 }
 
 func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {

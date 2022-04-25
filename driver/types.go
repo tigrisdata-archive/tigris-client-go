@@ -54,10 +54,13 @@ type CollectionOptions api.CollectionOptions
 type DatabaseOptions api.DatabaseOptions
 type TxOptions api.TransactionOptions
 
-type InsertResponse *api.InsertResponse
-type ReplaceResponse *api.ReplaceResponse
-type UpdateResponse *api.UpdateResponse
-type DeleteResponse *api.DeleteResponse
+type InsertResponse api.InsertResponse
+type ReplaceResponse api.ReplaceResponse
+type UpdateResponse api.UpdateResponse
+type DeleteResponse api.DeleteResponse
+
+type DescribeDatabaseResponse api.DescribeDatabaseResponse
+type DescribeCollectionResponse api.DescribeCollectionResponse
 
 type Config struct {
 	TLS   *tls.Config `json:"tls,omitempty"`

@@ -263,10 +263,11 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.InsertRequestOptions{WriteOptions: options},
-		})).Return(&api.InsertResponse{}, nil)
+		})).Return(&api.InsertResponse{Status: "inserted"}, nil)
 
-	_, err := c.Insert(ctx, "db1", "c1", doc1, &InsertOptions{WriteOptions: options})
+	insResp, err := c.Insert(ctx, "db1", "c1", doc1, &InsertOptions{WriteOptions: options})
 	require.NoError(t, err)
+	require.Equal(t, "inserted", insResp.Status)
 
 	mc.EXPECT().Replace(gomock.Any(),
 		pm(&api.ReplaceRequest{
@@ -274,10 +275,11 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
-		})).Return(&api.ReplaceResponse{}, nil)
+		})).Return(&api.ReplaceResponse{Status: "replaced"}, nil)
 
-	_, err = c.Replace(ctx, "db1", "c1", doc1, &ReplaceOptions{WriteOptions: options})
+	repResp, err := c.Replace(ctx, "db1", "c1", doc1, &ReplaceOptions{WriteOptions: options})
 	require.NoError(t, err)
+	require.Equal(t, "replaced", repResp.Status)
 
 	doc123 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`), Document(`{"K1":"vK1","K2":2,"D1":"vD2"}`), Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`)}
 
@@ -299,10 +301,11 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":1}`),
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
-		})).Return(&api.UpdateResponse{}, nil)
+		})).Return(&api.UpdateResponse{Status: "updated"}, nil)
 
-	_, err = c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
+	updResp, err := c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
 	require.NoError(t, err)
+	require.Equal(t, "updated", updResp.Status)
 
 	roptions := &api.ReadRequestOptions{}
 
@@ -326,11 +329,11 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{WriteOptions: options},
-		})).Return(&api.DeleteResponse{}, nil)
+		})).Return(&api.DeleteResponse{Status: "deleted"}, nil)
 
-	_, err = c.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
+	delResp, err := c.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
 	require.NoError(t, err)
-
+	require.Equal(t, "deleted", delResp.Status)
 }
 
 func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
@@ -371,6 +374,50 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	colls, err = c.ListCollections(ctx, "db1")
 	require.NoError(t, err)
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
+
+	descExp := api.DescribeCollectionResponse{
+		Description: &api.CollectionDescription{
+			Collection: "coll1", SchemaInfo: &api.SchemaInfo{
+				Schema: []byte(`{"a":"b"}`),
+			},
+		},
+	}
+
+	mc.EXPECT().DescribeCollection(gomock.Any(),
+		pm(&api.DescribeCollectionRequest{
+			Db:         "db1",
+			Collection: "coll1",
+		})).Return(&descExp, nil)
+
+	desc, err := c.DescribeCollection(ctx, "db1", "coll1")
+	require.NoError(t, err)
+	require.Equal(t, descExp.Description.Collection, desc.Description.Collection)
+	require.Equal(t, descExp.Description.SchemaInfo.Schema, desc.Description.SchemaInfo.Schema)
+
+	descDbExp := api.DescribeDatabaseResponse{
+		Description: &api.DatabaseDescription{
+			CollectionsDescription: []*api.CollectionDescription{
+				{Collection: "coll1", SchemaInfo: &api.SchemaInfo{
+					Schema: []byte(`{"a":"b"}`),
+				}},
+				{Collection: "coll2", SchemaInfo: &api.SchemaInfo{
+					Schema: []byte(`{"c":"d"}`),
+				}},
+			},
+		},
+	}
+
+	mc.EXPECT().DescribeDatabase(gomock.Any(),
+		pm(&api.DescribeDatabaseRequest{
+			Db: "db1",
+		})).Return(&descDbExp, nil)
+
+	descDb, err := c.DescribeDatabase(ctx, "db1")
+	require.NoError(t, err)
+	require.Equal(t, descDbExp.Description.CollectionsDescription[0].Collection, descDb.Description.CollectionsDescription[0].Collection)
+	require.Equal(t, descDbExp.Description.CollectionsDescription[0].SchemaInfo.Schema, descDb.Description.CollectionsDescription[0].SchemaInfo.Schema)
+	require.Equal(t, descDbExp.Description.CollectionsDescription[1].Collection, descDb.Description.CollectionsDescription[1].Collection)
+	require.Equal(t, descDbExp.Description.CollectionsDescription[1].SchemaInfo.Schema, descDb.Description.CollectionsDescription[1].SchemaInfo.Schema)
 
 	mc.EXPECT().CreateDatabase(gomock.Any(),
 		pm(&api.CreateDatabaseRequest{

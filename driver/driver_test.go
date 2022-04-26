@@ -376,11 +376,8 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
 
 	descExp := api.DescribeCollectionResponse{
-		Description: &api.CollectionDescription{
-			Collection: "coll1", SchemaInfo: &api.SchemaInfo{
-				Schema: []byte(`{"a":"b"}`),
-			},
-		},
+		Collection: "coll1",
+		Schema:     []byte(`{"a":"b"}`),
 	}
 
 	mc.EXPECT().DescribeCollection(gomock.Any(),
@@ -391,18 +388,16 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 
 	desc, err := c.DescribeCollection(ctx, "db1", "coll1")
 	require.NoError(t, err)
-	require.Equal(t, descExp.Description.Collection, desc.Description.Collection)
-	require.Equal(t, descExp.Description.SchemaInfo.Schema, desc.Description.SchemaInfo.Schema)
+	require.Equal(t, descExp.Collection, desc.Collection)
+	require.Equal(t, descExp.Schema, desc.Schema)
 
 	descDbExp := api.DescribeDatabaseResponse{
-		Description: &api.DatabaseDescription{
-			CollectionsDescription: []*api.CollectionDescription{
-				{Collection: "coll1", SchemaInfo: &api.SchemaInfo{
-					Schema: []byte(`{"a":"b"}`),
-				}},
-				{Collection: "coll2", SchemaInfo: &api.SchemaInfo{
-					Schema: []byte(`{"c":"d"}`),
-				}},
+		Collections: []*api.CollectionDescription{
+			{Collection: "coll1",
+				Schema: []byte(`{"a":"b"}`),
+			},
+			{Collection: "coll2",
+				Schema: []byte(`{"c":"d"}`),
 			},
 		},
 	}
@@ -414,10 +409,10 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 
 	descDb, err := c.DescribeDatabase(ctx, "db1")
 	require.NoError(t, err)
-	require.Equal(t, descDbExp.Description.CollectionsDescription[0].Collection, descDb.Description.CollectionsDescription[0].Collection)
-	require.Equal(t, descDbExp.Description.CollectionsDescription[0].SchemaInfo.Schema, descDb.Description.CollectionsDescription[0].SchemaInfo.Schema)
-	require.Equal(t, descDbExp.Description.CollectionsDescription[1].Collection, descDb.Description.CollectionsDescription[1].Collection)
-	require.Equal(t, descDbExp.Description.CollectionsDescription[1].SchemaInfo.Schema, descDb.Description.CollectionsDescription[1].SchemaInfo.Schema)
+	require.Equal(t, descDbExp.Collections[0].Collection, descDb.Collections[0].Collection)
+	require.Equal(t, descDbExp.Collections[0].Schema, descDb.Collections[0].Schema)
+	require.Equal(t, descDbExp.Collections[1].Collection, descDb.Collections[1].Collection)
+	require.Equal(t, descDbExp.Collections[1].Schema, descDb.Collections[1].Schema)
 
 	mc.EXPECT().CreateDatabase(gomock.Any(),
 		pm(&api.CreateDatabaseRequest{

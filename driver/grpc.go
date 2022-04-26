@@ -103,6 +103,17 @@ func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	return databases, nil
 }
 
+func (c *grpcDriver) DescribeDatabase(ctx context.Context, db string) (*DescribeDatabaseResponse, error) {
+	r, err := c.api.DescribeDatabase(ctx, &api.DescribeDatabaseRequest{
+		Db: db,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*DescribeDatabaseResponse)(r), nil
+}
+
 func (c *grpcDriver) createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
 	_, err := c.api.CreateDatabase(ctx, &api.CreateDatabaseRequest{
 		Db:      db,
@@ -154,19 +165,19 @@ func (c *grpcTx) Rollback(ctx context.Context) error {
 	return GRPCError(err)
 }
 
-func (c *grpcTx) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (InsertResponse, error) {
+func (c *grpcTx) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error) {
 	return c.grpcCRUD.insertWithOptions(ctx, c.db, collection, docs, options)
 }
 
-func (c *grpcTx) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error) {
+func (c *grpcTx) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error) {
 	return c.grpcCRUD.replaceWithOptions(ctx, c.db, collection, docs, options)
 }
 
-func (c *grpcTx) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (UpdateResponse, error) {
+func (c *grpcTx) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error) {
 	return c.grpcCRUD.updateWithOptions(ctx, c.db, collection, filter, fields, options)
 }
 
-func (c *grpcTx) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error) {
+func (c *grpcTx) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error) {
 	return c.grpcCRUD.deleteWithOptions(ctx, c.db, collection, filter, options)
 }
 
@@ -222,6 +233,18 @@ func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, db string, op
 	return collections, nil
 }
 
+func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, db string, collection string, _ *CollectionOptions) (*DescribeCollectionResponse, error) {
+	r, err := c.api.DescribeCollection(ctx, &api.DescribeCollectionRequest{
+		Db:         db,
+		Collection: collection,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*DescribeCollectionResponse)(r), nil
+}
+
 func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
 	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
 	_, err := c.api.CreateOrUpdateCollection(ctx, &api.CreateOrUpdateCollectionRequest{
@@ -243,7 +266,7 @@ func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, db string, col
 	return GRPCError(err)
 }
 
-func (c *grpcCRUD) insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (InsertResponse, error) {
+func (c *grpcCRUD) insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error) {
 	options.WriteOptions = &api.WriteOptions{}
 	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
 
@@ -258,10 +281,10 @@ func (c *grpcCRUD) insertWithOptions(ctx context.Context, db string, collection 
 		return nil, GRPCError(err)
 	}
 
-	return resp, nil
+	return (*InsertResponse)(resp), nil
 }
 
-func (c *grpcCRUD) replaceWithOptions(ctx context.Context, db string, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error) {
+func (c *grpcCRUD) replaceWithOptions(ctx context.Context, db string, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error) {
 	options.WriteOptions = &api.WriteOptions{}
 	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
 
@@ -276,10 +299,10 @@ func (c *grpcCRUD) replaceWithOptions(ctx context.Context, db string, collection
 		return nil, GRPCError(err)
 	}
 
-	return resp, nil
+	return (*ReplaceResponse)(resp), nil
 }
 
-func (c *grpcCRUD) updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Update, options *UpdateOptions) (UpdateResponse, error) {
+func (c *grpcCRUD) updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error) {
 	options.WriteOptions = &api.WriteOptions{}
 	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
 
@@ -291,10 +314,10 @@ func (c *grpcCRUD) updateWithOptions(ctx context.Context, db string, collection 
 		Options:    (*api.UpdateRequestOptions)(options),
 	})
 
-	return resp, GRPCError(err)
+	return (*UpdateResponse)(resp), GRPCError(err)
 }
 
-func (c *grpcCRUD) deleteWithOptions(ctx context.Context, db string, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error) {
+func (c *grpcCRUD) deleteWithOptions(ctx context.Context, db string, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error) {
 	options.WriteOptions = &api.WriteOptions{}
 	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
 
@@ -305,7 +328,7 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, db string, collection 
 		Options:    (*api.DeleteRequestOptions)(options),
 	})
 
-	return resp, GRPCError(err)
+	return (*DeleteResponse)(resp), GRPCError(err)
 }
 
 func (c *grpcCRUD) readWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {

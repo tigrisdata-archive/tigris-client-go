@@ -25,11 +25,11 @@ import (
 )
 
 type driverWithOptions interface {
-	insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (InsertResponse, error)
-	replaceWithOptions(ctx context.Context, db string, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error)
+	insertWithOptions(ctx context.Context, db string, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error)
+	replaceWithOptions(ctx context.Context, db string, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error)
 	readWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error)
-	updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Update, options *UpdateOptions) (UpdateResponse, error)
-	deleteWithOptions(ctx context.Context, db string, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)
+	updateWithOptions(ctx context.Context, db string, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error)
+	deleteWithOptions(ctx context.Context, db string, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error)
 	createOrUpdateCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error
 	dropCollectionWithOptions(ctx context.Context, db string, collection string, options *CollectionOptions) error
 	createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
@@ -38,15 +38,17 @@ type driverWithOptions interface {
 
 	listCollectionsWithOptions(ctx context.Context, db string, options *CollectionOptions) ([]string, error)
 	ListDatabases(ctx context.Context) ([]string, error)
+	describeCollectionWithOptions(ctx context.Context, db string, collection string, options *CollectionOptions) (*DescribeCollectionResponse, error)
+	DescribeDatabase(ctx context.Context, db string) (*DescribeDatabaseResponse, error)
 	Close() error
 }
 
 type txWithOptions interface {
-	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (InsertResponse, error)
-	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (ReplaceResponse, error)
+	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error)
+	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error)
 	readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error)
-	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (UpdateResponse, error)
-	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (DeleteResponse, error)
+	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error)
+	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error)
 	createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)

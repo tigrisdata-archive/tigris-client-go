@@ -61,6 +61,7 @@ type TigrisDBClient interface {
 	DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error)
 	// Describe collection describes the information related to collection.
 	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
+	Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (TigrisDB_StreamClient, error)
 }
 
 type tigrisDBClient struct {
@@ -238,6 +239,38 @@ func (c *tigrisDBClient) DescribeCollection(ctx context.Context, in *DescribeCol
 	return out, nil
 }
 
+func (c *tigrisDBClient) Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (TigrisDB_StreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TigrisDB_ServiceDesc.Streams[1], "/TigrisDB/Stream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &tigrisDBStreamClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type TigrisDB_StreamClient interface {
+	Recv() (*StreamResponse, error)
+	grpc.ClientStream
+}
+
+type tigrisDBStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *tigrisDBStreamClient) Recv() (*StreamResponse, error) {
+	m := new(StreamResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // TigrisDBServer is the server API for TigrisDB service.
 // All implementations should embed UnimplementedTigrisDBServer
 // for forward compatibility
@@ -281,6 +314,7 @@ type TigrisDBServer interface {
 	DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error)
 	// Describe collection describes the information related to collection.
 	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
+	Stream(*StreamRequest, TigrisDB_StreamServer) error
 }
 
 // UnimplementedTigrisDBServer should be embedded to have forward compatible implementations.
@@ -334,6 +368,9 @@ func (UnimplementedTigrisDBServer) DescribeDatabase(context.Context, *DescribeDa
 }
 func (UnimplementedTigrisDBServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeCollection not implemented")
+}
+func (UnimplementedTigrisDBServer) Stream(*StreamRequest, TigrisDB_StreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method Stream not implemented")
 }
 
 // UnsafeTigrisDBServer may be embedded to opt out of forward compatibility for this service.
@@ -638,6 +675,27 @@ func _TigrisDB_DescribeCollection_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TigrisDB_Stream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TigrisDBServer).Stream(m, &tigrisDBStreamServer{stream})
+}
+
+type TigrisDB_StreamServer interface {
+	Send(*StreamResponse) error
+	grpc.ServerStream
+}
+
+type tigrisDBStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *tigrisDBStreamServer) Send(m *StreamResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // TigrisDB_ServiceDesc is the grpc.ServiceDesc for TigrisDB service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -710,6 +768,11 @@ var TigrisDB_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Read",
 			Handler:       _TigrisDB_Read_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Stream",
+			Handler:       _TigrisDB_Stream_Handler,
 			ServerStreams: true,
 		},
 	},

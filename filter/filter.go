@@ -6,7 +6,7 @@ package filter
 import (
 	"encoding/json"
 
-	"github.com/tigrisdata/tigrisdb-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
 type Operand map[string]comparison

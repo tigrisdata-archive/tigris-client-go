@@ -405,101 +405,101 @@ type WriteOptions struct {
 	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
 }
 
-// TigrisDBListCollectionsJSONBody defines parameters for TigrisDBListCollections.
-type TigrisDBListCollectionsJSONBody ListCollectionsRequest
+// TigrisListCollectionsJSONBody defines parameters for TigrisListCollections.
+type TigrisListCollectionsJSONBody ListCollectionsRequest
 
-// TigrisDBCreateOrUpdateCollectionJSONBody defines parameters for TigrisDBCreateOrUpdateCollection.
-type TigrisDBCreateOrUpdateCollectionJSONBody CreateOrUpdateCollectionRequest
+// TigrisCreateOrUpdateCollectionJSONBody defines parameters for TigrisCreateOrUpdateCollection.
+type TigrisCreateOrUpdateCollectionJSONBody CreateOrUpdateCollectionRequest
 
-// TigrisDBDescribeCollectionJSONBody defines parameters for TigrisDBDescribeCollection.
-type TigrisDBDescribeCollectionJSONBody DescribeCollectionRequest
+// TigrisDescribeCollectionJSONBody defines parameters for TigrisDescribeCollection.
+type TigrisDescribeCollectionJSONBody DescribeCollectionRequest
 
-// TigrisDBDeleteJSONBody defines parameters for TigrisDBDelete.
-type TigrisDBDeleteJSONBody DeleteRequest
+// TigrisDeleteJSONBody defines parameters for TigrisDelete.
+type TigrisDeleteJSONBody DeleteRequest
 
-// TigrisDBInsertJSONBody defines parameters for TigrisDBInsert.
-type TigrisDBInsertJSONBody InsertRequest
+// TigrisInsertJSONBody defines parameters for TigrisInsert.
+type TigrisInsertJSONBody InsertRequest
 
-// TigrisDBReadJSONBody defines parameters for TigrisDBRead.
-type TigrisDBReadJSONBody ReadRequest
+// TigrisReadJSONBody defines parameters for TigrisRead.
+type TigrisReadJSONBody ReadRequest
 
-// TigrisDBReplaceJSONBody defines parameters for TigrisDBReplace.
-type TigrisDBReplaceJSONBody ReplaceRequest
+// TigrisReplaceJSONBody defines parameters for TigrisReplace.
+type TigrisReplaceJSONBody ReplaceRequest
 
-// TigrisDBUpdateJSONBody defines parameters for TigrisDBUpdate.
-type TigrisDBUpdateJSONBody UpdateRequest
+// TigrisUpdateJSONBody defines parameters for TigrisUpdate.
+type TigrisUpdateJSONBody UpdateRequest
 
-// TigrisDBDropCollectionJSONBody defines parameters for TigrisDBDropCollection.
-type TigrisDBDropCollectionJSONBody DropCollectionRequest
+// TigrisDropCollectionJSONBody defines parameters for TigrisDropCollection.
+type TigrisDropCollectionJSONBody DropCollectionRequest
 
-// TigrisDBCreateDatabaseJSONBody defines parameters for TigrisDBCreateDatabase.
-type TigrisDBCreateDatabaseJSONBody CreateDatabaseRequest
+// TigrisCreateDatabaseJSONBody defines parameters for TigrisCreateDatabase.
+type TigrisCreateDatabaseJSONBody CreateDatabaseRequest
 
-// TigrisDBDescribeDatabaseJSONBody defines parameters for TigrisDBDescribeDatabase.
-type TigrisDBDescribeDatabaseJSONBody DescribeDatabaseRequest
+// TigrisDescribeDatabaseJSONBody defines parameters for TigrisDescribeDatabase.
+type TigrisDescribeDatabaseJSONBody DescribeDatabaseRequest
 
-// TigrisDBDropDatabaseJSONBody defines parameters for TigrisDBDropDatabase.
-type TigrisDBDropDatabaseJSONBody DropDatabaseRequest
+// TigrisDropDatabaseJSONBody defines parameters for TigrisDropDatabase.
+type TigrisDropDatabaseJSONBody DropDatabaseRequest
 
-// TigrisDBStreamJSONBody defines parameters for TigrisDBStream.
-type TigrisDBStreamJSONBody StreamRequest
+// TigrisStreamJSONBody defines parameters for TigrisStream.
+type TigrisStreamJSONBody StreamRequest
 
-// TigrisDBBeginTransactionJSONBody defines parameters for TigrisDBBeginTransaction.
-type TigrisDBBeginTransactionJSONBody BeginTransactionRequest
+// TigrisBeginTransactionJSONBody defines parameters for TigrisBeginTransaction.
+type TigrisBeginTransactionJSONBody BeginTransactionRequest
 
-// TigrisDBCommitTransactionJSONBody defines parameters for TigrisDBCommitTransaction.
-type TigrisDBCommitTransactionJSONBody CommitTransactionRequest
+// TigrisCommitTransactionJSONBody defines parameters for TigrisCommitTransaction.
+type TigrisCommitTransactionJSONBody CommitTransactionRequest
 
-// TigrisDBRollbackTransactionJSONBody defines parameters for TigrisDBRollbackTransaction.
-type TigrisDBRollbackTransactionJSONBody RollbackTransactionRequest
+// TigrisRollbackTransactionJSONBody defines parameters for TigrisRollbackTransaction.
+type TigrisRollbackTransactionJSONBody RollbackTransactionRequest
 
-// TigrisDBListCollectionsJSONRequestBody defines body for TigrisDBListCollections for application/json ContentType.
-type TigrisDBListCollectionsJSONRequestBody TigrisDBListCollectionsJSONBody
+// TigrisListCollectionsJSONRequestBody defines body for TigrisListCollections for application/json ContentType.
+type TigrisListCollectionsJSONRequestBody TigrisListCollectionsJSONBody
 
-// TigrisDBCreateOrUpdateCollectionJSONRequestBody defines body for TigrisDBCreateOrUpdateCollection for application/json ContentType.
-type TigrisDBCreateOrUpdateCollectionJSONRequestBody TigrisDBCreateOrUpdateCollectionJSONBody
+// TigrisCreateOrUpdateCollectionJSONRequestBody defines body for TigrisCreateOrUpdateCollection for application/json ContentType.
+type TigrisCreateOrUpdateCollectionJSONRequestBody TigrisCreateOrUpdateCollectionJSONBody
 
-// TigrisDBDescribeCollectionJSONRequestBody defines body for TigrisDBDescribeCollection for application/json ContentType.
-type TigrisDBDescribeCollectionJSONRequestBody TigrisDBDescribeCollectionJSONBody
+// TigrisDescribeCollectionJSONRequestBody defines body for TigrisDescribeCollection for application/json ContentType.
+type TigrisDescribeCollectionJSONRequestBody TigrisDescribeCollectionJSONBody
 
-// TigrisDBDeleteJSONRequestBody defines body for TigrisDBDelete for application/json ContentType.
-type TigrisDBDeleteJSONRequestBody TigrisDBDeleteJSONBody
+// TigrisDeleteJSONRequestBody defines body for TigrisDelete for application/json ContentType.
+type TigrisDeleteJSONRequestBody TigrisDeleteJSONBody
 
-// TigrisDBInsertJSONRequestBody defines body for TigrisDBInsert for application/json ContentType.
-type TigrisDBInsertJSONRequestBody TigrisDBInsertJSONBody
+// TigrisInsertJSONRequestBody defines body for TigrisInsert for application/json ContentType.
+type TigrisInsertJSONRequestBody TigrisInsertJSONBody
 
-// TigrisDBReadJSONRequestBody defines body for TigrisDBRead for application/json ContentType.
-type TigrisDBReadJSONRequestBody TigrisDBReadJSONBody
+// TigrisReadJSONRequestBody defines body for TigrisRead for application/json ContentType.
+type TigrisReadJSONRequestBody TigrisReadJSONBody
 
-// TigrisDBReplaceJSONRequestBody defines body for TigrisDBReplace for application/json ContentType.
-type TigrisDBReplaceJSONRequestBody TigrisDBReplaceJSONBody
+// TigrisReplaceJSONRequestBody defines body for TigrisReplace for application/json ContentType.
+type TigrisReplaceJSONRequestBody TigrisReplaceJSONBody
 
-// TigrisDBUpdateJSONRequestBody defines body for TigrisDBUpdate for application/json ContentType.
-type TigrisDBUpdateJSONRequestBody TigrisDBUpdateJSONBody
+// TigrisUpdateJSONRequestBody defines body for TigrisUpdate for application/json ContentType.
+type TigrisUpdateJSONRequestBody TigrisUpdateJSONBody
 
-// TigrisDBDropCollectionJSONRequestBody defines body for TigrisDBDropCollection for application/json ContentType.
-type TigrisDBDropCollectionJSONRequestBody TigrisDBDropCollectionJSONBody
+// TigrisDropCollectionJSONRequestBody defines body for TigrisDropCollection for application/json ContentType.
+type TigrisDropCollectionJSONRequestBody TigrisDropCollectionJSONBody
 
-// TigrisDBCreateDatabaseJSONRequestBody defines body for TigrisDBCreateDatabase for application/json ContentType.
-type TigrisDBCreateDatabaseJSONRequestBody TigrisDBCreateDatabaseJSONBody
+// TigrisCreateDatabaseJSONRequestBody defines body for TigrisCreateDatabase for application/json ContentType.
+type TigrisCreateDatabaseJSONRequestBody TigrisCreateDatabaseJSONBody
 
-// TigrisDBDescribeDatabaseJSONRequestBody defines body for TigrisDBDescribeDatabase for application/json ContentType.
-type TigrisDBDescribeDatabaseJSONRequestBody TigrisDBDescribeDatabaseJSONBody
+// TigrisDescribeDatabaseJSONRequestBody defines body for TigrisDescribeDatabase for application/json ContentType.
+type TigrisDescribeDatabaseJSONRequestBody TigrisDescribeDatabaseJSONBody
 
-// TigrisDBDropDatabaseJSONRequestBody defines body for TigrisDBDropDatabase for application/json ContentType.
-type TigrisDBDropDatabaseJSONRequestBody TigrisDBDropDatabaseJSONBody
+// TigrisDropDatabaseJSONRequestBody defines body for TigrisDropDatabase for application/json ContentType.
+type TigrisDropDatabaseJSONRequestBody TigrisDropDatabaseJSONBody
 
-// TigrisDBStreamJSONRequestBody defines body for TigrisDBStream for application/json ContentType.
-type TigrisDBStreamJSONRequestBody TigrisDBStreamJSONBody
+// TigrisStreamJSONRequestBody defines body for TigrisStream for application/json ContentType.
+type TigrisStreamJSONRequestBody TigrisStreamJSONBody
 
-// TigrisDBBeginTransactionJSONRequestBody defines body for TigrisDBBeginTransaction for application/json ContentType.
-type TigrisDBBeginTransactionJSONRequestBody TigrisDBBeginTransactionJSONBody
+// TigrisBeginTransactionJSONRequestBody defines body for TigrisBeginTransaction for application/json ContentType.
+type TigrisBeginTransactionJSONRequestBody TigrisBeginTransactionJSONBody
 
-// TigrisDBCommitTransactionJSONRequestBody defines body for TigrisDBCommitTransaction for application/json ContentType.
-type TigrisDBCommitTransactionJSONRequestBody TigrisDBCommitTransactionJSONBody
+// TigrisCommitTransactionJSONRequestBody defines body for TigrisCommitTransaction for application/json ContentType.
+type TigrisCommitTransactionJSONRequestBody TigrisCommitTransactionJSONBody
 
-// TigrisDBRollbackTransactionJSONRequestBody defines body for TigrisDBRollbackTransaction for application/json ContentType.
-type TigrisDBRollbackTransactionJSONRequestBody TigrisDBRollbackTransactionJSONBody
+// TigrisRollbackTransactionJSONRequestBody defines body for TigrisRollbackTransaction for application/json ContentType.
+type TigrisRollbackTransactionJSONRequestBody TigrisRollbackTransactionJSONBody
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -574,92 +574,92 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// TigrisDBListDatabases request
-	TigrisDBListDatabases(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisListDatabases request
+	TigrisListDatabases(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBListCollections request with any body
-	TigrisDBListCollectionsWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisListCollections request with any body
+	TigrisListCollectionsWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBListCollections(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisListCollections(ctx context.Context, db string, body TigrisListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBCreateOrUpdateCollection request with any body
-	TigrisDBCreateOrUpdateCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisCreateOrUpdateCollection request with any body
+	TigrisCreateOrUpdateCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBCreateOrUpdateCollection(ctx context.Context, db string, collection string, body TigrisDBCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisCreateOrUpdateCollection(ctx context.Context, db string, collection string, body TigrisCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBDescribeCollection request with any body
-	TigrisDBDescribeCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisDescribeCollection request with any body
+	TigrisDescribeCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBDescribeCollection(ctx context.Context, db string, collection string, body TigrisDBDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisDescribeCollection(ctx context.Context, db string, collection string, body TigrisDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBDelete request with any body
-	TigrisDBDeleteWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisDelete request with any body
+	TigrisDeleteWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBDelete(ctx context.Context, db string, collection string, body TigrisDBDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisDelete(ctx context.Context, db string, collection string, body TigrisDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBInsert request with any body
-	TigrisDBInsertWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisInsert request with any body
+	TigrisInsertWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBInsert(ctx context.Context, db string, collection string, body TigrisDBInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisInsert(ctx context.Context, db string, collection string, body TigrisInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBRead request with any body
-	TigrisDBReadWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisRead request with any body
+	TigrisReadWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBRead(ctx context.Context, db string, collection string, body TigrisDBReadJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisRead(ctx context.Context, db string, collection string, body TigrisReadJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBReplace request with any body
-	TigrisDBReplaceWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisReplace request with any body
+	TigrisReplaceWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBReplace(ctx context.Context, db string, collection string, body TigrisDBReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisReplace(ctx context.Context, db string, collection string, body TigrisReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBUpdate request with any body
-	TigrisDBUpdateWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisUpdate request with any body
+	TigrisUpdateWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBUpdate(ctx context.Context, db string, collection string, body TigrisDBUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisUpdate(ctx context.Context, db string, collection string, body TigrisUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBDropCollection request with any body
-	TigrisDBDropCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisDropCollection request with any body
+	TigrisDropCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBDropCollection(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisDropCollection(ctx context.Context, db string, collection string, body TigrisDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBCreateDatabase request with any body
-	TigrisDBCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisCreateDatabase request with any body
+	TigrisCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBCreateDatabase(ctx context.Context, db string, body TigrisDBCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisCreateDatabase(ctx context.Context, db string, body TigrisCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBDescribeDatabase request with any body
-	TigrisDBDescribeDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisDescribeDatabase request with any body
+	TigrisDescribeDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBDescribeDatabase(ctx context.Context, db string, body TigrisDBDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisDescribeDatabase(ctx context.Context, db string, body TigrisDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBDropDatabase request with any body
-	TigrisDBDropDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisDropDatabase request with any body
+	TigrisDropDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBDropDatabase(ctx context.Context, db string, body TigrisDBDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisDropDatabase(ctx context.Context, db string, body TigrisDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBStream request with any body
-	TigrisDBStreamWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisStream request with any body
+	TigrisStreamWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBStream(ctx context.Context, db string, body TigrisDBStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisStream(ctx context.Context, db string, body TigrisStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBBeginTransaction request with any body
-	TigrisDBBeginTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisBeginTransaction request with any body
+	TigrisBeginTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBBeginTransaction(ctx context.Context, db string, body TigrisDBBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisBeginTransaction(ctx context.Context, db string, body TigrisBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBCommitTransaction request with any body
-	TigrisDBCommitTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisCommitTransaction request with any body
+	TigrisCommitTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBCommitTransaction(ctx context.Context, db string, body TigrisDBCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisCommitTransaction(ctx context.Context, db string, body TigrisCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisDBRollbackTransaction request with any body
-	TigrisDBRollbackTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// TigrisRollbackTransaction request with any body
+	TigrisRollbackTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	TigrisDBRollbackTransaction(ctx context.Context, db string, body TigrisDBRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	TigrisRollbackTransaction(ctx context.Context, db string, body TigrisRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) TigrisDBListDatabases(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBListDatabasesRequest(c.Server)
+func (c *Client) TigrisListDatabases(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisListDatabasesRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -670,8 +670,8 @@ func (c *Client) TigrisDBListDatabases(ctx context.Context, reqEditors ...Reques
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBListCollectionsWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBListCollectionsRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisListCollectionsWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisListCollectionsRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -682,8 +682,8 @@ func (c *Client) TigrisDBListCollectionsWithBody(ctx context.Context, db string,
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBListCollections(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBListCollectionsRequest(c.Server, db, body)
+func (c *Client) TigrisListCollections(ctx context.Context, db string, body TigrisListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisListCollectionsRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -694,8 +694,8 @@ func (c *Client) TigrisDBListCollections(ctx context.Context, db string, body Ti
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBCreateOrUpdateCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBCreateOrUpdateCollectionRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisCreateOrUpdateCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateOrUpdateCollectionRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -706,8 +706,8 @@ func (c *Client) TigrisDBCreateOrUpdateCollectionWithBody(ctx context.Context, d
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBCreateOrUpdateCollection(ctx context.Context, db string, collection string, body TigrisDBCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBCreateOrUpdateCollectionRequest(c.Server, db, collection, body)
+func (c *Client) TigrisCreateOrUpdateCollection(ctx context.Context, db string, collection string, body TigrisCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateOrUpdateCollectionRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -718,8 +718,8 @@ func (c *Client) TigrisDBCreateOrUpdateCollection(ctx context.Context, db string
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDescribeCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDescribeCollectionRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisDescribeCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDescribeCollectionRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -730,8 +730,8 @@ func (c *Client) TigrisDBDescribeCollectionWithBody(ctx context.Context, db stri
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDescribeCollection(ctx context.Context, db string, collection string, body TigrisDBDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDescribeCollectionRequest(c.Server, db, collection, body)
+func (c *Client) TigrisDescribeCollection(ctx context.Context, db string, collection string, body TigrisDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDescribeCollectionRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -742,8 +742,8 @@ func (c *Client) TigrisDBDescribeCollection(ctx context.Context, db string, coll
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDeleteWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDeleteRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisDeleteWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDeleteRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -754,8 +754,8 @@ func (c *Client) TigrisDBDeleteWithBody(ctx context.Context, db string, collecti
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDelete(ctx context.Context, db string, collection string, body TigrisDBDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDeleteRequest(c.Server, db, collection, body)
+func (c *Client) TigrisDelete(ctx context.Context, db string, collection string, body TigrisDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDeleteRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -766,8 +766,8 @@ func (c *Client) TigrisDBDelete(ctx context.Context, db string, collection strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBInsertWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBInsertRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisInsertWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisInsertRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -778,8 +778,8 @@ func (c *Client) TigrisDBInsertWithBody(ctx context.Context, db string, collecti
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBInsert(ctx context.Context, db string, collection string, body TigrisDBInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBInsertRequest(c.Server, db, collection, body)
+func (c *Client) TigrisInsert(ctx context.Context, db string, collection string, body TigrisInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisInsertRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -790,8 +790,8 @@ func (c *Client) TigrisDBInsert(ctx context.Context, db string, collection strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBReadWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBReadRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisReadWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisReadRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -802,8 +802,8 @@ func (c *Client) TigrisDBReadWithBody(ctx context.Context, db string, collection
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBRead(ctx context.Context, db string, collection string, body TigrisDBReadJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBReadRequest(c.Server, db, collection, body)
+func (c *Client) TigrisRead(ctx context.Context, db string, collection string, body TigrisReadJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisReadRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -814,8 +814,8 @@ func (c *Client) TigrisDBRead(ctx context.Context, db string, collection string,
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBReplaceWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBReplaceRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisReplaceWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisReplaceRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -826,8 +826,8 @@ func (c *Client) TigrisDBReplaceWithBody(ctx context.Context, db string, collect
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBReplace(ctx context.Context, db string, collection string, body TigrisDBReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBReplaceRequest(c.Server, db, collection, body)
+func (c *Client) TigrisReplace(ctx context.Context, db string, collection string, body TigrisReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisReplaceRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -838,8 +838,8 @@ func (c *Client) TigrisDBReplace(ctx context.Context, db string, collection stri
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBUpdateWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBUpdateRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisUpdateWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisUpdateRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -850,8 +850,8 @@ func (c *Client) TigrisDBUpdateWithBody(ctx context.Context, db string, collecti
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBUpdate(ctx context.Context, db string, collection string, body TigrisDBUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBUpdateRequest(c.Server, db, collection, body)
+func (c *Client) TigrisUpdate(ctx context.Context, db string, collection string, body TigrisUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisUpdateRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -862,8 +862,8 @@ func (c *Client) TigrisDBUpdate(ctx context.Context, db string, collection strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDropCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDropCollectionRequestWithBody(c.Server, db, collection, contentType, body)
+func (c *Client) TigrisDropCollectionWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDropCollectionRequestWithBody(c.Server, db, collection, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -874,8 +874,8 @@ func (c *Client) TigrisDBDropCollectionWithBody(ctx context.Context, db string, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDropCollection(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDropCollectionRequest(c.Server, db, collection, body)
+func (c *Client) TigrisDropCollection(ctx context.Context, db string, collection string, body TigrisDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDropCollectionRequest(c.Server, db, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -886,8 +886,8 @@ func (c *Client) TigrisDBDropCollection(ctx context.Context, db string, collecti
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBCreateDatabaseRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateDatabaseRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -898,8 +898,8 @@ func (c *Client) TigrisDBCreateDatabaseWithBody(ctx context.Context, db string, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBCreateDatabase(ctx context.Context, db string, body TigrisDBCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBCreateDatabaseRequest(c.Server, db, body)
+func (c *Client) TigrisCreateDatabase(ctx context.Context, db string, body TigrisCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateDatabaseRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -910,8 +910,8 @@ func (c *Client) TigrisDBCreateDatabase(ctx context.Context, db string, body Tig
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDescribeDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDescribeDatabaseRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisDescribeDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDescribeDatabaseRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -922,8 +922,8 @@ func (c *Client) TigrisDBDescribeDatabaseWithBody(ctx context.Context, db string
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDescribeDatabase(ctx context.Context, db string, body TigrisDBDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDescribeDatabaseRequest(c.Server, db, body)
+func (c *Client) TigrisDescribeDatabase(ctx context.Context, db string, body TigrisDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDescribeDatabaseRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -934,8 +934,8 @@ func (c *Client) TigrisDBDescribeDatabase(ctx context.Context, db string, body T
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDropDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDropDatabaseRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisDropDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDropDatabaseRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -946,8 +946,8 @@ func (c *Client) TigrisDBDropDatabaseWithBody(ctx context.Context, db string, co
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBDropDatabase(ctx context.Context, db string, body TigrisDBDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBDropDatabaseRequest(c.Server, db, body)
+func (c *Client) TigrisDropDatabase(ctx context.Context, db string, body TigrisDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDropDatabaseRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -958,8 +958,8 @@ func (c *Client) TigrisDBDropDatabase(ctx context.Context, db string, body Tigri
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBStreamWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBStreamRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisStreamWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisStreamRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -970,8 +970,8 @@ func (c *Client) TigrisDBStreamWithBody(ctx context.Context, db string, contentT
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBStream(ctx context.Context, db string, body TigrisDBStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBStreamRequest(c.Server, db, body)
+func (c *Client) TigrisStream(ctx context.Context, db string, body TigrisStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisStreamRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -982,8 +982,8 @@ func (c *Client) TigrisDBStream(ctx context.Context, db string, body TigrisDBStr
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBBeginTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBBeginTransactionRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisBeginTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisBeginTransactionRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -994,8 +994,8 @@ func (c *Client) TigrisDBBeginTransactionWithBody(ctx context.Context, db string
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBBeginTransaction(ctx context.Context, db string, body TigrisDBBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBBeginTransactionRequest(c.Server, db, body)
+func (c *Client) TigrisBeginTransaction(ctx context.Context, db string, body TigrisBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisBeginTransactionRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1006,8 +1006,8 @@ func (c *Client) TigrisDBBeginTransaction(ctx context.Context, db string, body T
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBCommitTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBCommitTransactionRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisCommitTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCommitTransactionRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1018,8 +1018,8 @@ func (c *Client) TigrisDBCommitTransactionWithBody(ctx context.Context, db strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBCommitTransaction(ctx context.Context, db string, body TigrisDBCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBCommitTransactionRequest(c.Server, db, body)
+func (c *Client) TigrisCommitTransaction(ctx context.Context, db string, body TigrisCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCommitTransactionRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1030,8 +1030,8 @@ func (c *Client) TigrisDBCommitTransaction(ctx context.Context, db string, body 
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBRollbackTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBRollbackTransactionRequestWithBody(c.Server, db, contentType, body)
+func (c *Client) TigrisRollbackTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisRollbackTransactionRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1042,8 +1042,8 @@ func (c *Client) TigrisDBRollbackTransactionWithBody(ctx context.Context, db str
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisDBRollbackTransaction(ctx context.Context, db string, body TigrisDBRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisDBRollbackTransactionRequest(c.Server, db, body)
+func (c *Client) TigrisRollbackTransaction(ctx context.Context, db string, body TigrisRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisRollbackTransactionRequest(c.Server, db, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1054,8 +1054,8 @@ func (c *Client) TigrisDBRollbackTransaction(ctx context.Context, db string, bod
 	return c.Client.Do(req)
 }
 
-// NewTigrisDBListDatabasesRequest generates requests for TigrisDBListDatabases
-func NewTigrisDBListDatabasesRequest(server string) (*http.Request, error) {
+// NewTigrisListDatabasesRequest generates requests for TigrisListDatabases
+func NewTigrisListDatabasesRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1081,19 +1081,19 @@ func NewTigrisDBListDatabasesRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewTigrisDBListCollectionsRequest calls the generic TigrisDBListCollections builder with application/json body
-func NewTigrisDBListCollectionsRequest(server string, db string, body TigrisDBListCollectionsJSONRequestBody) (*http.Request, error) {
+// NewTigrisListCollectionsRequest calls the generic TigrisListCollections builder with application/json body
+func NewTigrisListCollectionsRequest(server string, db string, body TigrisListCollectionsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBListCollectionsRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisListCollectionsRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBListCollectionsRequestWithBody generates requests for TigrisDBListCollections with any type of body
-func NewTigrisDBListCollectionsRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisListCollectionsRequestWithBody generates requests for TigrisListCollections with any type of body
+func NewTigrisListCollectionsRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1128,19 +1128,19 @@ func NewTigrisDBListCollectionsRequestWithBody(server string, db string, content
 	return req, nil
 }
 
-// NewTigrisDBCreateOrUpdateCollectionRequest calls the generic TigrisDBCreateOrUpdateCollection builder with application/json body
-func NewTigrisDBCreateOrUpdateCollectionRequest(server string, db string, collection string, body TigrisDBCreateOrUpdateCollectionJSONRequestBody) (*http.Request, error) {
+// NewTigrisCreateOrUpdateCollectionRequest calls the generic TigrisCreateOrUpdateCollection builder with application/json body
+func NewTigrisCreateOrUpdateCollectionRequest(server string, db string, collection string, body TigrisCreateOrUpdateCollectionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBCreateOrUpdateCollectionRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisCreateOrUpdateCollectionRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBCreateOrUpdateCollectionRequestWithBody generates requests for TigrisDBCreateOrUpdateCollection with any type of body
-func NewTigrisDBCreateOrUpdateCollectionRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisCreateOrUpdateCollectionRequestWithBody generates requests for TigrisCreateOrUpdateCollection with any type of body
+func NewTigrisCreateOrUpdateCollectionRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1182,19 +1182,19 @@ func NewTigrisDBCreateOrUpdateCollectionRequestWithBody(server string, db string
 	return req, nil
 }
 
-// NewTigrisDBDescribeCollectionRequest calls the generic TigrisDBDescribeCollection builder with application/json body
-func NewTigrisDBDescribeCollectionRequest(server string, db string, collection string, body TigrisDBDescribeCollectionJSONRequestBody) (*http.Request, error) {
+// NewTigrisDescribeCollectionRequest calls the generic TigrisDescribeCollection builder with application/json body
+func NewTigrisDescribeCollectionRequest(server string, db string, collection string, body TigrisDescribeCollectionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBDescribeCollectionRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisDescribeCollectionRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBDescribeCollectionRequestWithBody generates requests for TigrisDBDescribeCollection with any type of body
-func NewTigrisDBDescribeCollectionRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisDescribeCollectionRequestWithBody generates requests for TigrisDescribeCollection with any type of body
+func NewTigrisDescribeCollectionRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1236,19 +1236,19 @@ func NewTigrisDBDescribeCollectionRequestWithBody(server string, db string, coll
 	return req, nil
 }
 
-// NewTigrisDBDeleteRequest calls the generic TigrisDBDelete builder with application/json body
-func NewTigrisDBDeleteRequest(server string, db string, collection string, body TigrisDBDeleteJSONRequestBody) (*http.Request, error) {
+// NewTigrisDeleteRequest calls the generic TigrisDelete builder with application/json body
+func NewTigrisDeleteRequest(server string, db string, collection string, body TigrisDeleteJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBDeleteRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisDeleteRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBDeleteRequestWithBody generates requests for TigrisDBDelete with any type of body
-func NewTigrisDBDeleteRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisDeleteRequestWithBody generates requests for TigrisDelete with any type of body
+func NewTigrisDeleteRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1290,19 +1290,19 @@ func NewTigrisDBDeleteRequestWithBody(server string, db string, collection strin
 	return req, nil
 }
 
-// NewTigrisDBInsertRequest calls the generic TigrisDBInsert builder with application/json body
-func NewTigrisDBInsertRequest(server string, db string, collection string, body TigrisDBInsertJSONRequestBody) (*http.Request, error) {
+// NewTigrisInsertRequest calls the generic TigrisInsert builder with application/json body
+func NewTigrisInsertRequest(server string, db string, collection string, body TigrisInsertJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBInsertRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisInsertRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBInsertRequestWithBody generates requests for TigrisDBInsert with any type of body
-func NewTigrisDBInsertRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisInsertRequestWithBody generates requests for TigrisInsert with any type of body
+func NewTigrisInsertRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1344,19 +1344,19 @@ func NewTigrisDBInsertRequestWithBody(server string, db string, collection strin
 	return req, nil
 }
 
-// NewTigrisDBReadRequest calls the generic TigrisDBRead builder with application/json body
-func NewTigrisDBReadRequest(server string, db string, collection string, body TigrisDBReadJSONRequestBody) (*http.Request, error) {
+// NewTigrisReadRequest calls the generic TigrisRead builder with application/json body
+func NewTigrisReadRequest(server string, db string, collection string, body TigrisReadJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBReadRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisReadRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBReadRequestWithBody generates requests for TigrisDBRead with any type of body
-func NewTigrisDBReadRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisReadRequestWithBody generates requests for TigrisRead with any type of body
+func NewTigrisReadRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1398,19 +1398,19 @@ func NewTigrisDBReadRequestWithBody(server string, db string, collection string,
 	return req, nil
 }
 
-// NewTigrisDBReplaceRequest calls the generic TigrisDBReplace builder with application/json body
-func NewTigrisDBReplaceRequest(server string, db string, collection string, body TigrisDBReplaceJSONRequestBody) (*http.Request, error) {
+// NewTigrisReplaceRequest calls the generic TigrisReplace builder with application/json body
+func NewTigrisReplaceRequest(server string, db string, collection string, body TigrisReplaceJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBReplaceRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisReplaceRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBReplaceRequestWithBody generates requests for TigrisDBReplace with any type of body
-func NewTigrisDBReplaceRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisReplaceRequestWithBody generates requests for TigrisReplace with any type of body
+func NewTigrisReplaceRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1452,19 +1452,19 @@ func NewTigrisDBReplaceRequestWithBody(server string, db string, collection stri
 	return req, nil
 }
 
-// NewTigrisDBUpdateRequest calls the generic TigrisDBUpdate builder with application/json body
-func NewTigrisDBUpdateRequest(server string, db string, collection string, body TigrisDBUpdateJSONRequestBody) (*http.Request, error) {
+// NewTigrisUpdateRequest calls the generic TigrisUpdate builder with application/json body
+func NewTigrisUpdateRequest(server string, db string, collection string, body TigrisUpdateJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBUpdateRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisUpdateRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBUpdateRequestWithBody generates requests for TigrisDBUpdate with any type of body
-func NewTigrisDBUpdateRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisUpdateRequestWithBody generates requests for TigrisUpdate with any type of body
+func NewTigrisUpdateRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1506,19 +1506,19 @@ func NewTigrisDBUpdateRequestWithBody(server string, db string, collection strin
 	return req, nil
 }
 
-// NewTigrisDBDropCollectionRequest calls the generic TigrisDBDropCollection builder with application/json body
-func NewTigrisDBDropCollectionRequest(server string, db string, collection string, body TigrisDBDropCollectionJSONRequestBody) (*http.Request, error) {
+// NewTigrisDropCollectionRequest calls the generic TigrisDropCollection builder with application/json body
+func NewTigrisDropCollectionRequest(server string, db string, collection string, body TigrisDropCollectionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBDropCollectionRequestWithBody(server, db, collection, "application/json", bodyReader)
+	return NewTigrisDropCollectionRequestWithBody(server, db, collection, "application/json", bodyReader)
 }
 
-// NewTigrisDBDropCollectionRequestWithBody generates requests for TigrisDBDropCollection with any type of body
-func NewTigrisDBDropCollectionRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisDropCollectionRequestWithBody generates requests for TigrisDropCollection with any type of body
+func NewTigrisDropCollectionRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1560,19 +1560,19 @@ func NewTigrisDBDropCollectionRequestWithBody(server string, db string, collecti
 	return req, nil
 }
 
-// NewTigrisDBCreateDatabaseRequest calls the generic TigrisDBCreateDatabase builder with application/json body
-func NewTigrisDBCreateDatabaseRequest(server string, db string, body TigrisDBCreateDatabaseJSONRequestBody) (*http.Request, error) {
+// NewTigrisCreateDatabaseRequest calls the generic TigrisCreateDatabase builder with application/json body
+func NewTigrisCreateDatabaseRequest(server string, db string, body TigrisCreateDatabaseJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBCreateDatabaseRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisCreateDatabaseRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBCreateDatabaseRequestWithBody generates requests for TigrisDBCreateDatabase with any type of body
-func NewTigrisDBCreateDatabaseRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisCreateDatabaseRequestWithBody generates requests for TigrisCreateDatabase with any type of body
+func NewTigrisCreateDatabaseRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1607,19 +1607,19 @@ func NewTigrisDBCreateDatabaseRequestWithBody(server string, db string, contentT
 	return req, nil
 }
 
-// NewTigrisDBDescribeDatabaseRequest calls the generic TigrisDBDescribeDatabase builder with application/json body
-func NewTigrisDBDescribeDatabaseRequest(server string, db string, body TigrisDBDescribeDatabaseJSONRequestBody) (*http.Request, error) {
+// NewTigrisDescribeDatabaseRequest calls the generic TigrisDescribeDatabase builder with application/json body
+func NewTigrisDescribeDatabaseRequest(server string, db string, body TigrisDescribeDatabaseJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBDescribeDatabaseRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisDescribeDatabaseRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBDescribeDatabaseRequestWithBody generates requests for TigrisDBDescribeDatabase with any type of body
-func NewTigrisDBDescribeDatabaseRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisDescribeDatabaseRequestWithBody generates requests for TigrisDescribeDatabase with any type of body
+func NewTigrisDescribeDatabaseRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1654,19 +1654,19 @@ func NewTigrisDBDescribeDatabaseRequestWithBody(server string, db string, conten
 	return req, nil
 }
 
-// NewTigrisDBDropDatabaseRequest calls the generic TigrisDBDropDatabase builder with application/json body
-func NewTigrisDBDropDatabaseRequest(server string, db string, body TigrisDBDropDatabaseJSONRequestBody) (*http.Request, error) {
+// NewTigrisDropDatabaseRequest calls the generic TigrisDropDatabase builder with application/json body
+func NewTigrisDropDatabaseRequest(server string, db string, body TigrisDropDatabaseJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBDropDatabaseRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisDropDatabaseRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBDropDatabaseRequestWithBody generates requests for TigrisDBDropDatabase with any type of body
-func NewTigrisDBDropDatabaseRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisDropDatabaseRequestWithBody generates requests for TigrisDropDatabase with any type of body
+func NewTigrisDropDatabaseRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1701,19 +1701,19 @@ func NewTigrisDBDropDatabaseRequestWithBody(server string, db string, contentTyp
 	return req, nil
 }
 
-// NewTigrisDBStreamRequest calls the generic TigrisDBStream builder with application/json body
-func NewTigrisDBStreamRequest(server string, db string, body TigrisDBStreamJSONRequestBody) (*http.Request, error) {
+// NewTigrisStreamRequest calls the generic TigrisStream builder with application/json body
+func NewTigrisStreamRequest(server string, db string, body TigrisStreamJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBStreamRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisStreamRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBStreamRequestWithBody generates requests for TigrisDBStream with any type of body
-func NewTigrisDBStreamRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisStreamRequestWithBody generates requests for TigrisStream with any type of body
+func NewTigrisStreamRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1748,19 +1748,19 @@ func NewTigrisDBStreamRequestWithBody(server string, db string, contentType stri
 	return req, nil
 }
 
-// NewTigrisDBBeginTransactionRequest calls the generic TigrisDBBeginTransaction builder with application/json body
-func NewTigrisDBBeginTransactionRequest(server string, db string, body TigrisDBBeginTransactionJSONRequestBody) (*http.Request, error) {
+// NewTigrisBeginTransactionRequest calls the generic TigrisBeginTransaction builder with application/json body
+func NewTigrisBeginTransactionRequest(server string, db string, body TigrisBeginTransactionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBBeginTransactionRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisBeginTransactionRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBBeginTransactionRequestWithBody generates requests for TigrisDBBeginTransaction with any type of body
-func NewTigrisDBBeginTransactionRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisBeginTransactionRequestWithBody generates requests for TigrisBeginTransaction with any type of body
+func NewTigrisBeginTransactionRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1795,19 +1795,19 @@ func NewTigrisDBBeginTransactionRequestWithBody(server string, db string, conten
 	return req, nil
 }
 
-// NewTigrisDBCommitTransactionRequest calls the generic TigrisDBCommitTransaction builder with application/json body
-func NewTigrisDBCommitTransactionRequest(server string, db string, body TigrisDBCommitTransactionJSONRequestBody) (*http.Request, error) {
+// NewTigrisCommitTransactionRequest calls the generic TigrisCommitTransaction builder with application/json body
+func NewTigrisCommitTransactionRequest(server string, db string, body TigrisCommitTransactionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBCommitTransactionRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisCommitTransactionRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBCommitTransactionRequestWithBody generates requests for TigrisDBCommitTransaction with any type of body
-func NewTigrisDBCommitTransactionRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisCommitTransactionRequestWithBody generates requests for TigrisCommitTransaction with any type of body
+func NewTigrisCommitTransactionRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1842,19 +1842,19 @@ func NewTigrisDBCommitTransactionRequestWithBody(server string, db string, conte
 	return req, nil
 }
 
-// NewTigrisDBRollbackTransactionRequest calls the generic TigrisDBRollbackTransaction builder with application/json body
-func NewTigrisDBRollbackTransactionRequest(server string, db string, body TigrisDBRollbackTransactionJSONRequestBody) (*http.Request, error) {
+// NewTigrisRollbackTransactionRequest calls the generic TigrisRollbackTransaction builder with application/json body
+func NewTigrisRollbackTransactionRequest(server string, db string, body TigrisRollbackTransactionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewTigrisDBRollbackTransactionRequestWithBody(server, db, "application/json", bodyReader)
+	return NewTigrisRollbackTransactionRequestWithBody(server, db, "application/json", bodyReader)
 }
 
-// NewTigrisDBRollbackTransactionRequestWithBody generates requests for TigrisDBRollbackTransaction with any type of body
-func NewTigrisDBRollbackTransactionRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
+// NewTigrisRollbackTransactionRequestWithBody generates requests for TigrisRollbackTransaction with any type of body
+func NewTigrisRollbackTransactionRequestWithBody(server string, db string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1932,98 +1932,98 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// TigrisDBListDatabases request
-	TigrisDBListDatabasesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisDBListDatabasesResponse, error)
+	// TigrisListDatabases request
+	TigrisListDatabasesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisListDatabasesResponse, error)
 
-	// TigrisDBListCollections request with any body
-	TigrisDBListCollectionsWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error)
+	// TigrisListCollections request with any body
+	TigrisListCollectionsWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisListCollectionsResponse, error)
 
-	TigrisDBListCollectionsWithResponse(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error)
+	TigrisListCollectionsWithResponse(ctx context.Context, db string, body TigrisListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisListCollectionsResponse, error)
 
-	// TigrisDBCreateOrUpdateCollection request with any body
-	TigrisDBCreateOrUpdateCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCreateOrUpdateCollectionResponse, error)
+	// TigrisCreateOrUpdateCollection request with any body
+	TigrisCreateOrUpdateCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionResponse, error)
 
-	TigrisDBCreateOrUpdateCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBCreateOrUpdateCollectionResponse, error)
+	TigrisCreateOrUpdateCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionResponse, error)
 
-	// TigrisDBDescribeCollection request with any body
-	TigrisDBDescribeCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDescribeCollectionResponse, error)
+	// TigrisDescribeCollection request with any body
+	TigrisDescribeCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDescribeCollectionResponse, error)
 
-	TigrisDBDescribeCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDescribeCollectionResponse, error)
+	TigrisDescribeCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDescribeCollectionResponse, error)
 
-	// TigrisDBDelete request with any body
-	TigrisDBDeleteWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDeleteResponse, error)
+	// TigrisDelete request with any body
+	TigrisDeleteWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDeleteResponse, error)
 
-	TigrisDBDeleteWithResponse(ctx context.Context, db string, collection string, body TigrisDBDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDeleteResponse, error)
+	TigrisDeleteWithResponse(ctx context.Context, db string, collection string, body TigrisDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDeleteResponse, error)
 
-	// TigrisDBInsert request with any body
-	TigrisDBInsertWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBInsertResponse, error)
+	// TigrisInsert request with any body
+	TigrisInsertWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisInsertResponse, error)
 
-	TigrisDBInsertWithResponse(ctx context.Context, db string, collection string, body TigrisDBInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBInsertResponse, error)
+	TigrisInsertWithResponse(ctx context.Context, db string, collection string, body TigrisInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisInsertResponse, error)
 
-	// TigrisDBRead request with any body
-	TigrisDBReadWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBReadResponse, error)
+	// TigrisRead request with any body
+	TigrisReadWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisReadResponse, error)
 
-	TigrisDBReadWithResponse(ctx context.Context, db string, collection string, body TigrisDBReadJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBReadResponse, error)
+	TigrisReadWithResponse(ctx context.Context, db string, collection string, body TigrisReadJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisReadResponse, error)
 
-	// TigrisDBReplace request with any body
-	TigrisDBReplaceWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBReplaceResponse, error)
+	// TigrisReplace request with any body
+	TigrisReplaceWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisReplaceResponse, error)
 
-	TigrisDBReplaceWithResponse(ctx context.Context, db string, collection string, body TigrisDBReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBReplaceResponse, error)
+	TigrisReplaceWithResponse(ctx context.Context, db string, collection string, body TigrisReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisReplaceResponse, error)
 
-	// TigrisDBUpdate request with any body
-	TigrisDBUpdateWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBUpdateResponse, error)
+	// TigrisUpdate request with any body
+	TigrisUpdateWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisUpdateResponse, error)
 
-	TigrisDBUpdateWithResponse(ctx context.Context, db string, collection string, body TigrisDBUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBUpdateResponse, error)
+	TigrisUpdateWithResponse(ctx context.Context, db string, collection string, body TigrisUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisUpdateResponse, error)
 
-	// TigrisDBDropCollection request with any body
-	TigrisDBDropCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error)
+	// TigrisDropCollection request with any body
+	TigrisDropCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDropCollectionResponse, error)
 
-	TigrisDBDropCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error)
+	TigrisDropCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDropCollectionResponse, error)
 
-	// TigrisDBCreateDatabase request with any body
-	TigrisDBCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCreateDatabaseResponse, error)
+	// TigrisCreateDatabase request with any body
+	TigrisCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateDatabaseResponse, error)
 
-	TigrisDBCreateDatabaseWithResponse(ctx context.Context, db string, body TigrisDBCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBCreateDatabaseResponse, error)
+	TigrisCreateDatabaseWithResponse(ctx context.Context, db string, body TigrisCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateDatabaseResponse, error)
 
-	// TigrisDBDescribeDatabase request with any body
-	TigrisDBDescribeDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDescribeDatabaseResponse, error)
+	// TigrisDescribeDatabase request with any body
+	TigrisDescribeDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDescribeDatabaseResponse, error)
 
-	TigrisDBDescribeDatabaseWithResponse(ctx context.Context, db string, body TigrisDBDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDescribeDatabaseResponse, error)
+	TigrisDescribeDatabaseWithResponse(ctx context.Context, db string, body TigrisDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDescribeDatabaseResponse, error)
 
-	// TigrisDBDropDatabase request with any body
-	TigrisDBDropDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDropDatabaseResponse, error)
+	// TigrisDropDatabase request with any body
+	TigrisDropDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDropDatabaseResponse, error)
 
-	TigrisDBDropDatabaseWithResponse(ctx context.Context, db string, body TigrisDBDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDropDatabaseResponse, error)
+	TigrisDropDatabaseWithResponse(ctx context.Context, db string, body TigrisDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDropDatabaseResponse, error)
 
-	// TigrisDBStream request with any body
-	TigrisDBStreamWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBStreamResponse, error)
+	// TigrisStream request with any body
+	TigrisStreamWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisStreamResponse, error)
 
-	TigrisDBStreamWithResponse(ctx context.Context, db string, body TigrisDBStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBStreamResponse, error)
+	TigrisStreamWithResponse(ctx context.Context, db string, body TigrisStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisStreamResponse, error)
 
-	// TigrisDBBeginTransaction request with any body
-	TigrisDBBeginTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBBeginTransactionResponse, error)
+	// TigrisBeginTransaction request with any body
+	TigrisBeginTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisBeginTransactionResponse, error)
 
-	TigrisDBBeginTransactionWithResponse(ctx context.Context, db string, body TigrisDBBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBBeginTransactionResponse, error)
+	TigrisBeginTransactionWithResponse(ctx context.Context, db string, body TigrisBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisBeginTransactionResponse, error)
 
-	// TigrisDBCommitTransaction request with any body
-	TigrisDBCommitTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCommitTransactionResponse, error)
+	// TigrisCommitTransaction request with any body
+	TigrisCommitTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCommitTransactionResponse, error)
 
-	TigrisDBCommitTransactionWithResponse(ctx context.Context, db string, body TigrisDBCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBCommitTransactionResponse, error)
+	TigrisCommitTransactionWithResponse(ctx context.Context, db string, body TigrisCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCommitTransactionResponse, error)
 
-	// TigrisDBRollbackTransaction request with any body
-	TigrisDBRollbackTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBRollbackTransactionResponse, error)
+	// TigrisRollbackTransaction request with any body
+	TigrisRollbackTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisRollbackTransactionResponse, error)
 
-	TigrisDBRollbackTransactionWithResponse(ctx context.Context, db string, body TigrisDBRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBRollbackTransactionResponse, error)
+	TigrisRollbackTransactionWithResponse(ctx context.Context, db string, body TigrisRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisRollbackTransactionResponse, error)
 }
 
-type TigrisDBListDatabasesResponse struct {
+type TigrisListDatabasesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListDatabasesResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBListDatabasesResponse) Status() string {
+func (r TigrisListDatabasesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2031,21 +2031,21 @@ func (r TigrisDBListDatabasesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBListDatabasesResponse) StatusCode() int {
+func (r TigrisListDatabasesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBListCollectionsResponse struct {
+type TigrisListCollectionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListCollectionsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBListCollectionsResponse) Status() string {
+func (r TigrisListCollectionsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2053,21 +2053,21 @@ func (r TigrisDBListCollectionsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBListCollectionsResponse) StatusCode() int {
+func (r TigrisListCollectionsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBCreateOrUpdateCollectionResponse struct {
+type TigrisCreateOrUpdateCollectionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CreateOrUpdateCollectionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBCreateOrUpdateCollectionResponse) Status() string {
+func (r TigrisCreateOrUpdateCollectionResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2075,21 +2075,21 @@ func (r TigrisDBCreateOrUpdateCollectionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBCreateOrUpdateCollectionResponse) StatusCode() int {
+func (r TigrisCreateOrUpdateCollectionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBDescribeCollectionResponse struct {
+type TigrisDescribeCollectionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DescribeCollectionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBDescribeCollectionResponse) Status() string {
+func (r TigrisDescribeCollectionResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2097,21 +2097,21 @@ func (r TigrisDBDescribeCollectionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBDescribeCollectionResponse) StatusCode() int {
+func (r TigrisDescribeCollectionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBDeleteResponse struct {
+type TigrisDeleteResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeleteResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBDeleteResponse) Status() string {
+func (r TigrisDeleteResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2119,21 +2119,21 @@ func (r TigrisDBDeleteResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBDeleteResponse) StatusCode() int {
+func (r TigrisDeleteResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBInsertResponse struct {
+type TigrisInsertResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *InsertResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBInsertResponse) Status() string {
+func (r TigrisInsertResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2141,21 +2141,21 @@ func (r TigrisDBInsertResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBInsertResponse) StatusCode() int {
+func (r TigrisInsertResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBReadResponse struct {
+type TigrisReadResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ReadResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBReadResponse) Status() string {
+func (r TigrisReadResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2163,21 +2163,21 @@ func (r TigrisDBReadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBReadResponse) StatusCode() int {
+func (r TigrisReadResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBReplaceResponse struct {
+type TigrisReplaceResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ReplaceResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBReplaceResponse) Status() string {
+func (r TigrisReplaceResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2185,21 +2185,21 @@ func (r TigrisDBReplaceResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBReplaceResponse) StatusCode() int {
+func (r TigrisReplaceResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBUpdateResponse struct {
+type TigrisUpdateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *UpdateResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBUpdateResponse) Status() string {
+func (r TigrisUpdateResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2207,21 +2207,21 @@ func (r TigrisDBUpdateResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBUpdateResponse) StatusCode() int {
+func (r TigrisUpdateResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBDropCollectionResponse struct {
+type TigrisDropCollectionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DropCollectionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBDropCollectionResponse) Status() string {
+func (r TigrisDropCollectionResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2229,21 +2229,21 @@ func (r TigrisDBDropCollectionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBDropCollectionResponse) StatusCode() int {
+func (r TigrisDropCollectionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBCreateDatabaseResponse struct {
+type TigrisCreateDatabaseResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CreateDatabaseResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBCreateDatabaseResponse) Status() string {
+func (r TigrisCreateDatabaseResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2251,21 +2251,21 @@ func (r TigrisDBCreateDatabaseResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBCreateDatabaseResponse) StatusCode() int {
+func (r TigrisCreateDatabaseResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBDescribeDatabaseResponse struct {
+type TigrisDescribeDatabaseResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DescribeDatabaseResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBDescribeDatabaseResponse) Status() string {
+func (r TigrisDescribeDatabaseResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2273,21 +2273,21 @@ func (r TigrisDBDescribeDatabaseResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBDescribeDatabaseResponse) StatusCode() int {
+func (r TigrisDescribeDatabaseResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBDropDatabaseResponse struct {
+type TigrisDropDatabaseResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DropDatabaseResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBDropDatabaseResponse) Status() string {
+func (r TigrisDropDatabaseResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2295,21 +2295,21 @@ func (r TigrisDBDropDatabaseResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBDropDatabaseResponse) StatusCode() int {
+func (r TigrisDropDatabaseResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBStreamResponse struct {
+type TigrisStreamResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *StreamResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBStreamResponse) Status() string {
+func (r TigrisStreamResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2317,21 +2317,21 @@ func (r TigrisDBStreamResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBStreamResponse) StatusCode() int {
+func (r TigrisStreamResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBBeginTransactionResponse struct {
+type TigrisBeginTransactionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *BeginTransactionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBBeginTransactionResponse) Status() string {
+func (r TigrisBeginTransactionResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2339,21 +2339,21 @@ func (r TigrisDBBeginTransactionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBBeginTransactionResponse) StatusCode() int {
+func (r TigrisBeginTransactionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBCommitTransactionResponse struct {
+type TigrisCommitTransactionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CommitTransactionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBCommitTransactionResponse) Status() string {
+func (r TigrisCommitTransactionResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2361,21 +2361,21 @@ func (r TigrisDBCommitTransactionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBCommitTransactionResponse) StatusCode() int {
+func (r TigrisCommitTransactionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type TigrisDBRollbackTransactionResponse struct {
+type TigrisRollbackTransactionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *RollbackTransactionResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisDBRollbackTransactionResponse) Status() string {
+func (r TigrisRollbackTransactionResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2383,303 +2383,303 @@ func (r TigrisDBRollbackTransactionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisDBRollbackTransactionResponse) StatusCode() int {
+func (r TigrisRollbackTransactionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TigrisDBListDatabasesWithResponse request returning *TigrisDBListDatabasesResponse
-func (c *ClientWithResponses) TigrisDBListDatabasesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisDBListDatabasesResponse, error) {
-	rsp, err := c.TigrisDBListDatabases(ctx, reqEditors...)
+// TigrisListDatabasesWithResponse request returning *TigrisListDatabasesResponse
+func (c *ClientWithResponses) TigrisListDatabasesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisListDatabasesResponse, error) {
+	rsp, err := c.TigrisListDatabases(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBListDatabasesResponse(rsp)
+	return ParseTigrisListDatabasesResponse(rsp)
 }
 
-// TigrisDBListCollectionsWithBodyWithResponse request with arbitrary body returning *TigrisDBListCollectionsResponse
-func (c *ClientWithResponses) TigrisDBListCollectionsWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error) {
-	rsp, err := c.TigrisDBListCollectionsWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisListCollectionsWithBodyWithResponse request with arbitrary body returning *TigrisListCollectionsResponse
+func (c *ClientWithResponses) TigrisListCollectionsWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisListCollectionsResponse, error) {
+	rsp, err := c.TigrisListCollectionsWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBListCollectionsResponse(rsp)
+	return ParseTigrisListCollectionsResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBListCollectionsWithResponse(ctx context.Context, db string, body TigrisDBListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBListCollectionsResponse, error) {
-	rsp, err := c.TigrisDBListCollections(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisListCollectionsWithResponse(ctx context.Context, db string, body TigrisListCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisListCollectionsResponse, error) {
+	rsp, err := c.TigrisListCollections(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBListCollectionsResponse(rsp)
+	return ParseTigrisListCollectionsResponse(rsp)
 }
 
-// TigrisDBCreateOrUpdateCollectionWithBodyWithResponse request with arbitrary body returning *TigrisDBCreateOrUpdateCollectionResponse
-func (c *ClientWithResponses) TigrisDBCreateOrUpdateCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCreateOrUpdateCollectionResponse, error) {
-	rsp, err := c.TigrisDBCreateOrUpdateCollectionWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisCreateOrUpdateCollectionWithBodyWithResponse request with arbitrary body returning *TigrisCreateOrUpdateCollectionResponse
+func (c *ClientWithResponses) TigrisCreateOrUpdateCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionResponse, error) {
+	rsp, err := c.TigrisCreateOrUpdateCollectionWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBCreateOrUpdateCollectionResponse(rsp)
+	return ParseTigrisCreateOrUpdateCollectionResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBCreateOrUpdateCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBCreateOrUpdateCollectionResponse, error) {
-	rsp, err := c.TigrisDBCreateOrUpdateCollection(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisCreateOrUpdateCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisCreateOrUpdateCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionResponse, error) {
+	rsp, err := c.TigrisCreateOrUpdateCollection(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBCreateOrUpdateCollectionResponse(rsp)
+	return ParseTigrisCreateOrUpdateCollectionResponse(rsp)
 }
 
-// TigrisDBDescribeCollectionWithBodyWithResponse request with arbitrary body returning *TigrisDBDescribeCollectionResponse
-func (c *ClientWithResponses) TigrisDBDescribeCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDescribeCollectionResponse, error) {
-	rsp, err := c.TigrisDBDescribeCollectionWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisDescribeCollectionWithBodyWithResponse request with arbitrary body returning *TigrisDescribeCollectionResponse
+func (c *ClientWithResponses) TigrisDescribeCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDescribeCollectionResponse, error) {
+	rsp, err := c.TigrisDescribeCollectionWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDescribeCollectionResponse(rsp)
+	return ParseTigrisDescribeCollectionResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBDescribeCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDescribeCollectionResponse, error) {
-	rsp, err := c.TigrisDBDescribeCollection(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisDescribeCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDescribeCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDescribeCollectionResponse, error) {
+	rsp, err := c.TigrisDescribeCollection(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDescribeCollectionResponse(rsp)
+	return ParseTigrisDescribeCollectionResponse(rsp)
 }
 
-// TigrisDBDeleteWithBodyWithResponse request with arbitrary body returning *TigrisDBDeleteResponse
-func (c *ClientWithResponses) TigrisDBDeleteWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDeleteResponse, error) {
-	rsp, err := c.TigrisDBDeleteWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisDeleteWithBodyWithResponse request with arbitrary body returning *TigrisDeleteResponse
+func (c *ClientWithResponses) TigrisDeleteWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDeleteResponse, error) {
+	rsp, err := c.TigrisDeleteWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDeleteResponse(rsp)
+	return ParseTigrisDeleteResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBDeleteWithResponse(ctx context.Context, db string, collection string, body TigrisDBDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDeleteResponse, error) {
-	rsp, err := c.TigrisDBDelete(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisDeleteWithResponse(ctx context.Context, db string, collection string, body TigrisDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDeleteResponse, error) {
+	rsp, err := c.TigrisDelete(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDeleteResponse(rsp)
+	return ParseTigrisDeleteResponse(rsp)
 }
 
-// TigrisDBInsertWithBodyWithResponse request with arbitrary body returning *TigrisDBInsertResponse
-func (c *ClientWithResponses) TigrisDBInsertWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBInsertResponse, error) {
-	rsp, err := c.TigrisDBInsertWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisInsertWithBodyWithResponse request with arbitrary body returning *TigrisInsertResponse
+func (c *ClientWithResponses) TigrisInsertWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisInsertResponse, error) {
+	rsp, err := c.TigrisInsertWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBInsertResponse(rsp)
+	return ParseTigrisInsertResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBInsertWithResponse(ctx context.Context, db string, collection string, body TigrisDBInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBInsertResponse, error) {
-	rsp, err := c.TigrisDBInsert(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisInsertWithResponse(ctx context.Context, db string, collection string, body TigrisInsertJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisInsertResponse, error) {
+	rsp, err := c.TigrisInsert(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBInsertResponse(rsp)
+	return ParseTigrisInsertResponse(rsp)
 }
 
-// TigrisDBReadWithBodyWithResponse request with arbitrary body returning *TigrisDBReadResponse
-func (c *ClientWithResponses) TigrisDBReadWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBReadResponse, error) {
-	rsp, err := c.TigrisDBReadWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisReadWithBodyWithResponse request with arbitrary body returning *TigrisReadResponse
+func (c *ClientWithResponses) TigrisReadWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisReadResponse, error) {
+	rsp, err := c.TigrisReadWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBReadResponse(rsp)
+	return ParseTigrisReadResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBReadWithResponse(ctx context.Context, db string, collection string, body TigrisDBReadJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBReadResponse, error) {
-	rsp, err := c.TigrisDBRead(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisReadWithResponse(ctx context.Context, db string, collection string, body TigrisReadJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisReadResponse, error) {
+	rsp, err := c.TigrisRead(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBReadResponse(rsp)
+	return ParseTigrisReadResponse(rsp)
 }
 
-// TigrisDBReplaceWithBodyWithResponse request with arbitrary body returning *TigrisDBReplaceResponse
-func (c *ClientWithResponses) TigrisDBReplaceWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBReplaceResponse, error) {
-	rsp, err := c.TigrisDBReplaceWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisReplaceWithBodyWithResponse request with arbitrary body returning *TigrisReplaceResponse
+func (c *ClientWithResponses) TigrisReplaceWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisReplaceResponse, error) {
+	rsp, err := c.TigrisReplaceWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBReplaceResponse(rsp)
+	return ParseTigrisReplaceResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBReplaceWithResponse(ctx context.Context, db string, collection string, body TigrisDBReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBReplaceResponse, error) {
-	rsp, err := c.TigrisDBReplace(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisReplaceWithResponse(ctx context.Context, db string, collection string, body TigrisReplaceJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisReplaceResponse, error) {
+	rsp, err := c.TigrisReplace(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBReplaceResponse(rsp)
+	return ParseTigrisReplaceResponse(rsp)
 }
 
-// TigrisDBUpdateWithBodyWithResponse request with arbitrary body returning *TigrisDBUpdateResponse
-func (c *ClientWithResponses) TigrisDBUpdateWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBUpdateResponse, error) {
-	rsp, err := c.TigrisDBUpdateWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisUpdateWithBodyWithResponse request with arbitrary body returning *TigrisUpdateResponse
+func (c *ClientWithResponses) TigrisUpdateWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisUpdateResponse, error) {
+	rsp, err := c.TigrisUpdateWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBUpdateResponse(rsp)
+	return ParseTigrisUpdateResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBUpdateWithResponse(ctx context.Context, db string, collection string, body TigrisDBUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBUpdateResponse, error) {
-	rsp, err := c.TigrisDBUpdate(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisUpdateWithResponse(ctx context.Context, db string, collection string, body TigrisUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisUpdateResponse, error) {
+	rsp, err := c.TigrisUpdate(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBUpdateResponse(rsp)
+	return ParseTigrisUpdateResponse(rsp)
 }
 
-// TigrisDBDropCollectionWithBodyWithResponse request with arbitrary body returning *TigrisDBDropCollectionResponse
-func (c *ClientWithResponses) TigrisDBDropCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error) {
-	rsp, err := c.TigrisDBDropCollectionWithBody(ctx, db, collection, contentType, body, reqEditors...)
+// TigrisDropCollectionWithBodyWithResponse request with arbitrary body returning *TigrisDropCollectionResponse
+func (c *ClientWithResponses) TigrisDropCollectionWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDropCollectionResponse, error) {
+	rsp, err := c.TigrisDropCollectionWithBody(ctx, db, collection, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDropCollectionResponse(rsp)
+	return ParseTigrisDropCollectionResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBDropCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDBDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDropCollectionResponse, error) {
-	rsp, err := c.TigrisDBDropCollection(ctx, db, collection, body, reqEditors...)
+func (c *ClientWithResponses) TigrisDropCollectionWithResponse(ctx context.Context, db string, collection string, body TigrisDropCollectionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDropCollectionResponse, error) {
+	rsp, err := c.TigrisDropCollection(ctx, db, collection, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDropCollectionResponse(rsp)
+	return ParseTigrisDropCollectionResponse(rsp)
 }
 
-// TigrisDBCreateDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisDBCreateDatabaseResponse
-func (c *ClientWithResponses) TigrisDBCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCreateDatabaseResponse, error) {
-	rsp, err := c.TigrisDBCreateDatabaseWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisCreateDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisCreateDatabaseResponse
+func (c *ClientWithResponses) TigrisCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateDatabaseResponse, error) {
+	rsp, err := c.TigrisCreateDatabaseWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBCreateDatabaseResponse(rsp)
+	return ParseTigrisCreateDatabaseResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBCreateDatabaseWithResponse(ctx context.Context, db string, body TigrisDBCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBCreateDatabaseResponse, error) {
-	rsp, err := c.TigrisDBCreateDatabase(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisCreateDatabaseWithResponse(ctx context.Context, db string, body TigrisCreateDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateDatabaseResponse, error) {
+	rsp, err := c.TigrisCreateDatabase(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBCreateDatabaseResponse(rsp)
+	return ParseTigrisCreateDatabaseResponse(rsp)
 }
 
-// TigrisDBDescribeDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisDBDescribeDatabaseResponse
-func (c *ClientWithResponses) TigrisDBDescribeDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDescribeDatabaseResponse, error) {
-	rsp, err := c.TigrisDBDescribeDatabaseWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisDescribeDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisDescribeDatabaseResponse
+func (c *ClientWithResponses) TigrisDescribeDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDescribeDatabaseResponse, error) {
+	rsp, err := c.TigrisDescribeDatabaseWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDescribeDatabaseResponse(rsp)
+	return ParseTigrisDescribeDatabaseResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBDescribeDatabaseWithResponse(ctx context.Context, db string, body TigrisDBDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDescribeDatabaseResponse, error) {
-	rsp, err := c.TigrisDBDescribeDatabase(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisDescribeDatabaseWithResponse(ctx context.Context, db string, body TigrisDescribeDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDescribeDatabaseResponse, error) {
+	rsp, err := c.TigrisDescribeDatabase(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDescribeDatabaseResponse(rsp)
+	return ParseTigrisDescribeDatabaseResponse(rsp)
 }
 
-// TigrisDBDropDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisDBDropDatabaseResponse
-func (c *ClientWithResponses) TigrisDBDropDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBDropDatabaseResponse, error) {
-	rsp, err := c.TigrisDBDropDatabaseWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisDropDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisDropDatabaseResponse
+func (c *ClientWithResponses) TigrisDropDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDropDatabaseResponse, error) {
+	rsp, err := c.TigrisDropDatabaseWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDropDatabaseResponse(rsp)
+	return ParseTigrisDropDatabaseResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBDropDatabaseWithResponse(ctx context.Context, db string, body TigrisDBDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBDropDatabaseResponse, error) {
-	rsp, err := c.TigrisDBDropDatabase(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisDropDatabaseWithResponse(ctx context.Context, db string, body TigrisDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDropDatabaseResponse, error) {
+	rsp, err := c.TigrisDropDatabase(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBDropDatabaseResponse(rsp)
+	return ParseTigrisDropDatabaseResponse(rsp)
 }
 
-// TigrisDBStreamWithBodyWithResponse request with arbitrary body returning *TigrisDBStreamResponse
-func (c *ClientWithResponses) TigrisDBStreamWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBStreamResponse, error) {
-	rsp, err := c.TigrisDBStreamWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisStreamWithBodyWithResponse request with arbitrary body returning *TigrisStreamResponse
+func (c *ClientWithResponses) TigrisStreamWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisStreamResponse, error) {
+	rsp, err := c.TigrisStreamWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBStreamResponse(rsp)
+	return ParseTigrisStreamResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBStreamWithResponse(ctx context.Context, db string, body TigrisDBStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBStreamResponse, error) {
-	rsp, err := c.TigrisDBStream(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisStreamWithResponse(ctx context.Context, db string, body TigrisStreamJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisStreamResponse, error) {
+	rsp, err := c.TigrisStream(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBStreamResponse(rsp)
+	return ParseTigrisStreamResponse(rsp)
 }
 
-// TigrisDBBeginTransactionWithBodyWithResponse request with arbitrary body returning *TigrisDBBeginTransactionResponse
-func (c *ClientWithResponses) TigrisDBBeginTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBBeginTransactionResponse, error) {
-	rsp, err := c.TigrisDBBeginTransactionWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisBeginTransactionWithBodyWithResponse request with arbitrary body returning *TigrisBeginTransactionResponse
+func (c *ClientWithResponses) TigrisBeginTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisBeginTransactionResponse, error) {
+	rsp, err := c.TigrisBeginTransactionWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBBeginTransactionResponse(rsp)
+	return ParseTigrisBeginTransactionResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBBeginTransactionWithResponse(ctx context.Context, db string, body TigrisDBBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBBeginTransactionResponse, error) {
-	rsp, err := c.TigrisDBBeginTransaction(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisBeginTransactionWithResponse(ctx context.Context, db string, body TigrisBeginTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisBeginTransactionResponse, error) {
+	rsp, err := c.TigrisBeginTransaction(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBBeginTransactionResponse(rsp)
+	return ParseTigrisBeginTransactionResponse(rsp)
 }
 
-// TigrisDBCommitTransactionWithBodyWithResponse request with arbitrary body returning *TigrisDBCommitTransactionResponse
-func (c *ClientWithResponses) TigrisDBCommitTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBCommitTransactionResponse, error) {
-	rsp, err := c.TigrisDBCommitTransactionWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisCommitTransactionWithBodyWithResponse request with arbitrary body returning *TigrisCommitTransactionResponse
+func (c *ClientWithResponses) TigrisCommitTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCommitTransactionResponse, error) {
+	rsp, err := c.TigrisCommitTransactionWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBCommitTransactionResponse(rsp)
+	return ParseTigrisCommitTransactionResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBCommitTransactionWithResponse(ctx context.Context, db string, body TigrisDBCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBCommitTransactionResponse, error) {
-	rsp, err := c.TigrisDBCommitTransaction(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisCommitTransactionWithResponse(ctx context.Context, db string, body TigrisCommitTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCommitTransactionResponse, error) {
+	rsp, err := c.TigrisCommitTransaction(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBCommitTransactionResponse(rsp)
+	return ParseTigrisCommitTransactionResponse(rsp)
 }
 
-// TigrisDBRollbackTransactionWithBodyWithResponse request with arbitrary body returning *TigrisDBRollbackTransactionResponse
-func (c *ClientWithResponses) TigrisDBRollbackTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDBRollbackTransactionResponse, error) {
-	rsp, err := c.TigrisDBRollbackTransactionWithBody(ctx, db, contentType, body, reqEditors...)
+// TigrisRollbackTransactionWithBodyWithResponse request with arbitrary body returning *TigrisRollbackTransactionResponse
+func (c *ClientWithResponses) TigrisRollbackTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisRollbackTransactionResponse, error) {
+	rsp, err := c.TigrisRollbackTransactionWithBody(ctx, db, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBRollbackTransactionResponse(rsp)
+	return ParseTigrisRollbackTransactionResponse(rsp)
 }
 
-func (c *ClientWithResponses) TigrisDBRollbackTransactionWithResponse(ctx context.Context, db string, body TigrisDBRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDBRollbackTransactionResponse, error) {
-	rsp, err := c.TigrisDBRollbackTransaction(ctx, db, body, reqEditors...)
+func (c *ClientWithResponses) TigrisRollbackTransactionWithResponse(ctx context.Context, db string, body TigrisRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisRollbackTransactionResponse, error) {
+	rsp, err := c.TigrisRollbackTransaction(ctx, db, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisDBRollbackTransactionResponse(rsp)
+	return ParseTigrisRollbackTransactionResponse(rsp)
 }
 
-// ParseTigrisDBListDatabasesResponse parses an HTTP response from a TigrisDBListDatabasesWithResponse call
-func ParseTigrisDBListDatabasesResponse(rsp *http.Response) (*TigrisDBListDatabasesResponse, error) {
+// ParseTigrisListDatabasesResponse parses an HTTP response from a TigrisListDatabasesWithResponse call
+func ParseTigrisListDatabasesResponse(rsp *http.Response) (*TigrisListDatabasesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBListDatabasesResponse{
+	response := &TigrisListDatabasesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2697,15 +2697,15 @@ func ParseTigrisDBListDatabasesResponse(rsp *http.Response) (*TigrisDBListDataba
 	return response, nil
 }
 
-// ParseTigrisDBListCollectionsResponse parses an HTTP response from a TigrisDBListCollectionsWithResponse call
-func ParseTigrisDBListCollectionsResponse(rsp *http.Response) (*TigrisDBListCollectionsResponse, error) {
+// ParseTigrisListCollectionsResponse parses an HTTP response from a TigrisListCollectionsWithResponse call
+func ParseTigrisListCollectionsResponse(rsp *http.Response) (*TigrisListCollectionsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBListCollectionsResponse{
+	response := &TigrisListCollectionsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2723,15 +2723,15 @@ func ParseTigrisDBListCollectionsResponse(rsp *http.Response) (*TigrisDBListColl
 	return response, nil
 }
 
-// ParseTigrisDBCreateOrUpdateCollectionResponse parses an HTTP response from a TigrisDBCreateOrUpdateCollectionWithResponse call
-func ParseTigrisDBCreateOrUpdateCollectionResponse(rsp *http.Response) (*TigrisDBCreateOrUpdateCollectionResponse, error) {
+// ParseTigrisCreateOrUpdateCollectionResponse parses an HTTP response from a TigrisCreateOrUpdateCollectionWithResponse call
+func ParseTigrisCreateOrUpdateCollectionResponse(rsp *http.Response) (*TigrisCreateOrUpdateCollectionResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBCreateOrUpdateCollectionResponse{
+	response := &TigrisCreateOrUpdateCollectionResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2749,15 +2749,15 @@ func ParseTigrisDBCreateOrUpdateCollectionResponse(rsp *http.Response) (*TigrisD
 	return response, nil
 }
 
-// ParseTigrisDBDescribeCollectionResponse parses an HTTP response from a TigrisDBDescribeCollectionWithResponse call
-func ParseTigrisDBDescribeCollectionResponse(rsp *http.Response) (*TigrisDBDescribeCollectionResponse, error) {
+// ParseTigrisDescribeCollectionResponse parses an HTTP response from a TigrisDescribeCollectionWithResponse call
+func ParseTigrisDescribeCollectionResponse(rsp *http.Response) (*TigrisDescribeCollectionResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBDescribeCollectionResponse{
+	response := &TigrisDescribeCollectionResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2775,15 +2775,15 @@ func ParseTigrisDBDescribeCollectionResponse(rsp *http.Response) (*TigrisDBDescr
 	return response, nil
 }
 
-// ParseTigrisDBDeleteResponse parses an HTTP response from a TigrisDBDeleteWithResponse call
-func ParseTigrisDBDeleteResponse(rsp *http.Response) (*TigrisDBDeleteResponse, error) {
+// ParseTigrisDeleteResponse parses an HTTP response from a TigrisDeleteWithResponse call
+func ParseTigrisDeleteResponse(rsp *http.Response) (*TigrisDeleteResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBDeleteResponse{
+	response := &TigrisDeleteResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2801,15 +2801,15 @@ func ParseTigrisDBDeleteResponse(rsp *http.Response) (*TigrisDBDeleteResponse, e
 	return response, nil
 }
 
-// ParseTigrisDBInsertResponse parses an HTTP response from a TigrisDBInsertWithResponse call
-func ParseTigrisDBInsertResponse(rsp *http.Response) (*TigrisDBInsertResponse, error) {
+// ParseTigrisInsertResponse parses an HTTP response from a TigrisInsertWithResponse call
+func ParseTigrisInsertResponse(rsp *http.Response) (*TigrisInsertResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBInsertResponse{
+	response := &TigrisInsertResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2827,15 +2827,15 @@ func ParseTigrisDBInsertResponse(rsp *http.Response) (*TigrisDBInsertResponse, e
 	return response, nil
 }
 
-// ParseTigrisDBReadResponse parses an HTTP response from a TigrisDBReadWithResponse call
-func ParseTigrisDBReadResponse(rsp *http.Response) (*TigrisDBReadResponse, error) {
+// ParseTigrisReadResponse parses an HTTP response from a TigrisReadWithResponse call
+func ParseTigrisReadResponse(rsp *http.Response) (*TigrisReadResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBReadResponse{
+	response := &TigrisReadResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2853,15 +2853,15 @@ func ParseTigrisDBReadResponse(rsp *http.Response) (*TigrisDBReadResponse, error
 	return response, nil
 }
 
-// ParseTigrisDBReplaceResponse parses an HTTP response from a TigrisDBReplaceWithResponse call
-func ParseTigrisDBReplaceResponse(rsp *http.Response) (*TigrisDBReplaceResponse, error) {
+// ParseTigrisReplaceResponse parses an HTTP response from a TigrisReplaceWithResponse call
+func ParseTigrisReplaceResponse(rsp *http.Response) (*TigrisReplaceResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBReplaceResponse{
+	response := &TigrisReplaceResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2879,15 +2879,15 @@ func ParseTigrisDBReplaceResponse(rsp *http.Response) (*TigrisDBReplaceResponse,
 	return response, nil
 }
 
-// ParseTigrisDBUpdateResponse parses an HTTP response from a TigrisDBUpdateWithResponse call
-func ParseTigrisDBUpdateResponse(rsp *http.Response) (*TigrisDBUpdateResponse, error) {
+// ParseTigrisUpdateResponse parses an HTTP response from a TigrisUpdateWithResponse call
+func ParseTigrisUpdateResponse(rsp *http.Response) (*TigrisUpdateResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBUpdateResponse{
+	response := &TigrisUpdateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2905,15 +2905,15 @@ func ParseTigrisDBUpdateResponse(rsp *http.Response) (*TigrisDBUpdateResponse, e
 	return response, nil
 }
 
-// ParseTigrisDBDropCollectionResponse parses an HTTP response from a TigrisDBDropCollectionWithResponse call
-func ParseTigrisDBDropCollectionResponse(rsp *http.Response) (*TigrisDBDropCollectionResponse, error) {
+// ParseTigrisDropCollectionResponse parses an HTTP response from a TigrisDropCollectionWithResponse call
+func ParseTigrisDropCollectionResponse(rsp *http.Response) (*TigrisDropCollectionResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBDropCollectionResponse{
+	response := &TigrisDropCollectionResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2931,15 +2931,15 @@ func ParseTigrisDBDropCollectionResponse(rsp *http.Response) (*TigrisDBDropColle
 	return response, nil
 }
 
-// ParseTigrisDBCreateDatabaseResponse parses an HTTP response from a TigrisDBCreateDatabaseWithResponse call
-func ParseTigrisDBCreateDatabaseResponse(rsp *http.Response) (*TigrisDBCreateDatabaseResponse, error) {
+// ParseTigrisCreateDatabaseResponse parses an HTTP response from a TigrisCreateDatabaseWithResponse call
+func ParseTigrisCreateDatabaseResponse(rsp *http.Response) (*TigrisCreateDatabaseResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBCreateDatabaseResponse{
+	response := &TigrisCreateDatabaseResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2957,15 +2957,15 @@ func ParseTigrisDBCreateDatabaseResponse(rsp *http.Response) (*TigrisDBCreateDat
 	return response, nil
 }
 
-// ParseTigrisDBDescribeDatabaseResponse parses an HTTP response from a TigrisDBDescribeDatabaseWithResponse call
-func ParseTigrisDBDescribeDatabaseResponse(rsp *http.Response) (*TigrisDBDescribeDatabaseResponse, error) {
+// ParseTigrisDescribeDatabaseResponse parses an HTTP response from a TigrisDescribeDatabaseWithResponse call
+func ParseTigrisDescribeDatabaseResponse(rsp *http.Response) (*TigrisDescribeDatabaseResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBDescribeDatabaseResponse{
+	response := &TigrisDescribeDatabaseResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2983,15 +2983,15 @@ func ParseTigrisDBDescribeDatabaseResponse(rsp *http.Response) (*TigrisDBDescrib
 	return response, nil
 }
 
-// ParseTigrisDBDropDatabaseResponse parses an HTTP response from a TigrisDBDropDatabaseWithResponse call
-func ParseTigrisDBDropDatabaseResponse(rsp *http.Response) (*TigrisDBDropDatabaseResponse, error) {
+// ParseTigrisDropDatabaseResponse parses an HTTP response from a TigrisDropDatabaseWithResponse call
+func ParseTigrisDropDatabaseResponse(rsp *http.Response) (*TigrisDropDatabaseResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBDropDatabaseResponse{
+	response := &TigrisDropDatabaseResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3009,15 +3009,15 @@ func ParseTigrisDBDropDatabaseResponse(rsp *http.Response) (*TigrisDBDropDatabas
 	return response, nil
 }
 
-// ParseTigrisDBStreamResponse parses an HTTP response from a TigrisDBStreamWithResponse call
-func ParseTigrisDBStreamResponse(rsp *http.Response) (*TigrisDBStreamResponse, error) {
+// ParseTigrisStreamResponse parses an HTTP response from a TigrisStreamWithResponse call
+func ParseTigrisStreamResponse(rsp *http.Response) (*TigrisStreamResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBStreamResponse{
+	response := &TigrisStreamResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3035,15 +3035,15 @@ func ParseTigrisDBStreamResponse(rsp *http.Response) (*TigrisDBStreamResponse, e
 	return response, nil
 }
 
-// ParseTigrisDBBeginTransactionResponse parses an HTTP response from a TigrisDBBeginTransactionWithResponse call
-func ParseTigrisDBBeginTransactionResponse(rsp *http.Response) (*TigrisDBBeginTransactionResponse, error) {
+// ParseTigrisBeginTransactionResponse parses an HTTP response from a TigrisBeginTransactionWithResponse call
+func ParseTigrisBeginTransactionResponse(rsp *http.Response) (*TigrisBeginTransactionResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBBeginTransactionResponse{
+	response := &TigrisBeginTransactionResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3061,15 +3061,15 @@ func ParseTigrisDBBeginTransactionResponse(rsp *http.Response) (*TigrisDBBeginTr
 	return response, nil
 }
 
-// ParseTigrisDBCommitTransactionResponse parses an HTTP response from a TigrisDBCommitTransactionWithResponse call
-func ParseTigrisDBCommitTransactionResponse(rsp *http.Response) (*TigrisDBCommitTransactionResponse, error) {
+// ParseTigrisCommitTransactionResponse parses an HTTP response from a TigrisCommitTransactionWithResponse call
+func ParseTigrisCommitTransactionResponse(rsp *http.Response) (*TigrisCommitTransactionResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBCommitTransactionResponse{
+	response := &TigrisCommitTransactionResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3087,15 +3087,15 @@ func ParseTigrisDBCommitTransactionResponse(rsp *http.Response) (*TigrisDBCommit
 	return response, nil
 }
 
-// ParseTigrisDBRollbackTransactionResponse parses an HTTP response from a TigrisDBRollbackTransactionWithResponse call
-func ParseTigrisDBRollbackTransactionResponse(rsp *http.Response) (*TigrisDBRollbackTransactionResponse, error) {
+// ParseTigrisRollbackTransactionResponse parses an HTTP response from a TigrisRollbackTransactionWithResponse call
+func ParseTigrisRollbackTransactionResponse(rsp *http.Response) (*TigrisRollbackTransactionResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisDBRollbackTransactionResponse{
+	response := &TigrisRollbackTransactionResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3116,65 +3116,65 @@ func ParseTigrisDBRollbackTransactionResponse(rsp *http.Response) (*TigrisDBRoll
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/0NQeun4XwAA",
+	"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",
+	"X+WwXwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

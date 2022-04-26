@@ -18,10 +18,10 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// TigrisDBClient is the client API for TigrisDB service.
+// TigrisClient is the client API for Tigris service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TigrisDBClient interface {
+type TigrisClient interface {
 	// Starts a new transaction and returns a transactional object. All reads/writes performed
 	// within a transaction will run with serializable isolation.
 	BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*BeginTransactionResponse, error)
@@ -42,7 +42,7 @@ type TigrisDBClient interface {
 	// Update a range of documents in the collection using the condition provided in the filter.
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	//  Reads range of documents from the collection using the condition in the filter.
-	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (TigrisDB_ReadClient, error)
+	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (Tigris_ReadClient, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema changes in the database
 	// passed in the request.
 	CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error)
@@ -61,86 +61,86 @@ type TigrisDBClient interface {
 	DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error)
 	// Describe collection describes the information related to collection.
 	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
-	Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (TigrisDB_StreamClient, error)
+	Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (Tigris_StreamClient, error)
 }
 
-type tigrisDBClient struct {
+type tigrisClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTigrisDBClient(cc grpc.ClientConnInterface) TigrisDBClient {
-	return &tigrisDBClient{cc}
+func NewTigrisClient(cc grpc.ClientConnInterface) TigrisClient {
+	return &tigrisClient{cc}
 }
 
-func (c *tigrisDBClient) BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*BeginTransactionResponse, error) {
+func (c *tigrisClient) BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*BeginTransactionResponse, error) {
 	out := new(BeginTransactionResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/BeginTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/BeginTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) CommitTransaction(ctx context.Context, in *CommitTransactionRequest, opts ...grpc.CallOption) (*CommitTransactionResponse, error) {
+func (c *tigrisClient) CommitTransaction(ctx context.Context, in *CommitTransactionRequest, opts ...grpc.CallOption) (*CommitTransactionResponse, error) {
 	out := new(CommitTransactionResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/CommitTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/CommitTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) RollbackTransaction(ctx context.Context, in *RollbackTransactionRequest, opts ...grpc.CallOption) (*RollbackTransactionResponse, error) {
+func (c *tigrisClient) RollbackTransaction(ctx context.Context, in *RollbackTransactionRequest, opts ...grpc.CallOption) (*RollbackTransactionResponse, error) {
 	out := new(RollbackTransactionResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/RollbackTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/RollbackTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) Insert(ctx context.Context, in *InsertRequest, opts ...grpc.CallOption) (*InsertResponse, error) {
+func (c *tigrisClient) Insert(ctx context.Context, in *InsertRequest, opts ...grpc.CallOption) (*InsertResponse, error) {
 	out := new(InsertResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/Insert", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/Insert", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) Replace(ctx context.Context, in *ReplaceRequest, opts ...grpc.CallOption) (*ReplaceResponse, error) {
+func (c *tigrisClient) Replace(ctx context.Context, in *ReplaceRequest, opts ...grpc.CallOption) (*ReplaceResponse, error) {
 	out := new(ReplaceResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/Replace", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/Replace", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+func (c *tigrisClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
+func (c *tigrisClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
 	out := new(UpdateResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (TigrisDB_ReadClient, error) {
-	stream, err := c.cc.NewStream(ctx, &TigrisDB_ServiceDesc.Streams[0], "/TigrisDB/Read", opts...)
+func (c *tigrisClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (Tigris_ReadClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[0], "/Tigris/Read", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &tigrisDBReadClient{stream}
+	x := &tigrisReadClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -150,16 +150,16 @@ func (c *tigrisDBClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc
 	return x, nil
 }
 
-type TigrisDB_ReadClient interface {
+type Tigris_ReadClient interface {
 	Recv() (*ReadResponse, error)
 	grpc.ClientStream
 }
 
-type tigrisDBReadClient struct {
+type tigrisReadClient struct {
 	grpc.ClientStream
 }
 
-func (x *tigrisDBReadClient) Recv() (*ReadResponse, error) {
+func (x *tigrisReadClient) Recv() (*ReadResponse, error) {
 	m := new(ReadResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -167,84 +167,84 @@ func (x *tigrisDBReadClient) Recv() (*ReadResponse, error) {
 	return m, nil
 }
 
-func (c *tigrisDBClient) CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error) {
+func (c *tigrisClient) CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error) {
 	out := new(CreateOrUpdateCollectionResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/CreateOrUpdateCollection", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/CreateOrUpdateCollection", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) DropCollection(ctx context.Context, in *DropCollectionRequest, opts ...grpc.CallOption) (*DropCollectionResponse, error) {
+func (c *tigrisClient) DropCollection(ctx context.Context, in *DropCollectionRequest, opts ...grpc.CallOption) (*DropCollectionResponse, error) {
 	out := new(DropCollectionResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/DropCollection", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/DropCollection", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) ListDatabases(ctx context.Context, in *ListDatabasesRequest, opts ...grpc.CallOption) (*ListDatabasesResponse, error) {
+func (c *tigrisClient) ListDatabases(ctx context.Context, in *ListDatabasesRequest, opts ...grpc.CallOption) (*ListDatabasesResponse, error) {
 	out := new(ListDatabasesResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/ListDatabases", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/ListDatabases", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) ListCollections(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error) {
+func (c *tigrisClient) ListCollections(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error) {
 	out := new(ListCollectionsResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/ListCollections", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/ListCollections", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) CreateDatabase(ctx context.Context, in *CreateDatabaseRequest, opts ...grpc.CallOption) (*CreateDatabaseResponse, error) {
+func (c *tigrisClient) CreateDatabase(ctx context.Context, in *CreateDatabaseRequest, opts ...grpc.CallOption) (*CreateDatabaseResponse, error) {
 	out := new(CreateDatabaseResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/CreateDatabase", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/CreateDatabase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) DropDatabase(ctx context.Context, in *DropDatabaseRequest, opts ...grpc.CallOption) (*DropDatabaseResponse, error) {
+func (c *tigrisClient) DropDatabase(ctx context.Context, in *DropDatabaseRequest, opts ...grpc.CallOption) (*DropDatabaseResponse, error) {
 	out := new(DropDatabaseResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/DropDatabase", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/DropDatabase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error) {
+func (c *tigrisClient) DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error) {
 	out := new(DescribeDatabaseResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/DescribeDatabase", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/DescribeDatabase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error) {
+func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error) {
 	out := new(DescribeCollectionResponse)
-	err := c.cc.Invoke(ctx, "/TigrisDB/DescribeCollection", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Tigris/DescribeCollection", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tigrisDBClient) Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (TigrisDB_StreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &TigrisDB_ServiceDesc.Streams[1], "/TigrisDB/Stream", opts...)
+func (c *tigrisClient) Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (Tigris_StreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[1], "/Tigris/Stream", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &tigrisDBStreamClient{stream}
+	x := &tigrisStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -254,16 +254,16 @@ func (c *tigrisDBClient) Stream(ctx context.Context, in *StreamRequest, opts ...
 	return x, nil
 }
 
-type TigrisDB_StreamClient interface {
+type Tigris_StreamClient interface {
 	Recv() (*StreamResponse, error)
 	grpc.ClientStream
 }
 
-type tigrisDBStreamClient struct {
+type tigrisStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *tigrisDBStreamClient) Recv() (*StreamResponse, error) {
+func (x *tigrisStreamClient) Recv() (*StreamResponse, error) {
 	m := new(StreamResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -271,10 +271,10 @@ func (x *tigrisDBStreamClient) Recv() (*StreamResponse, error) {
 	return m, nil
 }
 
-// TigrisDBServer is the server API for TigrisDB service.
-// All implementations should embed UnimplementedTigrisDBServer
+// TigrisServer is the server API for Tigris service.
+// All implementations should embed UnimplementedTigrisServer
 // for forward compatibility
-type TigrisDBServer interface {
+type TigrisServer interface {
 	// Starts a new transaction and returns a transactional object. All reads/writes performed
 	// within a transaction will run with serializable isolation.
 	BeginTransaction(context.Context, *BeginTransactionRequest) (*BeginTransactionResponse, error)
@@ -295,7 +295,7 @@ type TigrisDBServer interface {
 	// Update a range of documents in the collection using the condition provided in the filter.
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	//  Reads range of documents from the collection using the condition in the filter.
-	Read(*ReadRequest, TigrisDB_ReadServer) error
+	Read(*ReadRequest, Tigris_ReadServer) error
 	// Creates a new collection or atomically upgrades the collection to the new schema changes in the database
 	// passed in the request.
 	CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error)
@@ -314,465 +314,465 @@ type TigrisDBServer interface {
 	DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error)
 	// Describe collection describes the information related to collection.
 	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
-	Stream(*StreamRequest, TigrisDB_StreamServer) error
+	Stream(*StreamRequest, Tigris_StreamServer) error
 }
 
-// UnimplementedTigrisDBServer should be embedded to have forward compatible implementations.
-type UnimplementedTigrisDBServer struct {
+// UnimplementedTigrisServer should be embedded to have forward compatible implementations.
+type UnimplementedTigrisServer struct {
 }
 
-func (UnimplementedTigrisDBServer) BeginTransaction(context.Context, *BeginTransactionRequest) (*BeginTransactionResponse, error) {
+func (UnimplementedTigrisServer) BeginTransaction(context.Context, *BeginTransactionRequest) (*BeginTransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BeginTransaction not implemented")
 }
-func (UnimplementedTigrisDBServer) CommitTransaction(context.Context, *CommitTransactionRequest) (*CommitTransactionResponse, error) {
+func (UnimplementedTigrisServer) CommitTransaction(context.Context, *CommitTransactionRequest) (*CommitTransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CommitTransaction not implemented")
 }
-func (UnimplementedTigrisDBServer) RollbackTransaction(context.Context, *RollbackTransactionRequest) (*RollbackTransactionResponse, error) {
+func (UnimplementedTigrisServer) RollbackTransaction(context.Context, *RollbackTransactionRequest) (*RollbackTransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RollbackTransaction not implemented")
 }
-func (UnimplementedTigrisDBServer) Insert(context.Context, *InsertRequest) (*InsertResponse, error) {
+func (UnimplementedTigrisServer) Insert(context.Context, *InsertRequest) (*InsertResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Insert not implemented")
 }
-func (UnimplementedTigrisDBServer) Replace(context.Context, *ReplaceRequest) (*ReplaceResponse, error) {
+func (UnimplementedTigrisServer) Replace(context.Context, *ReplaceRequest) (*ReplaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Replace not implemented")
 }
-func (UnimplementedTigrisDBServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
+func (UnimplementedTigrisServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedTigrisDBServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
+func (UnimplementedTigrisServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedTigrisDBServer) Read(*ReadRequest, TigrisDB_ReadServer) error {
+func (UnimplementedTigrisServer) Read(*ReadRequest, Tigris_ReadServer) error {
 	return status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedTigrisDBServer) CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error) {
+func (UnimplementedTigrisServer) CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrUpdateCollection not implemented")
 }
-func (UnimplementedTigrisDBServer) DropCollection(context.Context, *DropCollectionRequest) (*DropCollectionResponse, error) {
+func (UnimplementedTigrisServer) DropCollection(context.Context, *DropCollectionRequest) (*DropCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropCollection not implemented")
 }
-func (UnimplementedTigrisDBServer) ListDatabases(context.Context, *ListDatabasesRequest) (*ListDatabasesResponse, error) {
+func (UnimplementedTigrisServer) ListDatabases(context.Context, *ListDatabasesRequest) (*ListDatabasesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDatabases not implemented")
 }
-func (UnimplementedTigrisDBServer) ListCollections(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error) {
+func (UnimplementedTigrisServer) ListCollections(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCollections not implemented")
 }
-func (UnimplementedTigrisDBServer) CreateDatabase(context.Context, *CreateDatabaseRequest) (*CreateDatabaseResponse, error) {
+func (UnimplementedTigrisServer) CreateDatabase(context.Context, *CreateDatabaseRequest) (*CreateDatabaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDatabase not implemented")
 }
-func (UnimplementedTigrisDBServer) DropDatabase(context.Context, *DropDatabaseRequest) (*DropDatabaseResponse, error) {
+func (UnimplementedTigrisServer) DropDatabase(context.Context, *DropDatabaseRequest) (*DropDatabaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropDatabase not implemented")
 }
-func (UnimplementedTigrisDBServer) DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error) {
+func (UnimplementedTigrisServer) DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeDatabase not implemented")
 }
-func (UnimplementedTigrisDBServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
+func (UnimplementedTigrisServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeCollection not implemented")
 }
-func (UnimplementedTigrisDBServer) Stream(*StreamRequest, TigrisDB_StreamServer) error {
+func (UnimplementedTigrisServer) Stream(*StreamRequest, Tigris_StreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method Stream not implemented")
 }
 
-// UnsafeTigrisDBServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TigrisDBServer will
+// UnsafeTigrisServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TigrisServer will
 // result in compilation errors.
-type UnsafeTigrisDBServer interface {
-	mustEmbedUnimplementedTigrisDBServer()
+type UnsafeTigrisServer interface {
+	mustEmbedUnimplementedTigrisServer()
 }
 
-func RegisterTigrisDBServer(s grpc.ServiceRegistrar, srv TigrisDBServer) {
-	s.RegisterService(&TigrisDB_ServiceDesc, srv)
+func RegisterTigrisServer(s grpc.ServiceRegistrar, srv TigrisServer) {
+	s.RegisterService(&Tigris_ServiceDesc, srv)
 }
 
-func _TigrisDB_BeginTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_BeginTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BeginTransactionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).BeginTransaction(ctx, in)
+		return srv.(TigrisServer).BeginTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/BeginTransaction",
+		FullMethod: "/Tigris/BeginTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).BeginTransaction(ctx, req.(*BeginTransactionRequest))
+		return srv.(TigrisServer).BeginTransaction(ctx, req.(*BeginTransactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_CommitTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_CommitTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommitTransactionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).CommitTransaction(ctx, in)
+		return srv.(TigrisServer).CommitTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/CommitTransaction",
+		FullMethod: "/Tigris/CommitTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).CommitTransaction(ctx, req.(*CommitTransactionRequest))
+		return srv.(TigrisServer).CommitTransaction(ctx, req.(*CommitTransactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_RollbackTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_RollbackTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RollbackTransactionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).RollbackTransaction(ctx, in)
+		return srv.(TigrisServer).RollbackTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/RollbackTransaction",
+		FullMethod: "/Tigris/RollbackTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).RollbackTransaction(ctx, req.(*RollbackTransactionRequest))
+		return srv.(TigrisServer).RollbackTransaction(ctx, req.(*RollbackTransactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_Insert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_Insert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InsertRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).Insert(ctx, in)
+		return srv.(TigrisServer).Insert(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/Insert",
+		FullMethod: "/Tigris/Insert",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).Insert(ctx, req.(*InsertRequest))
+		return srv.(TigrisServer).Insert(ctx, req.(*InsertRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_Replace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_Replace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReplaceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).Replace(ctx, in)
+		return srv.(TigrisServer).Replace(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/Replace",
+		FullMethod: "/Tigris/Replace",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).Replace(ctx, req.(*ReplaceRequest))
+		return srv.(TigrisServer).Replace(ctx, req.(*ReplaceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).Delete(ctx, in)
+		return srv.(TigrisServer).Delete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/Delete",
+		FullMethod: "/Tigris/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).Delete(ctx, req.(*DeleteRequest))
+		return srv.(TigrisServer).Delete(ctx, req.(*DeleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).Update(ctx, in)
+		return srv.(TigrisServer).Update(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/Update",
+		FullMethod: "/Tigris/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).Update(ctx, req.(*UpdateRequest))
+		return srv.(TigrisServer).Update(ctx, req.(*UpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_Read_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Tigris_Read_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ReadRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(TigrisDBServer).Read(m, &tigrisDBReadServer{stream})
+	return srv.(TigrisServer).Read(m, &tigrisReadServer{stream})
 }
 
-type TigrisDB_ReadServer interface {
+type Tigris_ReadServer interface {
 	Send(*ReadResponse) error
 	grpc.ServerStream
 }
 
-type tigrisDBReadServer struct {
+type tigrisReadServer struct {
 	grpc.ServerStream
 }
 
-func (x *tigrisDBReadServer) Send(m *ReadResponse) error {
+func (x *tigrisReadServer) Send(m *ReadResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _TigrisDB_CreateOrUpdateCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_CreateOrUpdateCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateOrUpdateCollectionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).CreateOrUpdateCollection(ctx, in)
+		return srv.(TigrisServer).CreateOrUpdateCollection(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/CreateOrUpdateCollection",
+		FullMethod: "/Tigris/CreateOrUpdateCollection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).CreateOrUpdateCollection(ctx, req.(*CreateOrUpdateCollectionRequest))
+		return srv.(TigrisServer).CreateOrUpdateCollection(ctx, req.(*CreateOrUpdateCollectionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_DropCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_DropCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DropCollectionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).DropCollection(ctx, in)
+		return srv.(TigrisServer).DropCollection(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/DropCollection",
+		FullMethod: "/Tigris/DropCollection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).DropCollection(ctx, req.(*DropCollectionRequest))
+		return srv.(TigrisServer).DropCollection(ctx, req.(*DropCollectionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_ListDatabases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_ListDatabases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListDatabasesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).ListDatabases(ctx, in)
+		return srv.(TigrisServer).ListDatabases(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/ListDatabases",
+		FullMethod: "/Tigris/ListDatabases",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).ListDatabases(ctx, req.(*ListDatabasesRequest))
+		return srv.(TigrisServer).ListDatabases(ctx, req.(*ListDatabasesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_ListCollections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_ListCollections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListCollectionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).ListCollections(ctx, in)
+		return srv.(TigrisServer).ListCollections(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/ListCollections",
+		FullMethod: "/Tigris/ListCollections",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).ListCollections(ctx, req.(*ListCollectionsRequest))
+		return srv.(TigrisServer).ListCollections(ctx, req.(*ListCollectionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_CreateDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_CreateDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDatabaseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).CreateDatabase(ctx, in)
+		return srv.(TigrisServer).CreateDatabase(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/CreateDatabase",
+		FullMethod: "/Tigris/CreateDatabase",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).CreateDatabase(ctx, req.(*CreateDatabaseRequest))
+		return srv.(TigrisServer).CreateDatabase(ctx, req.(*CreateDatabaseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_DropDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_DropDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DropDatabaseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).DropDatabase(ctx, in)
+		return srv.(TigrisServer).DropDatabase(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/DropDatabase",
+		FullMethod: "/Tigris/DropDatabase",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).DropDatabase(ctx, req.(*DropDatabaseRequest))
+		return srv.(TigrisServer).DropDatabase(ctx, req.(*DropDatabaseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_DescribeDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_DescribeDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DescribeDatabaseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).DescribeDatabase(ctx, in)
+		return srv.(TigrisServer).DescribeDatabase(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/DescribeDatabase",
+		FullMethod: "/Tigris/DescribeDatabase",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).DescribeDatabase(ctx, req.(*DescribeDatabaseRequest))
+		return srv.(TigrisServer).DescribeDatabase(ctx, req.(*DescribeDatabaseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_DescribeCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tigris_DescribeCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DescribeCollectionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TigrisDBServer).DescribeCollection(ctx, in)
+		return srv.(TigrisServer).DescribeCollection(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TigrisDB/DescribeCollection",
+		FullMethod: "/Tigris/DescribeCollection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisDBServer).DescribeCollection(ctx, req.(*DescribeCollectionRequest))
+		return srv.(TigrisServer).DescribeCollection(ctx, req.(*DescribeCollectionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TigrisDB_Stream_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Tigris_Stream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(StreamRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(TigrisDBServer).Stream(m, &tigrisDBStreamServer{stream})
+	return srv.(TigrisServer).Stream(m, &tigrisStreamServer{stream})
 }
 
-type TigrisDB_StreamServer interface {
+type Tigris_StreamServer interface {
 	Send(*StreamResponse) error
 	grpc.ServerStream
 }
 
-type tigrisDBStreamServer struct {
+type tigrisStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *tigrisDBStreamServer) Send(m *StreamResponse) error {
+func (x *tigrisStreamServer) Send(m *StreamResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// TigrisDB_ServiceDesc is the grpc.ServiceDesc for TigrisDB service.
+// Tigris_ServiceDesc is the grpc.ServiceDesc for Tigris service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var TigrisDB_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "TigrisDB",
-	HandlerType: (*TigrisDBServer)(nil),
+var Tigris_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "Tigris",
+	HandlerType: (*TigrisServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "BeginTransaction",
-			Handler:    _TigrisDB_BeginTransaction_Handler,
+			Handler:    _Tigris_BeginTransaction_Handler,
 		},
 		{
 			MethodName: "CommitTransaction",
-			Handler:    _TigrisDB_CommitTransaction_Handler,
+			Handler:    _Tigris_CommitTransaction_Handler,
 		},
 		{
 			MethodName: "RollbackTransaction",
-			Handler:    _TigrisDB_RollbackTransaction_Handler,
+			Handler:    _Tigris_RollbackTransaction_Handler,
 		},
 		{
 			MethodName: "Insert",
-			Handler:    _TigrisDB_Insert_Handler,
+			Handler:    _Tigris_Insert_Handler,
 		},
 		{
 			MethodName: "Replace",
-			Handler:    _TigrisDB_Replace_Handler,
+			Handler:    _Tigris_Replace_Handler,
 		},
 		{
 			MethodName: "Delete",
-			Handler:    _TigrisDB_Delete_Handler,
+			Handler:    _Tigris_Delete_Handler,
 		},
 		{
 			MethodName: "Update",
-			Handler:    _TigrisDB_Update_Handler,
+			Handler:    _Tigris_Update_Handler,
 		},
 		{
 			MethodName: "CreateOrUpdateCollection",
-			Handler:    _TigrisDB_CreateOrUpdateCollection_Handler,
+			Handler:    _Tigris_CreateOrUpdateCollection_Handler,
 		},
 		{
 			MethodName: "DropCollection",
-			Handler:    _TigrisDB_DropCollection_Handler,
+			Handler:    _Tigris_DropCollection_Handler,
 		},
 		{
 			MethodName: "ListDatabases",
-			Handler:    _TigrisDB_ListDatabases_Handler,
+			Handler:    _Tigris_ListDatabases_Handler,
 		},
 		{
 			MethodName: "ListCollections",
-			Handler:    _TigrisDB_ListCollections_Handler,
+			Handler:    _Tigris_ListCollections_Handler,
 		},
 		{
 			MethodName: "CreateDatabase",
-			Handler:    _TigrisDB_CreateDatabase_Handler,
+			Handler:    _Tigris_CreateDatabase_Handler,
 		},
 		{
 			MethodName: "DropDatabase",
-			Handler:    _TigrisDB_DropDatabase_Handler,
+			Handler:    _Tigris_DropDatabase_Handler,
 		},
 		{
 			MethodName: "DescribeDatabase",
-			Handler:    _TigrisDB_DescribeDatabase_Handler,
+			Handler:    _Tigris_DescribeDatabase_Handler,
 		},
 		{
 			MethodName: "DescribeCollection",
-			Handler:    _TigrisDB_DescribeCollection_Handler,
+			Handler:    _Tigris_DescribeCollection_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Read",
-			Handler:       _TigrisDB_Read_Handler,
+			Handler:       _Tigris_Read_Handler,
 			ServerStreams: true,
 		},
 		{
 			StreamName:    "Stream",
-			Handler:       _TigrisDB_Stream_Handler,
+			Handler:       _Tigris_Stream_Handler,
 			ServerStreams: true,
 		},
 	},

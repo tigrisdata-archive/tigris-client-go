@@ -18,17 +18,17 @@ import (
 	"crypto/tls"
 	"encoding/json"
 
-	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
+	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
 const (
 	GRPC = iota
 	HTTP = iota
 
-	TokenEnv = "TIGRISDB_TOKEN"
+	TokenEnv = "TIGRIS_TOKEN"
 
 	Version   = "v1.0.0"
-	UserAgent = "tigrisdb-client-go/" + Version
+	UserAgent = "tigris-client-go/" + Version
 )
 
 var (

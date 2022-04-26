@@ -31,7 +31,7 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_TigrisDB_BeginTransaction_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_BeginTransaction_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq BeginTransactionRequest
 	var metadata runtime.ServerMetadata
 
@@ -65,7 +65,7 @@ func request_TigrisDB_BeginTransaction_0(ctx context.Context, marshaler runtime.
 
 }
 
-func local_request_TigrisDB_BeginTransaction_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_BeginTransaction_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq BeginTransactionRequest
 	var metadata runtime.ServerMetadata
 
@@ -99,7 +99,7 @@ func local_request_TigrisDB_BeginTransaction_0(ctx context.Context, marshaler ru
 
 }
 
-func request_TigrisDB_CommitTransaction_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_CommitTransaction_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CommitTransactionRequest
 	var metadata runtime.ServerMetadata
 
@@ -133,7 +133,7 @@ func request_TigrisDB_CommitTransaction_0(ctx context.Context, marshaler runtime
 
 }
 
-func local_request_TigrisDB_CommitTransaction_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_CommitTransaction_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CommitTransactionRequest
 	var metadata runtime.ServerMetadata
 
@@ -167,7 +167,7 @@ func local_request_TigrisDB_CommitTransaction_0(ctx context.Context, marshaler r
 
 }
 
-func request_TigrisDB_RollbackTransaction_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_RollbackTransaction_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq RollbackTransactionRequest
 	var metadata runtime.ServerMetadata
 
@@ -201,7 +201,7 @@ func request_TigrisDB_RollbackTransaction_0(ctx context.Context, marshaler runti
 
 }
 
-func local_request_TigrisDB_RollbackTransaction_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_RollbackTransaction_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq RollbackTransactionRequest
 	var metadata runtime.ServerMetadata
 
@@ -235,7 +235,7 @@ func local_request_TigrisDB_RollbackTransaction_0(ctx context.Context, marshaler
 
 }
 
-func request_TigrisDB_Insert_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_Insert_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq InsertRequest
 	var metadata runtime.ServerMetadata
 
@@ -279,7 +279,7 @@ func request_TigrisDB_Insert_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-func local_request_TigrisDB_Insert_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_Insert_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq InsertRequest
 	var metadata runtime.ServerMetadata
 
@@ -323,7 +323,7 @@ func local_request_TigrisDB_Insert_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-func request_TigrisDB_Replace_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_Replace_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ReplaceRequest
 	var metadata runtime.ServerMetadata
 
@@ -367,7 +367,7 @@ func request_TigrisDB_Replace_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
-func local_request_TigrisDB_Replace_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_Replace_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ReplaceRequest
 	var metadata runtime.ServerMetadata
 
@@ -411,7 +411,7 @@ func local_request_TigrisDB_Replace_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-func request_TigrisDB_Delete_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_Delete_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DeleteRequest
 	var metadata runtime.ServerMetadata
 
@@ -455,7 +455,7 @@ func request_TigrisDB_Delete_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-func local_request_TigrisDB_Delete_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_Delete_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DeleteRequest
 	var metadata runtime.ServerMetadata
 
@@ -499,7 +499,7 @@ func local_request_TigrisDB_Delete_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-func request_TigrisDB_Update_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_Update_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateRequest
 	var metadata runtime.ServerMetadata
 
@@ -543,7 +543,7 @@ func request_TigrisDB_Update_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-func local_request_TigrisDB_Update_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_Update_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateRequest
 	var metadata runtime.ServerMetadata
 
@@ -587,7 +587,7 @@ func local_request_TigrisDB_Update_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-func request_TigrisDB_Read_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (TigrisDB_ReadClient, runtime.ServerMetadata, error) {
+func request_Tigris_Read_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_ReadClient, runtime.ServerMetadata, error) {
 	var protoReq ReadRequest
 	var metadata runtime.ServerMetadata
 
@@ -639,7 +639,7 @@ func request_TigrisDB_Read_0(ctx context.Context, marshaler runtime.Marshaler, c
 
 }
 
-func request_TigrisDB_CreateOrUpdateCollection_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_CreateOrUpdateCollection_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateOrUpdateCollectionRequest
 	var metadata runtime.ServerMetadata
 
@@ -683,7 +683,7 @@ func request_TigrisDB_CreateOrUpdateCollection_0(ctx context.Context, marshaler 
 
 }
 
-func local_request_TigrisDB_CreateOrUpdateCollection_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_CreateOrUpdateCollection_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateOrUpdateCollectionRequest
 	var metadata runtime.ServerMetadata
 
@@ -727,7 +727,7 @@ func local_request_TigrisDB_CreateOrUpdateCollection_0(ctx context.Context, mars
 
 }
 
-func request_TigrisDB_DropCollection_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_DropCollection_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DropCollectionRequest
 	var metadata runtime.ServerMetadata
 
@@ -771,7 +771,7 @@ func request_TigrisDB_DropCollection_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
-func local_request_TigrisDB_DropCollection_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_DropCollection_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DropCollectionRequest
 	var metadata runtime.ServerMetadata
 
@@ -815,7 +815,7 @@ func local_request_TigrisDB_DropCollection_0(ctx context.Context, marshaler runt
 
 }
 
-func request_TigrisDB_ListDatabases_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_ListDatabases_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListDatabasesRequest
 	var metadata runtime.ServerMetadata
 
@@ -824,7 +824,7 @@ func request_TigrisDB_ListDatabases_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-func local_request_TigrisDB_ListDatabases_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_ListDatabases_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListDatabasesRequest
 	var metadata runtime.ServerMetadata
 
@@ -833,7 +833,7 @@ func local_request_TigrisDB_ListDatabases_0(ctx context.Context, marshaler runti
 
 }
 
-func request_TigrisDB_ListCollections_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_ListCollections_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListCollectionsRequest
 	var metadata runtime.ServerMetadata
 
@@ -867,7 +867,7 @@ func request_TigrisDB_ListCollections_0(ctx context.Context, marshaler runtime.M
 
 }
 
-func local_request_TigrisDB_ListCollections_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_ListCollections_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListCollectionsRequest
 	var metadata runtime.ServerMetadata
 
@@ -901,7 +901,7 @@ func local_request_TigrisDB_ListCollections_0(ctx context.Context, marshaler run
 
 }
 
-func request_TigrisDB_CreateDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_CreateDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateDatabaseRequest
 	var metadata runtime.ServerMetadata
 
@@ -935,7 +935,7 @@ func request_TigrisDB_CreateDatabase_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
-func local_request_TigrisDB_CreateDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_CreateDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateDatabaseRequest
 	var metadata runtime.ServerMetadata
 
@@ -969,7 +969,7 @@ func local_request_TigrisDB_CreateDatabase_0(ctx context.Context, marshaler runt
 
 }
 
-func request_TigrisDB_DropDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_DropDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DropDatabaseRequest
 	var metadata runtime.ServerMetadata
 
@@ -1003,7 +1003,7 @@ func request_TigrisDB_DropDatabase_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-func local_request_TigrisDB_DropDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_DropDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DropDatabaseRequest
 	var metadata runtime.ServerMetadata
 
@@ -1037,7 +1037,7 @@ func local_request_TigrisDB_DropDatabase_0(ctx context.Context, marshaler runtim
 
 }
 
-func request_TigrisDB_DescribeDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_DescribeDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DescribeDatabaseRequest
 	var metadata runtime.ServerMetadata
 
@@ -1071,7 +1071,7 @@ func request_TigrisDB_DescribeDatabase_0(ctx context.Context, marshaler runtime.
 
 }
 
-func local_request_TigrisDB_DescribeDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_DescribeDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DescribeDatabaseRequest
 	var metadata runtime.ServerMetadata
 
@@ -1105,7 +1105,7 @@ func local_request_TigrisDB_DescribeDatabase_0(ctx context.Context, marshaler ru
 
 }
 
-func request_TigrisDB_DescribeCollection_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Tigris_DescribeCollection_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DescribeCollectionRequest
 	var metadata runtime.ServerMetadata
 
@@ -1149,7 +1149,7 @@ func request_TigrisDB_DescribeCollection_0(ctx context.Context, marshaler runtim
 
 }
 
-func local_request_TigrisDB_DescribeCollection_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisDBServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Tigris_DescribeCollection_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DescribeCollectionRequest
 	var metadata runtime.ServerMetadata
 
@@ -1193,7 +1193,7 @@ func local_request_TigrisDB_DescribeCollection_0(ctx context.Context, marshaler 
 
 }
 
-func request_TigrisDB_Stream_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisDBClient, req *http.Request, pathParams map[string]string) (TigrisDB_StreamClient, runtime.ServerMetadata, error) {
+func request_Tigris_Stream_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_StreamClient, runtime.ServerMetadata, error) {
 	var protoReq StreamRequest
 	var metadata runtime.ServerMetadata
 
@@ -1235,24 +1235,24 @@ func request_TigrisDB_Stream_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-// RegisterTigrisDBHandlerServer registers the http handlers for service TigrisDB to "mux".
-// UnaryRPC     :call TigrisDBServer directly.
+// RegisterTigrisHandlerServer registers the http handlers for service Tigris to "mux".
+// UnaryRPC     :call TigrisServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterTigrisDBHandlerFromEndpoint instead.
-func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, server TigrisDBServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterTigrisHandlerFromEndpoint instead.
+func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, server TigrisServer) error {
 
-	mux.Handle("POST", pattern_TigrisDB_BeginTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_BeginTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/BeginTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/begin"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/begin"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_BeginTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_BeginTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1260,22 +1260,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_BeginTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_BeginTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_CommitTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CommitTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/CommitTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/commit"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/commit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_CommitTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_CommitTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1283,22 +1283,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_CommitTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CommitTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_RollbackTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_RollbackTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/RollbackTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/rollback"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/rollback"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_RollbackTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_RollbackTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1306,22 +1306,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_RollbackTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_RollbackTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_Insert_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_Insert_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/Insert", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/insert"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/Insert", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_Insert_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Insert_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1329,22 +1329,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_Insert_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Insert_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_TigrisDB_Replace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Tigris_Replace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/Replace", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/replace"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/Replace", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/replace"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_Replace_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Replace_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1352,22 +1352,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_Replace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Replace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_TigrisDB_Delete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_Delete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/Delete", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/delete"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/Delete", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1375,22 +1375,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_Delete_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Delete_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_TigrisDB_Update_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Tigris_Update_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/Update", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/update"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/Update", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_Update_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Update_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1398,29 +1398,29 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_Update_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Update_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_Read_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_Read_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 		return
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_CreateOrUpdateCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CreateOrUpdateCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/createOrUpdate"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/createOrUpdate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_CreateOrUpdateCollection_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_CreateOrUpdateCollection_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1428,22 +1428,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_CreateOrUpdateCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CreateOrUpdateCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_TigrisDB_DropCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_DropCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/DropCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/drop"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/DropCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_DropCollection_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DropCollection_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1451,22 +1451,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_DropCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DropCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_ListDatabases_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_ListDatabases_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/ListDatabases", runtime.WithHTTPPathPattern("/api/v1/databases/list"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/api/v1/databases/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_ListDatabases_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_ListDatabases_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1474,22 +1474,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_ListDatabases_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_ListDatabases_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_ListCollections_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_ListCollections_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/ListCollections", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/list"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/ListCollections", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_ListCollections_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_ListCollections_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1497,22 +1497,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_ListCollections_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_ListCollections_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_CreateDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CreateDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/CreateDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/create"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_CreateDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_CreateDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1520,22 +1520,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_CreateDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CreateDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_TigrisDB_DropDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_DropDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/DropDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/drop"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_DropDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DropDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1543,22 +1543,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_DropDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DropDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_DescribeDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_DescribeDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/DescribeDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/describe"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_DescribeDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DescribeDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1566,22 +1566,22 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_DescribeDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DescribeDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_DescribeCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_DescribeCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.TigrisDB/DescribeCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/describe"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TigrisDB_DescribeCollection_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DescribeCollection_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1589,11 +1589,11 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_TigrisDB_DescribeCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DescribeCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_Stream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_Stream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1603,9 +1603,9 @@ func RegisterTigrisDBHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	return nil
 }
 
-// RegisterTigrisDBHandlerFromEndpoint is same as RegisterTigrisDBHandler but
+// RegisterTigrisHandlerFromEndpoint is same as RegisterTigrisHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterTigrisDBHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterTigrisHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -1625,359 +1625,359 @@ func RegisterTigrisDBHandlerFromEndpoint(ctx context.Context, mux *runtime.Serve
 		}()
 	}()
 
-	return RegisterTigrisDBHandler(ctx, mux, conn)
+	return RegisterTigrisHandler(ctx, mux, conn)
 }
 
-// RegisterTigrisDBHandler registers the http handlers for service TigrisDB to "mux".
+// RegisterTigrisHandler registers the http handlers for service Tigris to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterTigrisDBHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterTigrisDBHandlerClient(ctx, mux, NewTigrisDBClient(conn))
+func RegisterTigrisHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterTigrisHandlerClient(ctx, mux, NewTigrisClient(conn))
 }
 
-// RegisterTigrisDBHandlerClient registers the http handlers for service TigrisDB
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "TigrisDBClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "TigrisDBClient"
+// RegisterTigrisHandlerClient registers the http handlers for service Tigris
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "TigrisClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "TigrisClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "TigrisDBClient" to call the correct interceptors.
-func RegisterTigrisDBHandlerClient(ctx context.Context, mux *runtime.ServeMux, client TigrisDBClient) error {
+// "TigrisClient" to call the correct interceptors.
+func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, client TigrisClient) error {
 
-	mux.Handle("POST", pattern_TigrisDB_BeginTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_BeginTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/BeginTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/begin"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/begin"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_BeginTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_BeginTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_BeginTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_BeginTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_CommitTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CommitTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/CommitTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/commit"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/commit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_CommitTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_CommitTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_CommitTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CommitTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_RollbackTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_RollbackTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/RollbackTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/rollback"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/transactions/rollback"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_RollbackTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_RollbackTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_RollbackTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_RollbackTransaction_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_Insert_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_Insert_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/Insert", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/insert"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/Insert", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_Insert_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Insert_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_Insert_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Insert_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_TigrisDB_Replace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Tigris_Replace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/Replace", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/replace"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/Replace", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/replace"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_Replace_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Replace_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_Replace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Replace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_TigrisDB_Delete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_Delete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/Delete", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/delete"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/Delete", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_Delete_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Delete_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_Delete_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Delete_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PUT", pattern_TigrisDB_Update_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Tigris_Update_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/Update", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/update"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/Update", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_Update_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Update_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_Update_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Update_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_Read_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_Read_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/Read", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/read"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/Read", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/documents/read"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_Read_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Read_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_Read_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Read_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_CreateOrUpdateCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CreateOrUpdateCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/createOrUpdate"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/createOrUpdate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_CreateOrUpdateCollection_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_CreateOrUpdateCollection_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_CreateOrUpdateCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CreateOrUpdateCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_TigrisDB_DropCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_DropCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/DropCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/drop"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/DropCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_DropCollection_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DropCollection_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_DropCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DropCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_ListDatabases_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_ListDatabases_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/ListDatabases", runtime.WithHTTPPathPattern("/api/v1/databases/list"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/api/v1/databases/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_ListDatabases_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_ListDatabases_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_ListDatabases_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_ListDatabases_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_ListCollections_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_ListCollections_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/ListCollections", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/list"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/ListCollections", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_ListCollections_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_ListCollections_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_ListCollections_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_ListCollections_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_CreateDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CreateDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/CreateDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/create"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_CreateDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_CreateDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_CreateDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CreateDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_TigrisDB_DropDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_DropDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/DropDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/drop"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_DropDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DropDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_DropDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DropDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_DescribeDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_DescribeDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/DescribeDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/describe"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_DescribeDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DescribeDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_DescribeDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DescribeDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_DescribeCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_DescribeCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/DescribeCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/describe"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_DescribeCollection_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DescribeCollection_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_DescribeCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DescribeCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_TigrisDB_Stream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_Stream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.TigrisDB/Stream", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/stream"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Tigris/Stream", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/stream"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TigrisDB_Stream_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Stream_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_TigrisDB_Stream_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_Tigris_Stream_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1985,73 +1985,73 @@ func RegisterTigrisDBHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 }
 
 var (
-	pattern_TigrisDB_BeginTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "transactions", "begin"}, ""))
+	pattern_Tigris_BeginTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "transactions", "begin"}, ""))
 
-	pattern_TigrisDB_CommitTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "transactions", "commit"}, ""))
+	pattern_Tigris_CommitTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "transactions", "commit"}, ""))
 
-	pattern_TigrisDB_RollbackTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "transactions", "rollback"}, ""))
+	pattern_Tigris_RollbackTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "transactions", "rollback"}, ""))
 
-	pattern_TigrisDB_Insert_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "insert"}, ""))
+	pattern_Tigris_Insert_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "insert"}, ""))
 
-	pattern_TigrisDB_Replace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "replace"}, ""))
+	pattern_Tigris_Replace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "replace"}, ""))
 
-	pattern_TigrisDB_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "delete"}, ""))
+	pattern_Tigris_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "delete"}, ""))
 
-	pattern_TigrisDB_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "update"}, ""))
+	pattern_Tigris_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "update"}, ""))
 
-	pattern_TigrisDB_Read_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "read"}, ""))
+	pattern_Tigris_Read_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "read"}, ""))
 
-	pattern_TigrisDB_CreateOrUpdateCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "createOrUpdate"}, ""))
+	pattern_Tigris_CreateOrUpdateCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "createOrUpdate"}, ""))
 
-	pattern_TigrisDB_DropCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "drop"}, ""))
+	pattern_Tigris_DropCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "drop"}, ""))
 
-	pattern_TigrisDB_ListDatabases_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "databases", "list"}, ""))
+	pattern_Tigris_ListDatabases_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "databases", "list"}, ""))
 
-	pattern_TigrisDB_ListCollections_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "collections", "list"}, ""))
+	pattern_Tigris_ListCollections_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "databases", "db", "collections", "list"}, ""))
 
-	pattern_TigrisDB_CreateDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "create"}, ""))
+	pattern_Tigris_CreateDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "create"}, ""))
 
-	pattern_TigrisDB_DropDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "drop"}, ""))
+	pattern_Tigris_DropDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "drop"}, ""))
 
-	pattern_TigrisDB_DescribeDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "describe"}, ""))
+	pattern_Tigris_DescribeDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "describe"}, ""))
 
-	pattern_TigrisDB_DescribeCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "describe"}, ""))
+	pattern_Tigris_DescribeCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "describe"}, ""))
 
-	pattern_TigrisDB_Stream_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "stream"}, ""))
+	pattern_Tigris_Stream_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "databases", "db", "stream"}, ""))
 )
 
 var (
-	forward_TigrisDB_BeginTransaction_0 = runtime.ForwardResponseMessage
+	forward_Tigris_BeginTransaction_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_CommitTransaction_0 = runtime.ForwardResponseMessage
+	forward_Tigris_CommitTransaction_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_RollbackTransaction_0 = runtime.ForwardResponseMessage
+	forward_Tigris_RollbackTransaction_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_Insert_0 = runtime.ForwardResponseMessage
+	forward_Tigris_Insert_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_Replace_0 = runtime.ForwardResponseMessage
+	forward_Tigris_Replace_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_Delete_0 = runtime.ForwardResponseMessage
+	forward_Tigris_Delete_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_Update_0 = runtime.ForwardResponseMessage
+	forward_Tigris_Update_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_Read_0 = runtime.ForwardResponseStream
+	forward_Tigris_Read_0 = runtime.ForwardResponseStream
 
-	forward_TigrisDB_CreateOrUpdateCollection_0 = runtime.ForwardResponseMessage
+	forward_Tigris_CreateOrUpdateCollection_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_DropCollection_0 = runtime.ForwardResponseMessage
+	forward_Tigris_DropCollection_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_ListDatabases_0 = runtime.ForwardResponseMessage
+	forward_Tigris_ListDatabases_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_ListCollections_0 = runtime.ForwardResponseMessage
+	forward_Tigris_ListCollections_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_CreateDatabase_0 = runtime.ForwardResponseMessage
+	forward_Tigris_CreateDatabase_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_DropDatabase_0 = runtime.ForwardResponseMessage
+	forward_Tigris_DropDatabase_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_DescribeDatabase_0 = runtime.ForwardResponseMessage
+	forward_Tigris_DescribeDatabase_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_DescribeCollection_0 = runtime.ForwardResponseMessage
+	forward_Tigris_DescribeCollection_0 = runtime.ForwardResponseMessage
 
-	forward_TigrisDB_Stream_0 = runtime.ForwardResponseStream
+	forward_Tigris_Stream_0 = runtime.ForwardResponseStream
 )

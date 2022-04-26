@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unsafe"
 
-	api "github.com/tigrisdata/tigrisdb-client-go/api/server/v1"
+	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -46,7 +46,7 @@ func GRPCError(err error) error {
 		return err
 	}
 	s := status.Convert(err)
-	return &api.TigrisDBError{Code: s.Code(), Message: s.Message()}
+	return &api.TigrisError{Code: s.Code(), Message: s.Message()}
 }
 
 func NewGRPCClient(ctx context.Context, url string, config *Config) (Driver, error) {
@@ -80,7 +80,7 @@ func NewGRPCClient(ctx context.Context, url string, config *Config) (Driver, err
 		return nil, GRPCError(err)
 	}
 
-	return &driver{driverWithOptions: &grpcDriver{grpcCRUD: &grpcCRUD{api: api.NewTigrisDBClient(conn)}, conn: conn}}, nil
+	return &driver{driverWithOptions: &grpcDriver{grpcCRUD: &grpcCRUD{api: api.NewTigrisClient(conn)}, conn: conn}}, nil
 }
 
 func (c *grpcDriver) Close() error {
@@ -212,7 +212,7 @@ func setGRPCCollectionTxCtx(txCtx *api.TransactionCtx, options *api.CollectionOp
 }
 
 type grpcCRUD struct {
-	api   api.TigrisDBClient
+	api   api.TigrisClient
 	txCtx api.TransactionCtx
 }
 
@@ -351,7 +351,7 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, db string, collection st
 }
 
 type grpcStreamReader struct {
-	stream api.TigrisDB_ReadClient
+	stream api.Tigris_ReadClient
 }
 
 func (g *grpcStreamReader) read() (Document, error) {

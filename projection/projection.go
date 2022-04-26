@@ -3,7 +3,7 @@ package projection
 import (
 	"encoding/json"
 
-	"github.com/tigrisdata/tigrisdb-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
 type Projection map[string]bool

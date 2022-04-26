@@ -5,7 +5,7 @@ V=v1
 GEN_DIR=${API_DIR}/server/${V}
 PROTO_DIR=${API_DIR}/proto/server/${V}
 
-BUILD_PARAM=-tags=release -ldflags "-X 'main.Version=$(VERSION)'" $(shell printenv BUILD_PARAM)
+BUILD_PARAM=-tags=release -ldflags "-X 'github.com/tigrisdata/tigris-client-go/main.Version=$(VERSION)'" $(shell printenv BUILD_PARAM)
 TEST_PARAM=-cover -race -tags=test $(shell printenv TEST_PARAM)
 
 all: generate ${GO_SRC}
@@ -36,7 +36,7 @@ generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${API_DIR}/client/${V}/ap
 
 mock/api_grpc.go: generate
 	mkdir -p mock
-	mockgen -package mock -destination mock/api_grpc.go github.com/tigrisdata/tigrisdb-client-go/api/server/v1 TigrisDBServer
+	mockgen -package mock -destination mock/api_grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer
 
 mock: mock/api_grpc.go
 

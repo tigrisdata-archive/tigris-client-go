@@ -8,7 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/tigrisdata/tigrisdb-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
 // TxFunc is a user-provided function that will be run
@@ -26,7 +26,7 @@ type Tx interface {
 }
 
 // Database is the interface for interacting with a specific database
-// in TigrisDB.
+// in Tigris.
 type Database interface {
 	// Transact runs the provided TranactionFunc in a transaction. If the
 	// function returns an error then the transaction will be aborted,

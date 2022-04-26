@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/tigrisdata/tigrisdb-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
 type Update struct {

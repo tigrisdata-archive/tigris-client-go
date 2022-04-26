@@ -1,14 +1,14 @@
-# TigrisDB Golang client
+# Tigris Golang client
 
-[![Go Report](https://goreportcard.com/badge/github.com/tigrisdata/tigrisdb-client-go)](https://goreportcard.com/report/github.com/tigrisdata/tigrisdb-client-go)
-[![Build Status](https://github.com/tigrisdata/tigrisdb-client-go/workflows/go-test/badge.svg)]()
-[![Build Status](https://github.com/tigrisdata/tigrisdb-client-go/workflows/go-lint/badge.svg)]()
-[![codecov](https://codecov.io/gh/tigrisdata/tigrisdb-client-go/branch/main/graph/badge.svg)](https://codecov.io/gh/tigrisdata/tigrisdb-client-go)
+[![Go Report](https://goreportcard.com/badge/github.com/tigrisdata/tigris-client-go)](https://goreportcard.com/report/github.com/tigrisdata/tigris-client-go)
+[![Build Status](https://github.com/tigrisdata/tigris-client-go/workflows/go-test/badge.svg)]()
+[![Build Status](https://github.com/tigrisdata/tigris-client-go/workflows/go-lint/badge.svg)]()
+[![codecov](https://codecov.io/gh/tigrisdata/tigris-client-go/branch/main/graph/badge.svg)](https://codecov.io/gh/tigrisdata/tigris-client-go)
 
 # Install
 
 ```sh
-go get github.com/tigrisdata/tigrisdb-client-go@latest
+go get github.com/tigrisdata/tigris-client-go@latest
 ```
 
 # Example
@@ -20,7 +20,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/tigrisdata/tigrisdb-client-go/driver"
+    "github.com/tigrisdata/tigris-client-go/driver"
 )
 
 func example() error {

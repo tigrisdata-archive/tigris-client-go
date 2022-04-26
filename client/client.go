@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tigrisdata/tigrisdb-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
-// Client is the interface for a TigrisDB client.
+// Client is the interface for a Tigris client.
 type Client interface {
 	// Database returns a Database interface for the provided
 	// database name.

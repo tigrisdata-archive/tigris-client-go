@@ -20,7 +20,7 @@ import (
 	"reflect"
 )
 
-// Driver implements TigrisDB API
+// Driver implements Tigris API
 type Driver interface {
 	// Insert array of documents into specified database and collection
 	Insert(ctx context.Context, db string, collection string, docs []Document, options ...*InsertOptions) (*InsertResponse, error)
@@ -315,7 +315,7 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 	return v.Index(0).Interface(), nil
 }
 
-// NewDriver connect to TigrisDB at the specified URL
+// NewDriver connect to Tigris at the specified URL
 // URL should be in the form: {hostname}:{port}
 func NewDriver(ctx context.Context, url string, config *Config) (Driver, error) {
 	if config == nil {

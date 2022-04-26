@@ -160,7 +160,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    &api.InsertRequestOptions{WriteOptions: options},
 		})).Return(&api.InsertResponse{}, nil)
 
-	_, err = c.Insert(ctx, "c1", doc123, &InsertOptions{})
+	_, err = c.Insert(ctx, "c1", doc123)
 	require.NoError(t, err)
 
 	mc.EXPECT().Replace(gomock.Any(),
@@ -171,7 +171,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
 		})).Return(&api.ReplaceResponse{}, nil)
 
-	_, err = c.Replace(ctx, "c1", doc123, &ReplaceOptions{})
+	_, err = c.Replace(ctx, "c1", doc123)
 	require.NoError(t, err)
 
 	mc.EXPECT().Update(gomock.Any(),
@@ -183,7 +183,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisDBServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(&api.UpdateResponse{}, nil)
 
-	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
+	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
 	require.NoError(t, err)
 
 	roptions := &api.ReadRequestOptions{}
@@ -303,7 +303,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(&api.UpdateResponse{Status: "updated"}, nil)
 
-	updResp, err := c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`), &UpdateOptions{})
+	updResp, err := c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
 	require.NoError(t, err)
 	require.Equal(t, "updated", updResp.Status)
 
@@ -331,7 +331,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisDBServer) {
 			Options:    &api.DeleteRequestOptions{WriteOptions: options},
 		})).Return(&api.DeleteResponse{Status: "deleted"}, nil)
 
-	delResp, err := c.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
+	delResp, err := c.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
 	require.Equal(t, "deleted", delResp.Status)
 }

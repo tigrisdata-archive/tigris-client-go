@@ -240,7 +240,7 @@ func (c *driverTxWithOptions) Insert(ctx context.Context, collection string, doc
 }
 
 func (c *driverTxWithOptions) Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (*ReplaceResponse, error) {
-	opts, err := validateOptionsParam(options, &InsertOptions{})
+	opts, err := validateOptionsParam(options, &ReplaceOptions{})
 	if err != nil {
 		return nil, err
 	}

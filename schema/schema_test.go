@@ -112,19 +112,12 @@ func TestCollectionSchema(t *testing.T) {
 	}
 
 	type allTypes struct {
-		tm     time.Time
-		tmPtr  *time.Time
-		Int8   int8   `json:"int_8"`
-		Int16  int16  `json:"int_16"`
-		Int32  int32  `json:"int_32"`
-		Uint8  uint8  `json:"uint_8"`
-		Uint16 uint16 `json:"uint_16"`
-		Uint32 uint32 `json:"uint_32"`
+		tm    time.Time
+		tmPtr *time.Time
+		Int32 int32 `json:"int_32"`
 
 		Int64 int64 `json:"int_64"`
-		//Uint64 uint64 `json:"uint_64"`
-		Int  int  `json:"int_1"`
-		Uint uint `json:"uint_1"`
+		Int   int   `json:"int_1"`
 
 		Bytes  []byte  `json:"bytes_1"`
 		BytesA [4]byte `json:"bytes_2"`
@@ -183,17 +176,11 @@ func TestCollectionSchema(t *testing.T) {
 			{Name: "tm", Type: typeString, Format: formatDateTime},
 			{Name: "tmPtr", Type: typeString, Format: formatDateTime},
 
-			{Name: "int_8", Type: typeInteger, Format: formatInt32},
-			{Name: "int_16", Type: typeInteger, Format: formatInt32},
 			{Name: "int_32", Type: typeInteger, Format: formatInt32},
-			{Name: "uint_8", Type: typeInteger, Format: formatInt32},
-			{Name: "uint_16", Type: typeInteger, Format: formatInt32},
-			{Name: "uint_32", Type: typeInteger},
 
 			{Name: "int_64", Type: typeInteger},
 			//			{Name: "uint_64", Type: typeInteger},
-			{Name: "int_1", Type: typeInteger, Format: formatInt32},
-			{Name: "uint_1", Type: typeInteger},
+			{Name: "int_1", Type: typeInteger},
 
 			{Name: "bytes_1", Type: typeString, Format: formatByte},
 			{Name: "bytes_2", Type: typeString, Format: formatByte},
@@ -270,7 +257,7 @@ func TestCollectionSchema(t *testing.T) {
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"title":"allTypes","properties":[{"title":"tm","type":"string","format":"date-time"},{"title":"tmPtr","type":"string","format":"date-time"},{"title":"int_8","type":"integer","format":"int32"},{"title":"int_16","type":"integer","format":"int32"},{"title":"int_32","type":"integer","format":"int32"},{"title":"uint_8","type":"integer","format":"int32"},{"title":"uint_16","type":"integer","format":"int32"},{"title":"uint_32","type":"integer"},{"title":"int_64","type":"integer"},{"title":"int_1","type":"integer","format":"int32"},{"title":"uint_1","type":"integer"},{"title":"bytes_1","type":"string","format":"byte"},{"title":"bytes_2","type":"string","format":"byte"},{"title":"float_32","type":"number"},{"title":"float_64","type":"number"},{"title":"bool_1","type":"boolean"},{"title":"string_1","type":"string"},{"title":"data_1","type":"object","properties":[{"title":"field_1","type":"string"},{"title":"Nested","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}]},{"title":"slice_1","type":"array","items":{"type":"string"}},{"title":"arr_1","type":"array","items":{"type":"string"}},{"title":"map_1","type":"object"},{"title":"slice_2","type":"array","items":{"title":"subStruct","type":"object","properties":[{"title":"field_1","type":"string"},{"title":"Nested","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}]}},{"title":"map_2","type":"object"},{"title":"bool_123","type":"boolean"},{"title":"ptrStruct","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}],"primary_key":["data_1.Nested.ss_field_1","string_1"]}`, string(b))
+		require.Equal(t, `{"title":"allTypes","properties":[{"title":"tm","type":"string","format":"date-time"},{"title":"tmPtr","type":"string","format":"date-time"},{"title":"int_32","type":"integer","format":"int32"},{"title":"int_64","type":"integer"},{"title":"int_1","type":"integer"},{"title":"bytes_1","type":"string","format":"byte"},{"title":"bytes_2","type":"string","format":"byte"},{"title":"float_32","type":"number"},{"title":"float_64","type":"number"},{"title":"bool_1","type":"boolean"},{"title":"string_1","type":"string"},{"title":"data_1","type":"object","properties":[{"title":"field_1","type":"string"},{"title":"Nested","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}]},{"title":"slice_1","type":"array","items":{"type":"string"}},{"title":"arr_1","type":"array","items":{"type":"string"}},{"title":"map_1","type":"object"},{"title":"slice_2","type":"array","items":{"title":"subStruct","type":"object","properties":[{"title":"field_1","type":"string"},{"title":"Nested","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}]}},{"title":"map_2","type":"object"},{"title":"bool_123","type":"boolean"},{"title":"ptrStruct","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}],"primary_key":["data_1.Nested.ss_field_1","string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {

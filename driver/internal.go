@@ -81,7 +81,7 @@ func getAuthToken(ctx context.Context, config *config.Config) (*oauth2.Token, *o
 		TLSClientConfig: config.TLS,
 	}
 
-	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: ToekenRefreshURL}}
+	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: TokenRefreshURL}}
 
 	return &t, ocfg, context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: tr})
 }

@@ -31,6 +31,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
+	"unsafe"
 
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
@@ -42,6 +44,14 @@ const (
 	tagPrimaryKey = "primary_key"
 	tagSkip       = "-"
 )
+
+// PrimitiveFieldType represents types supported by non-composite fields
+type PrimitiveFieldType interface {
+	string |
+		int | int32 | int64 |
+		float32 | float64 |
+		[]byte | *time.Time
+}
 
 // Supported data types
 // See translateType for Golang to JSON schema translation rules
@@ -112,11 +122,9 @@ func translateType(t reflect.Type) (string, string, error) {
 			return typeString, formatByte, nil
 		}
 		return typeArray, "", nil
-	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int:
+	case reflect.Int32:
 		return typeInteger, formatInt32, nil
-	case reflect.Uint8, reflect.Uint16:
-		return typeInteger, formatInt32, nil
-	case reflect.Int64, reflect.Uint, reflect.Uint32:
+	case reflect.Int64:
 		return typeInteger, "", nil
 	case reflect.String:
 		return typeString, "", nil
@@ -126,6 +134,12 @@ func translateType(t reflect.Type) (string, string, error) {
 		return typeBoolean, "", nil
 	case reflect.Map:
 		return typeObject, "", nil
+	case reflect.Int:
+		var a int
+		if unsafe.Sizeof(a) == 4 {
+			return typeInteger, formatInt32, nil
+		}
+		return typeInteger, "", nil
 	}
 
 	return "", "", fmt.Errorf("unsupported type: '%s'", t.Name())

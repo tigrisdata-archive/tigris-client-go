@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 
 	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
 type Operand map[string]comparison
@@ -65,7 +66,7 @@ func Not(op expr) expr {
 
 // Eq composes 'equal' operation.
 // Result is equivalent to: field == value
-func Eq(field string, value interface{}) expr {
+func Eq[T schema.PrimitiveFieldType](field string, value T) expr {
 	return expr{field: comparison{Eq: value}}
 }
 

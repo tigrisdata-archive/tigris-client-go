@@ -15,11 +15,12 @@
 package api
 
 import (
+	"encoding/json"
+	"time"
+
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/valyala/bytebufferpool"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
-	"google.golang.org/grpc/codes"
 )
 
 // CustomMarshaler is a marshaler to customize the response. Currently it is only used to marshal custom error message
@@ -46,45 +47,42 @@ func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
 	return c.JSONBuiltin.Marshal(v)
 }
 
-// MarshalJSON on read response avoid any encoding/decoding on x.Doc. With this approach we are not doing any extra
+// MarshalJSON on read response avoid any encoding/decoding on x.Data. With this approach we are not doing any extra
 // marshaling/unmarshalling in returning the data from the database. The document returned from the database is stored
-// in x.Doc and will return as-is.
+// in x.Data and will return as-is.
 //
 // Note: This also means any changes in ReadResponse proto needs to make sure that we add that here and similarly
-// the openAPI specs needs to be specified Doc as object instead of bytes.
+// the openAPI specs needs to be specified Data as object instead of bytes.
 func (x *ReadResponse) MarshalJSON() ([]byte, error) {
-	var err error
-	bb := bytebufferpool.Get()
-	_, err = bb.Write([]byte(`{"data":`))
-	if err != nil {
-		return nil, Errorf(codes.Internal, err.Error())
+	resp := struct {
+		Data        json.RawMessage `json:"data,omitempty"`
+		Metadata    Metadata        `json:"metadata,omitempty"`
+		ResumeToken []byte          `json:"resume_token,omitempty"`
+	}{
+		Data:        x.Data,
+		Metadata:    CreateMDFromResponseMD(x.Metadata),
+		ResumeToken: x.ResumeToken,
+	}
+	return json.Marshal(resp)
+}
+
+type Metadata struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+}
+
+func CreateMDFromResponseMD(x *ResponseMetadata) Metadata {
+	var md Metadata
+	if x.CreatedAt != nil {
+		tm := x.CreatedAt.AsTime()
+		md.CreatedAt = &tm
+	}
+	if x.UpdatedAt != nil {
+		tm := x.UpdatedAt.AsTime()
+		md.UpdatedAt = &tm
 	}
 
-	_, err = bb.Write(x.Data)
-	if err != nil {
-		return nil, Errorf(codes.Internal, err.Error())
-	}
-
-	key, err := jsoniter.Marshal(x.ResumeToken)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = bb.Write([]byte(`,"resume_token":`))
-	if err != nil {
-		return nil, Errorf(codes.Internal, err.Error())
-	}
-	_, err = bb.Write(key)
-	if err != nil {
-		return nil, Errorf(codes.Internal, err.Error())
-	}
-
-	_, err = bb.WriteString("}")
-	if err != nil {
-		return nil, Errorf(codes.Internal, err.Error())
-	}
-
-	return bb.Bytes(), nil
+	return md
 }
 
 // UnmarshalJSON on ReadRequest avoids unmarshalling filter and instead this way we can write a custom struct to do
@@ -285,4 +283,39 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 		}
 	}
 	return nil
+}
+
+type collDesc struct {
+	Collection string              `json:"collection"`
+	Metadata   *CollectionMetadata `json:"metadata"`
+	Schema     json.RawMessage     `json:"schema"`
+}
+
+func (x *DescribeCollectionResponse) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&collDesc{
+		Collection: x.Collection,
+		Metadata:   x.Metadata,
+		Schema:     x.Schema,
+	})
+}
+
+func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Db          string            `json:"db"`
+		Metadata    *DatabaseMetadata `json:"metadata"`
+		Collections []*collDesc       `json:"collections"`
+	}{
+		Db:       x.Db,
+		Metadata: x.Metadata,
+	}
+
+	for _, v := range x.Collections {
+		resp.Collections = append(resp.Collections, &collDesc{
+			Collection: v.Collection,
+			Metadata:   v.Metadata,
+			Schema:     v.Schema,
+		})
+	}
+
+	return json.Marshal(&resp)
 }

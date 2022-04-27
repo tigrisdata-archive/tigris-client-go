@@ -140,11 +140,19 @@ func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*Describe
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
-	var d DescribeDatabaseResponse
+	var d apiHTTP.DescribeDatabaseResponse
 	if err := respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
-	return &d, nil
+
+	var r DescribeDatabaseResponse
+	for _, v := range *d.Collections {
+		r.Collections = append(r.Collections, &api.CollectionDescription{
+			Collection: ToString(v.Collection),
+			Schema:     v.Schema,
+		})
+	}
+	return &r, nil
 }
 
 func convertDatabaseOptions(_ *DatabaseOptions) *apiHTTP.DatabaseOptions {
@@ -314,12 +322,17 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, db string,
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
-	var d DescribeCollectionResponse
+	var d apiHTTP.DescribeCollectionResponse
 	if err := respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
-	return &d, nil
+	r := &DescribeCollectionResponse{
+		Schema:     d.Schema,
+		Collection: ToString(d.Collection),
+	}
+
+	return r, nil
 }
 
 func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, db string, collection string, schema Schema, options *CollectionOptions) error {
@@ -448,4 +461,11 @@ func (g *httpStreamReader) read() (Document, error) {
 
 func (g *httpStreamReader) close() error {
 	return g.closer.Close()
+}
+
+func ToString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }

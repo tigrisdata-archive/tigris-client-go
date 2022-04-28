@@ -20,6 +20,10 @@ import (
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
+var (
+	All = (Projection)(nil)
+)
+
 type Projection map[string]bool
 
 func Builder() Projection {
@@ -45,13 +49,13 @@ func (pr Projection) Build() (driver.Projection, error) {
 }
 
 func Include(field string) Projection {
-	pr := map[string]bool{}
+	pr := Projection{}
 	pr[field] = true
 	return pr
 }
 
 func Exclude(field string) Projection {
-	pr := map[string]bool{}
+	pr := Projection{}
 	pr[field] = false
 	return pr
 }

@@ -75,7 +75,7 @@ func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp 
 			Options:    &api.DeleteRequestOptions{WriteOptions: &api.WriteOptions{}},
 		})).Return(r, in)
 
-	_, err := d.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
+	_, err := d.UseDatabase("db1").Delete(ctx, "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
 
 	require.Equal(t, exp, err)
 }
@@ -238,6 +238,8 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	ctx := context.TODO()
 
+	db := c.UseDatabase("db1")
+
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
 
 	options := &api.WriteOptions{}
@@ -250,7 +252,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    &api.InsertRequestOptions{WriteOptions: options},
 		})).Return(&api.InsertResponse{Status: "inserted"}, nil)
 
-	insResp, err := c.Insert(ctx, "db1", "c1", doc1, &InsertOptions{WriteOptions: options})
+	insResp, err := db.Insert(ctx, "c1", doc1, &InsertOptions{WriteOptions: options})
 	require.NoError(t, err)
 	require.Equal(t, "inserted", insResp.Status)
 
@@ -262,7 +264,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
 		})).Return(&api.ReplaceResponse{Status: "replaced"}, nil)
 
-	repResp, err := c.Replace(ctx, "db1", "c1", doc1, &ReplaceOptions{WriteOptions: options})
+	repResp, err := db.Replace(ctx, "c1", doc1, &ReplaceOptions{WriteOptions: options})
 	require.NoError(t, err)
 	require.Equal(t, "replaced", repResp.Status)
 
@@ -276,7 +278,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    &api.InsertRequestOptions{WriteOptions: options},
 		})).Return(&api.InsertResponse{}, nil)
 
-	_, err = c.Insert(ctx, "db1", "c1", doc123)
+	_, err = db.Insert(ctx, "c1", doc123)
 	require.NoError(t, err)
 
 	mc.EXPECT().Update(gomock.Any(),
@@ -288,7 +290,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    &api.UpdateRequestOptions{WriteOptions: options},
 		})).Return(&api.UpdateResponse{Status: "updated"}, nil)
 
-	updResp, err := c.Update(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
+	updResp, err := db.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
 	require.NoError(t, err)
 	require.Equal(t, "updated", updResp.Status)
 
@@ -303,7 +305,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    roptions,
 		}), gomock.Any()).Return(nil)
 
-	it, err := c.Read(ctx, "db1", "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
+	it, err := db.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
@@ -316,7 +318,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    &api.DeleteRequestOptions{WriteOptions: options},
 		})).Return(&api.DeleteResponse{Status: "deleted"}, nil)
 
-	delResp, err := c.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`))
+	delResp, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
 	require.Equal(t, "deleted", delResp.Status)
 }
@@ -339,6 +341,8 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.NoError(t, err)
 	require.Equal(t, []string{"ldb1", "ldb2"}, dbs)
 
+	db := c.UseDatabase("db1")
+
 	// Test empty list response
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
@@ -346,7 +350,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: nil}, nil)
 
-	colls, err := c.ListCollections(ctx, "db1", &CollectionOptions{})
+	colls, err := db.ListCollections(ctx, &CollectionOptions{})
 	require.NoError(t, err)
 	require.Equal(t, []string(nil), colls)
 
@@ -356,7 +360,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{{Collection: "lc1"}, {Collection: "lc2"}}}, nil)
 
-	colls, err = c.ListCollections(ctx, "db1")
+	colls, err = db.ListCollections(ctx)
 	require.NoError(t, err)
 	require.Equal(t, []string{"lc1", "lc2"}, colls)
 
@@ -371,7 +375,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Collection: "coll1",
 		})).Return(&descExp, nil)
 
-	desc, err := c.DescribeCollection(ctx, "db1", "coll1")
+	desc, err := db.DescribeCollection(ctx, "coll1")
 	require.NoError(t, err)
 	require.Equal(t, descExp.Collection, desc.Collection)
 	require.Equal(t, descExp.Schema, desc.Schema)
@@ -426,7 +430,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    &api.CollectionOptions{},
 		})).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
 
-	err = c.CreateOrUpdateCollection(ctx, "db1", "c1", Schema(sch), &CollectionOptions{})
+	err = db.CreateOrUpdateCollection(ctx, "c1", Schema(sch), &CollectionOptions{})
 	require.NoError(t, err)
 
 	mc.EXPECT().DropCollection(gomock.Any(),
@@ -436,7 +440,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options:    &api.CollectionOptions{},
 		})).Return(&api.DropCollectionResponse{}, nil)
 
-	err = c.DropCollection(ctx, "db1", "c1", &CollectionOptions{})
+	err = db.DropCollection(ctx, "c1", &CollectionOptions{})
 	require.NoError(t, err)
 
 	testCRUDBasic(t, c, mc)
@@ -705,7 +709,9 @@ func testDriverAuth(t *testing.T, d Driver, mc *mock.MockTigrisServer, token str
 		assert.True(t, strings.Contains(metautils.ExtractIncoming(ctx).Get(ua), UserAgent))
 	}).Return(&api.DeleteResponse{}, nil)
 
-	_, err := d.Delete(ctx, "db1", "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
+	db := d.UseDatabase("db1")
+
+	_, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
 	require.NoError(t, err)
 }
 
@@ -777,27 +783,29 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 
 	ctx := context.TODO()
 
-	_, err := c.ListCollections(ctx, "db1", &CollectionOptions{}, &CollectionOptions{})
+	db := c.UseDatabase("db1")
+
+	_, err := db.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
-	_, err = c.Insert(ctx, "db1", "coll1", nil, &InsertOptions{}, &InsertOptions{})
+	_, err = db.Insert(ctx, "coll1", nil, &InsertOptions{}, &InsertOptions{})
 	require.Error(t, err)
-	_, err = c.Replace(ctx, "db1", "coll1", nil, &ReplaceOptions{}, &ReplaceOptions{})
+	_, err = db.Replace(ctx, "coll1", nil, &ReplaceOptions{}, &ReplaceOptions{})
 	require.Error(t, err)
-	_, err = c.Update(ctx, "db1", "coll1", nil, nil, &UpdateOptions{}, &UpdateOptions{})
+	_, err = db.Update(ctx, "coll1", nil, nil, &UpdateOptions{}, &UpdateOptions{})
 	require.Error(t, err)
-	_, err = c.Delete(ctx, "db1", "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
+	_, err = db.Delete(ctx, "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
 	require.Error(t, err)
 	_, err = c.BeginTx(ctx, "db1", &TxOptions{}, &TxOptions{})
 	require.Error(t, err)
-	err = c.CreateOrUpdateCollection(ctx, "db1", "coll1", nil, &CollectionOptions{}, &CollectionOptions{})
+	err = db.CreateOrUpdateCollection(ctx, "coll1", nil, &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
-	err = c.DropCollection(ctx, "db1", "coll1", &CollectionOptions{}, &CollectionOptions{})
+	err = db.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
 	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
 	require.Error(t, err)
 	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
 	require.Error(t, err)
-	_, err = c.Read(ctx, "db1", "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
+	_, err = db.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
 	require.Error(t, err)
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}

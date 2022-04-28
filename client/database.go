@@ -34,7 +34,7 @@ type TxFunc func(
 // not expose operations like Commit()/Abort as it is meant to be used
 // within the Transact() method which abstracts away those operations.
 type Tx interface {
-	driver.CRUDTx
+	driver.Database
 }
 
 // Database is the interface for interacting with a specific database

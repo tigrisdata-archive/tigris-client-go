@@ -1,3 +1,17 @@
+// Copyright 2022 Tigris Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // Package filter provides methods to build logical filters.
 // Filters are used to read or update only documents,
 // which satisfies the filter.
@@ -7,6 +21,7 @@ import (
 	"encoding/json"
 
 	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
 type Operand map[string]comparison
@@ -51,7 +66,7 @@ func Not(op expr) expr {
 
 // Eq composes 'equal' operation.
 // Result is equivalent to: field == value
-func Eq(field string, value interface{}) expr {
+func Eq[T schema.PrimitiveFieldType](field string, value T) expr {
 	return expr{field: comparison{Eq: value}}
 }
 

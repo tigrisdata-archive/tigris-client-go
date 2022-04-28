@@ -12,4 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package client
+package config
+
+import "crypto/tls"
+
+type Config struct {
+	TLS   *tls.Config `json:"tls,omitempty"`
+	Token string      `json:",omitempty"`
+	URL   string      `json:"url,omitempty"`
+}

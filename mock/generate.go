@@ -14,4 +14,4 @@
 
 package mock
 
-//go:generate mockgen -package mock -destination user_grpc.go github.com/tigrisdata/tigris-api/server/v1 TigrisServer
+//go:generate mockgen -package mock -destination api_grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer

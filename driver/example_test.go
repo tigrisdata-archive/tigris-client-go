@@ -17,21 +17,25 @@ package driver
 import (
 	"context"
 	"fmt"
+
+	"github.com/tigrisdata/tigris-client-go/config"
 )
 
 func ExampleDriver() {
 	ctx := context.TODO()
 
-	c, _ := NewDriver(ctx, "localhost", &Config{})
+	c, _ := NewDriver(ctx, &config.Config{URL: "localhost"})
 
 	_ = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
 
-	_ = c.CreateOrUpdateCollection(ctx, "db1", "coll1",
+	db := c.UseDatabase("db1")
+
+	_ = db.CreateOrUpdateCollection(ctx, "coll1",
 		Schema(`{ "properties": { "F1": { "type": "string" }, "F2": { "type": "string" } }, "primary_key": ["F1"] }`))
 
-	_, _ = c.Insert(ctx, "db1", "c1", []Document{Document(`{"F1":"V1"}`)})
+	_, _ = db.Insert(ctx, "c1", []Document{Document(`{"F1":"V1"}`)})
 
-	it, _ := c.Read(ctx, "db1", "c1", Filter(`{"F1":"V1"}`), Projection(`{}`))
+	it, _ := db.Read(ctx, "c1", Filter(`{"F1":"V1"}`), Projection(`{}`))
 
 	var doc Document
 	for it.Next(&doc) {
@@ -40,7 +44,7 @@ func ExampleDriver() {
 
 	_ = it.Err()
 
-	_, _ = c.Delete(ctx, "db1", "c1", Filter(`{"F1":"V1"}`))
+	_, _ = db.Delete(ctx, "c1", Filter(`{"F1":"V1"}`))
 
 	tx, _ := c.BeginTx(ctx, "db1", nil)
 	defer func() { _ = tx.Rollback(ctx) }()

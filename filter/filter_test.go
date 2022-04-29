@@ -23,7 +23,7 @@ import (
 func TestPrefixFilterBuilderBasic(t *testing.T) {
 	cases := []struct {
 		name string
-		fb   expr
+		fb   Expr
 		exp  string
 	}{
 		{"eq", Eq("a", 1), `{"a":{"$eq":1}}`},

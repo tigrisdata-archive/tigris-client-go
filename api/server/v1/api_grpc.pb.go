@@ -74,7 +74,7 @@ func NewTigrisClient(cc grpc.ClientConnInterface) TigrisClient {
 
 func (c *tigrisClient) BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*BeginTransactionResponse, error) {
 	out := new(BeginTransactionResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/BeginTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/BeginTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (c *tigrisClient) BeginTransaction(ctx context.Context, in *BeginTransactio
 
 func (c *tigrisClient) CommitTransaction(ctx context.Context, in *CommitTransactionRequest, opts ...grpc.CallOption) (*CommitTransactionResponse, error) {
 	out := new(CommitTransactionResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/CommitTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/CommitTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (c *tigrisClient) CommitTransaction(ctx context.Context, in *CommitTransact
 
 func (c *tigrisClient) RollbackTransaction(ctx context.Context, in *RollbackTransactionRequest, opts ...grpc.CallOption) (*RollbackTransactionResponse, error) {
 	out := new(RollbackTransactionResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/RollbackTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/RollbackTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (c *tigrisClient) RollbackTransaction(ctx context.Context, in *RollbackTran
 
 func (c *tigrisClient) Insert(ctx context.Context, in *InsertRequest, opts ...grpc.CallOption) (*InsertResponse, error) {
 	out := new(InsertResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/Insert", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Insert", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (c *tigrisClient) Insert(ctx context.Context, in *InsertRequest, opts ...gr
 
 func (c *tigrisClient) Replace(ctx context.Context, in *ReplaceRequest, opts ...grpc.CallOption) (*ReplaceResponse, error) {
 	out := new(ReplaceResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/Replace", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Replace", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (c *tigrisClient) Replace(ctx context.Context, in *ReplaceRequest, opts ...
 
 func (c *tigrisClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (c *tigrisClient) Delete(ctx context.Context, in *DeleteRequest, opts ...gr
 
 func (c *tigrisClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
 	out := new(UpdateResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (c *tigrisClient) Update(ctx context.Context, in *UpdateRequest, opts ...gr
 }
 
 func (c *tigrisClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (Tigris_ReadClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[0], "/Tigris/Read", opts...)
+	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[0], "/tigrisdata.v1.Tigris/Read", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (x *tigrisReadClient) Recv() (*ReadResponse, error) {
 
 func (c *tigrisClient) CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error) {
 	out := new(CreateOrUpdateCollectionResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/CreateOrUpdateCollection", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (c *tigrisClient) CreateOrUpdateCollection(ctx context.Context, in *CreateO
 
 func (c *tigrisClient) DropCollection(ctx context.Context, in *DropCollectionRequest, opts ...grpc.CallOption) (*DropCollectionResponse, error) {
 	out := new(DropCollectionResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/DropCollection", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DropCollection", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ func (c *tigrisClient) DropCollection(ctx context.Context, in *DropCollectionReq
 
 func (c *tigrisClient) ListDatabases(ctx context.Context, in *ListDatabasesRequest, opts ...grpc.CallOption) (*ListDatabasesResponse, error) {
 	out := new(ListDatabasesResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/ListDatabases", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/ListDatabases", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func (c *tigrisClient) ListDatabases(ctx context.Context, in *ListDatabasesReque
 
 func (c *tigrisClient) ListCollections(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error) {
 	out := new(ListCollectionsResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/ListCollections", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/ListCollections", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (c *tigrisClient) ListCollections(ctx context.Context, in *ListCollectionsR
 
 func (c *tigrisClient) CreateDatabase(ctx context.Context, in *CreateDatabaseRequest, opts ...grpc.CallOption) (*CreateDatabaseResponse, error) {
 	out := new(CreateDatabaseResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/CreateDatabase", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/CreateDatabase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func (c *tigrisClient) CreateDatabase(ctx context.Context, in *CreateDatabaseReq
 
 func (c *tigrisClient) DropDatabase(ctx context.Context, in *DropDatabaseRequest, opts ...grpc.CallOption) (*DropDatabaseResponse, error) {
 	out := new(DropDatabaseResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/DropDatabase", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DropDatabase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func (c *tigrisClient) DropDatabase(ctx context.Context, in *DropDatabaseRequest
 
 func (c *tigrisClient) DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error) {
 	out := new(DescribeDatabaseResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/DescribeDatabase", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DescribeDatabase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (c *tigrisClient) DescribeDatabase(ctx context.Context, in *DescribeDatabas
 
 func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error) {
 	out := new(DescribeCollectionResponse)
-	err := c.cc.Invoke(ctx, "/Tigris/DescribeCollection", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DescribeCollection", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +240,7 @@ func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeColle
 }
 
 func (c *tigrisClient) Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (Tigris_StreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[1], "/Tigris/Stream", opts...)
+	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[1], "/tigrisdata.v1.Tigris/Stream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -394,7 +394,7 @@ func _Tigris_BeginTransaction_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/BeginTransaction",
+		FullMethod: "/tigrisdata.v1.Tigris/BeginTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).BeginTransaction(ctx, req.(*BeginTransactionRequest))
@@ -412,7 +412,7 @@ func _Tigris_CommitTransaction_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/CommitTransaction",
+		FullMethod: "/tigrisdata.v1.Tigris/CommitTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).CommitTransaction(ctx, req.(*CommitTransactionRequest))
@@ -430,7 +430,7 @@ func _Tigris_RollbackTransaction_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/RollbackTransaction",
+		FullMethod: "/tigrisdata.v1.Tigris/RollbackTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).RollbackTransaction(ctx, req.(*RollbackTransactionRequest))
@@ -448,7 +448,7 @@ func _Tigris_Insert_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/Insert",
+		FullMethod: "/tigrisdata.v1.Tigris/Insert",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).Insert(ctx, req.(*InsertRequest))
@@ -466,7 +466,7 @@ func _Tigris_Replace_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/Replace",
+		FullMethod: "/tigrisdata.v1.Tigris/Replace",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).Replace(ctx, req.(*ReplaceRequest))
@@ -484,7 +484,7 @@ func _Tigris_Delete_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/Delete",
+		FullMethod: "/tigrisdata.v1.Tigris/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).Delete(ctx, req.(*DeleteRequest))
@@ -502,7 +502,7 @@ func _Tigris_Update_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/Update",
+		FullMethod: "/tigrisdata.v1.Tigris/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).Update(ctx, req.(*UpdateRequest))
@@ -541,7 +541,7 @@ func _Tigris_CreateOrUpdateCollection_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/CreateOrUpdateCollection",
+		FullMethod: "/tigrisdata.v1.Tigris/CreateOrUpdateCollection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).CreateOrUpdateCollection(ctx, req.(*CreateOrUpdateCollectionRequest))
@@ -559,7 +559,7 @@ func _Tigris_DropCollection_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/DropCollection",
+		FullMethod: "/tigrisdata.v1.Tigris/DropCollection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).DropCollection(ctx, req.(*DropCollectionRequest))
@@ -577,7 +577,7 @@ func _Tigris_ListDatabases_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/ListDatabases",
+		FullMethod: "/tigrisdata.v1.Tigris/ListDatabases",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).ListDatabases(ctx, req.(*ListDatabasesRequest))
@@ -595,7 +595,7 @@ func _Tigris_ListCollections_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/ListCollections",
+		FullMethod: "/tigrisdata.v1.Tigris/ListCollections",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).ListCollections(ctx, req.(*ListCollectionsRequest))
@@ -613,7 +613,7 @@ func _Tigris_CreateDatabase_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/CreateDatabase",
+		FullMethod: "/tigrisdata.v1.Tigris/CreateDatabase",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).CreateDatabase(ctx, req.(*CreateDatabaseRequest))
@@ -631,7 +631,7 @@ func _Tigris_DropDatabase_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/DropDatabase",
+		FullMethod: "/tigrisdata.v1.Tigris/DropDatabase",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).DropDatabase(ctx, req.(*DropDatabaseRequest))
@@ -649,7 +649,7 @@ func _Tigris_DescribeDatabase_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/DescribeDatabase",
+		FullMethod: "/tigrisdata.v1.Tigris/DescribeDatabase",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).DescribeDatabase(ctx, req.(*DescribeDatabaseRequest))
@@ -667,7 +667,7 @@ func _Tigris_DescribeCollection_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Tigris/DescribeCollection",
+		FullMethod: "/tigrisdata.v1.Tigris/DescribeCollection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TigrisServer).DescribeCollection(ctx, req.(*DescribeCollectionRequest))
@@ -700,7 +700,7 @@ func (x *tigrisStreamServer) Send(m *StreamResponse) error {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Tigris_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Tigris",
+	ServiceName: "tigrisdata.v1.Tigris",
 	HandlerType: (*TigrisServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

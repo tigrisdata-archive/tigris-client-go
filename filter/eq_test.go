@@ -10,7 +10,7 @@ import (
 func TestEq(t *testing.T) {
 	cases := []struct {
 		name string
-		expr expr
+		expr Expr
 		exp  string
 	}{
 		{"int", EqInt("f", 12345), `{"f":{"$eq":12345}}`},

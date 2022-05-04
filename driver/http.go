@@ -91,7 +91,8 @@ func setHeaders(_ context.Context, req *http.Request) error {
 	return nil
 }
 
-func NewHTTPClient(ctx context.Context, url string, config *config.Config) (Driver, error) {
+// NewHTTPClient return Driver interface implementation using HTTP transport protocol
+func NewHTTPClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 
 	if !strings.Contains(url, ":") {
@@ -122,6 +123,19 @@ func (c *httpDriver) Close() error {
 
 func (c *httpDriver) UseDatabase(name string) Database {
 	return &driverCRUD{&httpCRUD{db: name, api: c.api}}
+}
+
+func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
+	resp, err := c.api.TigrisGetInfo(ctx)
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+	var i InfoResponse
+	if err := respDecode(resp.Body, &i); err != nil {
+		return nil, err
+	}
+
+	return &i, nil
 }
 
 func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
@@ -218,10 +232,17 @@ func (c *httpCRUD) Commit(ctx context.Context) error {
 	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{
 		TxCtx: &c.txCtx,
 	})
-	return HTTPError(err, resp)
+	err = HTTPError(err, resp)
+	if err == nil {
+		c.committed = true
+	}
+	return err
 }
 
 func (c *httpCRUD) Rollback(ctx context.Context) error {
+	if c.committed {
+		return nil
+	}
 	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{
 		TxCtx: &c.txCtx,
 	})
@@ -232,6 +253,8 @@ type httpCRUD struct {
 	db    string
 	api   *apiHTTP.ClientWithResponses
 	txCtx apiHTTP.TransactionCtx
+
+	committed bool
 }
 
 func (c *httpCRUD) convertWriteOptions(_ *WriteOptions) *apiHTTP.WriteOptions {

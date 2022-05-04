@@ -78,6 +78,10 @@ func TestIterator(t *testing.T) {
 			assert.Equal(t, c.expError, it.Err())
 			assert.Equal(t, c.expCount, i)
 			assert.Equal(t, 1, mci.closeCalled)
+			it.Close()
+			assert.Equal(t, 1, mci.closeCalled)
+			assert.False(t, it.Next(&d))
+			assert.Equal(t, c.expError, it.Err())
 		})
 	}
 }

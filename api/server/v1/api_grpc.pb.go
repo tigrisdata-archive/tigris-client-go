@@ -61,7 +61,11 @@ type TigrisClient interface {
 	DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error)
 	// Describe collection describes the information related to collection.
 	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
+	// Provides real time events for the changes made into the database. Streams by default publish all events for a database
+	// but can be restricted to a specific collection. These events can be useful to build event-driven applications.
 	Stream(ctx context.Context, in *StreamRequest, opts ...grpc.CallOption) (Tigris_StreamClient, error)
+	// Provides the information about the server. This information includes returning the server version, etc.
+	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error)
 }
 
 type tigrisClient struct {
@@ -271,6 +275,15 @@ func (x *tigrisStreamClient) Recv() (*StreamResponse, error) {
 	return m, nil
 }
 
+func (c *tigrisClient) GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error) {
+	out := new(GetInfoResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/GetInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TigrisServer is the server API for Tigris service.
 // All implementations should embed UnimplementedTigrisServer
 // for forward compatibility
@@ -314,7 +327,11 @@ type TigrisServer interface {
 	DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error)
 	// Describe collection describes the information related to collection.
 	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
+	// Provides real time events for the changes made into the database. Streams by default publish all events for a database
+	// but can be restricted to a specific collection. These events can be useful to build event-driven applications.
 	Stream(*StreamRequest, Tigris_StreamServer) error
+	// Provides the information about the server. This information includes returning the server version, etc.
+	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 }
 
 // UnimplementedTigrisServer should be embedded to have forward compatible implementations.
@@ -371,6 +388,9 @@ func (UnimplementedTigrisServer) DescribeCollection(context.Context, *DescribeCo
 }
 func (UnimplementedTigrisServer) Stream(*StreamRequest, Tigris_StreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method Stream not implemented")
+}
+func (UnimplementedTigrisServer) GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
 
 // UnsafeTigrisServer may be embedded to opt out of forward compatibility for this service.
@@ -696,6 +716,24 @@ func (x *tigrisStreamServer) Send(m *StreamResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Tigris_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).GetInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/GetInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).GetInfo(ctx, req.(*GetInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Tigris_ServiceDesc is the grpc.ServiceDesc for Tigris service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -762,6 +800,10 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DescribeCollection",
 			Handler:    _Tigris_DescribeCollection_Handler,
+		},
+		{
+			MethodName: "GetInfo",
+			Handler:    _Tigris_GetInfo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

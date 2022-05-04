@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package driver provides access to the low level Tigris API.
+// It abstracts underlying transport protocol.
 package driver
 
 import (
@@ -24,6 +26,9 @@ import (
 
 // Driver implements Tigris API
 type Driver interface {
+	// Info returns server information
+	Info(ctx context.Context) (*InfoResponse, error)
+
 	// UseDatabase returns and interface for collections and documents management
 	// of the database
 	UseDatabase(name string) Database
@@ -242,9 +247,9 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 
 // NewDriver connect to Tigris at the specified URL
 // URL should be in the form: {hostname}:{port}
-func NewDriver(ctx context.Context, cfg *config.Config) (Driver, error) {
+func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	if cfg == nil {
-		cfg = &config.Config{}
+		cfg = &config.Driver{}
 	}
 	if DefaultProtocol == GRPC {
 		return NewGRPCClient(ctx, cfg.URL, cfg)

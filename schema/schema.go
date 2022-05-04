@@ -32,8 +32,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unsafe"
 
+	"github.com/gertd/go-pluralize"
+	"github.com/iancoleman/strcase"
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
@@ -51,6 +54,12 @@ type PrimitiveFieldType interface {
 		int | int32 | int64 |
 		float32 | float64 |
 		[]byte | *time.Time
+}
+
+var plural *pluralize.Client
+
+func init() {
+	plural = pluralize.NewClient()
 }
 
 // Supported data types
@@ -73,30 +82,44 @@ const (
 
 // Field represents JSON schema object
 type Field struct {
-	Name   string   `json:"title,omitempty"`
-	Type   string   `json:"type,omitempty"`
-	Format string   `json:"format,omitempty"`
-	Tags   []string `json:"tags,omitempty"`
-	Desc   string   `json:"description,omitempty"`
-	Fields []Field  `json:"properties,omitempty"`
-	Items  *Field   `json:"items,omitempty"`
+	Type   string           `json:"type,omitempty"`
+	Format string           `json:"format,omitempty"`
+	Tags   []string         `json:"tags,omitempty"`
+	Desc   string           `json:"description,omitempty"`
+	Fields map[string]Field `json:"properties,omitempty"`
+	Items  *Field           `json:"items,omitempty"`
 }
 
 // Schema is top level JSON schema object
 type Schema struct {
-	Name       string   `json:"title,omitempty"`
-	Desc       string   `json:"description,omitempty"`
-	Fields     []Field  `json:"properties,omitempty"`
-	PrimaryKey []string `json:"primary_key,omitempty"`
+	Name       string           `json:"title,omitempty"`
+	Desc       string           `json:"description,omitempty"`
+	Fields     map[string]Field `json:"properties,omitempty"`
+	PrimaryKey []string         `json:"primary_key,omitempty"`
 }
 
-// ModelName returns name of the model
-func ModelName(s interface{}) string {
+// DatabaseModelName returns name of the database derived from the given database model
+func DatabaseModelName(s interface{}) string {
 	t := reflect.TypeOf(s)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
 	return t.Name()
+}
+
+// ModelName returns name of the colletiction derived from the given colletction model type.
+// The name is snake case pluralized.
+// If the original name ends with digit then it's not pluralized
+func ModelName(s interface{}) string {
+	t := reflect.TypeOf(s)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	name := strcase.ToSnake(t.Name())
+	if unicode.IsDigit(rune(name[len(name)-1])) {
+		return name
+	}
+	return plural.Plural(name)
 }
 
 // TODO: Handle UUID, Datetime, Set types
@@ -203,7 +226,7 @@ func parseTag(name string, tag string, _ *[]string, pk map[string]int) (bool, er
 	for _, tag := range tagList {
 		if strings.HasPrefix(tag, tagPrimaryKey) {
 			if pk == nil {
-				return false, fmt.Errorf("cannot define primary key on database level")
+				return false, nil
 			}
 			i, err := parsePrimaryKeyIndex(tag)
 			if err != nil {
@@ -225,8 +248,8 @@ func parseTag(name string, tag string, _ *[]string, pk map[string]int) (bool, er
 }
 
 // traverseFields recursively parses the model structure and build the schema structure out of it
-func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *int) ([]Field, error) {
-	var fields []Field
+func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *int) (map[string]Field, error) {
+	fields := make(map[string]Field)
 
 	if prefix != "" {
 		prefix += "."
@@ -249,9 +272,9 @@ func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *i
 
 		var f Field
 
-		f.Name = name
+		fName := name
 
-		skip, err := parseTag(prefix+f.Name, field.Tag.Get(tagName), &f.Tags, pk)
+		skip, err := parseTag(prefix+fName, field.Tag.Get(tagName), &f.Tags, pk)
 		if err != nil {
 			return nil, err
 		}
@@ -265,7 +288,7 @@ func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *i
 			return nil, err
 		}
 
-		if _, ok := pk[prefix+f.Name]; ok && !isPrimaryKeyType(f.Type) {
+		if _, ok := pk[prefix+fName]; ok && !isPrimaryKeyType(f.Type) {
 			return nil, fmt.Errorf("type is not supported for the key: %s", field.Type.Name())
 
 		}
@@ -276,18 +299,18 @@ func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *i
 		}
 
 		if tp.Kind() == reflect.Struct && f.Format != formatDateTime {
-			f.Fields, err = traverseFields(prefix+f.Name, tp, pk, nFields)
+			f.Fields, err = traverseFields(prefix+fName, tp, nil, nFields)
 			if err != nil {
 				return nil, err
 			}
 		} else if f.Type == typeArray {
 			if field.Type.Elem().Kind() == reflect.Struct {
-				fields, err := traverseFields(prefix+f.Name, tp.Elem(), pk, nFields)
+				fields, err := traverseFields(prefix+fName, tp.Elem(), nil, nFields)
 				if err != nil {
 					return nil, err
 				}
 				f.Items = &Field{
-					Name:   tp.Elem().Name(),
+					//Name:   tp.Elem().Name(),
 					Type:   typeObject,
 					Fields: fields,
 				}
@@ -303,14 +326,14 @@ func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *i
 			}
 		}
 
-		fields = append(fields, f)
+		fields[fName] = f
 		*nFields++
 	}
 
 	return fields, nil
 }
 
-func fromCollectionModel(model interface{}) (*Schema, error) {
+func FromCollectionModel(model interface{}) (*Schema, error) {
 	t := reflect.TypeOf(model)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -353,29 +376,29 @@ func fromCollectionModel(model interface{}) (*Schema, error) {
 }
 
 // FromCollectionModels converts provided model(s) to the schema structure
-func FromCollectionModels(model interface{}, models ...interface{}) ([]*Schema, error) {
+func FromCollectionModels(model Model, models ...Model) (map[string]*Schema, error) {
 	//models parameter added to require at least one schema to migrate
-	var schemas []*Schema
+	schemas := make(map[string]*Schema)
 
-	schema, err := fromCollectionModel(model)
+	schema, err := FromCollectionModel(model)
 	if err != nil {
 		return nil, err
 	}
-	schemas = append(schemas, schema)
+	schemas[schema.Name] = schema
 
 	for _, m := range models {
-		schema, err := fromCollectionModel(m)
+		schema, err := FromCollectionModel(m)
 		if err != nil {
 			return nil, err
 		}
-		schemas = append(schemas, schema)
+		schemas[schema.Name] = schema
 	}
 
 	return schemas, nil
 }
 
 // FromDatabaseModel converts provided database model to collections schema structures
-func FromDatabaseModel(dbModel interface{}) (string, []*Schema, error) {
+func FromDatabaseModel(dbModel interface{}) (string, map[string]*Schema, error) {
 	t := reflect.TypeOf(dbModel)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -384,7 +407,7 @@ func FromDatabaseModel(dbModel interface{}) (string, []*Schema, error) {
 		return "", nil, fmt.Errorf("database model should be of struct type containing collection models types as fields")
 	}
 
-	var schemas []*Schema
+	schemas := make(map[string]*Schema)
 
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
@@ -411,7 +434,7 @@ func FromDatabaseModel(dbModel interface{}) (string, []*Schema, error) {
 			tt = field.Type.Elem()
 		}
 
-		sch, err := fromCollectionModel(reflect.New(tt).Elem().Interface())
+		sch, err := FromCollectionModel(reflect.New(tt).Elem().Interface())
 		if err != nil {
 			return "", nil, err
 		}
@@ -420,7 +443,7 @@ func FromDatabaseModel(dbModel interface{}) (string, []*Schema, error) {
 			sch.Name = name
 		}
 
-		schemas = append(schemas, sch)
+		schemas[name] = sch
 	}
 
 	return t.Name(), schemas, nil

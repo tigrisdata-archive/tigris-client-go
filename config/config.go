@@ -16,8 +16,16 @@ package config
 
 import "crypto/tls"
 
-type Config struct {
+// Driver contains connection and transport configuration
+type Driver struct {
 	TLS   *tls.Config `json:"tls,omitempty"`
 	Token string      `json:",omitempty"`
 	URL   string      `json:"url,omitempty"`
+}
+
+// Database contains database and connection config
+type Database struct {
+	Driver
+	// MustExist if set skips implicit database creation
+	MustExist bool
 }

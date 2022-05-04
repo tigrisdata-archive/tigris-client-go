@@ -30,6 +30,7 @@ type driverWithOptions interface {
 	dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
 	beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error)
 
+	Info(ctx context.Context) (*InfoResponse, error)
 	UseDatabase(name string) Database
 	ListDatabases(ctx context.Context) ([]string, error)
 	DescribeDatabase(ctx context.Context, db string) (*DescribeDatabaseResponse, error)
@@ -54,7 +55,7 @@ type txWithOptions interface {
 	Rollback(ctx context.Context) error
 }
 
-func getAuthToken(ctx context.Context, config *config.Config) (*oauth2.Token, *oauth2.Config, context.Context) {
+func getAuthToken(ctx context.Context, config *config.Driver) (*oauth2.Token, *oauth2.Config, context.Context) {
 	token := config.Token
 	if os.Getenv(TokenEnv) != "" {
 		token = os.Getenv(TokenEnv)

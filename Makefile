@@ -34,22 +34,23 @@ ${API_DIR}/client/${V}/%/http.go: ${PROTO_DIR}/%_openapi.yaml
 
 generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${API_DIR}/client/${V}/api/http.go
 
-mock/api_grpc.go: generate
-	mkdir -p mock
-	mockgen -package mock -destination mock/api_grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer
+mock/api/grpc.go mock/driver.go:
+	mkdir -p mock/api
+	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver Driver,Tx,Database,Iterator
+	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer
 
-mock: mock/api_grpc.go
+mock: mock/api/grpc.go mock/driver.go
 
 lint:
 	yq --exit-status 'tag == "!!map" or tag== "!!seq"' .github/workflows/*.yaml
 	shellcheck scripts/*
 	golangci-lint run
 
-go.sum: go.mod mock generate
+go.sum: go.mod generate mock
 	go mod download
 
-test: go.sum generate mock lint
+test: go.sum generate mock
 	go test $(TEST_PARAM) ./...
 
 clean:
-	rm -f mock/api_grpc.go
+	rm -rf mock/

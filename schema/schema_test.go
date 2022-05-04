@@ -127,7 +127,7 @@ func TestCollectionSchema(t *testing.T) {
 
 		Bool bool `json:"bool_1"`
 
-		String string `json:"string_1" tigris:"primary_key:2"`
+		String string `json:"string_1" tigris:"primary_key:1"`
 
 		Data1  subStructPK          `json:"data_1"`
 		Slice1 []string             `json:"slice_1"`
@@ -162,110 +162,104 @@ func TestCollectionSchema(t *testing.T) {
 		{pkGap{}, nil, fmt.Errorf("gap in the primary key index")},
 		{pkInvalidType{}, nil, fmt.Errorf("type is not supported for the key: bool")},
 		{pkInvalidTag{}, nil, fmt.Errorf("only one colon allowed in the tag")},
-		{pk{}, &Schema{Name: "pk", Fields: []Field{
-			{Name: "key_1", Type: typeString}}, PrimaryKey: []string{"key_1"}}, nil},
-		{pk1{}, &Schema{Name: "pk1", Fields: []Field{
-			{Name: "key_1", Type: typeString}}, PrimaryKey: []string{"key_1"}}, nil},
-		{pk2{}, &Schema{Name: "pk2", Fields: []Field{
-			{Name: "key_2", Type: typeString}, {Name: "key_1", Type: typeString}},
+		{input: pk{}, output: &Schema{Name: "pks", Fields: map[string]Field{
+			"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}},
+		{pk1{}, &Schema{Name: "pk_1", Fields: map[string]Field{
+			"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}, nil},
+		{pk2{}, &Schema{Name: "pk_2", Fields: map[string]Field{
+			"key_2": {Type: typeString}, "key_1": {Type: typeString}},
 			PrimaryKey: []string{"key_1", "key_2"}}, nil},
-		{pk3{}, &Schema{Name: "pk3", Fields: []Field{
-			{Name: "key_2", Type: typeString}, {Name: "key_1", Type: typeString}, {Name: "key_3", Type: typeString}},
+		{pk3{}, &Schema{Name: "pk_3", Fields: map[string]Field{
+			"key_2": {Type: typeString}, "key_1": {Type: typeString}, "key_3": {Type: typeString}},
 			PrimaryKey: []string{"key_1", "key_2", "key_3"}}, nil},
-		{allTypes{}, &Schema{Name: "allTypes", Fields: []Field{
-			{Name: "tm", Type: typeString, Format: formatDateTime},
-			{Name: "tmPtr", Type: typeString, Format: formatDateTime},
+		{allTypes{}, &Schema{Name: "all_types", Fields: map[string]Field{
+			"tm":    {Type: typeString, Format: formatDateTime},
+			"tmPtr": {Type: typeString, Format: formatDateTime},
 
-			{Name: "int_32", Type: typeInteger, Format: formatInt32},
+			"int_32": {Type: typeInteger, Format: formatInt32},
 
-			{Name: "int_64", Type: typeInteger},
+			"int_64": {Type: typeInteger},
 			//			{Name: "uint_64", Type: typeInteger},
-			{Name: "int_1", Type: typeInteger},
+			"int_1": {Type: typeInteger},
 
-			{Name: "bytes_1", Type: typeString, Format: formatByte},
-			{Name: "bytes_2", Type: typeString, Format: formatByte},
+			"bytes_1": {Type: typeString, Format: formatByte},
+			"bytes_2": {Type: typeString, Format: formatByte},
 
-			{Name: "float_32", Type: typeNumber},
-			{Name: "float_64", Type: typeNumber},
+			"float_32": {Type: typeNumber},
+			"float_64": {Type: typeNumber},
 
-			{Name: "bool_1", Type: typeBoolean},
+			"bool_1": {Type: typeBoolean},
 
-			{Name: "string_1", Type: typeString},
+			"string_1": {Type: typeString},
 
-			{
-				Name: "data_1",
+			"data_1": {
 				Type: "object",
-				Fields: []Field{
-					{
-						Name: "field_1", Type: typeString},
-					{
-						Name: "Nested",
+				Fields: map[string]Field{
+					"field_1": {Type: typeString},
+					"Nested": {
 						Type: "object",
-						Fields: []Field{
-							{Name: "ss_field_1", Type: typeString},
+						Fields: map[string]Field{
+							"ss_field_1": {Type: typeString},
 						},
 					},
 				},
 			},
 
-			{Name: "slice_1", Type: typeArray, Items: &Field{Type: typeString}},
-			{Name: "arr_1", Type: typeArray, Items: &Field{Type: typeString}},
-			{Name: "map_1", Type: typeObject},
+			"slice_1": {Type: typeArray, Items: &Field{Type: typeString}},
+			"arr_1":   {Type: typeArray, Items: &Field{Type: typeString}},
+			"map_1":   {Type: typeObject},
 
-			{Name: "slice_2", Type: typeArray,
+			"slice_2": {Type: typeArray,
 				Items: &Field{
-					Name: "subStruct",
 					Type: "object",
-					Fields: []Field{
-						{Name: "field_1", Type: typeString},
-						{
-							Name: "Nested",
+					Fields: map[string]Field{
+						"field_1": {Type: typeString},
+						"Nested": {
 							Type: "object",
-							Fields: []Field{
-								{Name: "ss_field_1", Type: typeString},
+							Fields: map[string]Field{
+								"ss_field_1": {Type: typeString},
 							},
 						},
 					},
 				},
 			},
-			{Name: "map_2", Type: typeObject},
+			"map_2": {Type: typeObject},
 
 			// use original name if JSON tag name is not defined
-			{Name: "bool_123", Type: typeBoolean},
-			{Name: "ptrStruct", Type: typeObject, Fields: []Field{
-				{
-					Name: "ss_field_1",
+			"bool_123": {Type: typeBoolean},
+			"ptrStruct": {Type: typeObject, Fields: map[string]Field{
+				"ss_field_1": {
 					Type: "string",
 				}}},
 			//	{Name: "DataEnc", Type: typeInteger, Tags: []string{"encrypted"}},
 			//	{Name: "DataPII", Type: typeInteger, Tags: []string{"pii"}},
-		}, PrimaryKey: []string{"data_1.Nested.ss_field_1", "string_1"}}, nil},
+		}, PrimaryKey: []string{"string_1"}}, nil},
 	}
 
 	for _, c := range cases {
 		t.Run(reflect.TypeOf(c.input).Name(), func(t *testing.T) {
-			schema, err := fromCollectionModel(c.input)
+			schema, err := FromCollectionModel(c.input)
 			assert.Equal(t, c.err, err)
 			assert.Equal(t, c.output, schema)
 		})
 	}
 
 	t.Run("build", func(t *testing.T) {
-		s, err := fromCollectionModel(allTypes{})
+		s, err := FromCollectionModel(allTypes{})
 		require.NoError(t, err)
 
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"title":"allTypes","properties":[{"title":"tm","type":"string","format":"date-time"},{"title":"tmPtr","type":"string","format":"date-time"},{"title":"int_32","type":"integer","format":"int32"},{"title":"int_64","type":"integer"},{"title":"int_1","type":"integer"},{"title":"bytes_1","type":"string","format":"byte"},{"title":"bytes_2","type":"string","format":"byte"},{"title":"float_32","type":"number"},{"title":"float_64","type":"number"},{"title":"bool_1","type":"boolean"},{"title":"string_1","type":"string"},{"title":"data_1","type":"object","properties":[{"title":"field_1","type":"string"},{"title":"Nested","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}]},{"title":"slice_1","type":"array","items":{"type":"string"}},{"title":"arr_1","type":"array","items":{"type":"string"}},{"title":"map_1","type":"object"},{"title":"slice_2","type":"array","items":{"title":"subStruct","type":"object","properties":[{"title":"field_1","type":"string"},{"title":"Nested","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}]}},{"title":"map_2","type":"object"},{"title":"bool_123","type":"boolean"},{"title":"ptrStruct","type":"object","properties":[{"title":"ss_field_1","type":"string"}]}],"primary_key":["data_1.Nested.ss_field_1","string_1"]}`, string(b))
+		require.Equal(t, `{"title":"all_types","properties":{"arr_1":{"type":"array","items":{"type":"string"}},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object"},"map_2":{"type":"object"},"ptrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"},"tm":{"type":"string","format":"date-time"},"tmPtr":{"type":"string","format":"date-time"}},"primary_key":["string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {
 		s, err := FromCollectionModels(pk{}, pk1{})
 		require.NoError(t, err)
 
-		assert.Equal(t, []*Schema{{Name: "pk", Fields: []Field{{Name: "key_1", Type: typeString}}, PrimaryKey: []string{"key_1"}},
-			{Name: "pk1", Fields: []Field{{Name: "key_1", Type: typeString}}, PrimaryKey: []string{"key_1"}}}, s)
+		assert.Equal(t, map[string]*Schema{"pks": {Name: "pks", Fields: map[string]Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}},
+			"pk_1": {Name: "pk_1", Fields: map[string]Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}}, s)
 	})
 
 	t.Run("duplicate_pk_index", func(t *testing.T) {
@@ -296,10 +290,6 @@ func TestDatabaseSchema(t *testing.T) {
 
 	_ = Db1{c1: Coll1{}, c2: &Coll2{}, c3: []Coll2{}, C4: []*Coll2{}}
 
-	type Db2 struct {
-		Coll1 `tigris:"primary_key"`
-	}
-
 	type Db3 struct {
 		Coll1
 		Coll2 `tigris:"-"`
@@ -311,23 +301,22 @@ func TestDatabaseSchema(t *testing.T) {
 
 	_ = Db4{1}
 
-	coll1 := Schema{Name: "Coll1", Fields: []Field{{Name: "Key1", Type: "integer"}}, PrimaryKey: []string{"Key1"}}
-	c1 := Schema{Name: "c1", Fields: []Field{{Name: "Key1", Type: "integer"}}, PrimaryKey: []string{"Key1"}}
-	c2 := Schema{Name: "c2", Fields: []Field{{Name: "Key2", Type: "integer"}}, PrimaryKey: []string{"Key2"}}
-	c3 := Schema{Name: "c3", Fields: []Field{{Name: "Key2", Type: "integer"}}, PrimaryKey: []string{"Key2"}}
-	c4 := Schema{Name: "coll_4", Fields: []Field{{Name: "Key2", Type: "integer"}}, PrimaryKey: []string{"Key2"}}
+	coll1 := Schema{Name: "Coll1", Fields: map[string]Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}}
+	c1 := Schema{Name: "c1", Fields: map[string]Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}}
+	c2 := Schema{Name: "c2", Fields: map[string]Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
+	c3 := Schema{Name: "c3", Fields: map[string]Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
+	c4 := Schema{Name: "coll_4", Fields: map[string]Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
 
 	var i int64
 
 	cases := []struct {
 		input  interface{}
 		name   string
-		output []*Schema
+		output map[string]*Schema
 		err    error
 	}{
-		{Db1{}, "Db1", []*Schema{&c1, &c2, &c3, &c4}, nil},
-		{Db2{}, "", nil, fmt.Errorf("cannot define primary key on database level")},
-		{&Db3{}, "Db3", []*Schema{&coll1}, nil},
+		{Db1{}, "Db1", map[string]*Schema{"c1": &c1, "c2": &c2, "c3": &c3, "coll_4": &c4}, nil},
+		{&Db3{}, "Db3", map[string]*Schema{"Coll1": &coll1}, nil},
 		{Db4{}, "", nil, fmt.Errorf("model should be of struct type, not int64")},
 		{i, "", nil, fmt.Errorf("database model should be of struct type containing collection models types as fields")},
 	}

@@ -51,7 +51,8 @@ func GRPCError(err error) error {
 	return &api.TigrisError{Code: s.Code(), Message: s.Message()}
 }
 
-func NewGRPCClient(ctx context.Context, url string, config *config.Config) (Driver, error) {
+// NewGRPCClient return Driver interface implementation using GRPC transport protocol
+func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 
 	ts := oCfg.TokenSource(ctxClient, token)
@@ -94,6 +95,15 @@ func (c *grpcDriver) Close() error {
 
 func (c *grpcDriver) UseDatabase(name string) Database {
 	return &driverCRUD{&grpcCRUD{db: name, api: c.api}}
+}
+
+func (c *grpcDriver) Info(ctx context.Context) (*InfoResponse, error) {
+	r, err := c.api.GetInfo(ctx, &api.GetInfoRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*InfoResponse)(r), nil
 }
 
 func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
@@ -155,10 +165,17 @@ func (c *grpcCRUD) Commit(ctx context.Context) error {
 		Db:    c.db,
 		TxCtx: &c.txCtx,
 	})
-	return GRPCError(err)
+	err = GRPCError(err)
+	if err == nil {
+		c.committed = true
+	}
+	return err
 }
 
 func (c *grpcCRUD) Rollback(ctx context.Context) error {
+	if c.committed {
+		return nil
+	}
 	_, err := c.api.RollbackTransaction(ctx, &api.RollbackTransactionRequest{
 		Db:    c.db,
 		TxCtx: &c.txCtx,
@@ -184,6 +201,8 @@ type grpcCRUD struct {
 	db    string
 	api   api.TigrisClient
 	txCtx api.TransactionCtx
+
+	committed bool
 }
 
 func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {

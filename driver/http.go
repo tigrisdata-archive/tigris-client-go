@@ -91,7 +91,7 @@ func setHeaders(_ context.Context, req *http.Request) error {
 	return nil
 }
 
-func NewHTTPClient(ctx context.Context, url string, config *config.Config) (Driver, error) {
+func NewHTTPClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 
 	if !strings.Contains(url, ":") {

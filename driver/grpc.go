@@ -51,7 +51,7 @@ func GRPCError(err error) error {
 	return &api.TigrisError{Code: s.Code(), Message: s.Message()}
 }
 
-func NewGRPCClient(ctx context.Context, url string, config *config.Config) (Driver, error) {
+func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 
 	ts := oCfg.TokenSource(ctxClient, token)

@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package client
+package tigris
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
+	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
@@ -102,7 +103,7 @@ func (db *Database) Tx(ctx context.Context, fn func(ctx context.Context, tx *Tx)
 }
 
 // openDatabaseFromModels creates Database and collections from the provided collection models
-func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *DatabaseConfig, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Database, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
 	// optionally creates database if it's allowed
 	if !cfg.MustExist {
 		err := d.CreateDatabase(ctx, dbName)
@@ -126,8 +127,8 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *DatabaseC
 // OpenDatabase initializes Database from a bunch of collections models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database
-func OpenDatabase(ctx context.Context, cfg *DatabaseConfig, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
-	d, err := driver.NewDriver(ctx, &cfg.Config)
+func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+	d, err := driver.NewDriver(ctx, &cfg.Driver)
 	if err != nil {
 		return nil, err
 	}

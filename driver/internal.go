@@ -54,7 +54,7 @@ type txWithOptions interface {
 	Rollback(ctx context.Context) error
 }
 
-func getAuthToken(ctx context.Context, config *config.Config) (*oauth2.Token, *oauth2.Config, context.Context) {
+func getAuthToken(ctx context.Context, config *config.Driver) (*oauth2.Token, *oauth2.Config, context.Context) {
 	token := config.Token
 	if os.Getenv(TokenEnv) != "" {
 		token = os.Getenv(TokenEnv)

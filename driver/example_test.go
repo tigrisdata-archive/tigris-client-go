@@ -24,7 +24,7 @@ import (
 func ExampleDriver() {
 	ctx := context.TODO()
 
-	c, _ := NewDriver(ctx, &config.Config{URL: "localhost"})
+	c, _ := NewDriver(ctx, &config.Driver{URL: "localhost"})
 
 	_ = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
 

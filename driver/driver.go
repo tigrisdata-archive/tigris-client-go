@@ -242,9 +242,9 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 
 // NewDriver connect to Tigris at the specified URL
 // URL should be in the form: {hostname}:{port}
-func NewDriver(ctx context.Context, cfg *config.Config) (Driver, error) {
+func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	if cfg == nil {
-		cfg = &config.Config{}
+		cfg = &config.Driver{}
 	}
 	if DefaultProtocol == GRPC {
 		return NewGRPCClient(ctx, cfg.URL, cfg)

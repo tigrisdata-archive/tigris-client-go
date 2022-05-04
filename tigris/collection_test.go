@@ -1,4 +1,4 @@
-package client
+package tigris
 
 import (
 	"context"
@@ -80,7 +80,7 @@ func TestCollectionBasic(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &DatabaseConfig{}, "db1", &Coll1{}, &Coll2{})
+	db, err := openDatabaseFromModels(ctx, m, &config.Database{}, "db1", &Coll1{}, &Coll2{})
 	require.NoError(t, err)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb)
@@ -448,11 +448,11 @@ func TestClientSchemaMigration(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &DatabaseConfig{Config: config.Config{URL: "localhost:33334"}}
+	cfg := &config.Database{Driver: config.Driver{URL: "localhost:33334"}}
 	cfg.TLS = test.SetupTLS(t)
 
 	driver.DefaultProtocol = driver.GRPC
-	drv, err := driver.NewDriver(ctx, &cfg.Config)
+	drv, err := driver.NewDriver(ctx, &cfg.Driver)
 	require.NoError(t, err)
 
 	type testSchema1 struct {
@@ -491,7 +491,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			TxCtx: txCtx,
 		})).Return(&api.CommitTransactionResponse{}, nil)
 
-	_, err = openDatabaseFromModels(ctx, drv, &DatabaseConfig{}, "db1", &testSchema1{})
+	_, err = openDatabaseFromModels(ctx, drv, &config.Database{}, "db1", &testSchema1{})
 	require.NoError(t, err)
 
 	mc.EXPECT().CreateDatabase(gomock.Any(),
@@ -528,7 +528,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			TxCtx: txCtx,
 		})).Return(&api.CommitTransactionResponse{}, nil)
 
-	_, err = openDatabaseFromModels(ctx, drv, &DatabaseConfig{}, "db1", &testSchema1{}, &testSchema2{})
+	_, err = openDatabaseFromModels(ctx, drv, &config.Database{}, "db1", &testSchema1{}, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string

@@ -24,6 +24,9 @@ import (
 
 // Driver implements Tigris API
 type Driver interface {
+	// Info returns server information
+	Info(ctx context.Context) (*InfoResponse, error)
+
 	// UseDatabase returns and interface for collections and documents management
 	// of the database
 	UseDatabase(name string) Database

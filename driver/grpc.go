@@ -96,6 +96,15 @@ func (c *grpcDriver) UseDatabase(name string) Database {
 	return &driverCRUD{&grpcCRUD{db: name, api: c.api}}
 }
 
+func (c *grpcDriver) Info(ctx context.Context) (*InfoResponse, error) {
+	r, err := c.api.GetInfo(ctx, &api.GetInfoRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*InfoResponse)(r), nil
+}
+
 func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	r, err := c.api.ListDatabases(ctx, &api.ListDatabasesRequest{})
 	if err != nil {

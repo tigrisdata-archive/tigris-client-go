@@ -475,16 +475,35 @@ func testTxBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.NoError(t, err)
 }
 
+func testGetInfo(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
+	ctx := context.TODO()
+
+	mc.EXPECT().GetInfo(gomock.Any(),
+		pm(&api.GetInfoRequest{})).Return(&api.GetInfoResponse{ServerVersion: "some version"}, nil)
+
+	info, err := c.Info(ctx)
+	require.NoError(t, err)
+	require.Equal(t, "some version", info.ServerVersion)
+
+	mc.EXPECT().GetInfo(gomock.Any(),
+		pm(&api.GetInfoRequest{})).Return(nil, fmt.Errorf("some error"))
+
+	_, err = c.Info(ctx)
+	require.Error(t, err)
+}
+
 func TestGRPCDriver(t *testing.T) {
 	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Token: "aaa"})
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
+	testGetInfo(t, client, mockServer)
 }
 
 func TestHTTPDriver(t *testing.T) {
 	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Token: "aaa"})
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
+	testGetInfo(t, client, mockServer)
 }
 
 func TestTxGRPCDriver(t *testing.T) {

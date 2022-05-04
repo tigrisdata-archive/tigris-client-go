@@ -108,6 +108,9 @@ func SetupTests(t *testing.T) (*mock.MockTigrisServer, func()) {
 	r.HandleFunc(apiPathPrefix+documentPathPattern, func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
 	})
+	r.HandleFunc(apiPathPrefix+"/info", func(w http.ResponseWriter, r *http.Request) {
+		mux.ServeHTTP(w, r)
+	})
 	r.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
 		b, err := ioutil.ReadAll(r.Body)
 		require.NoError(t, err)

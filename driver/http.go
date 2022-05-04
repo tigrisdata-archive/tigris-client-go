@@ -124,6 +124,19 @@ func (c *httpDriver) UseDatabase(name string) Database {
 	return &driverCRUD{&httpCRUD{db: name, api: c.api}}
 }
 
+func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
+	resp, err := c.api.TigrisGetInfo(ctx)
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+	var i InfoResponse
+	if err := respDecode(resp.Body, &i); err != nil {
+		return nil, err
+	}
+
+	return &i, nil
+}
+
 func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	resp, err := c.api.TigrisListDatabases(ctx)
 	if err := HTTPError(err, resp); err != nil {

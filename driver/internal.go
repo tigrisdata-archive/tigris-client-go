@@ -30,6 +30,7 @@ type driverWithOptions interface {
 	dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
 	beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error)
 
+	Info(ctx context.Context) (*InfoResponse, error)
 	UseDatabase(name string) Database
 	ListDatabases(ctx context.Context) ([]string, error)
 	DescribeDatabase(ctx context.Context, db string) (*DescribeDatabaseResponse, error)

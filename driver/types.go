@@ -62,6 +62,8 @@ type DeleteResponse api.DeleteResponse
 type DescribeDatabaseResponse api.DescribeDatabaseResponse
 type DescribeCollectionResponse api.DescribeCollectionResponse
 
+type InfoResponse api.GetInfoResponse
+
 type Config struct {
 	TLS   *tls.Config `json:"tls,omitempty"`
 	Token string      `json:",omitempty"`

@@ -39,18 +39,18 @@ import (
 )
 
 func SetupGRPCTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
-	mockServer, cancel := test.SetupTests(t)
+	mockServer, cancel := test.SetupTests(t, 0)
 	config.TLS = test.SetupTLS(t)
-	client, err := NewGRPCClient(context.Background(), test.GRPCURL, config)
+	client, err := NewGRPCClient(context.Background(), test.GRPCURL(0), config)
 	require.NoError(t, err)
 
 	return client, mockServer, func() { cancel(); _ = client.Close() }
 }
 
 func SetupHTTPTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
-	mockServer, cancel := test.SetupTests(t)
+	mockServer, cancel := test.SetupTests(t, 0)
 	config.TLS = test.SetupTLS(t)
-	client, err := NewHTTPClient(context.Background(), test.HTTPURL, config)
+	client, err := NewHTTPClient(context.Background(), test.HTTPURL(0), config)
 	require.NoError(t, err)
 
 	//FIXME: implement proper wait for HTTP server to start
@@ -679,11 +679,11 @@ func TestTxHTTPDriverNegative(t *testing.T) {
 }
 
 func TestNewDriver(t *testing.T) {
-	_, cancel := test.SetupTests(t)
+	_, cancel := test.SetupTests(t, 0)
 	defer cancel()
 
 	DefaultProtocol = HTTP
-	cfg := config.Driver{URL: test.HTTPURL}
+	cfg := config.Driver{URL: test.HTTPURL(0)}
 	client, err := NewDriver(context.Background(), &cfg)
 	require.NoError(t, err)
 	_ = client.Close()
@@ -693,7 +693,7 @@ func TestNewDriver(t *testing.T) {
 	certPool := x509.NewCertPool()
 	require.True(t, certPool.AppendCertsFromPEM([]byte(test.CaCert)))
 
-	cfg = config.Driver{URL: test.GRPCURL, TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost"}}
+	cfg = config.Driver{URL: test.GRPCURL(0), TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost"}}
 	client, err = NewDriver(context.Background(), &cfg)
 	require.NoError(t, err)
 	_ = client.Close()
@@ -773,7 +773,7 @@ func TestHTTPDriverAuth(t *testing.T) {
 }
 
 func TestGRPCTokenRefresh(t *testing.T) {
-	TokenRefreshURL = test.HTTPURL + "/token"
+	TokenRefreshURL = test.HTTPURL(0) + "/token"
 
 	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Token: "token_config_123:refresh_token_123"})
 	defer cancel()
@@ -782,7 +782,7 @@ func TestGRPCTokenRefresh(t *testing.T) {
 }
 
 func TestHTTPTokenRefresh(t *testing.T) {
-	TokenRefreshURL = test.HTTPURL + "/token"
+	TokenRefreshURL = test.HTTPURL(0) + "/token"
 
 	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Token: "token_config_123:refresh_token_123"})
 	defer cancel()

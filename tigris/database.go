@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package tigris provides an interface for accessing Tigris data-platform
+// This is the main client package you are looking for.
 package tigris
 
 import (
@@ -44,6 +46,8 @@ func newDatabase(name string, driver driver.Driver) *Database {
 }
 
 // CreateCollections creates collections in the Database using provided collection models
+// This method is only needed if collections need to be created dynamically,
+// all static collections are created by OpenDatabase
 func (db *Database) CreateCollections(ctx context.Context, model schema.Model, models ...schema.Model) error {
 	schemas, err := schema.FromCollectionModels(model, models...)
 	if err != nil {
@@ -86,6 +90,11 @@ func (db *Database) Drop(ctx context.Context) error {
 }
 
 // Tx executes given set of operations in a transaction
+//
+// All operation in the "fn" closure is executed atomically in a transaction.
+// If the closure returns no error the changes are applied to the database,
+// when error is returned then changes just discarded,
+// database stays intact.
 func (db *Database) Tx(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) error {
 	dtx, err := db.driver.BeginTx(ctx, db.name)
 	if err != nil {
@@ -124,7 +133,7 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Da
 	return db, nil
 }
 
-// OpenDatabase initializes Database from a bunch of collections models.
+// OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database
 func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {

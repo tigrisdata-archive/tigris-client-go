@@ -44,21 +44,24 @@ func (u *Update) Build() (driver.Update, error) {
 }
 
 // Set instructs operation to set given field to the provided value
-// The result is equivalent to `field = value`
+// The result is equivalent to
+//   field = value
 func (u *Update) Set(field string, value interface{}) *Update {
 	u.SetF[field] = value
 	return u
 }
 
 // Unset instructs operation to clear given field in the document
-// The result is equivalent to `field = null`
+// The result is equivalent to
+//   field = null
 func (u *Update) Unset(field string) *Update {
 	u.UnsetF[field] = nil
 	return u
 }
 
 // Set instructs operation to set given field to the provided value
-// The result is equivalent to `field = value`
+// The result is equivalent to
+//   field = value
 func Set(field string, value interface{}) *Update {
 	u := &Update{SetF: map[string]interface{}{}, UnsetF: map[string]interface{}{}}
 	u.SetF[field] = value
@@ -66,7 +69,8 @@ func Set(field string, value interface{}) *Update {
 }
 
 // Unset instructs operation to clear given field in the document
-// The result is equivalent to `field = null`
+// The result is equivalent to
+//   field = null
 func Unset(field string) *Update {
 	u := &Update{SetF: map[string]interface{}{}, UnsetF: map[string]interface{}{}}
 	u.UnsetF[field] = nil

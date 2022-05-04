@@ -91,6 +91,7 @@ func setHeaders(_ context.Context, req *http.Request) error {
 	return nil
 }
 
+// NewHTTPClient return Driver interface implementation using HTTP transport protocol
 func NewHTTPClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 

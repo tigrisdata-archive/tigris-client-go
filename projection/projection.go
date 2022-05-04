@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package projection provides helpers to construct "field projections".
+// In other words subset of fields of a document.
+// This is used by read API to fetch partial documents.
 package projection
 
 import (
@@ -21,6 +24,7 @@ import (
 )
 
 var (
+	//All represents projection which includes all field of the documents
 	All = (Projection)(nil)
 )
 
@@ -30,16 +34,20 @@ func Builder() Projection {
 	return Projection{}
 }
 
+// Include flags the field to be returned by read
 func (pr Projection) Include(field string) Projection {
 	pr[field] = true
 	return pr
 }
 
+// Exclude flags the fields to be excluded by the read
 func (pr Projection) Exclude(field string) Projection {
 	pr[field] = false
 	return pr
 }
 
+// Build materializes the projection, built by Include/Exclude,
+// to be used by driver API.
 func (pr Projection) Build() (driver.Projection, error) {
 	if pr == nil || len(pr) == 0 {
 		return nil, nil
@@ -48,12 +56,14 @@ func (pr Projection) Build() (driver.Projection, error) {
 	return b, err
 }
 
+// Include flags the field to be returned by read
 func Include(field string) Projection {
 	pr := Projection{}
 	pr[field] = true
 	return pr
 }
 
+// Exclude flags the fields to be excluded by the read
 func Exclude(field string) Projection {
 	pr := Projection{}
 	pr[field] = false

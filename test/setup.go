@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package test contains testing helpers
 package test
 
 import (
@@ -37,17 +38,20 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const (
-	GRPCURL = "dns:localhost:33334"
-	HTTPURL = "https://localhost:33333"
-)
-
 var (
 	apiPathPrefix         = "/api/v1"
 	databasePathPattern   = "/databases/*"
 	collectionPathPattern = "/collections/*"
 	documentPathPattern   = "/documents/*"
 )
+
+func GRPCURL(shift int) string {
+	return fmt.Sprintf("dns:localhost:%d", 33334+shift)
+}
+
+func HTTPURL(shift int) string {
+	return fmt.Sprintf("https://localhost:%d", 33333+shift)
+}
 
 type ProtoMatcher struct {
 	Message proto.Message
@@ -73,7 +77,7 @@ func SetupTLS(t *testing.T) *tls.Config {
 	return &tls.Config{RootCAs: certPool, ServerName: "localhost"}
 }
 
-func SetupTests(t *testing.T) (*mock.MockTigrisServer, func()) {
+func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 	c := gomock.NewController(t)
 
 	m := mock.NewMockTigrisServer(c)
@@ -121,7 +125,7 @@ func SetupTests(t *testing.T) (*mock.MockTigrisServer, func()) {
 
 	var wg sync.WaitGroup
 
-	l, err := net.Listen("tcp", "localhost:33334")
+	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", 33334+portShift))
 	require.NoError(t, err)
 
 	wg.Add(1)
@@ -130,7 +134,7 @@ func SetupTests(t *testing.T) (*mock.MockTigrisServer, func()) {
 		_ = s.Serve(l)
 	}()
 
-	server := &http.Server{Addr: "localhost:33333", TLSConfig: tlsConfig, Handler: r}
+	server := &http.Server{Addr: fmt.Sprintf("localhost:%d", 33333+portShift), TLSConfig: tlsConfig, Handler: r}
 
 	wg.Add(1)
 	go func() {

@@ -43,6 +43,7 @@ const (
 )
 
 var (
+	//All represents filter which includes all the documents of the collection
 	All = driver.Filter(`{}`)
 )
 

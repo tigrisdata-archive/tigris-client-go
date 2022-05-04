@@ -15,7 +15,6 @@
 package driver
 
 import (
-	"crypto/tls"
 	"encoding/json"
 
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
@@ -63,8 +62,3 @@ type DescribeDatabaseResponse api.DescribeDatabaseResponse
 type DescribeCollectionResponse api.DescribeCollectionResponse
 
 type InfoResponse api.GetInfoResponse
-
-type Config struct {
-	TLS   *tls.Config `json:"tls,omitempty"`
-	Token string      `json:",omitempty"`
-}

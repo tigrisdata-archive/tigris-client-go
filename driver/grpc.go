@@ -51,6 +51,7 @@ func GRPCError(err error) error {
 	return &api.TigrisError{Code: s.Code(), Message: s.Message()}
 }
 
+// NewGRPCClient return Driver interface implementation using GRPC transport protocol
 func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
 	token, oCfg, ctxClient := getAuthToken(ctx, config)
 

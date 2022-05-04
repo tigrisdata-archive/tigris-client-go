@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package driver provides access to the low level Tigris API.
+// It abstracts underlying transport protocol.
 package driver
 
 import (

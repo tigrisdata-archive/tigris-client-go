@@ -16,6 +16,7 @@ package config
 
 import "crypto/tls"
 
+// Driver contains connection and transport configuration
 type Driver struct {
 	TLS   *tls.Config `json:"tls,omitempty"`
 	Token string      `json:",omitempty"`

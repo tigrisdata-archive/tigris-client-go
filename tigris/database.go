@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package tigris provides an interface for accessing Tigris data-platform
+// Package tigris provides an interface for accessing Tigris data-platform.
 // This is the main client package you are looking for.
 package tigris
 

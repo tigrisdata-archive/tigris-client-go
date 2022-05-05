@@ -51,6 +51,3 @@ go.sum: go.mod generate mock
 
 test: go.sum generate mock
 	go test $(TEST_PARAM) ./...
-
-clean:
-	rm -rf mock/

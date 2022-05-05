@@ -636,6 +636,16 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	_, err := c.BeginTx(ctx, "db1", &TxOptions{})
 	require.Error(t, err)
 
+	// Empty tx context
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Db:      "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{}, nil)
+
+	_, err = c.BeginTx(ctx, "db1", &TxOptions{})
+	require.Error(t, err)
+
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
 			Db:      "db1",

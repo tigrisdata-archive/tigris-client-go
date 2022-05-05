@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockStreamReader struct {
@@ -84,4 +85,19 @@ func TestIterator(t *testing.T) {
 			assert.Equal(t, c.expError, it.Err())
 		})
 	}
+
+	t.Run("premature close", func(t *testing.T) {
+		mci := &mockStreamReader{docs: []Document{Document("one1"), Document("two2")}, err: nil}
+		it := readIterator{streamReader: mci}
+		var d Document
+		require.True(t, it.Next(&d))
+		assert.Equal(t, 0, mci.closeCalled)
+		it.Close()
+		assert.Equal(t, 1, mci.closeCalled)
+		assert.False(t, it.Next(&d))
+		assert.NoError(t, it.Err())
+		assert.Equal(t, 1, mci.closeCalled)
+		it.Close()
+		assert.Equal(t, 1, mci.closeCalled)
+	})
 }

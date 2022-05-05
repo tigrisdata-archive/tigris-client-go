@@ -169,6 +169,7 @@ func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*Describe
 	}
 
 	var r DescribeDatabaseResponse
+	r.Db = ToString(d.Db)
 	for _, v := range *d.Collections {
 		r.Collections = append(r.Collections, &api.CollectionDescription{
 			Collection: ToString(v.Collection),

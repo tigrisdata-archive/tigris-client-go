@@ -1,4 +1,7 @@
-# Tigris Golang client
+<table style="border: none">
+<tr><td><img alt="Tigris logo" src="docs/logo.svg" width="100"></td>
+<td><h1>Golang client</h1></td>
+</table>
 
 [![Go Report](https://goreportcard.com/badge/github.com/tigrisdata/tigris-client-go)](https://goreportcard.com/report/github.com/tigrisdata/tigris-client-go)
 [![Build Status](https://github.com/tigrisdata/tigris-client-go/workflows/go-test/badge.svg)]()

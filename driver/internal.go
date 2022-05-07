@@ -47,6 +47,7 @@ type CRUDWithOptions interface {
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) (*DescribeCollectionResponse, error)
+	streamWithOptions(ctx context.Context, collection string, options *StreamOptions) (EventIterator, error)
 }
 
 type txWithOptions interface {

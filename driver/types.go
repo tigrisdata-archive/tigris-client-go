@@ -40,6 +40,7 @@ type Filter json.RawMessage
 type Projection json.RawMessage
 type Update json.RawMessage
 type Schema json.RawMessage
+type Event json.RawMessage
 
 type WriteOptions api.WriteOptions
 
@@ -48,6 +49,7 @@ type ReplaceOptions api.ReplaceRequestOptions
 type UpdateOptions api.UpdateRequestOptions
 type DeleteOptions api.DeleteRequestOptions
 type ReadOptions api.ReadRequestOptions
+type StreamOptions api.StreamRequestOptions
 
 type CollectionOptions api.CollectionOptions
 type DatabaseOptions api.DatabaseOptions

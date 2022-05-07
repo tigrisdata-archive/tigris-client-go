@@ -66,3 +66,54 @@ func (i *readIterator) Close() {
 	_ = i.close()
 	i.eof = true
 }
+
+type EventIterator interface {
+	Next(d *Event) bool
+	Err() error
+	Close()
+}
+
+type eventStreamReader interface {
+	read() (Event, error)
+	close() error
+}
+
+type eventReadIterator struct {
+	eventStreamReader
+	eof bool
+	err error
+}
+
+func (i *eventReadIterator) Next(e *Event) bool {
+	if i.eof {
+		return false
+	}
+
+	event, err := i.read()
+	if err == io.EOF {
+		i.eof = true
+		_ = i.close()
+		return false
+	}
+	if err != nil {
+		i.eof = true
+		i.err = err
+		_ = i.close()
+		return false
+	}
+
+	*e = event
+	return true
+}
+
+func (i *eventReadIterator) Err() error {
+	return i.err
+}
+
+func (i *eventReadIterator) Close() {
+	if i.eof {
+		return
+	}
+	_ = i.close()
+	i.eof = true
+}

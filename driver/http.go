@@ -290,6 +290,10 @@ func (c *httpCRUD) convertReadOptions(_ *ReadOptions) *apiHTTP.ReadRequestOption
 	return &opts
 }
 
+func (c *httpCRUD) convertStreamOptions(_ *StreamOptions) *apiHTTP.StreamRequestOptions {
+	return &apiHTTP.StreamRequestOptions{}
+}
+
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
 	resp, err := c.api.TigrisListCollections(ctx, c.db, apiHTTP.TigrisListCollectionsJSONRequestBody{
 		Options: c.convertCollectionOptions(options),
@@ -457,6 +461,45 @@ func (g *httpStreamReader) read() (Document, error) {
 }
 
 func (g *httpStreamReader) close() error {
+	return g.closer.Close()
+}
+
+func (c *httpCRUD) streamWithOptions(ctx context.Context, collection string, options *StreamOptions) (EventIterator, error) {
+	resp, err := c.api.TigrisStream(ctx, c.db, apiHTTP.TigrisStreamJSONRequestBody{
+		Collection: &collection,
+		Options:    c.convertStreamOptions(options),
+	})
+
+	if err != nil {
+		return nil, HTTPError(err, nil)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return nil, HTTPError(fmt.Errorf(resp.Status), nil)
+	}
+
+	dec := json.NewDecoder(resp.Body)
+
+	return &eventReadIterator{eventStreamReader: &httpEventStreamReader{stream: dec, closer: resp.Body}}, nil
+}
+
+type httpEventStreamReader struct {
+	closer io.Closer
+	stream *json.Decoder
+}
+
+func (g *httpEventStreamReader) read() (Event, error) {
+	var res struct {
+		Result apiHTTP.ReadResponse
+	}
+	if err := g.stream.Decode(&res); err != nil {
+		return nil, HTTPError(err, nil)
+	}
+
+	return Event(res.Result.Data), nil
+}
+
+func (g *httpEventStreamReader) close() error {
 	return g.closer.Close()
 }
 

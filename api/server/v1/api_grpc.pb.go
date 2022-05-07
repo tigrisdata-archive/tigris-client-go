@@ -259,7 +259,7 @@ func (c *tigrisClient) Stream(ctx context.Context, in *StreamRequest, opts ...gr
 }
 
 type Tigris_StreamClient interface {
-	Recv() (*StreamResponse, error)
+	Recv() (*StreamEvent, error)
 	grpc.ClientStream
 }
 
@@ -267,8 +267,8 @@ type tigrisStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *tigrisStreamClient) Recv() (*StreamResponse, error) {
-	m := new(StreamResponse)
+func (x *tigrisStreamClient) Recv() (*StreamEvent, error) {
+	m := new(StreamEvent)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -704,7 +704,7 @@ func _Tigris_Stream_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type Tigris_StreamServer interface {
-	Send(*StreamResponse) error
+	Send(*StreamEvent) error
 	grpc.ServerStream
 }
 
@@ -712,7 +712,7 @@ type tigrisStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *tigrisStreamServer) Send(m *StreamResponse) error {
+func (x *tigrisStreamServer) Send(m *StreamEvent) error {
 	return x.ServerStream.SendMsg(m)
 }
 

@@ -375,6 +375,26 @@ func (mr *MockTxMockRecorder) Rollback(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockTx)(nil).Rollback), arg0)
 }
 
+// Stream mocks base method.
+func (m *MockTx) Stream(arg0 context.Context, arg1 string, arg2 ...*driver.StreamOptions) (driver.EventIterator, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Stream", varargs...)
+	ret0, _ := ret[0].(driver.EventIterator)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stream indicates an expected call of Stream.
+func (mr *MockTxMockRecorder) Stream(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stream", reflect.TypeOf((*MockTx)(nil).Stream), varargs...)
+}
+
 // Update mocks base method.
 func (m *MockTx) Update(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 driver.Update, arg4 ...*driver.UpdateOptions) (*driver.UpdateResponse, error) {
 	m.ctrl.T.Helper()
@@ -574,6 +594,26 @@ func (mr *MockDatabaseMockRecorder) Replace(arg0, arg1, arg2 interface{}, arg3 .
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Replace", reflect.TypeOf((*MockDatabase)(nil).Replace), varargs...)
+}
+
+// Stream mocks base method.
+func (m *MockDatabase) Stream(arg0 context.Context, arg1 string, arg2 ...*driver.StreamOptions) (driver.EventIterator, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Stream", varargs...)
+	ret0, _ := ret[0].(driver.EventIterator)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stream indicates an expected call of Stream.
+func (mr *MockDatabaseMockRecorder) Stream(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stream", reflect.TypeOf((*MockDatabase)(nil).Stream), varargs...)
 }
 
 // Update mocks base method.

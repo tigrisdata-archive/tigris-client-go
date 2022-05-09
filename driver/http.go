@@ -490,13 +490,13 @@ type httpEventStreamReader struct {
 
 func (g *httpEventStreamReader) read() (Event, error) {
 	var res struct {
-		Result apiHTTP.ReadResponse
+		Result apiHTTP.StreamResponse
 	}
 	if err := g.stream.Decode(&res); err != nil {
 		return nil, HTTPError(err, nil)
 	}
 
-	return Event(res.Result.Data), nil
+	return Event(res.Result.Event.Data), nil
 }
 
 func (g *httpEventStreamReader) close() error {

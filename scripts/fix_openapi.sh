@@ -55,6 +55,7 @@ yq_fix_json ReplaceRequest documents.items
 yq_fix_json UpdateRequest fields
 yq_fix_json ReadRequest fields
 yq_fix_json ReadResponse data
+yq_fix_json StreamEvent data
 yq_fix_json CreateOrUpdateCollectionRequest schema
 yq_fix_json CollectionDescription schema
 yq_fix_json DescribeCollectionResponse schema

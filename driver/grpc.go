@@ -379,7 +379,7 @@ func (g *grpcEventStreamReader) read() (Event, error) {
 		return nil, GRPCError(err)
 	}
 
-	return resp.Data, nil
+	return resp.Event.Data, nil
 }
 
 func (g *grpcEventStreamReader) close() error {

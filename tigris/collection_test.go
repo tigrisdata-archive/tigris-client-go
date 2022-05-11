@@ -197,6 +197,7 @@ func TestCollectionTx(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
+	mdb := mock.NewMockDatabase(ctrl)
 	mtx := mock.NewMockTx(ctrl)
 
 	type Coll1 struct {
@@ -208,8 +209,9 @@ func TestCollectionTx(t *testing.T) {
 
 	m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
 
-	err := db.Tx(ctx, func(ctx context.Context, tx *Tx) error {
-		c := GetTxCollection[Coll1](tx)
+	err := db.Tx(ctx, func(ctx context.Context) error {
+		m.EXPECT().UseDatabase("db1").Return(mdb)
+		c := GetCollection[Coll1](db)
 
 		d1 := &Coll1{Key1: "aaa", Field1: 123}
 		d2 := &Coll1{Key1: "bbb", Field1: 123}
@@ -310,8 +312,8 @@ func TestCollectionTx(t *testing.T) {
 		err = c.Drop(ctx)
 		require.NoError(t, err)
 
-		mtx.EXPECT().Commit(ctx)
-		mtx.EXPECT().Rollback(ctx)
+		mtx.EXPECT().Commit(context.Background())
+		mtx.EXPECT().Rollback(context.Background())
 
 		return nil
 	})

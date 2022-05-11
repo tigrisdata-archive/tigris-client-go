@@ -37,12 +37,12 @@ type Collection[T schema.Model] struct {
 	driver driver.Driver
 	schema *schema.Schema
 	model  interface{}
-	crud   driver.Database
+	db     driver.Database
 }
 
 // Drop drops the collection
 func (c *Collection[T]) Drop(ctx context.Context) error {
-	return c.crud.DropCollection(ctx, c.name)
+	return getDB(ctx, c.db).DropCollection(ctx, c.name)
 }
 
 // Insert inserts documents into the collection.
@@ -57,7 +57,7 @@ func (c *Collection[T]) Insert(ctx context.Context, docs ...*T) (*InsertResponse
 		}
 	}
 
-	_, err = c.crud.Insert(ctx, c.name, bdocs)
+	_, err = getDB(ctx, c.db).Insert(ctx, c.name, bdocs)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 		}
 	}
 
-	_, err = c.crud.Replace(ctx, c.name, bdocs)
+	_, err = getDB(ctx, c.db).Replace(ctx, c.name, bdocs)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update
 	if err != nil {
 		return nil, err
 	}
-	_, err = c.crud.Update(ctx, c.name, f, u)
+	_, err = getDB(ctx, c.db).Update(ctx, c.name, f, u)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, projecti
 		return nil, err
 	}
 
-	it, err := c.crud.Read(ctx, c.name, f, p)
+	it, err := getDB(ctx, c.db).Read(ctx, c.name, f, p)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (c *Collection[T]) ReadAll(ctx context.Context, projection ...projection.Pr
 	if err != nil {
 		return nil, err
 	}
-	it, err := c.crud.Read(ctx, c.name, filter.All, p)
+	it, err := getDB(ctx, c.db).Read(ctx, c.name, filter.All, p)
 	return &Iterator[T]{Iterator: it}, err
 }
 
@@ -176,7 +176,7 @@ func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*Dele
 	if err != nil {
 		return nil, err
 	}
-	_, err = c.crud.Delete(ctx, c.name, f)
+	_, err = getDB(ctx, c.db).Delete(ctx, c.name, f)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*Dele
 
 // DeleteAll removes all the documents from the collection.
 func (c *Collection[T]) DeleteAll(ctx context.Context) (*DeleteResponse, error) {
-	_, err := c.crud.Delete(ctx, c.name, filter.All)
+	_, err := getDB(ctx, c.db).Delete(ctx, c.name, filter.All)
 	if err != nil {
 		return nil, err
 	}

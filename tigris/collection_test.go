@@ -28,12 +28,11 @@ import (
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/mock"
-	"github.com/tigrisdata/tigris-client-go/projection"
 	"github.com/tigrisdata/tigris-client-go/schema"
 	"github.com/tigrisdata/tigris-client-go/test"
-	"github.com/tigrisdata/tigris-client-go/update"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -121,7 +120,7 @@ func TestCollectionBasic(t *testing.T) {
 	_, err = c.Update(ctx, filter.Or(
 		filter.Eq("Key1", "aaa"),
 		filter.Eq("Key1", "bbb")),
-		update.Set("Field1", 345),
+		fields.Set("Field1", 345),
 	)
 	require.NoError(t, err)
 
@@ -135,7 +134,7 @@ func TestCollectionBasic(t *testing.T) {
 	it, err := c.Read(ctx, filter.Or(
 		filter.Eq("Key1", "aaa"),
 		filter.Eq("Key1", "ccc")),
-		projection.Exclude("Key1").
+		fields.Exclude("Key1").
 			Include("Field1"),
 	)
 	require.NoError(t, err)
@@ -157,9 +156,9 @@ func TestCollectionBasic(t *testing.T) {
 	mit.EXPECT().Close()
 	it.Close()
 
-	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(`{}`), driver.Projection(nil)).Return(mit, nil)
+	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(`{}`), driver.Projection(`{}`)).Return(mit, nil)
 
-	it, err = c.ReadAll(ctx, projection.All)
+	it, err = c.ReadAll(ctx, fields.All)
 	require.NoError(t, err)
 
 	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{}`))
@@ -233,7 +232,7 @@ func TestCollectionTx(t *testing.T) {
 		_, err = c.Update(ctx, filter.Or(
 			filter.Eq("Key1", "aaa"),
 			filter.Eq("Key1", "bbb")),
-			update.Set("Field1", 345),
+			fields.Set("Field1", 345),
 		)
 		require.NoError(t, err)
 
@@ -247,7 +246,7 @@ func TestCollectionTx(t *testing.T) {
 		it, err := c.Read(ctx, filter.Or(
 			filter.Eq("Key1", "aaa"),
 			filter.Eq("Key1", "ccc")),
-			projection.Exclude("Key1").
+			fields.Exclude("Key1").
 				Include("Field1"),
 		)
 		require.NoError(t, err)
@@ -269,9 +268,9 @@ func TestCollectionTx(t *testing.T) {
 		mit.EXPECT().Close()
 		it.Close()
 
-		mtx.EXPECT().Read(ctx, "coll_1", driver.Filter(`{}`), driver.Projection(nil)).Return(mit, nil)
+		mtx.EXPECT().Read(ctx, "coll_1", driver.Filter(`{}`), driver.Projection(`{}`)).Return(mit, nil)
 
-		it, err = c.ReadAll(ctx, projection.All)
+		it, err = c.ReadAll(ctx, fields.All)
 		require.NoError(t, err)
 
 		mtx.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{}`))
@@ -338,31 +337,31 @@ func TestCollectionNegative(t *testing.T) {
 
 	c := GetCollection[Coll1](db)
 
-	// Test too many projection arguments in all Read API
-	_, err := c.Read(ctx, nil, projection.All, projection.All)
+	// Test too many fields arguments in all Read API
+	_, err := c.Read(ctx, nil, fields.All, fields.All)
 	require.Error(t, err)
 
-	_, err = c.ReadOne(ctx, nil, projection.All, projection.All)
+	_, err = c.ReadOne(ctx, nil, fields.All, fields.All)
 	require.Error(t, err)
 
-	_, err = c.ReadAll(ctx, projection.All, projection.All)
+	_, err = c.ReadAll(ctx, fields.All, fields.All)
 	require.Error(t, err)
 
 	// Iterator error
 	var dd driver.Document
-	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(nil), driver.Projection(nil)).Return(mit, nil)
+	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(nil), driver.Projection(`{}`)).Return(mit, nil)
 	mit.EXPECT().Next(&dd).Return(false)
 	mit.EXPECT().Err().Return(fmt.Errorf("error0"))
 	mit.EXPECT().Err().Return(fmt.Errorf("error0"))
 	mit.EXPECT().Err().Return(fmt.Errorf("error0"))
 	mit.EXPECT().Err().Return(fmt.Errorf("error0"))
 
-	_, err = c.ReadOne(ctx, nil, projection.All)
+	_, err = c.ReadOne(ctx, nil, fields.All)
 	require.Error(t, err)
 
-	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(nil), driver.Projection(nil)).Return(mit, nil)
+	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(nil), driver.Projection(`{}`)).Return(mit, nil)
 
-	it, err := c.Read(ctx, nil, projection.All)
+	it, err := c.Read(ctx, nil, fields.All)
 	require.NoError(t, err)
 
 	mit.EXPECT().Err().Return(fmt.Errorf("error1"))
@@ -373,11 +372,11 @@ func TestCollectionNegative(t *testing.T) {
 	it.err = fmt.Errorf("error2")
 	require.False(t, it.Next(nil))
 
-	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(nil), driver.Projection(nil)).Return(mit, nil)
+	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(nil), driver.Projection(`{}`)).Return(mit, nil)
 	mit.EXPECT().Next(&dd).Return(false)
 	mit.EXPECT().Err().Return(nil)
 
-	_, err = c.ReadOne(ctx, nil, projection.All)
+	_, err = c.ReadOne(ctx, nil, fields.All)
 	require.Equal(t, errNotFound, err)
 
 	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{"all":{"$eq":"b"}}`)).Return(nil, fmt.Errorf("error"))
@@ -389,7 +388,7 @@ func TestCollectionNegative(t *testing.T) {
 	require.Error(t, err)
 
 	mdb.EXPECT().Update(ctx, "coll_1", driver.Filter(`{"all":{"$eq":"b"}}`), driver.Update(`{"$set":{"a":123}}`)).Return(nil, fmt.Errorf("error"))
-	_, err = c.Update(ctx, filter.Eq("all", "b"), update.Set("a", 123))
+	_, err = c.Update(ctx, filter.Eq("all", "b"), fields.Set("a", 123))
 	require.Error(t, err)
 
 	var doc = Coll1{Key1: "aaa"}

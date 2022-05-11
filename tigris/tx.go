@@ -10,7 +10,7 @@ import (
 var (
 	// ErrNotTransactional returned if not transactional call is called in
 	// a transactional context
-	ErrNotTransactional = fmt.Errorf("the call is not transactional")
+	ErrNotTransactional = fmt.Errorf("incorrect use of non-transactional operation in a transaction context")
 )
 
 // Tx is the interface for accessing APIs in a transactional way

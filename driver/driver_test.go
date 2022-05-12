@@ -381,6 +381,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, descExp.Schema, desc.Schema)
 
 	descDbExp := api.DescribeDatabaseResponse{
+		Db: "db1",
 		Collections: []*api.CollectionDescription{
 			{Collection: "coll1",
 				Schema: []byte(`{"a":"b"}`),
@@ -398,6 +399,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	descDb, err := c.DescribeDatabase(ctx, "db1")
 	require.NoError(t, err)
+	require.Equal(t, descDb.Db, "db1")
 	require.Equal(t, descDbExp.Collections[0].Collection, descDb.Collections[0].Collection)
 	require.Equal(t, descDbExp.Collections[0].Schema, descDb.Collections[0].Schema)
 	require.Equal(t, descDbExp.Collections[1].Collection, descDb.Collections[1].Collection)

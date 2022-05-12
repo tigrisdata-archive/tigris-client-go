@@ -20,10 +20,9 @@ import (
 	"fmt"
 
 	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
-	"github.com/tigrisdata/tigris-client-go/projection"
 	"github.com/tigrisdata/tigris-client-go/schema"
-	"github.com/tigrisdata/tigris-client-go/update"
 )
 
 var (
@@ -37,12 +36,12 @@ type Collection[T schema.Model] struct {
 	driver driver.Driver
 	schema *schema.Schema
 	model  interface{}
-	crud   driver.Database
+	db     driver.Database
 }
 
 // Drop drops the collection
 func (c *Collection[T]) Drop(ctx context.Context) error {
-	return c.crud.DropCollection(ctx, c.name)
+	return getDB(ctx, c.db).DropCollection(ctx, c.name)
 }
 
 // Insert inserts documents into the collection.
@@ -57,7 +56,7 @@ func (c *Collection[T]) Insert(ctx context.Context, docs ...*T) (*InsertResponse
 		}
 	}
 
-	_, err = c.crud.Insert(ctx, c.name, bdocs)
+	_, err = getDB(ctx, c.db).Insert(ctx, c.name, bdocs)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +77,7 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 		}
 	}
 
-	_, err = c.crud.Replace(ctx, c.name, bdocs)
+	_, err = getDB(ctx, c.db).Replace(ctx, c.name, bdocs)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +88,7 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 
 // Update partially updates documents based on the provided filter
 // and provided document mutation.
-func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update *update.Update) (*UpdateResponse, error) {
+func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update *fields.Update) (*UpdateResponse, error) {
 	f, err := filter.Build()
 	if err != nil {
 		return nil, err
@@ -98,7 +97,7 @@ func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update
 	if err != nil {
 		return nil, err
 	}
-	_, err = c.crud.Update(ctx, c.name, f, u)
+	_, err = getDB(ctx, c.db).Update(ctx, c.name, f, u.Built())
 	if err != nil {
 		return nil, err
 	}
@@ -107,25 +106,25 @@ func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update
 	return &UpdateResponse{}, nil
 }
 
-func getProjection(projection ...projection.Projection) (driver.Projection, error) {
-	var err error
+func getFields(fields ...*fields.Read) (driver.Projection, error) {
 	p := driver.Projection(nil)
-	if len(projection) > 0 {
-		if len(projection) > 1 {
-			return nil, fmt.Errorf("only one projection parameter is allowed")
+	if len(fields) > 0 {
+		if len(fields) > 1 {
+			return nil, fmt.Errorf("only one fields parameter is allowed")
 		}
-		p, err = projection[0].Build()
+		f, err := fields[0].Build()
 		if err != nil {
 			return nil, err
 		}
+		p = f.Built()
 	}
 	return p, nil
 }
 
 // Read returns documents which satisfies the filter.
-// Only field from the give projection are populated in the documents. By default, all fields are populated.
-func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, projection ...projection.Projection) (*Iterator[T], error) {
-	p, err := getProjection(projection...)
+// Only field from the give fields are populated in the documents. By default, all fields are populated.
+func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*Iterator[T], error) {
+	p, err := getFields(fields...)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +133,7 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, projecti
 		return nil, err
 	}
 
-	it, err := c.crud.Read(ctx, c.name, f, p)
+	it, err := getDB(ctx, c.db).Read(ctx, c.name, f, p)
 	if err != nil {
 		return nil, err
 	}
@@ -143,9 +142,9 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, projecti
 }
 
 // ReadOne reads one document from the collection satisfying the filter.
-func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, projection ...projection.Projection) (*T, error) {
+func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*T, error) {
 	var doc T
-	it, err := c.Read(ctx, filter, projection...)
+	it, err := c.Read(ctx, filter, fields...)
 	if err != nil {
 		return nil, err
 	}
@@ -161,12 +160,12 @@ func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, proje
 
 // ReadAll returns iterator which iterates over all the documents
 // in the collection.
-func (c *Collection[T]) ReadAll(ctx context.Context, projection ...projection.Projection) (*Iterator[T], error) {
-	p, err := getProjection(projection...)
+func (c *Collection[T]) ReadAll(ctx context.Context, fields ...*fields.Read) (*Iterator[T], error) {
+	p, err := getFields(fields...)
 	if err != nil {
 		return nil, err
 	}
-	it, err := c.crud.Read(ctx, c.name, filter.All, p)
+	it, err := getDB(ctx, c.db).Read(ctx, c.name, filter.All, p)
 	return &Iterator[T]{Iterator: it}, err
 }
 
@@ -176,7 +175,7 @@ func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*Dele
 	if err != nil {
 		return nil, err
 	}
-	_, err = c.crud.Delete(ctx, c.name, f)
+	_, err = getDB(ctx, c.db).Delete(ctx, c.name, f)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +185,7 @@ func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*Dele
 
 // DeleteAll removes all the documents from the collection.
 func (c *Collection[T]) DeleteAll(ctx context.Context) (*DeleteResponse, error) {
-	_, err := c.crud.Delete(ctx, c.name, filter.All)
+	_, err := getDB(ctx, c.db).Delete(ctx, c.name, filter.All)
 	if err != nil {
 		return nil, err
 	}

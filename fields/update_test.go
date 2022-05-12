@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package update
+package fields
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUpdateBasic(t *testing.T) {
@@ -46,11 +46,10 @@ func TestUpdateBasic(t *testing.T) {
 		t.Run(v.name, func(t *testing.T) {
 			b, err := v.fields.Build()
 			assert.Equal(t, v.err, err)
-			assert.Equal(t, v.exp, string(b))
+			assert.Equal(t, v.exp, string(b.Built()))
 		})
 	}
 
-	b, err := Builder().Build()
-	assert.Equal(t, fmt.Errorf("empty update"), err)
-	assert.Equal(t, driver.Update(nil), b)
+	_, err := UpdateBuilder().Build()
+	require.Equal(t, fmt.Errorf("empty update"), err)
 }

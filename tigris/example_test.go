@@ -16,8 +16,10 @@ package tigris
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/tigrisdata/tigris-client-go/code"
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/filter"
 )
@@ -103,5 +105,37 @@ func ExampleIterator() {
 
 	if err := it.Err(); err != nil {
 		panic(err)
+	}
+}
+
+func ExampleError() {
+	ctx := context.TODO()
+
+	type Coll1 struct {
+		Key1 string `tigris:"primary_key"`
+	}
+
+	db, err := OpenDatabase(ctx, &config.Database{}, "db1", &Coll1{})
+	if err != nil {
+		panic(err)
+	}
+
+	coll := GetCollection[Coll1](db)
+
+	// Insert document into collection
+	_, err = coll.Insert(ctx, &Coll1{"aaa"})
+	if err != nil {
+		panic(err)
+	}
+
+	// Insert of the same object causes duplicate key error
+	_, err = coll.Insert(ctx, &Coll1{"aaa"})
+
+	// Unwrap tigris.Error and check the code
+	var ep *Error
+	if errors.As(err, &ep) {
+		if ep.Code == code.AlreadyExists {
+			// handle duplicate key
+		}
 	}
 }

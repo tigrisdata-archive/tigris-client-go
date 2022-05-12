@@ -27,7 +27,6 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/credentials/oauth"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -47,8 +46,7 @@ func GRPCError(err error) error {
 	if err == io.EOF {
 		return err
 	}
-	s := status.Convert(err)
-	return &api.TigrisError{Code: s.Code(), Message: s.Message()}
+	return &Error{api.FromStatusError(err)}
 }
 
 // NewGRPCClient return Driver interface implementation using GRPC transport protocol

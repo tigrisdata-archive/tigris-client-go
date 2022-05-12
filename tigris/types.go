@@ -14,6 +14,10 @@
 
 package tigris
 
+import (
+	"github.com/tigrisdata/tigris-client-go/driver"
+)
+
 // InsertResponse includes metadata regarding just inserted documents.
 // Returned by Insert-documents collection API.
 type InsertResponse struct{}
@@ -29,3 +33,11 @@ type DeleteResponse struct{}
 // UpdateResponse includes metadata about just updated documents.
 // Returned by Update-documents collection API.
 type UpdateResponse struct{}
+
+// Error contains Tigris server error
+type Error driver.Error
+
+func (e *Error) AsTigrisError(de *driver.Error) bool {
+	e.TigrisError = de.TigrisError
+	return true
+}

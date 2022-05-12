@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -26,6 +27,7 @@ import (
 	"unsafe"
 
 	"github.com/golang/mock/gomock"
+	gproto "github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,9 +35,11 @@ import (
 	"github.com/tigrisdata/tigris-client-go/config"
 	mock "github.com/tigrisdata/tigris-client-go/mock/api"
 	"github.com/tigrisdata/tigris-client-go/test"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -60,7 +64,7 @@ func SetupHTTPTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigr
 	return client, mockServer, func() { cancel(); _ = client.Close() }
 }
 
-func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp error) {
+func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp error, rd time.Duration) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -79,25 +83,66 @@ func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp 
 	_, err := d.UseDatabase("db1").Delete(ctx, "c1", Filter(`{"filter":"value"}`), &DeleteOptions{})
 
 	require.Equal(t, exp, err)
+
+	var de *Error
+	if errors.As(err, &de) {
+		require.Equal(t, rd, de.RetryDelay())
+	}
+}
+
+func testReadStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	mc.EXPECT().Read(
+		pm(&api.ReadRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":"value"}`),
+			Options:    &api.ReadRequestOptions{},
+		}), gomock.Any()).DoAndReturn(func(r *api.ReadRequest, srv api.Tigris_ReadServer) error {
+		err := srv.Send(&api.ReadResponse{Data: Document(`{"aaa":"bbbb"}`)})
+		require.NoError(t, err)
+		return &api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}
+	})
+
+	it, err := d.UseDatabase("db1").Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
+	require.NoError(t, err)
+
+	var doc Document
+	require.True(t, it.Next(&doc))
+	require.Equal(t, Document(`{"aaa":"bbbb"}`), doc)
+	require.False(t, it.Next(&doc))
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}}, it.Err())
 }
 
 func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	cases := []struct {
-		name string
-		in   error
-		exp  error
+		name       string
+		in         error
+		exp        error
+		retryDelay time.Duration
 	}{
-		{"tigris_error", &api.TigrisError{Code: codes.Unauthenticated, Message: "some error"},
-			&api.TigrisError{Code: codes.Unauthenticated, Message: "some error"}},
+		{"tigris_error", api.Errorf(api.Code_UNAUTHENTICATED, "some error"),
+			&Error{&api.TigrisError{Code: api.Code_UNAUTHENTICATED, Message: "some error"}}, 0},
+		{"invalid_argument_error", api.Errorf(api.Code_INVALID_ARGUMENT, "invalid argument error"),
+			&Error{&api.TigrisError{Code: api.Code_INVALID_ARGUMENT, Message: "invalid argument error"}}, 0},
 		{"error", fmt.Errorf("some error 1"),
-			&api.TigrisError{Code: codes.Unknown, Message: "some error 1"}},
+			&Error{&api.TigrisError{Code: api.Code_UNKNOWN, Message: "some error 1"}}, 0},
 		{"grpc_error", status.Error(codes.PermissionDenied, "some error 1"),
-			&api.TigrisError{Code: codes.PermissionDenied, Message: "some error 1"}},
-		{"no_error", nil, nil},
+			&Error{&api.TigrisError{Code: api.Code_PERMISSION_DENIED, Message: "some error 1"}}, 0},
+		{"no_error", nil, nil, 0},
+		{"extended_tigris_error", api.Errorf(api.Code_CONFLICT, "extended error"),
+			&Error{&api.TigrisError{Code: api.Code_CONFLICT, Message: "extended error"}}, 0},
+		{"retry_error", api.Errorf(api.Code_CONFLICT, "retry error").WithRetry(5 * time.Second),
+			&Error{&api.TigrisError{Code: api.Code_CONFLICT, Message: "retry error", Details: []gproto.Message{&errdetails.RetryInfo{RetryDelay: durationpb.New(5 * time.Second)}}}}, 5 * time.Second},
 	}
 
 	for _, c := range cases {
-		testError(t, d, mc, c.in, c.exp)
+		t.Run(c.name, func(t *testing.T) {
+			testError(t, d, mc, c.in, c.exp, c.retryDelay)
+		})
 	}
 }
 
@@ -105,12 +150,18 @@ func TestGRPCError(t *testing.T) {
 	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Token: "aaa"})
 	defer cancel()
 	testErrors(t, client, mockServer)
+	t.Run("read_stream_error", func(t *testing.T) {
+		testReadStreamError(t, client, mockServer)
+	})
 }
 
 func TestHTTPError(t *testing.T) {
 	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Token: "aaa"})
 	defer cancel()
 	testErrors(t, client, mockServer)
+	t.Run("read_stream_error", func(t *testing.T) {
+		testReadStreamError(t, client, mockServer)
+	})
 }
 
 func pm(m proto.Message) gomock.Matcher {
@@ -648,6 +699,21 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	roptions := &api.ReadRequestOptions{}
 	roptions.TxCtx = &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().Read(
+		pm(&api.ReadRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":"value"}`),
+			Options:    roptions,
+		}), gomock.Any()).Return(&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "errrror"})
+
+	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
+	require.NoError(t, err)
+	var d Document
+	require.False(t, it.Next(&d))
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "errrror"}}, it.Err())
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{

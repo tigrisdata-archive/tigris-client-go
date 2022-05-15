@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package update
+package fields
 
 import (
 	"testing"
@@ -41,13 +41,13 @@ func TestSet(t *testing.T) {
 		t.Run(v.name, func(t *testing.T) {
 			act, err := v.upd.Build()
 			require.NoError(t, err)
-			require.Equal(t, v.exp, string(act))
+			require.Equal(t, v.exp, string(act.Built()))
 		})
 	}
 }
 
 func TestSetScoped(t *testing.T) {
-	u := Builder()
+	u := UpdateBuilder()
 	cases := []struct {
 		name string
 		upd  *Update
@@ -67,7 +67,7 @@ func TestSetScoped(t *testing.T) {
 		t.Run(v.name, func(t *testing.T) {
 			act, err := v.upd.Build()
 			require.NoError(t, err)
-			require.Equal(t, v.exp, string(act))
+			require.Equal(t, v.exp, string(act.Built()))
 		})
 	}
 }

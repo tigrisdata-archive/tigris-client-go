@@ -35,8 +35,8 @@ func ExampleDatabase_Tx() {
 		panic(err)
 	}
 
-	err = db.Tx(ctx, func(ctx context.Context, tx *Tx) error {
-		c := GetTxCollection[Coll1](tx)
+	err = db.Tx(ctx, func(ctx context.Context) error {
+		c := GetCollection[Coll1](db)
 
 		if _, err := c.Insert(ctx, &Coll1{"aaa"}); err != nil {
 			panic(err)

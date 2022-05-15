@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package update package provides a builder to construct update mutation of the Update API.
+// Package fields package provides a builder to construct update mutation of the Update API.
 //
 // Example:
 //   update.SetInt("field1", 123).Unset("field2")
-package update
+package fields
 
 import (
 	"encoding/json"
@@ -26,21 +26,30 @@ import (
 )
 
 type Update struct {
+	built  driver.Update
 	SetF   map[string]interface{} `json:"$set,omitempty"`
 	UnsetF map[string]interface{} `json:"$unset,omitempty"`
 }
 
-// Builder returns and object to construct the update field of Update API
-func Builder() *Update {
+// UpdateBuilder returns and object to construct the update field of Update API
+func UpdateBuilder() *Update {
 	return &Update{SetF: map[string]interface{}{}, UnsetF: map[string]interface{}{}}
 }
 
-func (u *Update) Build() (driver.Update, error) {
+func (u *Update) Build() (*Update, error) {
 	if len(u.SetF) == 0 && len(u.UnsetF) == 0 {
 		return nil, fmt.Errorf("empty update")
 	}
-	b, err := json.Marshal(u)
-	return b, err
+	if u.built != nil {
+		return u, nil
+	}
+	var err error
+	u.built, err = json.Marshal(u)
+	return u, err
+}
+
+func (u *Update) Built() driver.Update {
+	return u.built
 }
 
 // Set instructs operation to set given field to the provided value
@@ -63,7 +72,7 @@ func (u *Update) Unset(field string) *Update {
 // The result is equivalent to
 //   field = value
 func Set(field string, value interface{}) *Update {
-	u := &Update{SetF: map[string]interface{}{}, UnsetF: map[string]interface{}{}}
+	u := UpdateBuilder()
 	u.SetF[field] = value
 	return u
 }
@@ -72,7 +81,7 @@ func Set(field string, value interface{}) *Update {
 // The result is equivalent to
 //   field = null
 func Unset(field string) *Update {
-	u := &Update{SetF: map[string]interface{}{}, UnsetF: map[string]interface{}{}}
+	u := UpdateBuilder()
 	u.UnsetF[field] = nil
 	return u
 }

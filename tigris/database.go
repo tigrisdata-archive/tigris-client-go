@@ -57,14 +57,7 @@ func (db *Database) CreateCollections(ctx context.Context, model schema.Model, m
 	return db.createCollectionsFromSchemas(ctx, db.name, schemas)
 }
 
-// createCollectionsFromSchemas transactionally creates collections from the provided schema map
-func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName string, schemas map[string]*schema.Schema) error {
-	tx, err := db.driver.BeginTx(ctx, dbName)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = tx.Rollback(ctx) }()
-
+func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driver.Tx, schemas map[string]*schema.Schema) error {
 	for _, v := range schemas {
 		sch, err := schema.Build(v)
 		if err != nil {
@@ -74,6 +67,27 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// createCollectionsFromSchemas transactionally creates collections from the provided schema map
+func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName string, schemas map[string]*schema.Schema) error {
+	// Run in existing transaction
+	if tx := getTxCtx(ctx); tx != nil {
+		return db.createCollectionsFromSchemasLow(ctx, tx.tx, schemas)
+	}
+
+	// Run in new implicit transaction
+	tx, err := db.driver.BeginTx(ctx, dbName)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if err = db.createCollectionsFromSchemasLow(ctx, tx, schemas); err != nil {
+		return err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -86,29 +100,10 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 // Drop Database.
 // All the collections in the Database will be dropped
 func (db *Database) Drop(ctx context.Context) error {
+	if getTxCtx(ctx) != nil {
+		return ErrNotTransactional
+	}
 	return db.driver.DropDatabase(ctx, db.name)
-}
-
-// Tx executes given set of operations in a transaction
-//
-// All operation in the "fn" closure is executed atomically in a transaction.
-// If the closure returns no error the changes are applied to the database,
-// when error is returned then changes just discarded,
-// database stays intact.
-func (db *Database) Tx(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) error {
-	dtx, err := db.driver.BeginTx(ctx, db.name)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = dtx.Rollback(ctx) }()
-
-	tx := &Tx{db, dtx}
-
-	if err = fn(ctx, tx); err != nil {
-		return err
-	}
-
-	return dtx.Commit(ctx)
 }
 
 // openDatabaseFromModels creates Database and collections from the provided collection models
@@ -137,6 +132,10 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Da
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database
 func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+	if getTxCtx(ctx) != nil {
+		return nil, ErrNotTransactional
+	}
+
 	d, err := driver.NewDriver(ctx, &cfg.Driver)
 	if err != nil {
 		return nil, err
@@ -153,22 +152,5 @@ func GetCollection[T schema.Model](db *Database) *Collection[T] {
 }
 
 func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {
-	return &Collection[T]{name: name, crud: db.driver.UseDatabase(db.name)}
-}
-
-// Tx is the interface for accessing APIs in a transactional way
-type Tx struct {
-	db *Database
-	tx driver.Tx
-}
-
-// GetTxCollection returns collection object corresponding to collection model T
-func GetTxCollection[T schema.Model](tx *Tx) *Collection[T] {
-	var m T
-	name := schema.ModelName(&m)
-	return getNamedTxCollection[T](tx, name)
-}
-
-func getNamedTxCollection[T schema.Model](tx *Tx, name string) *Collection[T] {
-	return &Collection[T]{name: name, crud: tx.tx}
+	return &Collection[T]{name: name, db: db.driver.UseDatabase(db.name)}
 }

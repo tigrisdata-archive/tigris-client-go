@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package projection
+package fields
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
-func TestProjectionBasic(t *testing.T) {
+func TestFieldsBasic(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		fields Projection
+		fields *Read
 		exp    string
 		err    error
 	}{
-		{"nil", nil, ``, nil},
+		{"nil", nil, `{}`, nil},
 		{"include_1", Include("a"), `{"a":true}`, nil},
 		{"exclude_1", Exclude("a"), `{"a":false}`, nil},
 		{"include_exclude", Include("a").Exclude("b"), `{"a":true,"b":false}`, nil},
@@ -41,11 +40,11 @@ func TestProjectionBasic(t *testing.T) {
 		t.Run(v.name, func(t *testing.T) {
 			b, err := v.fields.Build()
 			assert.Equal(t, v.err, err)
-			assert.Equal(t, v.exp, string(b))
+			assert.Equal(t, v.exp, string(b.Built()))
 		})
 	}
 
-	b, err := Builder().Build()
+	b, err := ReadBuilder().Build()
 	assert.NoError(t, err)
-	assert.Equal(t, driver.Projection(nil), b)
+	assert.Equal(t, All, b)
 }

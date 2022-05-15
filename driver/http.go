@@ -499,7 +499,7 @@ func (g *httpEventStreamReader) read() (Event, error) {
 
 	event, err := jsoniter.Marshal(res.Result.Event)
 	if err != nil {
-		return nil, GRPCError(err)
+		return nil, HTTPError(err, nil)
 	}
 
 	return event, nil

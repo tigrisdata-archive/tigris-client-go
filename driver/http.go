@@ -24,6 +24,7 @@ import (
 	"strings"
 	"unsafe"
 
+	jsoniter "github.com/json-iterator/go"
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
@@ -496,7 +497,12 @@ func (g *httpEventStreamReader) read() (Event, error) {
 		return nil, HTTPError(err, nil)
 	}
 
-	return Event(res.Result.Event.Data), nil
+	event, err := jsoniter.Marshal(res.Result.Event)
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return event, nil
 }
 
 func (g *httpEventStreamReader) close() error {

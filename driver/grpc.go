@@ -21,6 +21,7 @@ import (
 	"strings"
 	"unsafe"
 
+	jsoniter "github.com/json-iterator/go"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 	"google.golang.org/grpc"
@@ -379,7 +380,12 @@ func (g *grpcEventStreamReader) read() (Event, error) {
 		return nil, GRPCError(err)
 	}
 
-	return resp.Event.Data, nil
+	event, err := jsoniter.Marshal(resp.Event)
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return event, nil
 }
 
 func (g *grpcEventStreamReader) close() error {

@@ -40,7 +40,7 @@ type Filter json.RawMessage
 type Projection json.RawMessage
 type Update json.RawMessage
 type Schema json.RawMessage
-type Event json.RawMessage
+type Event *api.StreamEvent
 
 type WriteOptions api.WriteOptions
 

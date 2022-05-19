@@ -36,6 +36,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func SetupGRPCTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
@@ -494,11 +495,80 @@ func testGetInfo(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Error(t, err)
 }
 
+func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
+	ctx := context.TODO()
+
+	db := c.UseDatabase("db1")
+
+	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
+
+	options := &api.WriteOptions{}
+
+	tm := time.Now()
+	md := &api.ResponseMetadata{
+		CreatedAt: timestamppb.New(tm),
+		UpdatedAt: timestamppb.New(tm),
+		DeletedAt: timestamppb.New(tm)}
+
+	mc.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.InsertRequestOptions{WriteOptions: options},
+		})).Return(&api.InsertResponse{Status: "inserted", Metadata: md}, nil)
+
+	insResp, err := db.Insert(ctx, "c1", doc1, &InsertOptions{WriteOptions: options})
+	require.NoError(t, err)
+	require.Equal(t, "inserted", insResp.Status)
+	require.Equal(t, md.CreatedAt.AsTime(), insResp.Metadata.CreatedAt.AsTime())
+
+	mc.EXPECT().Replace(gomock.Any(),
+		pm(&api.ReplaceRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
+		})).Return(&api.ReplaceResponse{Status: "replaced", Metadata: md}, nil)
+
+	repResp, err := db.Replace(ctx, "c1", doc1, &ReplaceOptions{WriteOptions: options})
+	require.NoError(t, err)
+	require.Equal(t, "replaced", repResp.Status)
+	require.Equal(t, md.CreatedAt.AsTime(), repResp.Metadata.CreatedAt.AsTime())
+
+	mc.EXPECT().Update(gomock.Any(),
+		pm(&api.UpdateRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":1}`),
+			Options:    &api.UpdateRequestOptions{WriteOptions: options},
+		})).Return(&api.UpdateResponse{Status: "updated", Metadata: md}, nil)
+
+	updResp, err := db.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
+	require.NoError(t, err)
+	require.Equal(t, "updated", updResp.Status)
+	require.Equal(t, updResp.Metadata.UpdatedAt.AsTime(), repResp.Metadata.UpdatedAt.AsTime())
+
+	mc.EXPECT().Delete(gomock.Any(),
+		pm(&api.DeleteRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Options:    &api.DeleteRequestOptions{WriteOptions: options},
+		})).Return(&api.DeleteResponse{Status: "deleted", Metadata: md}, nil)
+	delResp, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
+	require.NoError(t, err)
+	require.Equal(t, "deleted", delResp.Status)
+	require.Equal(t, md.DeletedAt.AsTime(), delResp.Metadata.DeletedAt.AsTime())
+}
+
 func TestGRPCDriver(t *testing.T) {
 	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Token: "aaa"})
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
 	testGetInfo(t, client, mockServer)
+	testResponseMetadata(t, client, mockServer)
 }
 
 func TestHTTPDriver(t *testing.T) {
@@ -506,6 +576,7 @@ func TestHTTPDriver(t *testing.T) {
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
 	testGetInfo(t, client, mockServer)
+	testResponseMetadata(t, client, mockServer)
 }
 
 func TestTxGRPCDriver(t *testing.T) {

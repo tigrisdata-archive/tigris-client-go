@@ -56,9 +56,21 @@ func (c *Collection[T]) Insert(ctx context.Context, docs ...*T) (*InsertResponse
 		}
 	}
 
-	_, err = getDB(ctx, c.db).Insert(ctx, c.name, bdocs)
+	md, err := getDB(ctx, c.db).Insert(ctx, c.name, bdocs)
 	if err != nil {
 		return nil, err
+	}
+
+	if md != nil {
+		if len(md.Keys) > 0 && len(md.Keys) != len(docs) {
+			return nil, fmt.Errorf("broken response. number of inserted documents is not the same as number of provided documents")
+		}
+
+		for k, v := range md.Keys {
+			if err := populateModelMetadata(docs[k], md.Metadata, v); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	// TODO: forward response
@@ -77,9 +89,21 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 		}
 	}
 
-	_, err = getDB(ctx, c.db).Replace(ctx, c.name, bdocs)
+	md, err := getDB(ctx, c.db).Replace(ctx, c.name, bdocs)
 	if err != nil {
 		return nil, err
+	}
+
+	if md != nil {
+		if len(md.Keys) > 0 && len(md.Keys) != len(docs) {
+			return nil, fmt.Errorf("broken response. number of inserted documents is not the same as number of provided documents")
+		}
+
+		for k, v := range md.Keys {
+			if err := populateModelMetadata(docs[k], md.Metadata, v); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	// TODO: forward response

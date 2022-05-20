@@ -54,6 +54,9 @@ var (
 	tigrisModelType = "Model"
 )
 
+// Model represents types supported as collection models
+type Model interface{}
+
 // PrimitiveFieldType represents types supported by non-composite fields
 type PrimitiveFieldType interface {
 	string |

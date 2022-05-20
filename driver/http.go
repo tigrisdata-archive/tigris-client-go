@@ -22,12 +22,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 	"unsafe"
 
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -81,6 +83,59 @@ func respDecode(body io.ReadCloser, v interface{}) error {
 	if err := json.NewDecoder(body).Decode(v); err != nil {
 		return &api.TigrisError{Code: codes.Unknown, Message: err.Error()}
 	}
+	return nil
+}
+
+type metadata struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+}
+
+func newRespMetadata(m *metadata) *api.ResponseMetadata {
+	r := &api.ResponseMetadata{}
+	if m.CreatedAt != nil {
+		r.CreatedAt = timestamppb.New(*m.CreatedAt)
+	}
+	if m.UpdatedAt != nil {
+		r.UpdatedAt = timestamppb.New(*m.UpdatedAt)
+	}
+	if m.DeletedAt != nil {
+		r.DeletedAt = timestamppb.New(*m.DeletedAt)
+	}
+	return r
+}
+
+// convert timestamps from response metadata to timestamppb.Timestamp
+func dmlRespDecode(body io.ReadCloser, v interface{}) error {
+	r := struct {
+		Metadata      metadata
+		Status        string `json:"status,omitempty"`
+		ModifiedCount int32  `json:"modified_count,omitempty"`
+	}{}
+
+	if err := respDecode(body, &r); err != nil {
+		return err
+	}
+
+	switch v := v.(type) {
+	case *InsertResponse:
+		v.Status = r.Status
+		v.Metadata = newRespMetadata(&r.Metadata)
+	case *ReplaceResponse:
+		v.Status = r.Status
+		v.Metadata = newRespMetadata(&r.Metadata)
+	case *UpdateResponse:
+		v.Status = r.Status
+		v.ModifiedCount = r.ModifiedCount
+		v.Metadata = newRespMetadata(&r.Metadata)
+	case *DeleteResponse:
+		v.Status = r.Status
+		v.Metadata = newRespMetadata(&r.Metadata)
+	default:
+		return fmt.Errorf("unkknown response type")
+	}
+
 	return nil
 }
 
@@ -290,6 +345,10 @@ func (c *httpCRUD) convertReadOptions(_ *ReadOptions) *apiHTTP.ReadRequestOption
 	return &opts
 }
 
+func (c *httpCRUD) convertStreamOptions(_ *StreamOptions) *apiHTTP.StreamRequestOptions {
+	return &apiHTTP.StreamRequestOptions{}
+}
+
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
 	resp, err := c.api.TigrisListCollections(ctx, c.db, apiHTTP.TigrisListCollectionsJSONRequestBody{
 		Options: c.convertCollectionOptions(options),
@@ -358,7 +417,7 @@ func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, doc
 	}
 
 	var d InsertResponse
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err := dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -376,7 +435,7 @@ func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, do
 	}
 
 	var d ReplaceResponse
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err := dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -395,7 +454,7 @@ func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, fil
 	}
 
 	var d UpdateResponse
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err := dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -413,7 +472,7 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 	}
 
 	var d DeleteResponse
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err := dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -457,6 +516,45 @@ func (g *httpStreamReader) read() (Document, error) {
 }
 
 func (g *httpStreamReader) close() error {
+	return g.closer.Close()
+}
+
+func (c *httpCRUD) streamWithOptions(ctx context.Context, collection string, options *StreamOptions) (EventIterator, error) {
+	resp, err := c.api.TigrisStream(ctx, c.db, apiHTTP.TigrisStreamJSONRequestBody{
+		Collection: &collection,
+		Options:    c.convertStreamOptions(options),
+	})
+
+	if err != nil {
+		return nil, HTTPError(err, nil)
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return nil, HTTPError(fmt.Errorf(resp.Status), nil)
+	}
+
+	dec := json.NewDecoder(resp.Body)
+
+	return &eventReadIterator{eventStreamReader: &httpEventStreamReader{stream: dec, closer: resp.Body}}, nil
+}
+
+type httpEventStreamReader struct {
+	closer io.Closer
+	stream *json.Decoder
+}
+
+func (g *httpEventStreamReader) read() (Event, error) {
+	var res struct {
+		Result api.StreamResponse
+	}
+	if err := g.stream.Decode(&res); err != nil {
+		return nil, HTTPError(err, nil)
+	}
+
+	return res.Result.Event, nil
+}
+
+func (g *httpEventStreamReader) close() error {
 	return g.closer.Close()
 }
 

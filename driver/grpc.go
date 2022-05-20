@@ -355,3 +355,33 @@ func (g *grpcStreamReader) read() (Document, error) {
 func (g *grpcStreamReader) close() error {
 	return nil
 }
+
+func (c *grpcCRUD) streamWithOptions(ctx context.Context, collection string, options *StreamOptions) (EventIterator, error) {
+	resp, err := c.api.Stream(ctx, &api.StreamRequest{
+		Db:         c.db,
+		Collection: collection,
+		Options:    (*api.StreamRequestOptions)(options),
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return &eventReadIterator{eventStreamReader: &grpcEventStreamReader{resp}}, nil
+}
+
+type grpcEventStreamReader struct {
+	stream api.Tigris_StreamClient
+}
+
+func (g *grpcEventStreamReader) read() (Event, error) {
+	resp, err := g.stream.Recv()
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return resp.Event, nil
+}
+
+func (g *grpcEventStreamReader) close() error {
+	return nil
+}

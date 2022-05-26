@@ -29,6 +29,7 @@ ${API_DIR}/client/${V}/%/http.go: ${PROTO_DIR}/%_openapi.yaml
 	/bin/bash scripts/fix_openapi.sh ${PROTO_DIR}/$(*F)_openapi.yaml /tmp/$(*F)_openapi.yaml
 	mkdir -p ${API_DIR}/client/${V}/$(*F)
 	oapi-codegen -package api -generate "client, types, spec" \
+		-old-config-style \
 		-o ${API_DIR}/client/${V}/$(*F)/http.go \
 		/tmp/$(*F)_openapi.yaml
 

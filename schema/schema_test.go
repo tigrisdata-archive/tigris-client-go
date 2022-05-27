@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -112,9 +113,11 @@ func TestCollectionSchema(t *testing.T) {
 	}
 
 	type allTypes struct {
-		tm    time.Time
-		tmPtr *time.Time
-		Int32 int32 `json:"int_32"`
+		Tm      time.Time
+		TmPtr   *time.Time
+		UUID    uuid.UUID
+		UUIDPtr *uuid.UUID
+		Int32   int32 `json:"int_32"`
 
 		Int64 int64 `json:"int_64"`
 		Int   int   `json:"int_1"`
@@ -141,13 +144,13 @@ func TestCollectionSchema(t *testing.T) {
 
 		DataSkipped int `json:"-"`
 
-		ptrStruct *subSubStruct
+		PtrStruct *subSubStruct
 		//		DataEnc   int64 `tigris:"encrypted"`
 		//		DataPII   int64 `tigris:"pii"`
-	}
 
-	// Fix linting errors
-	_ = allTypes{ptrStruct: &subSubStruct{}, tm: time.Time{}, tmPtr: &time.Time{}}
+		// unexported fields should not be in the schema
+		skipUnexported int
+	}
 
 	cases := []struct {
 		input  interface{}
@@ -173,8 +176,10 @@ func TestCollectionSchema(t *testing.T) {
 			"key_2": {Type: typeString}, "key_1": {Type: typeString}, "key_3": {Type: typeString}},
 			PrimaryKey: []string{"key_1", "key_2", "key_3"}}, nil},
 		{allTypes{}, &Schema{Name: "all_types", Fields: map[string]Field{
-			"tm":    {Type: typeString, Format: formatDateTime},
-			"tmPtr": {Type: typeString, Format: formatDateTime},
+			"Tm":      {Type: typeString, Format: formatDateTime},
+			"TmPtr":   {Type: typeString, Format: formatDateTime},
+			"UUID":    {Type: typeString, Format: formatUUID},
+			"UUIDPtr": {Type: typeString, Format: formatUUID},
 
 			"int_32": {Type: typeInteger, Format: formatInt32},
 
@@ -227,7 +232,7 @@ func TestCollectionSchema(t *testing.T) {
 
 			// use original name if JSON tag name is not defined
 			"bool_123": {Type: typeBoolean},
-			"ptrStruct": {Type: typeObject, Fields: map[string]Field{
+			"PtrStruct": {Type: typeObject, Fields: map[string]Field{
 				"ss_field_1": {
 					Type: "string",
 				}}},
@@ -238,20 +243,20 @@ func TestCollectionSchema(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(reflect.TypeOf(c.input).Name(), func(t *testing.T) {
-			schema, err := FromCollectionModel(c.input)
+			schema, err := fromCollectionModel(c.input)
 			assert.Equal(t, c.err, err)
 			assert.Equal(t, c.output, schema)
 		})
 	}
 
 	t.Run("build", func(t *testing.T) {
-		s, err := FromCollectionModel(allTypes{})
+		s, err := fromCollectionModel(allTypes{})
 		require.NoError(t, err)
 
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"title":"all_types","properties":{"arr_1":{"type":"array","items":{"type":"string"}},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object"},"map_2":{"type":"object"},"ptrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"},"tm":{"type":"string","format":"date-time"},"tmPtr":{"type":"string","format":"date-time"}},"primary_key":["string_1"]}`, string(b))
+		require.Equal(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"}},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object"},"map_2":{"type":"object"},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {

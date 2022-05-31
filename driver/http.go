@@ -28,7 +28,6 @@ import (
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -36,19 +35,26 @@ const (
 	DefaultHTTPPort = 443
 )
 
+// HTTPError parses HTTP error into TigrisError
+// Returns nil, if HTTP status is OK
 func HTTPError(err error, resp *http.Response) error {
 	if err != nil {
+		if terr, ok := err.(*api.TigrisError); ok {
+			return &Error{TigrisError: terr}
+		}
+
 		if err == io.EOF {
 			return err
 		}
-		return &api.TigrisError{Code: codes.Unknown, Message: err.Error()}
+
+		return err
 	}
 
 	if resp == nil {
 		return nil
 	}
 
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
+	if resp.StatusCode == http.StatusOK {
 		return nil
 	}
 
@@ -58,17 +64,18 @@ func HTTPError(err error, resp *http.Response) error {
 		}
 	}()
 
-	if !strings.Contains(resp.Header.Get("Content-Type"), "json") {
-		b, _ := ioutil.ReadAll(resp.Body)
-		return &api.TigrisError{Code: codes.Code(resp.StatusCode), Message: string(b)}
-	}
-
-	var e api.TigrisError
-	if err := respDecode(resp.Body, &e); err != nil {
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return err
 	}
 
-	return &e
+	if !strings.Contains(resp.Header.Get("Content-Type"), "json") {
+		return &Error{&api.TigrisError{Code: api.Code_UNKNOWN, Message: string(b)}}
+	}
+
+	te := api.UnmarshalStatus(b)
+
+	return &Error{TigrisError: te}
 }
 
 type httpDriver struct {
@@ -81,7 +88,7 @@ func respDecode(body io.ReadCloser, v interface{}) error {
 	}()
 
 	if err := json.NewDecoder(body).Decode(v); err != nil {
-		return &api.TigrisError{Code: codes.Unknown, Message: err.Error()}
+		return err
 	}
 	return nil
 }
@@ -486,17 +493,10 @@ func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filte
 		Options: c.convertReadOptions(options),
 	})
 
-	if err != nil {
-		return nil, HTTPError(err, nil)
-	}
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return nil, HTTPError(fmt.Errorf(resp.Status), nil)
-	}
-
+	err = HTTPError(err, resp)
 	dec := json.NewDecoder(resp.Body)
 
-	return &readIterator{streamReader: &httpStreamReader{stream: dec, closer: resp.Body}}, nil
+	return &readIterator{streamReader: &httpStreamReader{stream: dec, closer: resp.Body}, err: err, eof: err != nil}, nil
 }
 
 type httpStreamReader struct {
@@ -506,10 +506,16 @@ type httpStreamReader struct {
 
 func (g *httpStreamReader) read() (Document, error) {
 	var res struct {
-		Result apiHTTP.ReadResponse
+		Result *apiHTTP.ReadResponse
+		Error  *api.ErrorDetails
 	}
+
 	if err := g.stream.Decode(&res); err != nil {
 		return nil, HTTPError(err, nil)
+	}
+
+	if res.Error != nil {
+		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
 	}
 
 	return Document(res.Result.Data), nil
@@ -525,17 +531,10 @@ func (c *httpCRUD) streamWithOptions(ctx context.Context, collection string, opt
 		Options:    c.convertStreamOptions(options),
 	})
 
-	if err != nil {
-		return nil, HTTPError(err, nil)
-	}
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return nil, HTTPError(fmt.Errorf(resp.Status), nil)
-	}
-
+	err = HTTPError(err, resp)
 	dec := json.NewDecoder(resp.Body)
 
-	return &eventReadIterator{eventStreamReader: &httpEventStreamReader{stream: dec, closer: resp.Body}}, nil
+	return &eventReadIterator{eventStreamReader: &httpEventStreamReader{stream: dec, closer: resp.Body}, err: err, eof: err != nil}, nil
 }
 
 type httpEventStreamReader struct {
@@ -545,10 +544,18 @@ type httpEventStreamReader struct {
 
 func (g *httpEventStreamReader) read() (Event, error) {
 	var res struct {
-		Result api.StreamResponse
+		Result struct {
+			Event Event
+		}
+		Error *api.ErrorDetails
 	}
+
 	if err := g.stream.Decode(&res); err != nil {
 		return nil, HTTPError(err, nil)
+	}
+
+	if res.Error != nil {
+		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
 	}
 
 	return res.Result.Event, nil

@@ -17,6 +17,7 @@ package tigris
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -141,10 +142,9 @@ func TestCollectionBasic(t *testing.T) {
 
 	var d Coll1
 	var dd driver.Document
-	var dd1 driver.Document
 
 	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
-	mit.EXPECT().Next(&dd1).Return(false)
+	mit.EXPECT().Next(&dd).Return(false)
 	mit.EXPECT().Err().Return(nil)
 
 	for it.Next(&d) {
@@ -379,9 +379,13 @@ func TestCollectionNegative(t *testing.T) {
 	_, err = c.ReadOne(ctx, nil, fields.All)
 	require.Equal(t, errNotFound, err)
 
-	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{"all":{"$eq":"b"}}`)).Return(nil, fmt.Errorf("error"))
+	// Test that driver.Error is converted to tigris.Error
+	// by using driver.Error.As and tigris.Error.AsTigrisError interfaces
+	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{"all":{"$eq":"b"}}`)).Return(nil, &driver.Error{TigrisError: &api.TigrisError{Code: api.Code_CONFLICT}})
 	_, err = c.Delete(ctx, filter.Eq("all", "b"))
 	require.Error(t, err)
+	var te Error
+	require.True(t, errors.As(err, &te))
 
 	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{}`)).Return(nil, fmt.Errorf("error"))
 	_, err = c.DeleteAll(ctx)

@@ -64,3 +64,15 @@ type DescribeDatabaseResponse api.DescribeDatabaseResponse
 type DescribeCollectionResponse api.DescribeCollectionResponse
 
 type InfoResponse api.GetInfoResponse
+
+type Error struct {
+	*api.TigrisError
+}
+
+// As converts driver.Error the error which implements AsTigrisError interface
+func (e *Error) As(i any) bool {
+	if x, ok := i.(interface{ AsTigrisError(*Error) bool }); ok && x.AsTigrisError(e) {
+		return true
+	}
+	return false
+}

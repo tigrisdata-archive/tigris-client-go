@@ -85,7 +85,7 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 	inproc := &inprocgrpc.Channel{}
 	client := api.NewTigrisClient(inproc)
 
-	mux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONBuiltin{}))
+	mux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &api.CustomMarshaler{}))
 	err := api.RegisterTigrisHandlerClient(context.TODO(), mux, client)
 	require.NoError(t, err)
 	api.RegisterTigrisServer(inproc, m)

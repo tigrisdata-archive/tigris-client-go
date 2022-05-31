@@ -16,8 +16,10 @@ package driver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 )
 
@@ -57,7 +59,11 @@ func ExampleDriver() {
 		fmt.Printf("doc: %v\n", doc)
 	}
 
-	_ = it.Err()
+	err := it.Err()
+	var e Error
+	if errors.As(err, &e) && e.Code == api.Code_ALREADY_EXISTS {
+		// handle already exists error
+	}
 
 	_, _ = tx.Update(ctx, "c1", Filter(`{"F1":"V1"}`),
 		Update(`{"$set" : { "F2" : "V2"}}`), &UpdateOptions{})

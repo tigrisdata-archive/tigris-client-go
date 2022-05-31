@@ -78,6 +78,7 @@ const (
 	formatInt32    = "int32"
 	formatByte     = "byte"
 	formatDateTime = "date-time"
+	formatUUID     = "uuid"
 )
 
 // Field represents JSON schema object
@@ -107,7 +108,7 @@ func DatabaseModelName(s interface{}) string {
 	return t.Name()
 }
 
-// ModelName returns name of the colletiction derived from the given colletction model type.
+// ModelName returns name of the collection derived from the given collection model type.
 // The name is snake case pluralized.
 // If the original name ends with digit then it's not pluralized
 func ModelName(s interface{}) string {
@@ -122,9 +123,6 @@ func ModelName(s interface{}) string {
 	return plural.Plural(name)
 }
 
-// TODO: Handle UUID, Datetime, Set types
-// Uint is translated to int64 to avoid integer overflow
-// Uint64 cannot be represented by the JSON schema types
 func translateType(t reflect.Type) (string, string, error) {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -137,6 +135,9 @@ func translateType(t reflect.Type) (string, string, error) {
 		return typeObject, "", nil
 	case reflect.Array:
 		if t.Elem().Kind() == reflect.Uint8 {
+			if t.PkgPath() == "github.com/google/uuid" && t.Name() == "UUID" {
+				return typeString, formatUUID, nil
+			}
 			return typeString, formatByte, nil
 		}
 		return typeArray, "", nil
@@ -261,7 +262,8 @@ func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *i
 		name := strings.Split(field.Tag.Get("json"), ",")[0]
 
 		// Obey JSON skip tag
-		if strings.Compare(name, tagSkip) == 0 {
+		// and skip unexported fields
+		if strings.Compare(name, tagSkip) == 0 || !field.IsExported() {
 			continue
 		}
 
@@ -333,7 +335,7 @@ func traverseFields(prefix string, t reflect.Type, pk map[string]int, nFields *i
 	return fields, nil
 }
 
-func FromCollectionModel(model interface{}) (*Schema, error) {
+func fromCollectionModel(model interface{}) (*Schema, error) {
 	t := reflect.TypeOf(model)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -380,14 +382,14 @@ func FromCollectionModels(model Model, models ...Model) (map[string]*Schema, err
 	//models parameter added to require at least one schema to migrate
 	schemas := make(map[string]*Schema)
 
-	schema, err := FromCollectionModel(model)
+	schema, err := fromCollectionModel(model)
 	if err != nil {
 		return nil, err
 	}
 	schemas[schema.Name] = schema
 
 	for _, m := range models {
-		schema, err := FromCollectionModel(m)
+		schema, err := fromCollectionModel(m)
 		if err != nil {
 			return nil, err
 		}
@@ -434,7 +436,7 @@ func FromDatabaseModel(dbModel interface{}) (string, map[string]*Schema, error) 
 			tt = field.Type.Elem()
 		}
 
-		sch, err := FromCollectionModel(reflect.New(tt).Elem().Interface())
+		sch, err := fromCollectionModel(reflect.New(tt).Elem().Interface())
 		if err != nil {
 			return "", nil, err
 		}

@@ -14,7 +14,11 @@
 
 package fields
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // Package level versions
 
@@ -70,7 +74,14 @@ func SetFloat64(field string, value float64) *Update {
 // SetTime composes 'equal' operation. from time.Time value.
 // Result is equivalent to:
 //   field = value
-func SetTime(field string, value *time.Time) *Update {
+func SetTime(field string, value time.Time) *Update {
+	return Set(field, value)
+}
+
+// SetUUID composes 'equal' operation. from uuid.UUID value.
+// Result is equivalent to:
+//   field = value
+func SetUUID(field string, value uuid.UUID) *Update {
 	return Set(field, value)
 }
 
@@ -128,6 +139,13 @@ func (u *Update) SetFloat64(field string, value float64) *Update {
 // SetTime composes 'equal' operation. from time.Time value.
 // Result is equivalent to:
 //   field = value
-func (u *Update) SetTime(field string, value *time.Time) *Update {
+func (u *Update) SetTime(field string, value time.Time) *Update {
+	return Set(field, value)
+}
+
+// SetUUID composes 'equal' operation. from uuid.UUID value.
+// Result is equivalent to:
+//   field = value
+func (u *Update) SetUUID(field string, value uuid.UUID) *Update {
 	return Set(field, value)
 }

@@ -200,8 +200,7 @@ func TestCollectionSchema(t *testing.T) {
 		output *Schema
 		err    error
 	}{
-		{empty{}, nil, fmt.Errorf("no primary key defined in schema")},
-		{noPK{}, nil, fmt.Errorf("no primary key defined in schema")},
+		{empty{}, nil, fmt.Errorf("no data fields in the collection schema")},
 		{unknownTag{}, nil, fmt.Errorf("unknown tigris tag: some")},
 		{unsupportedType{}, nil, fmt.Errorf("unsupported type: name='' kind='chan'")},
 		{pk0{}, nil, fmt.Errorf("primary key index starts from 1")},
@@ -209,6 +208,9 @@ func TestCollectionSchema(t *testing.T) {
 		{pkGap{}, nil, fmt.Errorf("gap in the primary key index")},
 		{pkInvalidType{}, nil, fmt.Errorf("type is not supported for the key: bool")},
 		{pkInvalidTag{}, nil, fmt.Errorf("only one colon allowed in the tag")},
+		{input: noPK{}, output: &Schema{Name: "no_pks", Fields: map[string]Field{
+			"_id":   {Type: typeString, Format: formatUUID, AutoGenerate: true},
+			"key_1": {Type: typeString}}, PrimaryKey: []string{"_id"}}},
 		{input: pk{}, output: &Schema{Name: "pks", Fields: map[string]Field{
 			"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}},
 		{pk1{}, &Schema{Name: "pk_1", Fields: map[string]Field{

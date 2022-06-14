@@ -371,12 +371,11 @@ func fromCollectionModel(model interface{}) (*Schema, error) {
 	var err error
 	var sch Schema
 	var nFields int
-	var embModel bool
 	pk := make(map[string]int)
 
 	sch.Name = ModelName(model)
 
-	sch.Fields, embModel, err = traverseFields("", t, pk, &nFields)
+	sch.Fields, _, err = traverseFields("", t, pk, &nFields)
 	if err != nil {
 		return nil, err
 	}
@@ -395,11 +394,11 @@ func fromCollectionModel(model interface{}) (*Schema, error) {
 		sch.PrimaryKey[v-1] = k
 	}
 
-	if len(pk) == 0 {
-		if !embModel {
-			return nil, fmt.Errorf("no primary key defined in schema")
-		}
+	if nFields == 0 {
+		return nil, fmt.Errorf("no data fields in the collection schema")
+	}
 
+	if len(pk) == 0 {
 		sch.PrimaryKey = append(sch.PrimaryKey, "_id")
 		sch.Fields["_id"] = Field{Type: typeString, Format: formatUUID, AutoGenerate: true}
 	}

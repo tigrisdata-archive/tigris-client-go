@@ -14,7 +14,11 @@
 
 package filter
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // EqInt64 composes 'equal' operation from int64 value.
 // Result is equivalent to: field == value
@@ -60,6 +64,12 @@ func EqFloat64(field string, value float64) Expr {
 
 // EqTime composes 'equal' operation. from time.Time value.
 // Result is equivalent to: field == value
-func EqTime(field string, value *time.Time) Expr {
+func EqTime(field string, value time.Time) Expr {
+	return Expr{field: comparison{Eq: value}}
+}
+
+// EqUUID composes 'equal' operation. from uuid.UUID value.
+// Result is equivalent to: field == value
+func EqUUID(field string, value uuid.UUID) Expr {
 	return Expr{field: comparison{Eq: value}}
 }

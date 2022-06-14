@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,7 +19,8 @@ import (
 )
 
 func TestCollectionTx(t *testing.T) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
@@ -139,8 +139,8 @@ func TestCollectionTx(t *testing.T) {
 		err = c.Drop(ctx)
 		require.NoError(t, err)
 
-		mtx.EXPECT().Commit(context.Background())
-		mtx.EXPECT().Rollback(context.Background())
+		mtx.EXPECT().Commit(gomock.Any())
+		mtx.EXPECT().Rollback(gomock.Any())
 
 		return nil
 	})
@@ -148,7 +148,8 @@ func TestCollectionTx(t *testing.T) {
 }
 
 func TestCollectionTxRetry(t *testing.T) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
@@ -161,7 +162,7 @@ func TestCollectionTxRetry(t *testing.T) {
 
 		i := 7
 		err := db.Tx(ctx, func(ctx context.Context) error {
-			mtx.EXPECT().Commit(context.Background()).DoAndReturn(
+			mtx.EXPECT().Commit(gomock.Any()).DoAndReturn(
 				func(ctx context.Context) error {
 					i--
 					if i > 0 {
@@ -169,7 +170,7 @@ func TestCollectionTxRetry(t *testing.T) {
 					}
 					return nil
 				})
-			mtx.EXPECT().Rollback(context.Background())
+			mtx.EXPECT().Rollback(gomock.Any())
 
 			return nil
 		}, TxOptions{AutoRetry: true})
@@ -182,7 +183,7 @@ func TestCollectionTxRetry(t *testing.T) {
 
 		i := 7
 		err := db.Tx(ctx, func(ctx context.Context) error {
-			mtx.EXPECT().Commit(context.Background()).DoAndReturn(
+			mtx.EXPECT().Commit(gomock.Any()).DoAndReturn(
 				func(ctx context.Context) error {
 					i--
 					if i > 0 {
@@ -190,7 +191,7 @@ func TestCollectionTxRetry(t *testing.T) {
 					}
 					return nil
 				})
-			mtx.EXPECT().Rollback(context.Background())
+			mtx.EXPECT().Rollback(gomock.Any())
 
 			return nil
 		})
@@ -207,7 +208,7 @@ func TestCollectionTxRetry(t *testing.T) {
 
 		i := 7
 		err := db.Tx(ctx, func(ctx context.Context) error {
-			mtx.EXPECT().Commit(context.Background()).DoAndReturn(
+			mtx.EXPECT().Commit(gomock.Any()).DoAndReturn(
 				func(ctx context.Context) error {
 					i--
 					if i > 0 {
@@ -215,13 +216,12 @@ func TestCollectionTxRetry(t *testing.T) {
 					}
 					return nil
 				})
-			mtx.EXPECT().Rollback(context.Background())
+			mtx.EXPECT().Rollback(gomock.Any())
 
 			return nil
 		})
 		var te *driver.Error
 		require.Error(t, fmt.Errorf("error 6"), err)
-		spew.Dump(err)
 		assert.True(t, errors.As(err, &te))
 		assert.Equal(t, code.Conflict, te.Code)
 		assert.Equal(t, time.Duration(0), te.RetryDelay())

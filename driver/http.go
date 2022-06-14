@@ -35,6 +35,8 @@ const (
 	DefaultHTTPPort = 443
 )
 
+type txCtxKey struct{}
+
 // HTTPError parses HTTP error into TigrisError
 // Returns nil, if HTTP status is OK
 func HTTPError(err error, resp *http.Response) error {
@@ -146,11 +148,25 @@ func dmlRespDecode(body io.ReadCloser, v interface{}) error {
 	return nil
 }
 
-func setHeaders(_ context.Context, req *http.Request) error {
+func setHeaders(ctx context.Context, req *http.Request) error {
 	req.Header["Host"] = []string{req.Host}
 	req.Header["User-Agent"] = []string{UserAgent}
 	req.Header["Accept"] = []string{"*/*"}
+
+	if v := ctx.Value(txCtxKey{}); v != nil {
+		txCtx := v.(*api.TransactionCtx)
+		req.Header[api.HeaderTxID] = []string{txCtx.Id}
+		req.Header[api.HeaderTxOrigin] = []string{txCtx.Origin}
+	}
+
 	return nil
+}
+
+func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx) context.Context {
+	if txCtx != nil && txCtx.Id != "" {
+		return context.WithValue(ctx, txCtxKey{}, txCtx)
+	}
+	return ctx
 }
 
 // NewHTTPClient return Driver interface implementation using HTTP transport protocol
@@ -247,9 +263,6 @@ func convertDatabaseOptions(_ *DatabaseOptions) *apiHTTP.DatabaseOptions {
 
 func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
 	opts := apiHTTP.CollectionOptions{}
-	if c.txCtx.Id != nil && *c.txCtx.Id != "" {
-		opts.TxCtx = &apiHTTP.TransactionCtx{Id: c.txCtx.Id, Origin: c.txCtx.Origin}
-	}
 	return &opts
 }
 
@@ -288,13 +301,13 @@ func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options 
 		return nil, HTTPError(fmt.Errorf("empty transaction context in response"), nil)
 	}
 
-	return &httpCRUD{db: db, api: c.api, txCtx: *bTx.TxCtx}, nil
+	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: ToString(bTx.TxCtx.Id), Origin: ToString(bTx.TxCtx.Origin)}}, nil
 }
 
 func (c *httpCRUD) Commit(ctx context.Context) error {
-	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{
-		TxCtx: &c.txCtx,
-	})
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
+	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{})
 	err = HTTPError(err, resp)
 	if err == nil {
 		c.committed = true
@@ -303,52 +316,48 @@ func (c *httpCRUD) Commit(ctx context.Context) error {
 }
 
 func (c *httpCRUD) Rollback(ctx context.Context) error {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	if c.committed {
 		return nil
 	}
-	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{
-		TxCtx: &c.txCtx,
-	})
+	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{})
 	return HTTPError(err, resp)
 }
 
 type httpCRUD struct {
 	db    string
 	api   *apiHTTP.ClientWithResponses
-	txCtx apiHTTP.TransactionCtx
+	txCtx *api.TransactionCtx
 
 	committed bool
 }
 
-func (c *httpCRUD) convertWriteOptions(_ *WriteOptions) *apiHTTP.WriteOptions {
-	opts := apiHTTP.WriteOptions{}
-	if c.txCtx.Id != nil && *c.txCtx.Id != "" {
-		opts.TxCtx = &apiHTTP.TransactionCtx{Id: c.txCtx.Id, Origin: c.txCtx.Origin}
+func (c *httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
+	if o != nil {
+		return &apiHTTP.WriteOptions{}
 	}
-	return &opts
+	return nil
 }
 
-func (c *httpCRUD) convertInsertOptions(_ *InsertOptions) *apiHTTP.InsertRequestOptions {
-	return &apiHTTP.InsertRequestOptions{WriteOptions: c.convertWriteOptions(&WriteOptions{})}
+func (c *httpCRUD) convertInsertOptions(o *InsertOptions) *apiHTTP.InsertRequestOptions {
+	return &apiHTTP.InsertRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
-func (c *httpCRUD) convertReplaceOptions(_ *ReplaceOptions) *apiHTTP.ReplaceRequestOptions {
-	return &apiHTTP.ReplaceRequestOptions{WriteOptions: c.convertWriteOptions(&WriteOptions{})}
+func (c *httpCRUD) convertReplaceOptions(o *ReplaceOptions) *apiHTTP.ReplaceRequestOptions {
+	return &apiHTTP.ReplaceRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
-func (c *httpCRUD) convertUpdateOptions(_ *UpdateOptions) *apiHTTP.UpdateRequestOptions {
-	return &apiHTTP.UpdateRequestOptions{WriteOptions: c.convertWriteOptions(&WriteOptions{})}
+func (c *httpCRUD) convertUpdateOptions(o *UpdateOptions) *apiHTTP.UpdateRequestOptions {
+	return &apiHTTP.UpdateRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
-func (c *httpCRUD) convertDeleteOptions(_ *DeleteOptions) *apiHTTP.DeleteRequestOptions {
-	return &apiHTTP.DeleteRequestOptions{WriteOptions: c.convertWriteOptions(&WriteOptions{})}
+func (c *httpCRUD) convertDeleteOptions(o *DeleteOptions) *apiHTTP.DeleteRequestOptions {
+	return &apiHTTP.DeleteRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
 func (c *httpCRUD) convertReadOptions(_ *ReadOptions) *apiHTTP.ReadRequestOptions {
 	opts := apiHTTP.ReadRequestOptions{}
-	if c.txCtx.Id != nil && *c.txCtx.Id != "" {
-		opts.TxCtx = &apiHTTP.TransactionCtx{Id: c.txCtx.Id, Origin: c.txCtx.Origin}
-	}
 	return &opts
 }
 
@@ -357,6 +366,8 @@ func (c *httpCRUD) convertStreamOptions(_ *StreamOptions) *apiHTTP.StreamRequest
 }
 
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisListCollections(ctx, c.db, apiHTTP.TigrisListCollectionsJSONRequestBody{
 		Options: c.convertCollectionOptions(options),
 	})
@@ -399,6 +410,8 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 }
 
 func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisCreateOrUpdateCollection(ctx, c.db, collection, apiHTTP.TigrisCreateOrUpdateCollectionJSONRequestBody{
 		Schema:  json.RawMessage(schema),
 		Options: c.convertCollectionOptions(options),
@@ -407,6 +420,8 @@ func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 }
 
 func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisDropCollection(ctx, c.db, collection, apiHTTP.TigrisDropCollectionJSONRequestBody{
 		Options: c.convertCollectionOptions(options),
 	})
@@ -414,6 +429,8 @@ func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, collection str
 }
 
 func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisInsert(ctx, c.db, collection, apiHTTP.TigrisInsertJSONRequestBody{
 		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 		Options:   c.convertInsertOptions(options),
@@ -432,6 +449,8 @@ func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, doc
 }
 
 func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisReplace(ctx, c.db, collection, apiHTTP.TigrisReplaceJSONRequestBody{
 		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 		Options:   c.convertReplaceOptions(options),
@@ -450,6 +469,8 @@ func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, do
 }
 
 func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisUpdate(ctx, c.db, collection, apiHTTP.TigrisUpdateJSONRequestBody{
 		Filter:  json.RawMessage(filter),
 		Fields:  json.RawMessage(fields),
@@ -469,6 +490,8 @@ func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisDelete(ctx, c.db, collection, apiHTTP.TigrisDeleteJSONRequestBody{
 		Filter:  json.RawMessage(filter),
 		Options: c.convertDeleteOptions(options),
@@ -487,6 +510,8 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx)
+
 	resp, err := c.api.TigrisRead(ctx, c.db, collection, apiHTTP.TigrisReadJSONRequestBody{
 		Filter:  json.RawMessage(filter),
 		Fields:  json.RawMessage(fields),

@@ -23,8 +23,10 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/fullstorydev/grpchan/inprocgrpc"
 	"github.com/go-chi/chi/v5"
@@ -77,7 +79,21 @@ func SetupTLS(t *testing.T) *tls.Config {
 	return &tls.Config{RootCAs: certPool, ServerName: "localhost"}
 }
 
+// copy from Tigris' server/middleware.CustomMatcher
+func customMatcher(key string) (string, bool) {
+	switch key {
+	default:
+		if strings.HasPrefix(key, api.HeaderPrefix) {
+			return key, true
+		}
+		return runtime.DefaultHeaderMatcher(key)
+	}
+}
+
 func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	c := gomock.NewController(t)
 
 	m := mock.NewMockTigrisServer(c)
@@ -85,8 +101,10 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 	inproc := &inprocgrpc.Channel{}
 	client := api.NewTigrisClient(inproc)
 
-	mux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &api.CustomMarshaler{}))
-	err := api.RegisterTigrisHandlerClient(context.TODO(), mux, client)
+	mux := runtime.NewServeMux(
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &api.CustomMarshaler{}),
+		runtime.WithIncomingHeaderMatcher(customMatcher))
+	err := api.RegisterTigrisHandlerClient(ctx, mux, client)
 	require.NoError(t, err)
 	api.RegisterTigrisServer(inproc, m)
 
@@ -143,7 +161,8 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 	}()
 
 	return m, func() {
-		_ = server.Shutdown(context.Background())
+		err = server.Shutdown(context.Background())
+		require.NoError(t, err)
 		s.Stop()
 		wg.Wait()
 	}

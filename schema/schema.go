@@ -36,6 +36,7 @@ import (
 	"unsafe"
 
 	"github.com/gertd/go-pluralize"
+	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
@@ -62,7 +63,7 @@ type PrimitiveFieldType interface {
 	string |
 		int | int32 | int64 |
 		float32 | float64 |
-		[]byte | *time.Time
+		[]byte | time.Time | uuid.UUID
 }
 
 var plural *pluralize.Client

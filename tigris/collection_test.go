@@ -67,7 +67,8 @@ func toDocument(t *testing.T, doc interface{}) driver.Document {
 }
 
 func TestCollectionBasic(t *testing.T) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
@@ -192,7 +193,8 @@ func TestCollectionBasic(t *testing.T) {
 }
 
 func TestCollectionNegative(t *testing.T) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
@@ -278,7 +280,8 @@ func TestCollectionNegative(t *testing.T) {
 }
 
 func TestCollectionReadOmitEmpty(t *testing.T) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
@@ -333,13 +336,13 @@ func pm(m proto.Message) gomock.Matcher {
 }
 
 func TestClientSchemaMigration(t *testing.T) {
-	mc, cancel := test.SetupTests(t, 1)
+	mc, cancel := test.SetupTests(t, 6)
 	defer cancel()
 
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &config.Database{Driver: config.Driver{URL: test.GRPCURL(1)}}
+	cfg := &config.Database{Driver: config.Driver{URL: test.GRPCURL(6)}}
 	cfg.TLS = test.SetupTLS(t)
 
 	driver.DefaultProtocol = driver.GRPC
@@ -372,15 +375,21 @@ func TestClientSchemaMigration(t *testing.T) {
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "test_schema_1",
 			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"]}`),
-			Options: &api.CollectionOptions{TxCtx: txCtx},
-		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
-	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
+			Options: &api.CollectionOptions{},
+		})).DoAndReturn(
+		func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
+			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+			return &api.CreateOrUpdateCollectionResponse{}, nil
+		})
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
-			Db:    "db1",
-			TxCtx: txCtx,
-		})).Return(&api.CommitTransactionResponse{}, nil)
+			Db: "db1",
+		})).DoAndReturn(
+		func(ctx context.Context, r *api.CommitTransactionRequest) (*api.CommitTransactionResponse, error) {
+			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+			return &api.CommitTransactionResponse{}, nil
+		})
 
 	_, err = openDatabaseFromModels(ctx, drv, &config.Database{}, "db1", &testSchema1{})
 	require.NoError(t, err)
@@ -401,23 +410,32 @@ func TestClientSchemaMigration(t *testing.T) {
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "test_schema_2",
 			Schema:  []byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"]}`),
-			Options: &api.CollectionOptions{TxCtx: txCtx},
-		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
-	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
+			Options: &api.CollectionOptions{},
+		})).DoAndReturn(
+		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
+			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+			return &api.CreateOrUpdateCollectionResponse{}, nil
+		})
 
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "test_schema_1",
 			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"]}`),
-			Options: &api.CollectionOptions{TxCtx: txCtx},
-		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
-	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
+			Options: &api.CollectionOptions{},
+		})).DoAndReturn(
+		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
+			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+			return &api.CreateOrUpdateCollectionResponse{}, nil
+		})
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
-			Db:    "db1",
-			TxCtx: txCtx,
-		})).Return(&api.CommitTransactionResponse{}, nil)
+			Db: "db1",
+		})).DoAndReturn(
+		func(ctx context.Context, _ *api.CommitTransactionRequest) (*api.CommitTransactionResponse, error) {
+			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+			return &api.CommitTransactionResponse{}, nil
+		})
 
 	_, err = openDatabaseFromModels(ctx, drv, &config.Database{}, "db1", &testSchema1{}, &testSchema2{})
 	require.NoError(t, err)
@@ -454,14 +472,13 @@ func TestClientSchemaMigration(t *testing.T) {
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "coll_1",
 			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"]}`),
-			Options: &api.CollectionOptions{TxCtx: txCtx},
+			Options: &api.CollectionOptions{},
 		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
 	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
-			Db:    "db1",
-			TxCtx: txCtx,
+			Db: "db1",
 		})).Return(&api.CommitTransactionResponse{}, nil)
 
 	db, err := OpenDatabase(ctx, cfg, "db1", &Coll1{})

@@ -16,7 +16,8 @@ import (
 )
 
 func TestModelMetadata(t *testing.T) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)

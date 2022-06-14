@@ -27,6 +27,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/credentials/oauth"
+	grpc_md "google.golang.org/grpc/metadata"
 )
 
 const (
@@ -155,56 +156,55 @@ func (c *grpcDriver) beginTxWithOptions(ctx context.Context, db string, options 
 	if resp.GetTxCtx() == nil {
 		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
 	}
-	return &grpcCRUD{db: db, api: c.api, txCtx: *resp.GetTxCtx()}, nil
+	return &grpcCRUD{db: db, api: c.api, txCtx: resp.GetTxCtx()}, nil
+}
+
+func setGRPCTxCtx(ctx context.Context, txCtx *api.TransactionCtx) context.Context {
+	if txCtx == nil || txCtx.Id == "" {
+		return ctx
+	}
+
+	return grpc_md.AppendToOutgoingContext(ctx, api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin)
 }
 
 func (c *grpcCRUD) Commit(ctx context.Context) error {
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
+
 	_, err := c.api.CommitTransaction(ctx, &api.CommitTransactionRequest{
-		Db:    c.db,
-		TxCtx: &c.txCtx,
+		Db: c.db,
 	})
-	err = GRPCError(err)
-	if err == nil {
+
+	if err = GRPCError(err); err == nil {
 		c.committed = true
 	}
+
 	return err
 }
 
 func (c *grpcCRUD) Rollback(ctx context.Context) error {
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
+
 	if c.committed {
 		return nil
 	}
 	_, err := c.api.RollbackTransaction(ctx, &api.RollbackTransactionRequest{
-		Db:    c.db,
-		TxCtx: &c.txCtx,
+		Db: c.db,
 	})
+
 	return GRPCError(err)
-}
-
-func setGRPCTxCtx(txCtx *api.TransactionCtx, options *api.WriteOptions) {
-	if txCtx == nil || txCtx.Id == "" {
-		return
-	}
-	options.TxCtx = &api.TransactionCtx{Id: txCtx.Id, Origin: txCtx.Origin}
-}
-
-func setGRPCCollectionTxCtx(txCtx *api.TransactionCtx, options *api.CollectionOptions) {
-	if txCtx == nil || txCtx.Id == "" {
-		return
-	}
-	options.TxCtx = &api.TransactionCtx{Id: txCtx.Id, Origin: txCtx.Origin}
 }
 
 type grpcCRUD struct {
 	db    string
 	api   api.TigrisClient
-	txCtx api.TransactionCtx
+	txCtx *api.TransactionCtx
 
 	committed bool
 }
 
 func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
-	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
+
 	r, err := c.api.ListCollections(ctx, &api.ListCollectionsRequest{
 		Db:      c.db,
 		Options: (*api.CollectionOptions)(options),
@@ -233,7 +233,8 @@ func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, collection
 }
 
 func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
-	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
+
 	_, err := c.api.CreateOrUpdateCollection(ctx, &api.CreateOrUpdateCollectionRequest{
 		Db:         c.db,
 		Collection: collection,
@@ -244,7 +245,7 @@ func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 }
 
 func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
-	setGRPCCollectionTxCtx(&c.txCtx, (*api.CollectionOptions)(options))
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
 	_, err := c.api.DropCollection(ctx, &api.DropCollectionRequest{
 		Db:         c.db,
 		Collection: collection,
@@ -254,8 +255,7 @@ func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, collection str
 }
 
 func (c *grpcCRUD) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error) {
-	options.WriteOptions = &api.WriteOptions{}
-	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
 
 	resp, err := c.api.Insert(ctx, &api.InsertRequest{
 		Db:         c.db,
@@ -272,8 +272,7 @@ func (c *grpcCRUD) insertWithOptions(ctx context.Context, collection string, doc
 }
 
 func (c *grpcCRUD) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error) {
-	options.WriteOptions = &api.WriteOptions{}
-	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
 
 	resp, err := c.api.Replace(ctx, &api.ReplaceRequest{
 		Db:         c.db,
@@ -290,8 +289,7 @@ func (c *grpcCRUD) replaceWithOptions(ctx context.Context, collection string, do
 }
 
 func (c *grpcCRUD) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error) {
-	options.WriteOptions = &api.WriteOptions{}
-	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
 
 	resp, err := c.api.Update(ctx, &api.UpdateRequest{
 		Db:         c.db,
@@ -305,8 +303,7 @@ func (c *grpcCRUD) updateWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error) {
-	options.WriteOptions = &api.WriteOptions{}
-	setGRPCTxCtx(&c.txCtx, options.WriteOptions)
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
 
 	resp, err := c.api.Delete(ctx, &api.DeleteRequest{
 		Db:         c.db,
@@ -319,9 +316,7 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
-	if c.txCtx.Id != "" {
-		options.TxCtx = &api.TransactionCtx{Id: c.txCtx.Id, Origin: c.txCtx.Origin}
-	}
+	ctx = setGRPCTxCtx(ctx, c.txCtx)
 
 	resp, err := c.api.Read(ctx, &api.ReadRequest{
 		Db:         c.db,

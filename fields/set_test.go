@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,7 +35,8 @@ func TestSet(t *testing.T) {
 		{"float64", SetFloat64("f", 123456789012.34), `{"$set":{"f":123456789012.34}}`},
 		{"string", SetString("f", "1234"), `{"$set":{"f":"1234"}}`},
 		{"bytes", SetBytes("f", []byte("123")), `{"$set":{"f":"MTIz"}}`},
-		{"time", SetTime("f", &time.Time{}), `{"$set":{"f":"0001-01-01T00:00:00Z"}}`},
+		{"time", SetTime("f", time.Time{}), `{"$set":{"f":"0001-01-01T00:00:00Z"}}`},
+		{"uuid", SetUUID("f", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36")), `{"$set":{"f":"11111111-00b6-4eb5-a64d-351be56afe36"}}`},
 	}
 
 	for _, v := range cases {
@@ -60,7 +62,8 @@ func TestSetScoped(t *testing.T) {
 		{"float64", u.SetFloat64("f", 123456789012.34), `{"$set":{"f":123456789012.34}}`},
 		{"string", u.SetString("f", "1234"), `{"$set":{"f":"1234"}}`},
 		{"bytes", u.SetBytes("f", []byte("123")), `{"$set":{"f":"MTIz"}}`},
-		{"time", u.SetTime("f", &time.Time{}), `{"$set":{"f":"0001-01-01T00:00:00Z"}}`},
+		{"time", u.SetTime("f", time.Time{}), `{"$set":{"f":"0001-01-01T00:00:00Z"}}`},
+		{"uuid", u.SetUUID("f", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36")), `{"$set":{"f":"11111111-00b6-4eb5-a64d-351be56afe36"}}`},
 	}
 
 	for _, v := range cases {

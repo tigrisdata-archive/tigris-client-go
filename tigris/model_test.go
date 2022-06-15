@@ -51,16 +51,16 @@ func TestModelMetadata(t *testing.T) {
 					UpdatedAt: timestamppb.New(tm1),
 					DeletedAt: timestamppb.New(tm2)},
 				Keys: [][]byte{
-					[]byte(`{"_id":"` + id1 + `"}`),
-					[]byte(`{"_id":"` + id2 + `"}`),
+					[]byte(`{"id":"` + id1 + `"}`),
+					[]byte(`{"Id":"` + id2 + `"}`),
 				},
 			}, nil)
 
 		_, err := c.Insert(ctx, d1, d2)
 		require.NoError(t, err)
 
-		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id1), createdAt: tm, updatedAt: tm1, deletedAt: tm2}}, d1)
-		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id2), createdAt: tm, updatedAt: tm1, deletedAt: tm2}}, d2)
+		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id1), Metadata: Metadata{createdAt: tm, updatedAt: tm1, deletedAt: tm2}}}, d1)
+		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id2), Metadata: Metadata{createdAt: tm, updatedAt: tm1, deletedAt: tm2}}}, d2)
 
 		d1 = &Coll1{}
 		d2 = &Coll1{}
@@ -73,16 +73,16 @@ func TestModelMetadata(t *testing.T) {
 					UpdatedAt: timestamppb.New(tm1),
 					DeletedAt: timestamppb.New(tm2)},
 				Keys: [][]byte{
-					[]byte(`{"_id":"` + id1 + `"}`),
-					[]byte(`{"_id":"` + id2 + `"}`),
+					[]byte(`{"id":"` + id1 + `"}`),
+					[]byte(`{"ID":"` + id2 + `"}`),
 				},
 			}, nil)
 
 		_, err = c.InsertOrReplace(ctx, d1, d2)
 		require.NoError(t, err)
 
-		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id1), createdAt: tm, updatedAt: tm1, deletedAt: tm2}}, d1)
-		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id2), createdAt: tm, updatedAt: tm1, deletedAt: tm2}}, d2)
+		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id1), Metadata: Metadata{createdAt: tm, updatedAt: tm1, deletedAt: tm2}}}, d1)
+		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id2), Metadata: Metadata{createdAt: tm, updatedAt: tm1, deletedAt: tm2}}}, d2)
 	})
 
 	t.Run("composite_key", func(t *testing.T) {

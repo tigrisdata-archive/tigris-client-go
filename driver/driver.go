@@ -107,7 +107,7 @@ type Database interface {
 	// DescribeCollection returns metadata of the collection in the database
 	DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (*DescribeCollectionResponse, error)
 
-	Stream(ctx context.Context, collection string, options ...*StreamOptions) (EventIterator, error)
+	Events(ctx context.Context, collection string, options ...*EventsOptions) (EventIterator, error)
 }
 
 type driver struct {
@@ -233,13 +233,13 @@ func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, 
 	return c.describeCollectionWithOptions(ctx, collection, opts.(*CollectionOptions))
 }
 
-func (c *driverCRUD) Stream(ctx context.Context, collection string, options ...*StreamOptions) (EventIterator, error) {
-	opts, err := validateOptionsParam(options, &StreamOptions{})
+func (c *driverCRUD) Events(ctx context.Context, collection string, options ...*EventsOptions) (EventIterator, error) {
+	opts, err := validateOptionsParam(options, &EventsOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.streamWithOptions(ctx, collection, opts.(*StreamOptions))
+	return c.eventsWithOptions(ctx, collection, opts.(*EventsOptions))
 }
 
 func validateOptionsParam(options interface{}, out interface{}) (interface{}, error) {

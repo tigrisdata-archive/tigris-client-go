@@ -281,6 +281,26 @@ func (mr *MockTxMockRecorder) DropCollection(arg0, arg1 interface{}, arg2 ...int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropCollection", reflect.TypeOf((*MockTx)(nil).DropCollection), varargs...)
 }
 
+// Events mocks base method.
+func (m *MockTx) Events(arg0 context.Context, arg1 string, arg2 ...*driver.EventsOptions) (driver.EventIterator, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Events", varargs...)
+	ret0, _ := ret[0].(driver.EventIterator)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Events indicates an expected call of Events.
+func (mr *MockTxMockRecorder) Events(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Events", reflect.TypeOf((*MockTx)(nil).Events), varargs...)
+}
+
 // Insert mocks base method.
 func (m *MockTx) Insert(arg0 context.Context, arg1 string, arg2 []driver.Document, arg3 ...*driver.InsertOptions) (*driver.InsertResponse, error) {
 	m.ctrl.T.Helper()
@@ -373,26 +393,6 @@ func (m *MockTx) Rollback(arg0 context.Context) error {
 func (mr *MockTxMockRecorder) Rollback(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockTx)(nil).Rollback), arg0)
-}
-
-// Stream mocks base method.
-func (m *MockTx) Stream(arg0 context.Context, arg1 string, arg2 ...*driver.StreamOptions) (driver.EventIterator, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Stream", varargs...)
-	ret0, _ := ret[0].(driver.EventIterator)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Stream indicates an expected call of Stream.
-func (mr *MockTxMockRecorder) Stream(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stream", reflect.TypeOf((*MockTx)(nil).Stream), varargs...)
 }
 
 // Update mocks base method.
@@ -516,6 +516,26 @@ func (mr *MockDatabaseMockRecorder) DropCollection(arg0, arg1 interface{}, arg2 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropCollection", reflect.TypeOf((*MockDatabase)(nil).DropCollection), varargs...)
 }
 
+// Events mocks base method.
+func (m *MockDatabase) Events(arg0 context.Context, arg1 string, arg2 ...*driver.EventsOptions) (driver.EventIterator, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Events", varargs...)
+	ret0, _ := ret[0].(driver.EventIterator)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Events indicates an expected call of Events.
+func (mr *MockDatabaseMockRecorder) Events(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Events", reflect.TypeOf((*MockDatabase)(nil).Events), varargs...)
+}
+
 // Insert mocks base method.
 func (m *MockDatabase) Insert(arg0 context.Context, arg1 string, arg2 []driver.Document, arg3 ...*driver.InsertOptions) (*driver.InsertResponse, error) {
 	m.ctrl.T.Helper()
@@ -594,26 +614,6 @@ func (mr *MockDatabaseMockRecorder) Replace(arg0, arg1, arg2 interface{}, arg3 .
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Replace", reflect.TypeOf((*MockDatabase)(nil).Replace), varargs...)
-}
-
-// Stream mocks base method.
-func (m *MockDatabase) Stream(arg0 context.Context, arg1 string, arg2 ...*driver.StreamOptions) (driver.EventIterator, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Stream", varargs...)
-	ret0, _ := ret[0].(driver.EventIterator)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Stream indicates an expected call of Stream.
-func (mr *MockDatabaseMockRecorder) Stream(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stream", reflect.TypeOf((*MockDatabase)(nil).Stream), varargs...)
 }
 
 // Update mocks base method.

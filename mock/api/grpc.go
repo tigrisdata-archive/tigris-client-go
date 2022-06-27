@@ -244,6 +244,21 @@ func (mr *MockTigrisServerMockRecorder) ListDatabases(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDatabases", reflect.TypeOf((*MockTigrisServer)(nil).ListDatabases), arg0, arg1)
 }
 
+// Publish mocks base method.
+func (m *MockTigrisServer) Publish(arg0 context.Context, arg1 *api.PublishRequest) (*api.PublishResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Publish", arg0, arg1)
+	ret0, _ := ret[0].(*api.PublishResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Publish indicates an expected call of Publish.
+func (mr *MockTigrisServerMockRecorder) Publish(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockTigrisServer)(nil).Publish), arg0, arg1)
+}
+
 // Read mocks base method.
 func (m *MockTigrisServer) Read(arg0 *api.ReadRequest, arg1 api.Tigris_ReadServer) error {
 	m.ctrl.T.Helper()
@@ -286,6 +301,34 @@ func (m *MockTigrisServer) RollbackTransaction(arg0 context.Context, arg1 *api.R
 func (mr *MockTigrisServerMockRecorder) RollbackTransaction(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackTransaction", reflect.TypeOf((*MockTigrisServer)(nil).RollbackTransaction), arg0, arg1)
+}
+
+// Search mocks base method.
+func (m *MockTigrisServer) Search(arg0 *api.SearchRequest, arg1 api.Tigris_SearchServer) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Search", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Search indicates an expected call of Search.
+func (mr *MockTigrisServerMockRecorder) Search(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockTigrisServer)(nil).Search), arg0, arg1)
+}
+
+// Subscribe mocks base method.
+func (m *MockTigrisServer) Subscribe(arg0 *api.SubscribeRequest, arg1 api.Tigris_SubscribeServer) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Subscribe", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Subscribe indicates an expected call of Subscribe.
+func (mr *MockTigrisServerMockRecorder) Subscribe(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockTigrisServer)(nil).Subscribe), arg0, arg1)
 }
 
 // Update mocks base method.

@@ -43,6 +43,8 @@ type TigrisClient interface {
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	//  Reads range of documents from the collection using the condition in the filter.
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (Tigris_ReadClient, error)
+	//  Searches a collection for documents matching the query
+	Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (Tigris_SearchClient, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema changes in the database
 	// passed in the request.
 	CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error)
@@ -66,6 +68,8 @@ type TigrisClient interface {
 	Events(ctx context.Context, in *EventsRequest, opts ...grpc.CallOption) (Tigris_EventsClient, error)
 	// Provides the information about the server. This information includes returning the server version, etc.
 	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error)
+	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
+	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (Tigris_SubscribeClient, error)
 }
 
 type tigrisClient struct {
@@ -171,6 +175,38 @@ func (x *tigrisReadClient) Recv() (*ReadResponse, error) {
 	return m, nil
 }
 
+func (c *tigrisClient) Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (Tigris_SearchClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[1], "/tigrisdata.v1.Tigris/Search", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &tigrisSearchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Tigris_SearchClient interface {
+	Recv() (*SearchResponse, error)
+	grpc.ClientStream
+}
+
+type tigrisSearchClient struct {
+	grpc.ClientStream
+}
+
+func (x *tigrisSearchClient) Recv() (*SearchResponse, error) {
+	m := new(SearchResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *tigrisClient) CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error) {
 	out := new(CreateOrUpdateCollectionResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", in, out, opts...)
@@ -244,7 +280,7 @@ func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeColle
 }
 
 func (c *tigrisClient) Events(ctx context.Context, in *EventsRequest, opts ...grpc.CallOption) (Tigris_EventsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[1], "/tigrisdata.v1.Tigris/Events", opts...)
+	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[2], "/tigrisdata.v1.Tigris/Events", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -284,6 +320,47 @@ func (c *tigrisClient) GetInfo(ctx context.Context, in *GetInfoRequest, opts ...
 	return out, nil
 }
 
+func (c *tigrisClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error) {
+	out := new(PublishResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Publish", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (Tigris_SubscribeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Tigris_ServiceDesc.Streams[3], "/tigrisdata.v1.Tigris/Subscribe", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &tigrisSubscribeClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Tigris_SubscribeClient interface {
+	Recv() (*SubscribeResponse, error)
+	grpc.ClientStream
+}
+
+type tigrisSubscribeClient struct {
+	grpc.ClientStream
+}
+
+func (x *tigrisSubscribeClient) Recv() (*SubscribeResponse, error) {
+	m := new(SubscribeResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // TigrisServer is the server API for Tigris service.
 // All implementations should embed UnimplementedTigrisServer
 // for forward compatibility
@@ -309,6 +386,8 @@ type TigrisServer interface {
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	//  Reads range of documents from the collection using the condition in the filter.
 	Read(*ReadRequest, Tigris_ReadServer) error
+	//  Searches a collection for documents matching the query
+	Search(*SearchRequest, Tigris_SearchServer) error
 	// Creates a new collection or atomically upgrades the collection to the new schema changes in the database
 	// passed in the request.
 	CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error)
@@ -332,6 +411,8 @@ type TigrisServer interface {
 	Events(*EventsRequest, Tigris_EventsServer) error
 	// Provides the information about the server. This information includes returning the server version, etc.
 	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
+	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
+	Subscribe(*SubscribeRequest, Tigris_SubscribeServer) error
 }
 
 // UnimplementedTigrisServer should be embedded to have forward compatible implementations.
@@ -362,6 +443,9 @@ func (UnimplementedTigrisServer) Update(context.Context, *UpdateRequest) (*Updat
 func (UnimplementedTigrisServer) Read(*ReadRequest, Tigris_ReadServer) error {
 	return status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
+func (UnimplementedTigrisServer) Search(*SearchRequest, Tigris_SearchServer) error {
+	return status.Errorf(codes.Unimplemented, "method Search not implemented")
+}
 func (UnimplementedTigrisServer) CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrUpdateCollection not implemented")
 }
@@ -391,6 +475,12 @@ func (UnimplementedTigrisServer) Events(*EventsRequest, Tigris_EventsServer) err
 }
 func (UnimplementedTigrisServer) GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
+}
+func (UnimplementedTigrisServer) Publish(context.Context, *PublishRequest) (*PublishResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Publish not implemented")
+}
+func (UnimplementedTigrisServer) Subscribe(*SubscribeRequest, Tigris_SubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
 
 // UnsafeTigrisServer may be embedded to opt out of forward compatibility for this service.
@@ -548,6 +638,27 @@ type tigrisReadServer struct {
 }
 
 func (x *tigrisReadServer) Send(m *ReadResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Tigris_Search_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TigrisServer).Search(m, &tigrisSearchServer{stream})
+}
+
+type Tigris_SearchServer interface {
+	Send(*SearchResponse) error
+	grpc.ServerStream
+}
+
+type tigrisSearchServer struct {
+	grpc.ServerStream
+}
+
+func (x *tigrisSearchServer) Send(m *SearchResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -734,6 +845,45 @@ func _Tigris_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Tigris_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).Publish(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/Publish",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).Publish(ctx, req.(*PublishRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SubscribeRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TigrisServer).Subscribe(m, &tigrisSubscribeServer{stream})
+}
+
+type Tigris_SubscribeServer interface {
+	Send(*SubscribeResponse) error
+	grpc.ServerStream
+}
+
+type tigrisSubscribeServer struct {
+	grpc.ServerStream
+}
+
+func (x *tigrisSubscribeServer) Send(m *SubscribeResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Tigris_ServiceDesc is the grpc.ServiceDesc for Tigris service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -805,6 +955,10 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetInfo",
 			Handler:    _Tigris_GetInfo_Handler,
 		},
+		{
+			MethodName: "Publish",
+			Handler:    _Tigris_Publish_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -813,8 +967,18 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
+			StreamName:    "Search",
+			Handler:       _Tigris_Search_Handler,
+			ServerStreams: true,
+		},
+		{
 			StreamName:    "Events",
 			Handler:       _Tigris_Events_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Subscribe",
+			Handler:       _Tigris_Subscribe_Handler,
 			ServerStreams: true,
 		},
 	},

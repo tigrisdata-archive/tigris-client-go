@@ -361,8 +361,8 @@ func (c *httpCRUD) convertReadOptions(_ *ReadOptions) *apiHTTP.ReadRequestOption
 	return &opts
 }
 
-func (c *httpCRUD) convertStreamOptions(_ *StreamOptions) *apiHTTP.StreamRequestOptions {
-	return &apiHTTP.StreamRequestOptions{}
+func (c *httpCRUD) convertEventsOptions(_ *EventsOptions) *apiHTTP.EventsRequestOptions {
+	return &apiHTTP.EventsRequestOptions{}
 }
 
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
@@ -550,10 +550,10 @@ func (g *httpStreamReader) close() error {
 	return g.closer.Close()
 }
 
-func (c *httpCRUD) streamWithOptions(ctx context.Context, collection string, options *StreamOptions) (EventIterator, error) {
-	resp, err := c.api.TigrisStream(ctx, c.db, apiHTTP.TigrisStreamJSONRequestBody{
+func (c *httpCRUD) eventsWithOptions(ctx context.Context, collection string, options *EventsOptions) (EventIterator, error) {
+	resp, err := c.api.TigrisEvents(ctx, c.db, collection, apiHTTP.TigrisEventsJSONRequestBody{
 		Collection: &collection,
-		Options:    c.convertStreamOptions(options),
+		Options:    c.convertEventsOptions(options),
 	})
 
 	err = HTTPError(err, resp)

@@ -49,7 +49,7 @@ type ReplaceOptions api.ReplaceRequestOptions
 type UpdateOptions api.UpdateRequestOptions
 type DeleteOptions api.DeleteRequestOptions
 type ReadOptions api.ReadRequestOptions
-type StreamOptions api.StreamRequestOptions
+type EventsOptions api.EventsRequestOptions
 
 type CollectionOptions api.CollectionOptions
 type DatabaseOptions api.DatabaseOptions

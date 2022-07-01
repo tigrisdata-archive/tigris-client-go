@@ -491,6 +491,6 @@ func TestClientSchemaMigration(t *testing.T) {
 			Options: &api.DatabaseOptions{},
 		})).Return(&api.DropDatabaseResponse{}, nil)
 
-	err = db.Drop(ctx)
+	err = DropDatabase(ctx, cfg, "db1")
 	require.NoError(t, err)
 }

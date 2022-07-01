@@ -334,7 +334,7 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&resp)
 }
 
-func (x *StreamResponse) MarshalJSON() ([]byte, error) {
+func (x *EventsResponse) MarshalJSON() ([]byte, error) {
 	type event struct {
 		TxId       []byte          `json:"tx_id"`
 		Collection string          `json:"collection"`

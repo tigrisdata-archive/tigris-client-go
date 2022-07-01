@@ -97,15 +97,6 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 	return nil
 }
 
-// Drop Database.
-// All the collections in the Database will be dropped
-func (db *Database) Drop(ctx context.Context) error {
-	if getTxCtx(ctx) != nil {
-		return ErrNotTransactional
-	}
-	return db.driver.DropDatabase(ctx, db.name)
-}
-
 // openDatabaseFromModels creates Database and collections from the provided collection models
 func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Database, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
 	// optionally creates database if it's allowed
@@ -142,6 +133,21 @@ func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, mode
 	}
 
 	return openDatabaseFromModels(ctx, d, cfg, dbName, model, models...)
+}
+
+// DropDatabase deletes the database and all collections in it
+func DropDatabase(ctx context.Context, cfg *config.Database, dbName string) error {
+	if getTxCtx(ctx) != nil {
+		return ErrNotTransactional
+	}
+
+	d, err := driver.NewDriver(ctx, &cfg.Driver)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = d.Close() }()
+
+	return d.DropDatabase(ctx, dbName)
 }
 
 // GetCollection returns collection object corresponding to collection model T

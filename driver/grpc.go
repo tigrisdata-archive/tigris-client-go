@@ -349,6 +349,44 @@ func (g *grpcStreamReader) close() error {
 	return nil
 }
 
+func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error) {
+	resp, err := c.api.Search(ctx, &api.SearchRequest{
+		Db:           c.db,
+		Collection:   collection,
+		Q:            req.Q,
+		SearchFields: req.SearchFields,
+		Filter:       req.Filter,
+		Facet:        req.Facet,
+		Fields:       req.ReadFields,
+		PageSize:     req.PageSize,
+		Page:         req.Page,
+	})
+
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return &searchResultIterator{
+		searchStreamReader: &grpcSearchReader{stream: resp},
+	}, nil
+}
+
+type grpcSearchReader struct {
+	stream api.Tigris_SearchClient
+}
+
+func (g *grpcSearchReader) read() (SearchResponse, error) {
+	resp, err := g.stream.Recv()
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+	return resp, nil
+}
+
+func (g *grpcSearchReader) close() error {
+	return nil
+}
+
 func (c *grpcCRUD) eventsWithOptions(ctx context.Context, collection string, options *EventsOptions) (EventIterator, error) {
 	resp, err := c.api.Events(ctx, &api.EventsRequest{
 		Db:         c.db,

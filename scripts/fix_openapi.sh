@@ -45,8 +45,8 @@ fix_bytes
 
 # Fix the types of filter and document fields to be object on HTTP wire.
 # The original format in proto file is "bytes", which allows to skip
-# unmarshalling in GRPC, we also implement custom unmashalling for HTTP
-for i in DeleteRequest UpdateRequest ReadRequest; do
+# unmarshalling in GRPC, we also implement custom unmarshalling for HTTP
+for i in DeleteRequest UpdateRequest ReadRequest SearchRequest; do
 	yq_fix_json $i filter
 done
 
@@ -54,8 +54,11 @@ yq_fix_json InsertRequest documents.items
 yq_fix_json ReplaceRequest documents.items
 yq_fix_json UpdateRequest fields
 yq_fix_json ReadRequest fields
+yq_fix_json SearchRequest fields
+yq_fix_json SearchRequest facet
 yq_fix_json ReadResponse data
 yq_fix_json StreamEvent data
+yq_fix_json SearchHit data
 yq_fix_json CreateOrUpdateCollectionRequest schema
 yq_fix_json CollectionDescription schema
 yq_fix_json DescribeCollectionResponse schema

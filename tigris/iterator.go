@@ -16,8 +16,8 @@ package tigris
 
 import (
 	"encoding/json"
-
 	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/search"
 )
 
 // Iterator is used to iterate documents
@@ -63,7 +63,45 @@ func (it *Iterator[T]) Err() error {
 	return it.err
 }
 
-// Close closes iterator stream
+// Close closes Iterator stream
 func (it *Iterator[T]) Close() {
+	it.Iterator.Close()
+}
+
+// SearchIterator is used to iterate search documents
+type SearchIterator[T interface{}] struct {
+	Iterator driver.SearchResultIterator
+	err      error
+}
+
+func (it *SearchIterator[T]) Next(res *search.Result[T]) bool {
+	var r driver.SearchResponse
+	if it.err != nil {
+		return false
+	}
+
+	if !it.Iterator.Next(&r) {
+		return false
+	}
+	// catching json marshaling error
+	if err := res.From(r); err != nil {
+		it.err = err
+		it.Close()
+		return false
+	}
+	return true
+}
+
+// Err returns nil if iteration was successful,
+// otherwise return error details
+func (it *SearchIterator[T]) Err() error {
+	if it.Iterator.Err() != nil {
+		return it.Iterator.Err()
+	}
+	return it.err
+}
+
+// Close closes Iterator stream
+func (it *SearchIterator[T]) Close() {
 	it.Iterator.Close()
 }

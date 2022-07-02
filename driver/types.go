@@ -16,7 +16,6 @@ package driver
 
 import (
 	"encoding/json"
-
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
@@ -40,6 +39,7 @@ type Filter json.RawMessage
 type Projection json.RawMessage
 type Update json.RawMessage
 type Schema json.RawMessage
+type Facet json.RawMessage
 type Event *api.StreamEvent
 
 type WriteOptions api.WriteOptions
@@ -64,6 +64,17 @@ type DescribeDatabaseResponse api.DescribeDatabaseResponse
 type DescribeCollectionResponse api.DescribeCollectionResponse
 
 type InfoResponse api.GetInfoResponse
+
+type SearchRequest struct {
+	Q            string
+	SearchFields []string
+	Filter       Filter
+	Facet        Facet
+	ReadFields   Projection
+	Page         int32
+	PageSize     int32
+}
+type SearchResponse *api.SearchResponse
 
 type Error struct {
 	*api.TigrisError

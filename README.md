@@ -47,11 +47,17 @@ type User struct {
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
+	
+	// Connect to the Tigris server
+	client, err := tigris.NewClient(ctx, &config.Database{Driver: config.Driver{URL: "localhost:8081"}})
+	if err != nil {
+		panic(err)
+	}
+	defer client.Close()
 
-	// Connect to the Tigris backend, create the database and collection if they don't exist,
+	// Create the database and collection if they don't exist,
 	// otherwise update the schema of the collection if it already exists
-	db, err := tigris.OpenDatabase(ctx, &config.Database{Driver: config.Driver{URL: "localhost:8081"}},
-		"hello_db", &User{})
+	db, err := client.OpenDatabase(ctx, "hello_db", &User{})
 	if err != nil {
 		panic(err)
 	}

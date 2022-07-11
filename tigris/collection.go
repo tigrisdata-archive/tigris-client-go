@@ -23,6 +23,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/schema"
+	"github.com/tigrisdata/tigris-client-go/search"
 )
 
 var (
@@ -184,7 +185,7 @@ func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, field
 	return &doc, nil
 }
 
-// ReadAll returns iterator which iterates over all the documents
+// ReadAll returns Iterator which iterates over all the documents
 // in the collection.
 func (c *Collection[T]) ReadAll(ctx context.Context, fields ...*fields.Read) (*Iterator[T], error) {
 	p, err := getFields(fields...)
@@ -193,6 +194,63 @@ func (c *Collection[T]) ReadAll(ctx context.Context, fields ...*fields.Read) (*I
 	}
 	it, err := getDB(ctx, c.db).Read(ctx, c.name, filter.All, p)
 	return &Iterator[T]{Iterator: it}, err
+}
+
+func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
+	if req == nil {
+		return nil, fmt.Errorf("search request cannot be null")
+	}
+
+	r := driver.SearchRequest{
+		Q:            req.Q,
+		SearchFields: req.SearchFields,
+		Page:         req.Options.Page,
+		PageSize:     req.Options.PageSize,
+	}
+	f, err := req.Filter.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	if f != nil {
+		r.Filter = f
+	}
+
+	if req.ReadFields == nil {
+		req.ReadFields = &search.DefaultReadFields
+	}
+	p, err := req.ReadFields.Built()
+	if err != nil {
+		return nil, err
+	}
+	r.ReadFields = p
+
+	if req.Facet != nil {
+		facet, err := req.Facet.Built()
+		if err != nil {
+			return nil, err
+		}
+
+		if facet != nil {
+			r.Facet = facet
+		}
+	}
+	return &r, nil
+}
+
+// Search returns Iterator which iterates over matched documents
+// in the collection
+func (c *Collection[T]) Search(ctx context.Context, req *search.Request) (*SearchIterator[T], error) {
+	r, err := getSearchRequest(req)
+	if err != nil || r == nil {
+		return nil, err
+	}
+
+	it, err := getDB(ctx, c.db).Search(ctx, c.name, r)
+	if err != nil {
+		return nil, err
+	}
+	return &SearchIterator[T]{Iterator: it}, err
 }
 
 // Delete removes documents from the collection according to the filter.

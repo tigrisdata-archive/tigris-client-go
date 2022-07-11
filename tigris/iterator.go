@@ -16,6 +16,7 @@ package tigris
 
 import (
 	"encoding/json"
+
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/search"
 )

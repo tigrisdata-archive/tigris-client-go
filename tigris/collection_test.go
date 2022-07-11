@@ -19,15 +19,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tigrisdata/tigris-client-go/search"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 	"unsafe"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/tigrisdata/tigris-client-go/search"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
+
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -36,7 +40,6 @@ import (
 	"github.com/tigrisdata/tigris-client-go/mock"
 	"github.com/tigrisdata/tigris-client-go/schema"
 	"github.com/tigrisdata/tigris-client-go/test"
-	"google.golang.org/protobuf/proto"
 )
 
 type JSONMatcher struct {
@@ -97,8 +100,8 @@ func TestGetSearchRequest(t *testing.T) {
 			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
 			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
-			WithReadOptions(*fields.Include("field_4")).
-			WithOptions(&search.DefaultRequestOptions).
+			WithReadFields(search.NewReadFieldsBuilder().Include("field_4").Build()).
+			WithOptions(&search.DefaultSearchOptions).
 			Build()
 		out, err := getSearchRequest(in)
 		assert.Nil(t, err)
@@ -107,9 +110,9 @@ func TestGetSearchRequest(t *testing.T) {
 		assert.Equal(t, in.SearchFields, out.SearchFields)
 		assert.Equal(t, driver.Filter(`{"field_2":{"$eq":"some value"}}`), out.Filter)
 		assert.Equal(t, driver.Facet(`{"field_3":{"size":10}}`), out.Facet)
-		assert.Equal(t, driver.Projection(`{"field_4":true}`), out.ReadFields)
+		assert.Equal(t, driver.SearchProjection(`{"field_4":true}`), out.ReadFields)
 		assert.Equal(t, in.Options.Page, out.Page)
-		assert.Equal(t, in.Options.PerPage, out.PageSize)
+		assert.Equal(t, in.Options.PageSize, out.PageSize)
 	})
 
 	t.Run("with nil request", func(t *testing.T) {
@@ -125,11 +128,11 @@ func TestGetSearchRequest(t *testing.T) {
 		out, err := getSearchRequest(in)
 		assert.Nil(t, err)
 		assert.NotNil(t, out)
-		assert.Equal(t, search.DefaultRequestOptions.Page, out.Page)
-		assert.Equal(t, search.DefaultRequestOptions.PerPage, out.PageSize)
+		assert.Equal(t, search.DefaultSearchOptions.Page, out.Page)
+		assert.Equal(t, search.DefaultSearchOptions.PageSize, out.PageSize)
 		assert.Nil(t, out.Filter)
 		assert.Nil(t, out.Facet)
-		assert.Equal(t, driver.Projection(`{}`), out.ReadFields)
+		assert.Equal(t, driver.SearchProjection(`{}`), out.ReadFields)
 	})
 }
 
@@ -295,17 +298,17 @@ func TestCollection_Search(t *testing.T) {
 		sr := search.NewRequestBuilder("search query").WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
 			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
-			WithReadOptions(*fields.Include("field_4")).
-			WithOptions(&search.DefaultRequestOptions).
+			WithReadFields(search.NewReadFieldsBuilder().Include("field_4").Build()).
+			WithOptions(&search.DefaultSearchOptions).
 			Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
 			Q:            sr.Q,
 			SearchFields: sr.SearchFields,
 			Filter:       driver.Filter(`{"field_2":{"$eq":"some value"}}`),
 			Facet:        driver.Facet(`{"field_3":{"size":10}}`),
-			ReadFields:   driver.Projection(`{"field_4":true}`),
+			ReadFields:   driver.SearchProjection(`{"field_4":true}`),
 			Page:         sr.Options.Page,
-			PageSize:     sr.Options.PerPage,
+			PageSize:     sr.Options.PageSize,
 		}).Return(rit, nil)
 		searchIter, err := c.Search(ctx, sr)
 		require.NoError(t, err)
@@ -333,9 +336,9 @@ func TestCollection_Search(t *testing.T) {
 			SearchFields: []string{},
 			Filter:       nil,
 			Facet:        nil,
-			ReadFields:   driver.Projection(`{}`),
-			Page:         search.DefaultRequestOptions.Page,
-			PageSize:     search.DefaultRequestOptions.PerPage,
+			ReadFields:   driver.SearchProjection(`{}`),
+			Page:         search.DefaultSearchOptions.Page,
+			PageSize:     search.DefaultSearchOptions.PageSize,
 		}).Return(rit, nil)
 		searchIter, err := c.Search(ctx, sr)
 		require.NoError(t, err)

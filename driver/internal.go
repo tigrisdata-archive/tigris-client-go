@@ -21,8 +21,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tigrisdata/tigris-client-go/config"
 	"golang.org/x/oauth2"
+
+	"github.com/tigrisdata/tigris-client-go/config"
 )
 
 type driverWithOptions interface {

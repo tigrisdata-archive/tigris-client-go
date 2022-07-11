@@ -18,19 +18,27 @@ package search
 
 import (
 	"encoding/json"
+
 	"github.com/tigrisdata/tigris-client-go/driver"
-	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
 )
 
 // Request for search
 type Request struct {
-	Q            string
+	// Q is the text search query associated with this request
+	Q string
+	// Optional SearchFields is an array of fields to project Q against
+	// if not specified, query will be projected against all searchable fields
 	SearchFields []string
-	Filter       filter.Filter
-	Facet        *FacetQuery
-	ReadFields   fields.Read
-	Options      *RequestOptions
+	// Optional Filter is applied on search results to further refine them
+	Filter filter.Filter
+	// Optional Facet query can be used to request categorical arrangement of the indexed terms
+	Facet *FacetQuery
+	// Optional ReadFields sets the document fields to include/exclude in search results
+	// if not specified, all documents fields will be included
+	ReadFields *ReadFields
+	// Optional Options provide pagination input
+	Options *Options
 }
 
 func NewRequestBuilder(q string) RequestBuilder {
@@ -43,8 +51,8 @@ type RequestBuilder interface {
 	WithSearchFields(fields ...string) RequestBuilder
 	WithFilter(filter.Filter) RequestBuilder
 	WithFacet(*FacetQuery) RequestBuilder
-	WithReadOptions(fields.Read) RequestBuilder
-	WithOptions(*RequestOptions) RequestBuilder
+	WithReadFields(readFields *ReadFields) RequestBuilder
+	WithOptions(*Options) RequestBuilder
 	Build() *Request
 }
 
@@ -53,8 +61,8 @@ type requestBuilder struct {
 	searchFields map[string]bool
 	filter       filter.Filter
 	facet        *FacetQuery
-	readFields   fields.Read
-	options      *RequestOptions
+	readFields   *ReadFields
+	options      *Options
 }
 
 func (b *requestBuilder) WithSearchFields(fields ...string) RequestBuilder {
@@ -74,12 +82,12 @@ func (b *requestBuilder) WithFacet(facet *FacetQuery) RequestBuilder {
 	return b
 }
 
-func (b *requestBuilder) WithReadOptions(read fields.Read) RequestBuilder {
+func (b *requestBuilder) WithReadFields(read *ReadFields) RequestBuilder {
 	b.readFields = read
 	return b
 }
 
-func (b *requestBuilder) WithOptions(options *RequestOptions) RequestBuilder {
+func (b *requestBuilder) WithOptions(options *Options) RequestBuilder {
 	b.options = options
 	return b
 }
@@ -94,7 +102,7 @@ func (b *requestBuilder) Build() *Request {
 
 	// default options
 	if b.options == nil {
-		b.options = &DefaultRequestOptions
+		b.options = &DefaultSearchOptions
 	}
 
 	return &Request{
@@ -107,31 +115,35 @@ func (b *requestBuilder) Build() *Request {
 	}
 }
 
-type RequestOptions struct {
-	Page    int32
-	PerPage int32
+type Options struct {
+	Page     int32
+	PageSize int32
 }
 
-var DefaultRequestOptions = RequestOptions{Page: 1, PerPage: 20}
+var DefaultSearchOptions = Options{Page: 1, PageSize: 20}
 
 type FacetQuery struct {
 	FacetFields map[string]FacetQueryOptions
+	built       driver.Facet
 }
+
+var DefaultFacetQuery = FacetQuery{built: nil, FacetFields: map[string]FacetQueryOptions{}}
 
 // Built marshals the facet query
 func (f *FacetQuery) Built() (driver.Facet, error) {
 	if f.FacetFields == nil || len(f.FacetFields) == 0 {
-		return driver.Facet(`{}`), nil
+		return DefaultFacetQuery.built, nil
+	}
+	if f.built != nil {
+		return f.built, nil
 	}
 	m := make(map[string]map[string]int)
 	for f, o := range f.FacetFields {
-		opt := map[string]int{
-			"size": o.Size,
-		}
-		m[f] = opt
+		m[f] = map[string]int{"size": o.Size}
 	}
-	b, err := json.Marshal(m)
-	return b, err
+	var err error
+	f.built, err = json.Marshal(m)
+	return f.built, err
 }
 
 type FacetQueryOptions struct{ Size int }
@@ -176,4 +188,55 @@ func (b *facetQueryBuilder) WithFieldOptions(m map[string]FacetQueryOptions) Fac
 
 func (b *facetQueryBuilder) Build() *FacetQuery {
 	return &FacetQuery{FacetFields: b.fields}
+}
+
+type ReadFields struct {
+	built  driver.SearchProjection
+	Fields map[string]bool
+}
+
+var DefaultReadFields = ReadFields{built: driver.SearchProjection(`{}`), Fields: map[string]bool{}}
+
+func NewReadFieldsBuilder() ReadFieldsBuilder {
+	return &readFieldsBuilder{fields: make(map[string]bool)}
+}
+
+func (r *ReadFields) Built() (driver.SearchProjection, error) {
+	if r.Fields == nil || len(r.Fields) == 0 {
+		return DefaultReadFields.built, nil
+	}
+	if r.built != nil {
+		return r.built, nil
+	}
+	var err error
+	r.built, err = json.Marshal(r.Fields)
+	return r.built, err
+}
+
+type ReadFieldsBuilder interface {
+	Include(...string) ReadFieldsBuilder
+	Exclude(...string) ReadFieldsBuilder
+	Build() *ReadFields
+}
+
+type readFieldsBuilder struct {
+	fields map[string]bool
+}
+
+func (b *readFieldsBuilder) Include(fields ...string) ReadFieldsBuilder {
+	for _, f := range fields {
+		b.fields[f] = true
+	}
+	return b
+}
+
+func (b *readFieldsBuilder) Exclude(fields ...string) ReadFieldsBuilder {
+	for _, f := range fields {
+		b.fields[f] = false
+	}
+	return b
+}
+
+func (b *readFieldsBuilder) Build() *ReadFields {
+	return &ReadFields{Fields: b.fields}
 }

@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -204,7 +205,7 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 		Q:            req.Q,
 		SearchFields: req.SearchFields,
 		Page:         req.Options.Page,
-		PageSize:     req.Options.PerPage,
+		PageSize:     req.Options.PageSize,
 	}
 	f, err := req.Filter.Build()
 	if err != nil {
@@ -215,14 +216,14 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 		r.Filter = f
 	}
 
-	p, err := getFields(&req.ReadFields)
+	if req.ReadFields == nil {
+		req.ReadFields = &search.DefaultReadFields
+	}
+	p, err := req.ReadFields.Built()
 	if err != nil {
 		return nil, err
 	}
-
-	if p != nil {
-		r.ReadFields = p
-	}
+	r.ReadFields = p
 
 	if req.Facet != nil {
 		facet, err := req.Facet.Built()

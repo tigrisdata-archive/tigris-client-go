@@ -16,6 +16,7 @@ package driver
 
 import (
 	"encoding/json"
+
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
@@ -40,6 +41,7 @@ type Projection json.RawMessage
 type Update json.RawMessage
 type Schema json.RawMessage
 type Facet json.RawMessage
+type SearchProjection json.RawMessage
 type Event *api.StreamEvent
 
 type WriteOptions api.WriteOptions
@@ -70,7 +72,7 @@ type SearchRequest struct {
 	SearchFields []string
 	Filter       Filter
 	Facet        Facet
-	ReadFields   Projection
+	ReadFields   SearchProjection
 	Page         int32
 	PageSize     int32
 }

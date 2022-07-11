@@ -25,10 +25,11 @@ import (
 	"time"
 	"unsafe"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (

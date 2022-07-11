@@ -17,10 +17,12 @@
 package search
 
 import (
-	"github.com/stretchr/testify/assert"
-	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
+	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
 type Coll1 struct {
@@ -117,8 +119,8 @@ func TestResult_From(t *testing.T) {
 		f := r.Facets["Field2"]
 		assert.ElementsMatch(t, []FacetCount{{Count: 6, Value: "value2"}}, f.Counts)
 		assert.Equal(t, int64(1), f.Stats.Count)
-		assert.Equal(t, int64(5), f.Stats.Sum)
-		assert.Equal(t, float32(0.0), f.Stats.Avg)
+		assert.Equal(t, float64(5), f.Stats.Sum)
+		assert.Equal(t, float64(0.0), f.Stats.Avg)
 
 		m := r.Meta
 		assert.Equal(t, int64(12), m.Found)
@@ -223,7 +225,7 @@ func TestHitMeta_From(t *testing.T) {
 
 func TestFacetDistribution_From(t *testing.T) {
 	t.Run("from nil", func(t *testing.T) {
-		fd := &FacetDistribution{}
+		fd := &Facet{}
 		fd.From(nil)
 		assert.NotNil(t, fd)
 		assert.NotNil(t, fd.Counts)
@@ -232,7 +234,7 @@ func TestFacetDistribution_From(t *testing.T) {
 	})
 
 	t.Run("from partial response", func(t *testing.T) {
-		fd := &FacetDistribution{}
+		fd := &Facet{}
 		fd.From(&api.SearchFacet{})
 		assert.NotNil(t, fd)
 		assert.NotNil(t, fd.Counts)
@@ -241,7 +243,7 @@ func TestFacetDistribution_From(t *testing.T) {
 	})
 
 	t.Run("from complete response", func(t *testing.T) {
-		fd := &FacetDistribution{}
+		fd := &Facet{}
 		fd.From(&api.SearchFacet{
 			Counts: []*api.FacetCount{
 				{
@@ -295,20 +297,20 @@ func TestFacetStats_From(t *testing.T) {
 	t.Run("from nil", func(t *testing.T) {
 		st := &FacetStats{}
 		st.From(nil)
-		assert.Equal(t, float32(0), st.Avg)
-		assert.Equal(t, int64(0), st.Max)
-		assert.Equal(t, int64(0), st.Min)
-		assert.Equal(t, int64(0), st.Sum)
+		assert.Equal(t, float64(0), st.Avg)
+		assert.Equal(t, float64(0), st.Max)
+		assert.Equal(t, float64(0), st.Min)
+		assert.Equal(t, float64(0), st.Sum)
 		assert.Equal(t, int64(0), st.Count)
 	})
 
 	t.Run("from partial api response", func(t *testing.T) {
 		st := &FacetStats{}
 		st.From(&api.FacetStats{Avg: 34.5, Count: 238, Sum: 45})
-		assert.Equal(t, float32(34.5), st.Avg)
-		assert.Equal(t, int64(0), st.Max)
-		assert.Equal(t, int64(0), st.Min)
-		assert.Equal(t, int64(45), st.Sum)
+		assert.Equal(t, float64(34.5), st.Avg)
+		assert.Equal(t, float64(0), st.Max)
+		assert.Equal(t, float64(0), st.Min)
+		assert.Equal(t, float64(45), st.Sum)
 		assert.Equal(t, int64(238), st.Count)
 	})
 }

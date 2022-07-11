@@ -18,9 +18,10 @@ package search
 
 import (
 	"encoding/json"
+	"time"
+
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/schema"
-	"time"
 )
 
 // Result represents response to a search query
@@ -28,7 +29,7 @@ type Result[T schema.Model] struct {
 	// Hits is the results of the query as a list
 	Hits []Hit[T]
 	// Facets contain the facet distribution of any requested faceted fields
-	Facets map[string]FacetDistribution
+	Facets map[string]Facet
 	// Meta represents metadata associated with this search result
 	Meta Meta
 }
@@ -36,7 +37,7 @@ type Result[T schema.Model] struct {
 func (result *Result[T]) From(apiResponse *api.SearchResponse) error {
 	m := &Meta{}
 	result.Hits = []Hit[T]{}
-	result.Facets = make(map[string]FacetDistribution)
+	result.Facets = make(map[string]Facet)
 	if apiResponse == nil {
 		m.From(nil)
 	} else {
@@ -52,7 +53,7 @@ func (result *Result[T]) From(apiResponse *api.SearchResponse) error {
 		}
 
 		for field, facets := range apiResponse.Facets {
-			f := &FacetDistribution{}
+			f := &Facet{}
 			f.From(facets)
 			result.Facets[field] = *f
 		}
@@ -113,16 +114,16 @@ func (hm *HitMeta) From(apiHitMeta *api.SearchHitMeta) {
 	}
 }
 
-// FacetDistribution represents unique values with counts and aggregated summary of values in a faceted field
-type FacetDistribution struct {
+// Facet represents unique values with counts and aggregated summary of values in a faceted field
+type Facet struct {
 	// Counts represent distinct field values and number of times they appear in a faceted field
 	Counts []FacetCount
 	Stats  FacetStats
 }
 
-// From constructs FacetDistribution from Tigris server's search response
+// From constructs Facet from Tigris server's search response
 // sets default values for missing/nil input
-func (f *FacetDistribution) From(apiFacet *api.SearchFacet) {
+func (f *Facet) From(apiFacet *api.SearchFacet) {
 	f.Counts = []FacetCount{}
 	st := &FacetStats{}
 	if apiFacet == nil {
@@ -161,13 +162,13 @@ func (f *FacetCount) From(apiFacetCount *api.FacetCount) {
 // FacetStats represent statistics for the faceted field
 type FacetStats struct {
 	// Average of all values in a field. Only available for numeric fields
-	Avg float32
+	Avg float64
 	// Maximum of all values in a field. Only available for numeric fields
-	Max int64
+	Max float64
 	// Minimum of all values in a field. Only available for numeric fields
-	Min int64
+	Min float64
 	// Sum of all values in a field. Only available for numeric fields
-	Sum int64
+	Sum float64
 	// Total number of values in a field
 	Count int64
 }
@@ -202,8 +203,6 @@ func (m *Meta) From(apiMeta *api.SearchMetadata) {
 		p.From(apiMeta.GetPage())
 		m.Found = apiMeta.Found
 		m.TotalPages = apiMeta.TotalPages
-	} else {
-		p.From(nil)
 	}
 	m.Page = *p
 }

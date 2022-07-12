@@ -36,7 +36,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 		assert.Empty(t, req.Filter)
 		assert.Empty(t, req.Facet)
 		assert.Empty(t, req.ReadFields)
-		assert.Exactly(t, *req.Options, DefaultSearchOptions)
+		assert.Nil(t, req.Options)
 	})
 
 	t.Run("with search fields", func(t *testing.T) {

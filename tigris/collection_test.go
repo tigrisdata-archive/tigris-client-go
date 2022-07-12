@@ -128,8 +128,8 @@ func TestGetSearchRequest(t *testing.T) {
 		out, err := getSearchRequest(in)
 		assert.Nil(t, err)
 		assert.NotNil(t, out)
-		assert.Equal(t, search.DefaultSearchOptions.Page, out.Page)
-		assert.Equal(t, search.DefaultSearchOptions.PageSize, out.PageSize)
+		assert.Equal(t, int32(0), out.Page)
+		assert.Equal(t, int32(0), out.PageSize)
 		assert.Nil(t, out.Filter)
 		assert.Nil(t, out.Facet)
 		assert.Equal(t, driver.SearchProjection(`{}`), out.ReadFields)
@@ -337,8 +337,8 @@ func TestCollection_Search(t *testing.T) {
 			Filter:       nil,
 			Facet:        nil,
 			ReadFields:   driver.SearchProjection(`{}`),
-			Page:         search.DefaultSearchOptions.Page,
-			PageSize:     search.DefaultSearchOptions.PageSize,
+			Page:         int32(0),
+			PageSize:     int32(0),
 		}).Return(rit, nil)
 		searchIter, err := c.Search(ctx, sr)
 		require.NoError(t, err)

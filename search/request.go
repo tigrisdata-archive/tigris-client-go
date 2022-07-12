@@ -100,11 +100,6 @@ func (b *requestBuilder) Build() *Request {
 		i++
 	}
 
-	// default options
-	if b.options == nil {
-		b.options = &DefaultSearchOptions
-	}
-
 	return &Request{
 		Q:            b.q,
 		SearchFields: searchFields,

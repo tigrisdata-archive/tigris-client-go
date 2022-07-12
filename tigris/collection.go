@@ -204,9 +204,12 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 	r := driver.SearchRequest{
 		Q:            req.Q,
 		SearchFields: req.SearchFields,
-		Page:         req.Options.Page,
-		PageSize:     req.Options.PageSize,
 	}
+	if req.Options != nil {
+		r.Page = req.Options.Page
+		r.PageSize = req.Options.PageSize
+	}
+
 	f, err := req.Filter.Build()
 	if err != nil {
 		return nil, err

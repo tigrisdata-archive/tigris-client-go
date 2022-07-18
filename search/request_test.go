@@ -29,9 +29,9 @@ import (
 func TestRequestBuilder_Build(t *testing.T) {
 	inputQ := "search text"
 
-	t.Run("only with Q", func(t *testing.T) {
-		req := NewRequestBuilder(inputQ).Build()
-		assert.Equal(t, inputQ, req.Q)
+	t.Run("empty build", func(t *testing.T) {
+		req := NewRequestBuilder().Build()
+		assert.Equal(t, "", req.Q)
 		assert.Empty(t, req.SearchFields)
 		assert.Empty(t, req.Filter)
 		assert.Empty(t, req.Facet)
@@ -40,7 +40,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 	})
 
 	t.Run("with search fields", func(t *testing.T) {
-		req := NewRequestBuilder(inputQ).WithSearchFields("field_1", "field_2").Build()
+		req := NewRequestBuilder().WithQuery(inputQ).WithSearchFields("field_1", "field_2").Build()
 		assert.Len(t, req.SearchFields, 2)
 		assert.Subset(t, []string{"field_1", "field_2"}, req.SearchFields)
 	})
@@ -165,13 +165,13 @@ func TestReadFields_Built(t *testing.T) {
 }
 
 func ExampleNewRequestBuilder() {
-	req := NewRequestBuilder("my search text").Build()
+	req := NewRequestBuilder().WithQuery("my search text").Build()
 	fmt.Println(req.Q)
 	// Output: my search text
 }
 
 func ExampleRequestBuilder_WithSearchFields() {
-	req := NewRequestBuilder("some text").WithSearchFields("field_1").Build()
+	req := NewRequestBuilder().WithQuery("some text").WithSearchFields("field_1").Build()
 	b, _ := json.Marshal(req.SearchFields)
 	fmt.Println(string(b))
 	// Output: ["field_1"]

@@ -41,13 +41,13 @@ type Request struct {
 	Options *Options
 }
 
-func NewRequestBuilder(q string) RequestBuilder {
+func NewRequestBuilder() RequestBuilder {
 	return &requestBuilder{
-		q:            q,
 		searchFields: make(map[string]bool)}
 }
 
 type RequestBuilder interface {
+	WithQuery(q string) RequestBuilder
 	WithSearchFields(fields ...string) RequestBuilder
 	WithFilter(filter.Filter) RequestBuilder
 	WithFacet(*FacetQuery) RequestBuilder
@@ -63,6 +63,11 @@ type requestBuilder struct {
 	facet        *FacetQuery
 	readFields   *ReadFields
 	options      *Options
+}
+
+func (b *requestBuilder) WithQuery(q string) RequestBuilder {
+	b.q = q
+	return b
 }
 
 func (b *requestBuilder) WithSearchFields(fields ...string) RequestBuilder {

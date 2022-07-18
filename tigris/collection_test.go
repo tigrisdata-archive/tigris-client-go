@@ -96,7 +96,8 @@ func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
 
 func TestGetSearchRequest(t *testing.T) {
 	t.Run("with all params", func(t *testing.T) {
-		in := search.NewRequestBuilder("search query").
+		in := search.NewRequestBuilder().
+			WithQuery("search query").
 			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
 			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
@@ -122,12 +123,13 @@ func TestGetSearchRequest(t *testing.T) {
 	})
 
 	t.Run("with nil fields", func(t *testing.T) {
-		in := search.NewRequestBuilder("search query").
+		in := search.NewRequestBuilder().
 			WithSearchFields("field_1").
 			Build()
 		out, err := getSearchRequest(in)
 		assert.Nil(t, err)
 		assert.NotNil(t, out)
+		assert.Equal(t, "", out.Q)
 		assert.Equal(t, int32(0), out.Page)
 		assert.Equal(t, int32(0), out.PageSize)
 		assert.Nil(t, out.Filter)
@@ -295,7 +297,9 @@ func TestCollection_Search(t *testing.T) {
 	// search with all params parses completely
 	t.Run("with all request params", func(t *testing.T) {
 		rit := mock.NewMockSearchResultIterator(ctrl)
-		sr := search.NewRequestBuilder("search query").WithSearchFields("field_1").
+		sr := search.NewRequestBuilder().
+			WithQuery("search query").
+			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
 			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
 			WithReadFields(search.NewReadFieldsBuilder().Include("field_4").Build()).
@@ -330,7 +334,7 @@ func TestCollection_Search(t *testing.T) {
 
 	t.Run("with partial request params", func(t *testing.T) {
 		rit := mock.NewMockSearchResultIterator(ctrl)
-		sr := search.NewRequestBuilder("search query").Build()
+		sr := search.NewRequestBuilder().Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
 			Q:            sr.Q,
 			SearchFields: []string{},
@@ -356,7 +360,7 @@ func TestCollection_Search(t *testing.T) {
 	// with marshalling failure
 	t.Run("when response unmarshalling fails", func(t *testing.T) {
 		rit := mock.NewMockSearchResultIterator(ctrl)
-		sr := search.NewRequestBuilder("search query").Build()
+		sr := search.NewRequestBuilder().Build()
 		mdb.EXPECT().Search(ctx, "coll_1", gomock.Any()).Return(rit, nil)
 		searchIter, err := c.Search(ctx, sr)
 		require.NoError(t, err)

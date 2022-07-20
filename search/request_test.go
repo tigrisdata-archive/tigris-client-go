@@ -26,6 +26,11 @@ import (
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
+func TestMatchAllQuery(t *testing.T) {
+	req := MatchAll().Build()
+	assert.Equal(t, "", req.Q)
+}
+
 func TestRequestBuilder_Build(t *testing.T) {
 	inputQ := "search text"
 
@@ -43,6 +48,14 @@ func TestRequestBuilder_Build(t *testing.T) {
 		req := NewRequestBuilder().WithQuery(inputQ).WithSearchFields("field_1", "field_2").Build()
 		assert.Len(t, req.SearchFields, 2)
 		assert.Subset(t, []string{"field_1", "field_2"}, req.SearchFields)
+	})
+
+	t.Run("with facet fields", func(t *testing.T) {
+		req := NewRequestBuilder().WithFacetFields("field_1", "field_2").Build()
+		assert.Len(t, req.Facet.FacetFields, 2)
+		for f, _ := range req.Facet.FacetFields {
+			assert.Contains(t, []string{"field_1", "field_2"}, f)
+		}
 	})
 }
 

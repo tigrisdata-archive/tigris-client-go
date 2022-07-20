@@ -41,6 +41,10 @@ type Request struct {
 	Options *Options
 }
 
+func MatchAll() RequestBuilder {
+	return NewRequestBuilder().WithQuery("")
+}
+
 func NewRequestBuilder() RequestBuilder {
 	return &requestBuilder{
 		searchFields: make(map[string]bool)}
@@ -50,6 +54,7 @@ type RequestBuilder interface {
 	WithQuery(q string) RequestBuilder
 	WithSearchFields(fields ...string) RequestBuilder
 	WithFilter(filter.Filter) RequestBuilder
+	WithFacetFields(fields ...string) RequestBuilder
 	WithFacet(*FacetQuery) RequestBuilder
 	WithReadFields(readFields *ReadFields) RequestBuilder
 	WithOptions(*Options) RequestBuilder
@@ -79,6 +84,12 @@ func (b *requestBuilder) WithSearchFields(fields ...string) RequestBuilder {
 
 func (b *requestBuilder) WithFilter(f filter.Filter) RequestBuilder {
 	b.filter = f
+	return b
+}
+
+func (b *requestBuilder) WithFacetFields(fields ...string) RequestBuilder {
+	facetQuery := NewFacetQueryBuilder().WithFields(fields...).Build()
+	b.facet = facetQuery
 	return b
 }
 

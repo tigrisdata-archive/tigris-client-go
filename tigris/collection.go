@@ -175,6 +175,7 @@ func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, field
 	if err != nil {
 		return nil, err
 	}
+	defer it.Close()
 	if !it.Next(&doc) {
 		if it.Err() != nil {
 			return nil, it.Err()

@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/credentials/oauth"
-	grpc_md "google.golang.org/grpc/metadata"
+	grpcmd "google.golang.org/grpc/metadata"
 )
 
 const (
@@ -164,7 +164,7 @@ func setGRPCTxCtx(ctx context.Context, txCtx *api.TransactionCtx) context.Contex
 		return ctx
 	}
 
-	return grpc_md.AppendToOutgoingContext(ctx, api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin)
+	return grpcmd.AppendToOutgoingContext(ctx, api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin)
 }
 
 func (c *grpcCRUD) Commit(ctx context.Context) error {
@@ -318,7 +318,9 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
 	ctx = setGRPCTxCtx(ctx, c.txCtx)
 
-	resp, err := c.api.Read(ctx, &api.ReadRequest{
+	cctx, cancel := context.WithCancel(ctx)
+
+	resp, err := c.api.Read(cctx, &api.ReadRequest{
 		Db:         c.db,
 		Collection: collection,
 		Filter:     filter,
@@ -326,14 +328,16 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filte
 		Options:    (*api.ReadRequestOptions)(options),
 	})
 	if err != nil {
+		cancel()
 		return nil, GRPCError(err)
 	}
 
-	return &readIterator{streamReader: &grpcStreamReader{resp}}, nil
+	return &readIterator{streamReader: &grpcStreamReader{stream: resp, cancel: cancel}}, nil
 }
 
 type grpcStreamReader struct {
 	stream api.Tigris_ReadClient
+	cancel context.CancelFunc
 }
 
 func (g *grpcStreamReader) read() (Document, error) {
@@ -346,11 +350,14 @@ func (g *grpcStreamReader) read() (Document, error) {
 }
 
 func (g *grpcStreamReader) close() error {
+	g.cancel()
 	return nil
 }
 
 func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error) {
-	resp, err := c.api.Search(ctx, &api.SearchRequest{
+	cctx, cancel := context.WithCancel(ctx)
+
+	resp, err := c.api.Search(cctx, &api.SearchRequest{
 		Db:           c.db,
 		Collection:   collection,
 		Q:            req.Q,
@@ -363,16 +370,18 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 	})
 
 	if err != nil {
+		cancel()
 		return nil, GRPCError(err)
 	}
 
 	return &searchResultIterator{
-		searchStreamReader: &grpcSearchReader{stream: resp},
+		searchStreamReader: &grpcSearchReader{stream: resp, cancel: cancel},
 	}, nil
 }
 
 type grpcSearchReader struct {
 	stream api.Tigris_SearchClient
+	cancel context.CancelFunc
 }
 
 func (g *grpcSearchReader) read() (SearchResponse, error) {
@@ -384,24 +393,29 @@ func (g *grpcSearchReader) read() (SearchResponse, error) {
 }
 
 func (g *grpcSearchReader) close() error {
+	g.cancel()
 	return nil
 }
 
 func (c *grpcCRUD) eventsWithOptions(ctx context.Context, collection string, options *EventsOptions) (EventIterator, error) {
-	resp, err := c.api.Events(ctx, &api.EventsRequest{
+	cctx, cancel := context.WithCancel(ctx)
+
+	resp, err := c.api.Events(cctx, &api.EventsRequest{
 		Db:         c.db,
 		Collection: collection,
 		Options:    (*api.EventsRequestOptions)(options),
 	})
 	if err != nil {
+		cancel()
 		return nil, GRPCError(err)
 	}
 
-	return &eventReadIterator{eventStreamReader: &grpcEventStreamReader{resp}}, nil
+	return &eventReadIterator{eventStreamReader: &grpcEventStreamReader{stream: resp, cancel: cancel}}, nil
 }
 
 type grpcEventStreamReader struct {
 	stream api.Tigris_EventsClient
+	cancel context.CancelFunc
 }
 
 func (g *grpcEventStreamReader) read() (Event, error) {
@@ -414,5 +428,6 @@ func (g *grpcEventStreamReader) read() (Event, error) {
 }
 
 func (g *grpcEventStreamReader) close() error {
+	g.cancel()
 	return nil
 }

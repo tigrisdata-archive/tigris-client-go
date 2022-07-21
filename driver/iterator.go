@@ -14,7 +14,9 @@
 
 package driver
 
-import "io"
+import (
+	"io"
+)
 
 type Iterator interface {
 	Next(d *Document) bool
@@ -111,6 +113,56 @@ func (i *eventReadIterator) Err() error {
 }
 
 func (i *eventReadIterator) Close() {
+	if i.eof {
+		return
+	}
+	_ = i.close()
+	i.eof = true
+}
+
+type SearchResultIterator interface {
+	Next(r *SearchResponse) bool
+	Err() error
+	Close()
+}
+
+type searchStreamReader interface {
+	read() (SearchResponse, error)
+	close() error
+}
+
+type searchResultIterator struct {
+	searchStreamReader
+	eof bool
+	err error
+}
+
+func (i *searchResultIterator) Next(r *SearchResponse) bool {
+	if i.eof {
+		return false
+	}
+
+	resp, err := i.read()
+	if err == io.EOF {
+		i.eof = true
+		_ = i.close()
+		return false
+	}
+	if err != nil {
+		i.eof = true
+		i.err = err
+		_ = i.close()
+		return false
+	}
+	*r = resp
+	return true
+}
+
+func (i *searchResultIterator) Err() error {
+	return i.err
+}
+
+func (i *searchResultIterator) Close() {
 	if i.eof {
 		return
 	}

@@ -74,7 +74,10 @@ type Database interface {
 	// Read documents from the collection matching the specified filter.
 	Read(ctx context.Context, collection string, filter Filter, fields Projection, options ...*ReadOptions) (Iterator, error)
 
-	// Update documents in the collection matching the speficied filter.
+	//Search for documents in the collection matching specified query
+	Search(ctx context.Context, collection string, request *SearchRequest) (SearchResultIterator, error)
+
+	// Update documents in the collection matching the specified filter.
 	Update(ctx context.Context, collection string, filter Filter, fields Update, options ...*UpdateOptions) (*UpdateResponse, error)
 
 	// Delete documents from the collection matching specified filter.
@@ -196,6 +199,13 @@ func (c *driverCRUD) Read(ctx context.Context, collection string, filter Filter,
 	}
 
 	return c.readWithOptions(ctx, collection, filter, fields, opts.(*ReadOptions))
+}
+
+func (c *driverCRUD) Search(ctx context.Context, collection string, request *SearchRequest) (SearchResultIterator, error) {
+	if request == nil {
+		return nil, fmt.Errorf("API does accept nil Search Request")
+	}
+	return c.search(ctx, collection, request)
 }
 
 func (c *driverCRUD) CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {

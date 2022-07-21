@@ -25,10 +25,11 @@ import (
 	"time"
 	"unsafe"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -547,6 +548,66 @@ func (g *httpStreamReader) read() (Document, error) {
 }
 
 func (g *httpStreamReader) close() error {
+	return g.closer.Close()
+}
+
+func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error) {
+	// Will anything break if we don't set transaction context here?
+	if req.SearchFields == nil {
+		req.SearchFields = []string{}
+	}
+	resp, err := c.api.TigrisSearch(ctx, c.db, collection, apiHTTP.TigrisSearchJSONRequestBody{
+		Q:            &req.Q,
+		SearchFields: &req.SearchFields,
+		Filter:       json.RawMessage(req.Filter),
+		Facet:        json.RawMessage(req.Facet),
+		Fields:       json.RawMessage(req.ReadFields),
+		Page:         &req.Page,
+		PageSize:     &req.PageSize,
+	})
+	err = HTTPError(err, resp)
+	dec := json.NewDecoder(resp.Body)
+
+	return &searchResultIterator{
+		searchStreamReader: &httpSearchReader{
+			closer: resp.Body,
+			stream: dec,
+		},
+		eof: err != nil,
+		err: err,
+	}, nil
+}
+
+type httpSearchReader struct {
+	closer io.Closer
+	stream *json.Decoder
+}
+
+func (g *httpSearchReader) read() (SearchResponse, error) {
+	var res struct {
+		Result struct {
+			Hits   []*api.SearchHit
+			Facets map[string]*api.SearchFacet
+			Meta   *api.SearchMetadata
+		}
+		Error *api.ErrorDetails
+	}
+	if err := g.stream.Decode(&res); err != nil {
+		return nil, HTTPError(err, nil)
+	}
+
+	if res.Error != nil {
+		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
+	}
+
+	return &api.SearchResponse{
+		Hits:   res.Result.Hits,
+		Facets: res.Result.Facets,
+		Meta:   res.Result.Meta,
+	}, nil
+}
+
+func (g *httpSearchReader) close() error {
 	return g.closer.Close()
 }
 

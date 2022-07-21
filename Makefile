@@ -37,7 +37,7 @@ generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${API_DIR}/client/${V}/ap
 
 mock/api/grpc.go mock/driver.go:
 	mkdir -p mock/api
-	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver Driver,Tx,Database,Iterator
+	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver Driver,Tx,Database,Iterator,SearchResultIterator
 	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer
 
 mock: mock/api/grpc.go mock/driver.go

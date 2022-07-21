@@ -21,8 +21,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tigrisdata/tigris-client-go/config"
 	"golang.org/x/oauth2"
+
+	"github.com/tigrisdata/tigris-client-go/config"
 )
 
 type driverWithOptions interface {
@@ -41,6 +42,7 @@ type CRUDWithOptions interface {
 	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error)
 	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error)
 	readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error)
+	search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error)
 	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error)
 	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error)
 	createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error

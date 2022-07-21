@@ -31,16 +31,17 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/config"
-	mock "github.com/tigrisdata/tigris-client-go/mock/api"
-	"github.com/tigrisdata/tigris-client-go/test"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
+	"github.com/tigrisdata/tigris-client-go/config"
+	mock "github.com/tigrisdata/tigris-client-go/mock/api"
+	"github.com/tigrisdata/tigris-client-go/test"
 )
 
 func SetupGRPCTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
@@ -117,6 +118,41 @@ func testReadStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}}, it.Err())
 }
 
+func testSearchStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	expectedMeta := &api.SearchMetadata{
+		Found:      125,
+		TotalPages: 5,
+		Page: &api.Page{
+			Current: 2,
+			Size:    25,
+		},
+	}
+
+	mc.EXPECT().Search(
+		pm(&api.SearchRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Q:          "search text",
+		}), gomock.Any()).DoAndReturn(func(r *api.SearchRequest, srv api.Tigris_SearchServer) error {
+		err := srv.Send(&api.SearchResponse{Meta: expectedMeta})
+		require.NoError(t, err)
+		return &api.TigrisError{Code: api.Code_ABORTED, Message: "error_stream"}
+	})
+	it, err := d.UseDatabase("db1").Search(ctx, "c1", &SearchRequest{Q: "search text"})
+	require.NoError(t, err)
+
+	var doc SearchResponse
+	require.True(t, it.Next(&doc))
+	require.Equal(t, expectedMeta.Page.Current, doc.Meta.Page.Current)
+	require.Equal(t, expectedMeta.Page.Size, doc.Meta.Page.Size)
+	require.Equal(t, expectedMeta.Found, doc.Meta.Found)
+	require.Equal(t, expectedMeta.TotalPages, doc.Meta.TotalPages)
+	require.False(t, it.Next(&doc))
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_ABORTED, Message: "error_stream"}}, it.Err())
+}
+
 func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	cases := []struct {
 		name       string
@@ -153,6 +189,9 @@ func TestGRPCError(t *testing.T) {
 	t.Run("read_stream_error", func(t *testing.T) {
 		testReadStreamError(t, client, mockServer)
 	})
+	t.Run("search_stream_error", func(t *testing.T) {
+		testSearchStreamError(t, client, mockServer)
+	})
 }
 
 func TestHTTPError(t *testing.T) {
@@ -161,6 +200,9 @@ func TestHTTPError(t *testing.T) {
 	testErrors(t, client, mockServer)
 	t.Run("read_stream_error", func(t *testing.T) {
 		testReadStreamError(t, client, mockServer)
+	})
+	t.Run("search_stream_error", func(t *testing.T) {
+		testSearchStreamError(t, client, mockServer)
 	})
 }
 
@@ -390,6 +432,30 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.NoError(t, err)
 
 	require.False(t, it.Next(nil))
+
+	var sit SearchResultIterator
+	mc.EXPECT().Search(
+		pm(&api.SearchRequest{
+			Db:           "db1",
+			Collection:   "c1",
+			Q:            "search text",
+			SearchFields: []string{"field_1"},
+			Facet:        []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
+			Fields:       nil,
+			Sort:         nil,
+			Filter:       nil,
+			PageSize:     12,
+			Page:         3,
+		}), gomock.Any()).Return(nil)
+	sit, err = db.Search(ctx, "c1", &SearchRequest{
+		Q:            "search text",
+		SearchFields: []string{"field_1"},
+		Facet:        Facet(`{"field_1":{"size":10},"field_2":{"size":10}}`),
+		PageSize:     12,
+		Page:         3,
+	})
+	require.NoError(t, err)
+	require.False(t, sit.Next(nil))
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
@@ -761,6 +827,19 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	require.False(t, it.Next(&d))
 	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "errrror"}}, it.Err())
 
+	mc.EXPECT().Search(
+		pm(&api.SearchRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Q:          "search query",
+		}), gomock.Any()).Return(&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "search error"})
+
+	sit, err := c.Search(ctx, "c1", &SearchRequest{Q: "search query"})
+	require.NoError(t, err)
+	var resp SearchResponse
+	require.False(t, sit.Next(&resp))
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "search error"}}, sit.Err())
+
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
 			Db:         "db1",
@@ -1035,6 +1114,8 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
 	require.Error(t, err)
 	_, err = db.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
+	require.Error(t, err)
+	_, err = db.Search(ctx, "coll1", nil)
 	require.Error(t, err)
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}

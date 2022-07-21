@@ -119,6 +119,7 @@ func TestCollectionTx(t *testing.T) {
 		).Return(mit, nil)
 
 		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
+		mit.EXPECT().Close()
 
 		pd, err := c.ReadOne(ctx, filter.Eq("Key1", "aaa"))
 		require.NoError(t, err)

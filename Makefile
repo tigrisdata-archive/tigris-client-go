@@ -28,7 +28,7 @@ ${GEN_DIR}/%.pb.go ${GEN_DIR}/%.pb.gw.go: ${PROTO_DIR}/%.proto
 	make -C api/proto generate GEN_DIR=../../${GEN_DIR} API_DIR=..
 
 # generate Go HTTP client from openapi spec
-${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml
+${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml scripts/fix_openapi.sh
 	mkdir -p ${API_DIR}/client/${V}/api
 	/bin/bash scripts/fix_openapi.sh ${PROTO_DIR}/openapi.yaml /tmp/openapi.yaml
 	oapi-codegen --old-config-style -package api -generate "client, types, spec" \

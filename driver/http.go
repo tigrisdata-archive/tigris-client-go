@@ -552,18 +552,24 @@ func (g *httpStreamReader) close() error {
 }
 
 func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error) {
-	// Will anything break if we don't set transaction context here?
 	if req.SearchFields == nil {
 		req.SearchFields = []string{}
 	}
+	if req.IncludeFields == nil {
+		req.IncludeFields = []string{}
+	}
+	if req.ExcludeFields == nil {
+		req.ExcludeFields = []string{}
+	}
 	resp, err := c.api.TigrisSearch(ctx, c.db, collection, apiHTTP.TigrisSearchJSONRequestBody{
-		Q:            &req.Q,
-		SearchFields: &req.SearchFields,
-		Filter:       json.RawMessage(req.Filter),
-		Facet:        json.RawMessage(req.Facet),
-		Fields:       json.RawMessage(req.ReadFields),
-		Page:         &req.Page,
-		PageSize:     &req.PageSize,
+		Q:             &req.Q,
+		SearchFields:  &req.SearchFields,
+		Filter:        json.RawMessage(req.Filter),
+		Facet:         json.RawMessage(req.Facet),
+		IncludeFields: &req.IncludeFields,
+		ExcludeFields: &req.ExcludeFields,
+		Page:          &req.Page,
+		PageSize:      &req.PageSize,
 	})
 	err = HTTPError(err, resp)
 	dec := json.NewDecoder(resp.Body)

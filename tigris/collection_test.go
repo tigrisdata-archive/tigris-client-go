@@ -101,7 +101,7 @@ func TestGetSearchRequest(t *testing.T) {
 			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
 			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
-			WithReadFields(search.NewReadFieldsBuilder().Include("field_4").Build()).
+			WithExcludeFields("field_5").
 			WithOptions(&search.DefaultSearchOptions).
 			Build()
 		out, err := getSearchRequest(in)
@@ -111,7 +111,8 @@ func TestGetSearchRequest(t *testing.T) {
 		assert.Equal(t, in.SearchFields, out.SearchFields)
 		assert.Equal(t, driver.Filter(`{"field_2":{"$eq":"some value"}}`), out.Filter)
 		assert.Equal(t, driver.Facet(`{"field_3":{"size":10}}`), out.Facet)
-		assert.Equal(t, driver.SearchProjection(`{"field_4":true}`), out.ReadFields)
+		assert.Equal(t, in.ExcludeFields, out.ExcludeFields)
+		assert.Empty(t, out.IncludeFields)
 		assert.Equal(t, in.Options.Page, out.Page)
 		assert.Equal(t, in.Options.PageSize, out.PageSize)
 	})
@@ -130,11 +131,13 @@ func TestGetSearchRequest(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, out)
 		assert.Equal(t, "", out.Q)
+		assert.Equal(t, []string{"field_1"}, out.SearchFields)
 		assert.Equal(t, int32(0), out.Page)
 		assert.Equal(t, int32(0), out.PageSize)
 		assert.Nil(t, out.Filter)
 		assert.Nil(t, out.Facet)
-		assert.Equal(t, driver.SearchProjection(`{}`), out.ReadFields)
+		assert.Empty(t, out.IncludeFields)
+		assert.Empty(t, out.ExcludeFields)
 	})
 }
 
@@ -303,17 +306,18 @@ func TestCollection_Search(t *testing.T) {
 			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
 			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
-			WithReadFields(search.NewReadFieldsBuilder().Include("field_4").Build()).
+			WithIncludeFields("field_4").
 			WithOptions(&search.DefaultSearchOptions).
 			Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
-			Q:            sr.Q,
-			SearchFields: sr.SearchFields,
-			Filter:       driver.Filter(`{"field_2":{"$eq":"some value"}}`),
-			Facet:        driver.Facet(`{"field_3":{"size":10}}`),
-			ReadFields:   driver.SearchProjection(`{"field_4":true}`),
-			Page:         sr.Options.Page,
-			PageSize:     sr.Options.PageSize,
+			Q:             sr.Q,
+			SearchFields:  sr.SearchFields,
+			Filter:        driver.Filter(`{"field_2":{"$eq":"some value"}}`),
+			Facet:         driver.Facet(`{"field_3":{"size":10}}`),
+			IncludeFields: []string{"field_4"},
+			ExcludeFields: nil,
+			Page:          sr.Options.Page,
+			PageSize:      sr.Options.PageSize,
 		}).Return(rit, nil)
 		searchIter, err := c.Search(ctx, sr)
 		require.NoError(t, err)
@@ -337,13 +341,14 @@ func TestCollection_Search(t *testing.T) {
 		rit := mock.NewMockSearchResultIterator(ctrl)
 		sr := search.NewRequestBuilder().Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
-			Q:            sr.Q,
-			SearchFields: []string{},
-			Filter:       nil,
-			Facet:        nil,
-			ReadFields:   driver.SearchProjection(`{}`),
-			Page:         int32(0),
-			PageSize:     int32(0),
+			Q:             sr.Q,
+			SearchFields:  []string{},
+			Filter:        nil,
+			Facet:         nil,
+			IncludeFields: nil,
+			ExcludeFields: nil,
+			Page:          int32(0),
+			PageSize:      int32(0),
 		}).Return(rit, nil)
 		searchIter, err := c.Search(ctx, sr)
 		require.NoError(t, err)

@@ -34,9 +34,11 @@ type Request struct {
 	Filter filter.Filter
 	// Optional Facet query can be used to request categorical arrangement of the indexed terms
 	Facet *FacetQuery
-	// Optional ReadFields sets the document fields to include/exclude in search results
-	// if not specified, all documents fields will be included
-	ReadFields *ReadFields
+	// Optional IncludeFields sets the document fields to include in search results
+	// By default, all documents fields will be included, unless ExcludeFields is specified
+	IncludeFields []string
+	// Optional ExcludeFields sets the document fields that shouldn't be included in results
+	ExcludeFields []string
 	// Optional Options provide pagination input
 	Options *Options
 }
@@ -56,7 +58,8 @@ type RequestBuilder interface {
 	WithFilter(filter.Filter) RequestBuilder
 	WithFacetFields(fields ...string) RequestBuilder
 	WithFacet(*FacetQuery) RequestBuilder
-	WithReadFields(readFields *ReadFields) RequestBuilder
+	WithIncludeFields(fields ...string) RequestBuilder
+	WithExcludeFields(fields ...string) RequestBuilder
 	WithOptions(*Options) RequestBuilder
 	Build() *Request
 }
@@ -66,7 +69,8 @@ type requestBuilder struct {
 	searchFields map[string]bool
 	filter       filter.Filter
 	facet        *FacetQuery
-	readFields   *ReadFields
+	include      []string
+	exclude      []string
 	options      *Options
 }
 
@@ -98,8 +102,13 @@ func (b *requestBuilder) WithFacet(facet *FacetQuery) RequestBuilder {
 	return b
 }
 
-func (b *requestBuilder) WithReadFields(read *ReadFields) RequestBuilder {
-	b.readFields = read
+func (b *requestBuilder) WithIncludeFields(fields ...string) RequestBuilder {
+	b.include = fields
+	return b
+}
+
+func (b *requestBuilder) WithExcludeFields(fields ...string) RequestBuilder {
+	b.exclude = fields
 	return b
 }
 
@@ -117,12 +126,13 @@ func (b *requestBuilder) Build() *Request {
 	}
 
 	return &Request{
-		Q:            b.q,
-		SearchFields: searchFields,
-		Filter:       b.filter,
-		Facet:        b.facet,
-		ReadFields:   b.readFields,
-		Options:      b.options,
+		Q:             b.q,
+		SearchFields:  searchFields,
+		Filter:        b.filter,
+		Facet:         b.facet,
+		IncludeFields: b.include,
+		ExcludeFields: b.exclude,
+		Options:       b.options,
 	}
 }
 
@@ -199,55 +209,4 @@ func (b *facetQueryBuilder) WithFieldOptions(m map[string]FacetQueryOptions) Fac
 
 func (b *facetQueryBuilder) Build() *FacetQuery {
 	return &FacetQuery{FacetFields: b.fields}
-}
-
-type ReadFields struct {
-	built  driver.SearchProjection
-	Fields map[string]bool
-}
-
-var DefaultReadFields = ReadFields{built: driver.SearchProjection(`{}`), Fields: map[string]bool{}}
-
-func NewReadFieldsBuilder() ReadFieldsBuilder {
-	return &readFieldsBuilder{fields: make(map[string]bool)}
-}
-
-func (r *ReadFields) Built() (driver.SearchProjection, error) {
-	if r.Fields == nil || len(r.Fields) == 0 {
-		return DefaultReadFields.built, nil
-	}
-	if r.built != nil {
-		return r.built, nil
-	}
-	var err error
-	r.built, err = json.Marshal(r.Fields)
-	return r.built, err
-}
-
-type ReadFieldsBuilder interface {
-	Include(...string) ReadFieldsBuilder
-	Exclude(...string) ReadFieldsBuilder
-	Build() *ReadFields
-}
-
-type readFieldsBuilder struct {
-	fields map[string]bool
-}
-
-func (b *readFieldsBuilder) Include(fields ...string) ReadFieldsBuilder {
-	for _, f := range fields {
-		b.fields[f] = true
-	}
-	return b
-}
-
-func (b *readFieldsBuilder) Exclude(fields ...string) ReadFieldsBuilder {
-	for _, f := range fields {
-		b.fields[f] = false
-	}
-	return b
-}
-
-func (b *readFieldsBuilder) Build() *ReadFields {
-	return &ReadFields{Fields: b.fields}
 }

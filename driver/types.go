@@ -41,7 +41,6 @@ type Projection json.RawMessage
 type Update json.RawMessage
 type Schema json.RawMessage
 type Facet json.RawMessage
-type SearchProjection json.RawMessage
 type Event *api.StreamEvent
 
 type WriteOptions api.WriteOptions
@@ -68,13 +67,14 @@ type DescribeCollectionResponse api.DescribeCollectionResponse
 type InfoResponse api.GetInfoResponse
 
 type SearchRequest struct {
-	Q            string
-	SearchFields []string
-	Filter       Filter
-	Facet        Facet
-	ReadFields   SearchProjection
-	Page         int32
-	PageSize     int32
+	Q             string
+	SearchFields  []string
+	Filter        Filter
+	Facet         Facet
+	IncludeFields []string
+	ExcludeFields []string
+	Page          int32
+	PageSize      int32
 }
 type SearchResponse *api.SearchResponse
 

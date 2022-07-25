@@ -22,8 +22,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
 func TestMatchAllQuery(t *testing.T) {
@@ -40,7 +38,8 @@ func TestRequestBuilder_Build(t *testing.T) {
 		assert.Empty(t, req.SearchFields)
 		assert.Empty(t, req.Filter)
 		assert.Empty(t, req.Facet)
-		assert.Empty(t, req.ReadFields)
+		assert.Empty(t, req.IncludeFields)
+		assert.Empty(t, req.ExcludeFields)
 		assert.Nil(t, req.Options)
 	})
 
@@ -56,6 +55,18 @@ func TestRequestBuilder_Build(t *testing.T) {
 		for f, _ := range req.Facet.FacetFields {
 			assert.Contains(t, []string{"field_1", "field_2"}, f)
 		}
+	})
+
+	t.Run("with field selection", func(t *testing.T) {
+		req := NewRequestBuilder().
+			WithIncludeFields("field_1").
+			WithExcludeFields("field_2", "field_3").
+			Build()
+		assert.Len(t, req.IncludeFields, 1)
+		assert.Len(t, req.ExcludeFields, 2)
+		assert.Contains(t, req.IncludeFields, "field_1")
+		assert.Subset(t, []string{"field_3", "field_2"}, req.ExcludeFields)
+
 	})
 }
 
@@ -117,63 +128,6 @@ func TestFacetQuery_Built(t *testing.T) {
 		b, err := f.Built()
 		assert.Nil(t, err)
 		assert.Equal(t, "{\"field_1\":{\"size\":10},\"field_2\":{\"size\":10}}", string(b))
-	})
-}
-
-func TestReadFieldsBuilder_Build(t *testing.T) {
-
-	t.Run("empty build", func(t *testing.T) {
-		rf := NewReadFieldsBuilder().Build()
-		assert.Len(t, rf.Fields, 0)
-	})
-
-	t.Run("with included fields", func(t *testing.T) {
-		incF := []string{"field_1", "Field2", "field_3"}
-		excF := []string{"field_4", "field_1"} // override
-		rf := NewReadFieldsBuilder().Include(incF...).Exclude(excF...).Build()
-		assert.Len(t, rf.Fields, 4)
-		for _, f := range []string{"Field2", "field_3"} {
-			assert.Contains(t, rf.Fields, f)
-			assert.True(t, rf.Fields[f])
-		}
-		for _, f := range []string{"field_1", "field_4"} {
-			assert.Contains(t, rf.Fields, f)
-			assert.False(t, rf.Fields[f])
-		}
-	})
-}
-
-func TestReadFields_Built(t *testing.T) {
-
-	t.Run("nil object marshal", func(t *testing.T) {
-		b, err := (&ReadFields{}).Built()
-		assert.Nil(t, err)
-		assert.Equal(t, driver.SearchProjection(`{}`), b)
-	})
-
-	t.Run("empty object marshal", func(t *testing.T) {
-		b, err := NewReadFieldsBuilder().Build().Built()
-		assert.Nil(t, err)
-		assert.Equal(t, driver.SearchProjection(`{}`), b)
-	})
-
-	t.Run("typed object marshal", func(t *testing.T) {
-		incF := []string{"field_1", "Field2", "field_3"}
-		excF := []string{"field_4", "field_1"} // override
-		rf, err := NewReadFieldsBuilder().Include(incF...).Exclude(excF...).Build().Built()
-		assert.Nil(t, err)
-		var rawMap map[string]bool
-		err = json.Unmarshal(rf, &rawMap)
-		assert.Nil(t, err)
-
-		for _, f := range []string{"Field2", "field_3"} {
-			assert.Contains(t, rawMap, f)
-			assert.True(t, rawMap[f])
-		}
-		for _, f := range []string{"field_1", "field_4"} {
-			assert.Contains(t, rawMap, f)
-			assert.False(t, rawMap[f])
-		}
 	})
 }
 

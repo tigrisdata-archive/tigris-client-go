@@ -203,8 +203,10 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 	}
 
 	r := driver.SearchRequest{
-		Q:            req.Q,
-		SearchFields: req.SearchFields,
+		Q:             req.Q,
+		SearchFields:  req.SearchFields,
+		IncludeFields: req.IncludeFields,
+		ExcludeFields: req.ExcludeFields,
 	}
 	if req.Options != nil {
 		r.Page = req.Options.Page
@@ -219,15 +221,6 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 	if f != nil {
 		r.Filter = f
 	}
-
-	if req.ReadFields == nil {
-		req.ReadFields = &search.DefaultReadFields
-	}
-	p, err := req.ReadFields.Built()
-	if err != nil {
-		return nil, err
-	}
-	r.ReadFields = p
 
 	if req.Facet != nil {
 		facet, err := req.Facet.Built()

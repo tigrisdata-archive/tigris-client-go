@@ -82,6 +82,7 @@ func Eq[T schema.PrimitiveFieldType](field string, value T) Expr {
 func Ne(field string, value interface{}) Expr {
 	return Expr{field: comparison{Ne: value}}
 }
+*/
 
 // Gt composes 'greater than' operation.
 // Result is equivalent to: field > value
@@ -106,7 +107,6 @@ func Lt(field string, value interface{}) Expr {
 func Lte(field string, value interface{}) Expr {
 	return Expr{field: comparison{Lte: value}}
 }
-*/
 
 // Build materializes the filter
 func (prev Expr) Build() (driver.Filter, error) {

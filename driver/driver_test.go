@@ -436,16 +436,17 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	var sit SearchResultIterator
 	mc.EXPECT().Search(
 		pm(&api.SearchRequest{
-			Db:           "db1",
-			Collection:   "c1",
-			Q:            "search text",
-			SearchFields: []string{"field_1"},
-			Facet:        []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
-			Fields:       nil,
-			Sort:         nil,
-			Filter:       nil,
-			PageSize:     12,
-			Page:         3,
+			Db:            "db1",
+			Collection:    "c1",
+			Q:             "search text",
+			SearchFields:  []string{"field_1"},
+			Facet:         []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
+			IncludeFields: nil,
+			ExcludeFields: nil,
+			Sort:          nil,
+			Filter:        nil,
+			PageSize:      12,
+			Page:          3,
 		}), gomock.Any()).Return(nil)
 	sit, err = db.Search(ctx, "c1", &SearchRequest{
 		Q:            "search text",

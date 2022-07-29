@@ -358,15 +358,16 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 	cctx, cancel := context.WithCancel(ctx)
 
 	resp, err := c.api.Search(cctx, &api.SearchRequest{
-		Db:           c.db,
-		Collection:   collection,
-		Q:            req.Q,
-		SearchFields: req.SearchFields,
-		Filter:       req.Filter,
-		Facet:        req.Facet,
-		Fields:       req.ReadFields,
-		PageSize:     req.PageSize,
-		Page:         req.Page,
+		Db:            c.db,
+		Collection:    collection,
+		Q:             req.Q,
+		SearchFields:  req.SearchFields,
+		Filter:        req.Filter,
+		Facet:         req.Facet,
+		IncludeFields: req.IncludeFields,
+		ExcludeFields: req.ExcludeFields,
+		PageSize:      req.PageSize,
+		Page:          req.Page,
 	})
 
 	if err != nil {

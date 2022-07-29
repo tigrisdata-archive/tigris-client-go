@@ -520,9 +520,14 @@ func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filte
 	})
 
 	err = HTTPError(err, resp)
-	dec := json.NewDecoder(resp.Body)
 
-	return &readIterator{streamReader: &httpStreamReader{stream: dec, closer: resp.Body}, err: err, eof: err != nil}, nil
+	e := &readIterator{err: err, eof: err != nil}
+
+	if err == nil {
+		e.streamReader = &httpStreamReader{stream: json.NewDecoder(resp.Body), closer: resp.Body}
+	}
+
+	return e, nil
 }
 
 type httpStreamReader struct {
@@ -552,30 +557,35 @@ func (g *httpStreamReader) close() error {
 }
 
 func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error) {
-	// Will anything break if we don't set transaction context here?
 	if req.SearchFields == nil {
 		req.SearchFields = []string{}
 	}
+	if req.IncludeFields == nil {
+		req.IncludeFields = []string{}
+	}
+	if req.ExcludeFields == nil {
+		req.ExcludeFields = []string{}
+	}
 	resp, err := c.api.TigrisSearch(ctx, c.db, collection, apiHTTP.TigrisSearchJSONRequestBody{
-		Q:            &req.Q,
-		SearchFields: &req.SearchFields,
-		Filter:       json.RawMessage(req.Filter),
-		Facet:        json.RawMessage(req.Facet),
-		Fields:       json.RawMessage(req.ReadFields),
-		Page:         &req.Page,
-		PageSize:     &req.PageSize,
+		Q:             &req.Q,
+		SearchFields:  &req.SearchFields,
+		Filter:        json.RawMessage(req.Filter),
+		Facet:         json.RawMessage(req.Facet),
+		IncludeFields: &req.IncludeFields,
+		ExcludeFields: &req.ExcludeFields,
+		Page:          &req.Page,
+		PageSize:      &req.PageSize,
 	})
-	err = HTTPError(err, resp)
-	dec := json.NewDecoder(resp.Body)
 
-	return &searchResultIterator{
-		searchStreamReader: &httpSearchReader{
-			closer: resp.Body,
-			stream: dec,
-		},
-		eof: err != nil,
-		err: err,
-	}, nil
+	err = HTTPError(err, resp)
+
+	e := &searchResultIterator{err: err, eof: err != nil}
+
+	if err == nil {
+		e.searchStreamReader = &httpSearchReader{stream: json.NewDecoder(resp.Body), closer: resp.Body}
+	}
+
+	return e, nil
 }
 
 type httpSearchReader struct {
@@ -618,9 +628,14 @@ func (c *httpCRUD) eventsWithOptions(ctx context.Context, collection string, opt
 	})
 
 	err = HTTPError(err, resp)
-	dec := json.NewDecoder(resp.Body)
 
-	return &eventReadIterator{eventStreamReader: &httpEventStreamReader{stream: dec, closer: resp.Body}, err: err, eof: err != nil}, nil
+	e := &eventReadIterator{err: err, eof: err != nil}
+
+	if err == nil {
+		e.eventStreamReader = &httpEventStreamReader{stream: json.NewDecoder(resp.Body), closer: resp.Body}
+	}
+
+	return e, nil
 }
 
 type httpEventStreamReader struct {
@@ -631,7 +646,7 @@ type httpEventStreamReader struct {
 func (g *httpEventStreamReader) read() (Event, error) {
 	var res struct {
 		Result struct {
-			Event Event
+			Event *apiHTTP.StreamEvent
 		}
 		Error *api.ErrorDetails
 	}
@@ -643,8 +658,17 @@ func (g *httpEventStreamReader) read() (Event, error) {
 	if res.Error != nil {
 		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
 	}
-
-	return res.Result.Event, nil
+	e := res.Result.Event
+	return &api.StreamEvent{
+		Collection: ToString(e.Collection),
+		Data:       e.Data,
+		Key:        ToBytes(e.Key),
+		Last:       ToBool(e.Last),
+		Lkey:       ToBytes(e.Lkey),
+		Rkey:       ToBytes(e.Rkey),
+		Op:         ToString(e.Op),
+		TxId:       ToBytes(e.TxId),
+	}, nil
 }
 
 func (g *httpEventStreamReader) close() error {
@@ -656,4 +680,18 @@ func ToString(s *string) string {
 		return ""
 	}
 	return *s
+}
+
+func ToBytes(b *[]byte) []byte {
+	if b == nil {
+		return nil
+	}
+	return *b
+}
+
+func ToBool(b *bool) bool {
+	if b == nil {
+		return false
+	}
+	return *b
 }

@@ -516,6 +516,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	descExp := api.DescribeCollectionResponse{
 		Collection: "coll1",
 		Schema:     []byte(`{"a":"b"}`),
+		Size:       123456,
 	}
 
 	mc.EXPECT().DescribeCollection(gomock.Any(),
@@ -528,15 +529,19 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.NoError(t, err)
 	require.Equal(t, descExp.Collection, desc.Collection)
 	require.Equal(t, descExp.Schema, desc.Schema)
+	require.Equal(t, descExp.Size, desc.Size)
 
 	descDbExp := api.DescribeDatabaseResponse{
-		Db: "db1",
+		Db:   "db1",
+		Size: 314159,
 		Collections: []*api.CollectionDescription{
 			{Collection: "coll1",
 				Schema: []byte(`{"a":"b"}`),
+				Size:   111111,
 			},
 			{Collection: "coll2",
 				Schema: []byte(`{"c":"d"}`),
+				Size:   222222,
 			},
 		},
 	}
@@ -548,11 +553,14 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	descDb, err := c.DescribeDatabase(ctx, "db1")
 	require.NoError(t, err)
-	require.Equal(t, descDb.Db, "db1")
+	require.Equal(t, "db1", descDb.Db)
+	require.Equal(t, int64(314159), descDb.Size)
 	require.Equal(t, descDbExp.Collections[0].Collection, descDb.Collections[0].Collection)
 	require.Equal(t, descDbExp.Collections[0].Schema, descDb.Collections[0].Schema)
+	require.Equal(t, descDbExp.Collections[0].Size, descDb.Collections[0].Size)
 	require.Equal(t, descDbExp.Collections[1].Collection, descDb.Collections[1].Collection)
 	require.Equal(t, descDbExp.Collections[1].Schema, descDb.Collections[1].Schema)
+	require.Equal(t, descDbExp.Collections[1].Size, descDb.Collections[1].Size)
 
 	mc.EXPECT().CreateDatabase(gomock.Any(),
 		pm(&api.CreateDatabaseRequest{

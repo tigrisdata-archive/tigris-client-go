@@ -22,6 +22,18 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+// Defines values for CollectionMetadataType.
+const (
+	CollectionMetadataTypeDOCUMENTS CollectionMetadataType = "DOCUMENTS"
+	CollectionMetadataTypeMESSAGES  CollectionMetadataType = "MESSAGES"
+)
+
+// Defines values for CreateOrUpdateCollectionRequestType.
+const (
+	CreateOrUpdateCollectionRequestTypeDOCUMENTS CreateOrUpdateCollectionRequestType = "DOCUMENTS"
+	CreateOrUpdateCollectionRequestTypeMESSAGES  CreateOrUpdateCollectionRequestType = "MESSAGES"
+)
+
 // Defines values for ErrorCode.
 const (
 	ABORTED            ErrorCode = "ABORTED"
@@ -66,6 +78,9 @@ type CollectionDescription struct {
 
 	// Collections schema
 	Schema json.RawMessage `json:"schema,omitempty"`
+
+	// Collection size in bytes
+	Size *int64 `json:"size,omitempty"`
 }
 
 // CollectionInfo defines model for CollectionInfo.
@@ -76,7 +91,12 @@ type CollectionInfo struct {
 }
 
 // CollectionMetadata defines model for CollectionMetadata.
-type CollectionMetadata = map[string]interface{}
+type CollectionMetadata struct {
+	Type *CollectionMetadataType `json:"type,omitempty"`
+}
+
+// CollectionMetadataType defines model for CollectionMetadata.Type.
+type CollectionMetadataType string
 
 // Collection requests modifying options.
 type CollectionOptions = map[string]interface{}
@@ -113,8 +133,12 @@ type CreateOrUpdateCollectionRequest struct {
 	Options *CollectionOptions `json:"options,omitempty"`
 
 	// Schema of the documents in this collection. The schema specifications are same as JSON schema specification defined <a href="https://json-schema.org/specification.html" title="here">here</a>. <p></p>The following is an schema example: `{  "title": "user",  "description": "Collection of documents with details of users",  "properties": {    "id": {      "description": "A unique identifier for the user",      "type": "integer"    },    "name": {      "description": "Name of the user",      "type": "string",      "maxLength": 100    },    "balance": {      "description": "User account balance",      "type": "number"    }  },  "primary_key": ["id"] }`
-	Schema json.RawMessage `json:"schema,omitempty"`
+	Schema json.RawMessage                      `json:"schema,omitempty"`
+	Type   *CreateOrUpdateCollectionRequestType `json:"type,omitempty"`
 }
+
+// CreateOrUpdateCollectionRequestType defines model for CreateOrUpdateCollectionRequest.Type.
+type CreateOrUpdateCollectionRequestType string
 
 // CreateOrUpdateCollectionResponse defines model for CreateOrUpdateCollectionResponse.
 type CreateOrUpdateCollectionResponse struct {
@@ -182,6 +206,9 @@ type DescribeCollectionResponse struct {
 
 	// Collections schema
 	Schema json.RawMessage `json:"schema,omitempty"`
+
+	// Collection size in bytes
+	Size *int64 `json:"size,omitempty"`
 }
 
 // DescribeDatabaseRequest defines model for DescribeDatabaseRequest.
@@ -198,6 +225,9 @@ type DescribeDatabaseResponse struct {
 	// Name of the database.
 	Db       *string           `json:"db,omitempty"`
 	Metadata *DatabaseMetadata `json:"metadata,omitempty"`
+
+	// Sum all database collections sizes
+	Size *int64 `json:"size,omitempty"`
 }
 
 // DropCollectionRequest defines model for DropCollectionRequest.
@@ -345,14 +375,22 @@ type Page struct {
 
 // PublishRequest defines model for PublishRequest.
 type PublishRequest struct {
-	Db      *string `json:"db,omitempty"`
-	Message *[]byte `json:"message,omitempty"`
-	Topic   *string `json:"topic,omitempty"`
+	Collection *string                   `json:"collection,omitempty"`
+	Db         *string                   `json:"db,omitempty"`
+	Messages   *[]map[string]interface{} `json:"messages,omitempty"`
+	Options    *PublishRequestOptions    `json:"options,omitempty"`
 }
+
+// PublishRequestOptions defines model for PublishRequestOptions.
+type PublishRequestOptions = map[string]interface{}
 
 // PublishResponse defines model for PublishResponse.
 type PublishResponse struct {
-	Status *string `json:"status,omitempty"`
+	Keys *[][]byte `json:"keys,omitempty"`
+
+	// Has metadata related to the documents stored.
+	Metadata *ResponseMetadata `json:"metadata,omitempty"`
+	Status   *string           `json:"status,omitempty"`
 }
 
 // ReadRequest defines model for ReadRequest.
@@ -561,11 +599,22 @@ type StreamingSearchResponse struct {
 	Result *SearchResponse `json:"result,omitempty"`
 }
 
+// StreamingSubscribeResponse defines model for StreamingSubscribeResponse.
+type StreamingSubscribeResponse struct {
+	// The Error type defines a logical error model
+	Error  *Error             `json:"error,omitempty"`
+	Result *SubscribeResponse `json:"result,omitempty"`
+}
+
 // SubscribeRequest defines model for SubscribeRequest.
 type SubscribeRequest struct {
-	Db    *string `json:"db,omitempty"`
-	Topic *string `json:"topic,omitempty"`
+	Collection *string                  `json:"collection,omitempty"`
+	Db         *string                  `json:"db,omitempty"`
+	Options    *SubscribeRequestOptions `json:"options,omitempty"`
 }
+
+// SubscribeRequestOptions defines model for SubscribeRequestOptions.
+type SubscribeRequestOptions = map[string]interface{}
 
 // SubscribeResponse defines model for SubscribeResponse.
 type SubscribeResponse struct {
@@ -650,6 +699,12 @@ type TigrisDropCollectionJSONBody = DropCollectionRequest
 // TigrisEventsJSONBody defines parameters for TigrisEvents.
 type TigrisEventsJSONBody = EventsRequest
 
+// TigrisPublishJSONBody defines parameters for TigrisPublish.
+type TigrisPublishJSONBody = PublishRequest
+
+// TigrisSubscribeJSONBody defines parameters for TigrisSubscribe.
+type TigrisSubscribeJSONBody = SubscribeRequest
+
 // TigrisCreateDatabaseJSONBody defines parameters for TigrisCreateDatabase.
 type TigrisCreateDatabaseJSONBody = CreateDatabaseRequest
 
@@ -658,12 +713,6 @@ type TigrisDescribeDatabaseJSONBody = DescribeDatabaseRequest
 
 // TigrisDropDatabaseJSONBody defines parameters for TigrisDropDatabase.
 type TigrisDropDatabaseJSONBody = DropDatabaseRequest
-
-// TigrisPublishJSONBody defines parameters for TigrisPublish.
-type TigrisPublishJSONBody = PublishRequest
-
-// TigrisSubscribeJSONBody defines parameters for TigrisSubscribe.
-type TigrisSubscribeJSONBody = SubscribeRequest
 
 // TigrisBeginTransactionJSONBody defines parameters for TigrisBeginTransaction.
 type TigrisBeginTransactionJSONBody = BeginTransactionRequest
@@ -707,6 +756,12 @@ type TigrisDropCollectionJSONRequestBody = TigrisDropCollectionJSONBody
 // TigrisEventsJSONRequestBody defines body for TigrisEvents for application/json ContentType.
 type TigrisEventsJSONRequestBody = TigrisEventsJSONBody
 
+// TigrisPublishJSONRequestBody defines body for TigrisPublish for application/json ContentType.
+type TigrisPublishJSONRequestBody = TigrisPublishJSONBody
+
+// TigrisSubscribeJSONRequestBody defines body for TigrisSubscribe for application/json ContentType.
+type TigrisSubscribeJSONRequestBody = TigrisSubscribeJSONBody
+
 // TigrisCreateDatabaseJSONRequestBody defines body for TigrisCreateDatabase for application/json ContentType.
 type TigrisCreateDatabaseJSONRequestBody = TigrisCreateDatabaseJSONBody
 
@@ -715,12 +770,6 @@ type TigrisDescribeDatabaseJSONRequestBody = TigrisDescribeDatabaseJSONBody
 
 // TigrisDropDatabaseJSONRequestBody defines body for TigrisDropDatabase for application/json ContentType.
 type TigrisDropDatabaseJSONRequestBody = TigrisDropDatabaseJSONBody
-
-// TigrisPublishJSONRequestBody defines body for TigrisPublish for application/json ContentType.
-type TigrisPublishJSONRequestBody = TigrisPublishJSONBody
-
-// TigrisSubscribeJSONRequestBody defines body for TigrisSubscribe for application/json ContentType.
-type TigrisSubscribeJSONRequestBody = TigrisSubscribeJSONBody
 
 // TigrisBeginTransactionJSONRequestBody defines body for TigrisBeginTransaction for application/json ContentType.
 type TigrisBeginTransactionJSONRequestBody = TigrisBeginTransactionJSONBody
@@ -915,6 +964,16 @@ type ClientInterface interface {
 
 	TigrisEvents(ctx context.Context, db string, collection string, body TigrisEventsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// TigrisPublish request with any body
+	TigrisPublishWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisPublish(ctx context.Context, db string, collection string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TigrisSubscribe request with any body
+	TigrisSubscribeWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisSubscribe(ctx context.Context, db string, collection string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// TigrisCreateDatabase request with any body
 	TigrisCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -929,16 +988,6 @@ type ClientInterface interface {
 	TigrisDropDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	TigrisDropDatabase(ctx context.Context, db string, body TigrisDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// TigrisPublish request with any body
-	TigrisPublishWithBody(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	TigrisPublish(ctx context.Context, db string, topic string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// TigrisSubscribe request with any body
-	TigrisSubscribeWithBody(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	TigrisSubscribe(ctx context.Context, db string, topic string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// TigrisBeginTransaction request with any body
 	TigrisBeginTransactionWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1235,6 +1284,54 @@ func (c *Client) TigrisEvents(ctx context.Context, db string, collection string,
 	return c.Client.Do(req)
 }
 
+func (c *Client) TigrisPublishWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisPublishRequestWithBody(c.Server, db, collection, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisPublish(ctx context.Context, db string, collection string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisPublishRequest(c.Server, db, collection, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisSubscribeWithBody(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisSubscribeRequestWithBody(c.Server, db, collection, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisSubscribe(ctx context.Context, db string, collection string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisSubscribeRequest(c.Server, db, collection, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) TigrisCreateDatabaseWithBody(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewTigrisCreateDatabaseRequestWithBody(c.Server, db, contentType, body)
 	if err != nil {
@@ -1297,54 +1394,6 @@ func (c *Client) TigrisDropDatabaseWithBody(ctx context.Context, db string, cont
 
 func (c *Client) TigrisDropDatabase(ctx context.Context, db string, body TigrisDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewTigrisDropDatabaseRequest(c.Server, db, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) TigrisPublishWithBody(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisPublishRequestWithBody(c.Server, db, topic, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) TigrisPublish(ctx context.Context, db string, topic string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisPublishRequest(c.Server, db, topic, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) TigrisSubscribeWithBody(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisSubscribeRequestWithBody(c.Server, db, topic, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) TigrisSubscribe(ctx context.Context, db string, topic string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisSubscribeRequest(c.Server, db, topic, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2053,6 +2102,114 @@ func NewTigrisEventsRequestWithBody(server string, db string, collection string,
 	return req, nil
 }
 
+// NewTigrisPublishRequest calls the generic TigrisPublish builder with application/json body
+func NewTigrisPublishRequest(server string, db string, collection string, body TigrisPublishJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisPublishRequestWithBody(server, db, collection, "application/json", bodyReader)
+}
+
+// NewTigrisPublishRequestWithBody generates requests for TigrisPublish with any type of body
+func NewTigrisPublishRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "db", runtime.ParamLocationPath, db)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "collection", runtime.ParamLocationPath, collection)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/publish", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTigrisSubscribeRequest calls the generic TigrisSubscribe builder with application/json body
+func NewTigrisSubscribeRequest(server string, db string, collection string, body TigrisSubscribeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisSubscribeRequestWithBody(server, db, collection, "application/json", bodyReader)
+}
+
+// NewTigrisSubscribeRequestWithBody generates requests for TigrisSubscribe with any type of body
+func NewTigrisSubscribeRequestWithBody(server string, db string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "db", runtime.ParamLocationPath, db)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "collection", runtime.ParamLocationPath, collection)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/subscribe", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewTigrisCreateDatabaseRequest calls the generic TigrisCreateDatabase builder with application/json body
 func NewTigrisCreateDatabaseRequest(server string, db string, body TigrisCreateDatabaseJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -2185,114 +2342,6 @@ func NewTigrisDropDatabaseRequestWithBody(server string, db string, contentType 
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewTigrisPublishRequest calls the generic TigrisPublish builder with application/json body
-func NewTigrisPublishRequest(server string, db string, topic string, body TigrisPublishJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewTigrisPublishRequestWithBody(server, db, topic, "application/json", bodyReader)
-}
-
-// NewTigrisPublishRequestWithBody generates requests for TigrisPublish with any type of body
-func NewTigrisPublishRequestWithBody(server string, db string, topic string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "db", runtime.ParamLocationPath, db)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "topic", runtime.ParamLocationPath, topic)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/topic/%s/publish", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewTigrisSubscribeRequest calls the generic TigrisSubscribe builder with application/json body
-func NewTigrisSubscribeRequest(server string, db string, topic string, body TigrisSubscribeJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewTigrisSubscribeRequestWithBody(server, db, topic, "application/json", bodyReader)
-}
-
-// NewTigrisSubscribeRequestWithBody generates requests for TigrisSubscribe with any type of body
-func NewTigrisSubscribeRequestWithBody(server string, db string, topic string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "db", runtime.ParamLocationPath, db)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "topic", runtime.ParamLocationPath, topic)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/topic/%s/subscribe", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -2571,6 +2620,16 @@ type ClientWithResponsesInterface interface {
 
 	TigrisEventsWithResponse(ctx context.Context, db string, collection string, body TigrisEventsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisEventsResponse, error)
 
+	// TigrisPublish request with any body
+	TigrisPublishWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error)
+
+	TigrisPublishWithResponse(ctx context.Context, db string, collection string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error)
+
+	// TigrisSubscribe request with any body
+	TigrisSubscribeWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error)
+
+	TigrisSubscribeWithResponse(ctx context.Context, db string, collection string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error)
+
 	// TigrisCreateDatabase request with any body
 	TigrisCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateDatabaseResponse, error)
 
@@ -2585,16 +2644,6 @@ type ClientWithResponsesInterface interface {
 	TigrisDropDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDropDatabaseResponse, error)
 
 	TigrisDropDatabaseWithResponse(ctx context.Context, db string, body TigrisDropDatabaseJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDropDatabaseResponse, error)
-
-	// TigrisPublish request with any body
-	TigrisPublishWithBodyWithResponse(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error)
-
-	TigrisPublishWithResponse(ctx context.Context, db string, topic string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error)
-
-	// TigrisSubscribe request with any body
-	TigrisSubscribeWithBodyWithResponse(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error)
-
-	TigrisSubscribeWithResponse(ctx context.Context, db string, topic string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error)
 
 	// TigrisBeginTransaction request with any body
 	TigrisBeginTransactionWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisBeginTransactionResponse, error)
@@ -2891,6 +2940,52 @@ func (r TigrisEventsResponse) StatusCode() int {
 	return 0
 }
 
+type TigrisPublishResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PublishResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisPublishResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisPublishResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TigrisSubscribeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *StreamingSubscribeResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisSubscribeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisSubscribeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type TigrisCreateDatabaseResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2954,52 +3049,6 @@ func (r TigrisDropDatabaseResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r TigrisDropDatabaseResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type TigrisPublishResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *PublishResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r TigrisPublishResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r TigrisPublishResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type TigrisSubscribeResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *SubscribeResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r TigrisSubscribeResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r TigrisSubscribeResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3294,6 +3343,40 @@ func (c *ClientWithResponses) TigrisEventsWithResponse(ctx context.Context, db s
 	return ParseTigrisEventsResponse(rsp)
 }
 
+// TigrisPublishWithBodyWithResponse request with arbitrary body returning *TigrisPublishResponse
+func (c *ClientWithResponses) TigrisPublishWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error) {
+	rsp, err := c.TigrisPublishWithBody(ctx, db, collection, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisPublishResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisPublishWithResponse(ctx context.Context, db string, collection string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error) {
+	rsp, err := c.TigrisPublish(ctx, db, collection, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisPublishResponse(rsp)
+}
+
+// TigrisSubscribeWithBodyWithResponse request with arbitrary body returning *TigrisSubscribeResponse
+func (c *ClientWithResponses) TigrisSubscribeWithBodyWithResponse(ctx context.Context, db string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error) {
+	rsp, err := c.TigrisSubscribeWithBody(ctx, db, collection, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisSubscribeResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisSubscribeWithResponse(ctx context.Context, db string, collection string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error) {
+	rsp, err := c.TigrisSubscribe(ctx, db, collection, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisSubscribeResponse(rsp)
+}
+
 // TigrisCreateDatabaseWithBodyWithResponse request with arbitrary body returning *TigrisCreateDatabaseResponse
 func (c *ClientWithResponses) TigrisCreateDatabaseWithBodyWithResponse(ctx context.Context, db string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateDatabaseResponse, error) {
 	rsp, err := c.TigrisCreateDatabaseWithBody(ctx, db, contentType, body, reqEditors...)
@@ -3343,40 +3426,6 @@ func (c *ClientWithResponses) TigrisDropDatabaseWithResponse(ctx context.Context
 		return nil, err
 	}
 	return ParseTigrisDropDatabaseResponse(rsp)
-}
-
-// TigrisPublishWithBodyWithResponse request with arbitrary body returning *TigrisPublishResponse
-func (c *ClientWithResponses) TigrisPublishWithBodyWithResponse(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error) {
-	rsp, err := c.TigrisPublishWithBody(ctx, db, topic, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseTigrisPublishResponse(rsp)
-}
-
-func (c *ClientWithResponses) TigrisPublishWithResponse(ctx context.Context, db string, topic string, body TigrisPublishJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisPublishResponse, error) {
-	rsp, err := c.TigrisPublish(ctx, db, topic, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseTigrisPublishResponse(rsp)
-}
-
-// TigrisSubscribeWithBodyWithResponse request with arbitrary body returning *TigrisSubscribeResponse
-func (c *ClientWithResponses) TigrisSubscribeWithBodyWithResponse(ctx context.Context, db string, topic string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error) {
-	rsp, err := c.TigrisSubscribeWithBody(ctx, db, topic, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseTigrisSubscribeResponse(rsp)
-}
-
-func (c *ClientWithResponses) TigrisSubscribeWithResponse(ctx context.Context, db string, topic string, body TigrisSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisSubscribeResponse, error) {
-	rsp, err := c.TigrisSubscribe(ctx, db, topic, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseTigrisSubscribeResponse(rsp)
 }
 
 // TigrisBeginTransactionWithBodyWithResponse request with arbitrary body returning *TigrisBeginTransactionResponse
@@ -3835,6 +3884,72 @@ func ParseTigrisEventsResponse(rsp *http.Response) (*TigrisEventsResponse, error
 	return response, nil
 }
 
+// ParseTigrisPublishResponse parses an HTTP response from a TigrisPublishWithResponse call
+func ParseTigrisPublishResponse(rsp *http.Response) (*TigrisPublishResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisPublishResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PublishResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseTigrisSubscribeResponse parses an HTTP response from a TigrisSubscribeWithResponse call
+func ParseTigrisSubscribeResponse(rsp *http.Response) (*TigrisSubscribeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisSubscribeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest StreamingSubscribeResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseTigrisCreateDatabaseResponse parses an HTTP response from a TigrisCreateDatabaseWithResponse call
 func ParseTigrisCreateDatabaseResponse(rsp *http.Response) (*TigrisCreateDatabaseResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -3917,72 +4032,6 @@ func ParseTigrisDropDatabaseResponse(rsp *http.Response) (*TigrisDropDatabaseRes
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest DropDatabaseResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseTigrisPublishResponse parses an HTTP response from a TigrisPublishWithResponse call
-func ParseTigrisPublishResponse(rsp *http.Response) (*TigrisPublishResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &TigrisPublishResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest PublishResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseTigrisSubscribeResponse parses an HTTP response from a TigrisSubscribeWithResponse call
-func ParseTigrisSubscribeResponse(rsp *http.Response) (*TigrisSubscribeResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &TigrisSubscribeResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest SubscribeResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4135,101 +4184,102 @@ func ParseTigrisGetInfoResponse(rsp *http.Response) (*TigrisGetInfoResponse, err
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+w9XXPbtpZ/BcP24d6OIqXNzj54Zh8UW2m0dWSvLd/eO1VGhkhIQkMCLADaVjP+7zv4",
-	"IkESpCjHUqymL4lM4uMAON/n4PBzENIkpQQRwYOTzwEP1yiB6udbtMJkyiDhMBSYkiv0R4a4kK8ixEOG",
-	"U/k0OAmuBWQCEHQPRNEaYAIiKOACcgR4ikK8xCgCiw2YBdFiFvSDXpAymiImMFLzUTWe+vk9Q8vgJPhu",
-	"UAA3MJANHIguTI/Hx14gNikKTgK6+B2FInjsecDnKSUcNcHvws6QyBjhpWchJQI9CADu1zhcg4zgPzIU",
-	"bwCOEBFycRyINXK71FYoHuaheNhhgafiwb+4UxrHSDU5c5fyuTJhmDerr3oCEwToUgFdtJPHYmbjgmGy",
-	"krMlSEB5ltsgL6D6YHs89gxK1QEoWnNg2vSCJWUJFMFJ8DtXG1iBpX0vxmRJd9uEoi8gMEHPvvp2eD84",
-	"I7c0uygIoxF6pomTg4RGeLnBZAUMPTlrcgdPEiy6ELduWaKEeyzWCm1W+A4RMD7rOENBf+UD4gKKjHvp",
-	"UmRc4mhYB0IOABsw1rvrDEGBzgxHcpb7JCZkx2nlQNUpm9afIM7hysOYhiBCAuIYRYCZ3sA09mJq00YO",
-	"CUAkS/TB3cE4Q4AjASAHsyBUQEaaIXfexwt2k0ZQoAIDm3eUxJu5nsXB8wWlMYJEjthxy+v00MJbrtVz",
-	"y94iGmaJHEwKJbHG3GV4YLpGhv9YORVCzZUgQ4BLNgk5+N/ri4m3GYjQEhMUgVn2+vWbEII1Q8v/mQVr",
-	"IVJ+MhhIRvZKd+xTthqUOvfXIolnARBYxEh2QgzNAjUSUr/VmAOon/TNHKn+07w0f8llLGkc03tJ/JgD",
-	"SCy86AEmaYxOwO1nAGaBmmwWnIBZkHHEZkFPPnU2UL9zuAtdOnuosEgjpiJOOQY3gxRHL8f4DIB8iKP8",
-	"D+9EQyNMC1HKwJIydXQ5gLqvxB7dCROBVvKdfPHY068lD2+fy5V6jWNr/HdeJfDhHJGVWMv3P75+7c65",
-	"gDEk4ZZpbzhiAIYhzYgAeQ/P1CRLFvmq9CRyV3EC2Wb+CW1kq9/0ln4Ej7dPlJiNNPyyWRSgTOKsgjqa",
-	"Bd0Wa/mvXzmIFnVYbI8vVwnsSO0KQa2VTx2oSpxmqHdUBc5QjESzQFziWCDmmU51c9mCUosTKMK1nLJQ",
-	"+fUIfTA0v0AoORNO0ngDFgh8QpueOfF7yfLkA8m+JIUuMYojdQwAksi2olkcyZ6yhX6kuQXmukMfXDAA",
-	"3dkWCMR0hUMYmznEPZXIlFBmJuGVdvEG/E4VW8+4XM73lCkQvockUktB95atKiaoJzsxDDrGmieDKQWR",
-	"3iio2E2+XxaOteR6YA05gGYtP56A29vbz5Zt/ggeb29vW8aN45yZlU7DDi+3Uw9Wnkau/yf5zxspF2bB",
-	"95Qp5lLM/NgD+R8/uX+8efzYhfV0Fu0lFGxVqbwt68wkirD8CWOL+QpD9I5FOYHUTdB7hgWad4T6V9m4",
-	"E7TNXLUbG7EjlKyqBkYKWxip2YDOnFMNvOii5D2Toenjxm5361DofwGyefTIrotvciA4QtB5AeCCZqK6",
-	"bKVuuq2sr6FoAyxeKI4jcvW0jq/fhH1vT2Kr7fYF2NNt3ieff+4IkwcqOTbknIZYqjHO2fA+cLw59bMD",
-	"mIRxFiG7nbkSDjm4R3Hchh98R6itWClB92WoiwVKdqBO17FVHA9kDG6+mFU8s/7GaNrFEH5e/lSZ9EVq",
-	"7hGjabqDc0Eu6qAumvKEf4k9HDFGPfq6pF31Csgexmkh1UGrGCP1MqERij18JEL+IfWKgGygfA6ArykT",
-	"PZBAaQYgkELG4SKWDSXIvS3ec5RD2AdTvGLSDqDg/XR6qadIYJpKdfw3qd5+/MeAoSViiIRosBYifSXb",
-	"/DPoBXIzg5Pfgotfgl5wOpycjs7PR2dBL7iZ/DK5+HUS9ILx5F/D8/HZfHj1882H0WQa9IKz0fDsfDwZ",
-	"zUf/Ph2NzlSHycV0/u7iZiJ/D8+vRsOz/8xH/x5fT6+DXnA5uvowvr4eX0zmZ6PJWHW4Gl1f3FydykHe",
-	"D2+up+rhu+H4fHQ2v7wanV5MzsbT8YUEYfj24kq/v7iZzi/eza+Gk59HCsrxh8vzkQRLvR5PpqOryfBc",
-	"vRr+azg+H749lw3PhtPh/Pzi+lq/uZm+H02m49Oh7nZ6MXl3Pj6VS3s7PJv/PJyOfh3+J+gFH0bT9xdn",
-	"c7m24fn5xa+js+CjI5rV7nm5ZgsZ3KFYYsyrJQzlAeUN7uyh2t7dkPhO0nJHdbNBjXyqgliau5V7eFv6",
-	"jHfbsInBIPl+G1zXgiGYqKH84LyDIRKnNCPeHTOP81PGRPz3fxWnYfxpchzFgDw72DjntYCi3QyTbEIb",
-	"YUvZQXkFUBzVGA28W3nGuUMMrpRkl2qJAk+5cmFu75N4A+AdxLHiNXIekiWI4dBY967mGdFsETt4qF1u",
-	"cjH5JlX4HBUwBrqZBKIGgDt687Ym8KE+9gf4gJMs2f/aEuyxET5gcpjZueTHNSf9/mf2oezPSIzJkrbE",
-	"oxC7Q2x+hxj3cxjfqGPCERPNton1zHjQW6q0ZRe7oACr8fpgBMN14TVSIlaFIvTMJb16qzumqkN3ZIil",
-	"pbUyRG/LuovC757RKz6cd8YC24QGn9DG719R+1fkCOReSGN5GG89kP3957PYCNTlfPbhH2pTNfUJdHcQ",
-	"nWMuHCv/QJZPbdamA2y1fuUodRNbsqAl1WHCsg25o/Wqog3Pa7Y27YW1X1p2wo66ZR/yZp0XXAqu1Jbr",
-	"g/jSq0FewhUmsOxBkDzhGkEWrvOF1eySjDHkE9kTLawZShni0sIgK33SugNIjT7BEM9iwSsC/M1PXgHO",
-	"8Z+oWYIX+oEZFKSIqYm6jO7dqmwRY77e4u9qU9O3cxya4rCjhMvB2Z7H0WG0KwSjlqCTEvAeTQwwBKM8",
-	"AG9jN0tGEwBzMdkHZ2gJs1jLS+0Y2yocmwJdV4bPF9I5j3GZkNM3Hd5S5/HswS096l8gtOWgeatQ87Sr",
-	"YaJ5AcQaCnueGUeRVBd1rFftimE/PYU25hDBLIhxgsUskI1DSgSjenMLtlXssFZtdLam8uEqhbiukKkh",
-	"fSJFJWt1HFwddSmbq4MtRZdLjoTPExFmjFOdP5JxJCV5mssW7cEm6EEAroxpDu5xHBuQHBjhUpKWIjk9",
-	"UwmsJmbKP+G0URRV9XvZGCzQUpIoF5BpEUUtLPoQlSfF9uq0Nc241aYbeHBN9VaYAjHJxWfh6M95bRdi",
-	"+RJFVu5EguaCfkLEq87KtTNpTChWqwhCnr5z7NsPz79taQxD9Hwm3UIiuxozehF2XXmBW9iTr2nXwLtZ",
-	"9eFMuxzcb8u2a4v9W8zratvV5q3N9h7yQllnKFbRTEErGZdcUIYiT2hSJ3XNoc/hhqVGJEyswB0P3EMO",
-	"rJk6KKjpA4I8YyiS/J5AQl9xFFISccAxCbWycEPwA0ApDdclfhBBgV4JnHgPzSRMPAVI03VvoJksuKeA",
-	"ZrruCTQvMtE4XsDwU5eEc9t295Rz7yxPTzpnPkB2TTvXBqzykjc45dWvTsa249/3MBRunfBbh9Du+hZw",
-	"32PRVU8YhiKDMeCqX45mz6kT5CBJTrQFatXEk4iilJhmbmWgX2PRU4YEJhr6Ih0ip5+CbQ0KCmxJwDgG",
-	"LndUrESftSuVKq4DmpFoewzHHLl11cCQUa58Bcpjw7tZIalxs7Shr/J3KU+LgPFcD97ZXaU6aYh29FY1",
-	"b12jPoseVHbRvMn5UlNqHf+F0m/NANobY2Dtg1uTtWTGve0BvCyyg3tAwE+Ig5ShEEVI4gq9QwzclqG5",
-	"LSlbW5WrpeW35RUo7gf+yBDbSHjhasXQCorcZAaUGAFTjzA1u43sbj3Zw/ROe3K4gOEnBYOgqdxnDaiF",
-	"TVCwzJhYIwYIZIzeg4jeE9fi74NrnOAYMtn21vEo9PXMnfwa5dN6AhaYASQjyOF6uwGR9sj1FI0ZnxRk",
-	"yDaPdjvg1OtF1jaB8m4pJ5xCMu1lUA5fbV4zjO5QH4yX+iHmSkkWa0QAJfFGigFeuNxsG+u26OYqlr3m",
-	"fn9xFUhUdZWo+a25aHwl1pXcs/soQfrpdb8bNH/Uofg/hVt6g9ViNUOUfxleqC675nRQd3ao9tvRxBy1",
-	"oCBlVPkUDOvV2A1XUjKLnQ6fUya2zwhJBELKdF5WpK4kUCYAZRFiCh71y6UfcPvbZzALOIwh2+jrON/L",
-	"OWYBePx4+zQnQiWA4fEum7QxLlgWCucoarqEYmo6SyI3sy9LLbarUVoR9QEqsa6zJlqoiQ2WbbcB2tMq",
-	"r3MNvSKnbIJbaxKPatQwbpFHs3NmkdE5trLRT2jTyS0QQy2K69ci465D0NQLKuvaXzzMcdShZfNeYrLa",
-	"muG0w6Fpn18suiZqmTnbAWx3gu4DvNKM7cDVucT+wavM6QcwW+gc+F1jkLvEFZ1JOiTgPgFJKwUVmu3D",
-	"8VlbeqrjBZjqO8S6IAQuxzSqdSes11MJJL620b0Ucq7NJSmBcsv0H2sEpYD6pzJSsgWXnUmRFSM7GMFF",
-	"ActU78SOYiEyzkp1ddkBu26eYo+ldKPv4kpBBKX1topLg8DYwuK/hMPwypdpdo3YHVI3FaDjsS8u/PZ3",
-	"PsovDZO558lRAonAof+GpL4mu3Ow+p0JvFrskppeoZ7kHi2T+qYRjyANpwTZmtbXBc6oeatxgifbHXpd",
-	"f1/h3Brj1kfx/FFuO+5fIM5dopHW2Iy3ZddIktmxgwWSLLD7uMGpeBFG0bwh7fjKCUL5Aum2f0cj8ClB",
-	"o/yqfUf2XNrQLmdasGR1cKWDrYyubM4wY1hsVHUPZIpUQYbYMBPrvHqV0qPV42KQtRBp8Pio/Bu6DEAZ",
-	"tO++Axd3iN1hdD8jSrpze+eOA8pWkOA/UQQgoxmJ9H2U4eXYXImTvwAMQ5QKUyckl9aS39hgonzzCpGQ",
-	"Rs51IXeIkCq/s04PEJBEkJm5nFs2amtiHCKDj5Kzyr1NYbhG4Ny86AUZi826+clgsMJinS36IU0GQl2r",
-	"kUhofg4WMV0MEojJ4Hx8Oppcj5QGh0WMlANY3cIZXo7Blb1sE/SCPDk6eN1/3f9RcwpEYIqDk+BN/3X/",
-	"jSRNKNbqlAYwxYO7Hwd5guEgxkaUUi4akhLtvln2WMpOzOMw4ygHspQMGSg9WO+xnOCn16+1fUeEMfxg",
-	"msamDIsq0lKUP9tGzf6sS4VeFVXkFx1FVC6bZ5veGMae+Wzam75xw1zdnmdJAtnGbq67TwKueHDyW1A8",
-	"+yh71A/tc7R4HDjJsl1OUZ5eOb+2fCO2rAc7qmXTCTupvwrFGEyQQEyuwAtA6f6sVjFKeb2yoUTUoGdp",
-	"KVoo5PkjwwxFwYlgGXJvOVf54EfdGHHxlkabZ0UyT3K1OvUycI97RnVfsvVRIXsZZZ6O7p+LPx4HYamI",
-	"TjMV6GI7Umsj6N7FRqmOCpoYVTVLVwxG5hqk08qEKGVfc+s7XEOyQjVKmpHdaKmpCNA2oipVx7FKKjWB",
-	"0UqlgS8nrt6Win3F1A3zhe7CvjpRb6uedmDq3loI6ljIXC8EFBYCBKWDtzTvcoInUX1kikI007stG1FK",
-	"ljTPNHW76QVOJkKZdHwkW69Jso1Ym66W7IEwm+uNvHiqbC50c2B6bCk6cyyUmKP/6X7oz5q/A51gp+mv",
-	"+OUpUQYBkwKzbDznHtOcRrWTyLhRtaEKUkbvcFSIVOMHayRPBcfT5Ke5/VjK9j6A+Nx1/pdGuG7tuoMT",
-	"a6m61/EQqKKKszx73dGI82dfSJsamZplpL56y5VW20aTrvsEEjCMGYLRZvSAueBmlXgJINnUKr3OSEUN",
-	"BlB3Bkj17gMNgyVxDnCEkpQKRMINWNgUcJUPQYqp3DlmpDamurmkc91zSNSVBHA1ujwfno6UHwUTLtSl",
-	"lyUYT65HV9MmhqJB/JuhHI6hlG/xH5ihVC6kHwtDMYS0V4YiyayZnVwhGHGflFeZiB3kfCfxLmfZjRaF",
-	"uchYBuhwhnH3yV8WFbp3gw9Mg/58kWMhRQn0vglRiTdFi1mLZC9fAirugJkyX1Jeli431oU/b6ZDDcLT",
-	"xGJNPh9aLnYF4KWRZOky5IGpsnqf78hEI2XArGC/xGkSRxvlpE75Ur5oRyCq0si+4gZI5+g2kOF1nqX6",
-	"t0DcN/WVb258LZFYyxg8DiLUYO+X8rIiCOSTijfWKX0gT5SJST1NQmaVtLADy8du078s+ixnCB6YPis5",
-	"SsdCloYm9kGWjKatfmFGU5+nCcYxwILXafNpyQrlCs27EWPXOMoeZKTcveNw/nrLbh/aCewvw300zmBJ",
-	"CvuJ1KiatrxZGb20jleGYAwEThDQXfJvP9lEhwSq64S2tIQNY4JrU8Nnkd8uBKmuUaZI2RkNulkSiyxP",
-	"C2dIImloArDFh72qH2zgOWxFPvkyi1WmdobjSL99FTF1edQ5zUYjVt9dqTOFZ6HxF0+65fLOX0ufrd0f",
-	"Og6a1WAb7Hco1qBUK7Hmn+HrkqtU+mpFHoZpisKUv3NRDoy0piBZybdNQpocj3wOc4MC8/w7XS82l8//",
-	"8cmvkuxT+9rBkaX4ONiyWyLfDpk7OYp1yttxkJ6S1cwUq/F8QAVgwnFUTsRpS/PpShj7S/LZc77NVyaI",
-	"xg/8HF2uzdOJooup5JCDbMUbcLsqAShZFaSAK5HgJoOpK86XAauIAvDDDxMq0A8/nICz7iD3wY0dKoTZ",
-	"8xldezR/vjYB+b6ec1Smz5MJR11wHnxW/z0OjNnhihYfgpsKyofT+vU17BeArJVS1gfG02rl6mNB0Utr",
-	"zdqP52gr1Z6qxdip/HsXdOX2xv02hM2v5n+DKFurfXBoM7VWFuFoAi4WcgddbT0BZbRKZdVgNN8Rj4tL",
-	"+3ywQKbUQEO0U0AmrC3r3vYvm7Pl2gbmWj0YqrLQMOIDdTFVFfOX2j+KjIKvPlVTLlEpu2RG/eeIYRjj",
-	"P9W3azCnMWxL7K/WjNgxqioVHxeUBZLKFweCvmgNprrqr0RodTCOjN7UAsrY6FKVQzLdaSukiant7ieu",
-	"YXFzTTctNGzjtc0JpqE6iVuYBJzqMfJkXBjHM3VDjlCha1HYCh1gsQGI8EwVLiMUpJAJDGMTNrQ15cq2",
-	"SJRZVuQQyRLiOGONRriG6Jujydqyv5azqg7HsfmrDFmA6TOSpa1J3JIL66taHGEeQhbxKpHOSJ1My1zE",
-	"m4BXr7P8bRBHSxnrQyfEtZS6PppkVYupu0suW8RjhdoCi1WfbfE9bvNBE13Hy22Sf2G7uP5RtAem6EUP",
-	"IBE2yQ3zdcF9lp+ofsDweLIhm8/COfZhlGAiz/sxf1bTPi7HunYMJOpDXgyskNCloFoPvGAoepJ6QoQe",
-	"2VYOy8uG6XkqyclmKDdSvuOARUkTMLS11nKtRbZfwzsEKEF5pSs/CIXPqgmAYkonuYVrXasU7dbl3wji",
-	"vJymJvUqJPc2LD7d43wNwwUmz95p2w2j6qno/6tq9N/YXCrwX7oZzX2f5jPzmnSAl7AFJc71+PHx/wMA",
-	"AP//e6S7WWaTAAA=",
+	"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",
+	"xBK8hC0oca6nj0//HwAA//+tTGUjW5cAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -53,98 +53,6 @@ func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
 	return c.JSONBuiltin.Marshal(v)
 }
 
-// MarshalJSON on read response avoid any encoding/decoding on x.Data. With this approach we are not doing any extra
-// marshaling/unmarshalling in returning the data from the database. The document returned from the database is stored
-// in x.Data and will return as-is.
-//
-// Note: This also means any changes in ReadResponse proto needs to make sure that we add that here and similarly
-// the openAPI specs needs to be specified Data as object instead of bytes.
-func (x *ReadResponse) MarshalJSON() ([]byte, error) {
-	resp := struct {
-		Data        json.RawMessage `json:"data,omitempty"`
-		Metadata    Metadata        `json:"metadata,omitempty"`
-		ResumeToken []byte          `json:"resume_token,omitempty"`
-	}{
-		Data:        x.Data,
-		Metadata:    CreateMDFromResponseMD(x.Metadata),
-		ResumeToken: x.ResumeToken,
-	}
-	return json.Marshal(resp)
-}
-
-type Metadata struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-}
-
-func CreateMDFromResponseMD(x *ResponseMetadata) Metadata {
-	var md Metadata
-	if x == nil {
-		return md
-	}
-	if x.CreatedAt != nil {
-		tm := x.CreatedAt.AsTime()
-		md.CreatedAt = &tm
-	}
-	if x.UpdatedAt != nil {
-		tm := x.UpdatedAt.AsTime()
-		md.UpdatedAt = &tm
-	}
-	if x.DeletedAt != nil {
-		tm := x.DeletedAt.AsTime()
-		md.DeletedAt = &tm
-	}
-
-	return md
-}
-
-func (x *SearchResponse) MarshalJSON() ([]byte, error) {
-	resp := struct {
-		Hits   []*SearchHit            `json:"hits,omitempty"`
-		Facets map[string]*SearchFacet `json:"facets,omitempty"`
-		Meta   *SearchMetadata         `json:"meta,omitempty"`
-	}{
-		Hits:   x.Hits,
-		Facets: x.Facets,
-		Meta:   x.Meta,
-	}
-	return json.Marshal(resp)
-}
-
-func (x *SearchHit) MarshalJSON() ([]byte, error) {
-	resp := struct {
-		Data     json.RawMessage   `json:"data,omitempty"`
-		Metadata SearchHitMetadata `json:"metadata,omitempty"`
-	}{
-		Data:     x.Data,
-		Metadata: CreateMDFromSearchMD(x.Metadata),
-	}
-	return json.Marshal(resp)
-}
-
-type SearchHitMetadata struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-func CreateMDFromSearchMD(x *SearchHitMeta) SearchHitMetadata {
-	var md SearchHitMetadata
-	if x == nil {
-		return md
-	}
-	if x.CreatedAt != nil {
-		tm := x.CreatedAt.AsTime()
-		md.CreatedAt = &tm
-	}
-	if x.UpdatedAt != nil {
-		tm := x.UpdatedAt.AsTime()
-		md.UpdatedAt = &tm
-	}
-
-	return md
-}
-
 // UnmarshalJSON on ReadRequest avoids unmarshalling filter and instead this way we can write a custom struct to do
 // the unmarshalling and will be avoiding any extra allocation/copying.
 func (x *ReadRequest) UnmarshalJSON(data []byte) error {
@@ -394,6 +302,17 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 			if err := jsoniter.Unmarshal(value, &x.Options); err != nil {
 				return err
 			}
+		case "type":
+			var t string
+			if err := jsoniter.Unmarshal(value, &t); err != nil {
+				return err
+			}
+			switch t {
+			case "documents":
+				x.Type = CollectionType_DOCUMENTS
+			case "messages":
+				x.Type = CollectionType_MESSAGES
+			}
 		}
 	}
 	return nil
@@ -403,6 +322,7 @@ type collDesc struct {
 	Collection string              `json:"collection"`
 	Metadata   *CollectionMetadata `json:"metadata"`
 	Schema     json.RawMessage     `json:"schema"`
+	Size       int64               `json:"size"`
 }
 
 func (x *DescribeCollectionResponse) MarshalJSON() ([]byte, error) {
@@ -410,6 +330,7 @@ func (x *DescribeCollectionResponse) MarshalJSON() ([]byte, error) {
 		Collection: x.Collection,
 		Metadata:   x.Metadata,
 		Schema:     x.Schema,
+		Size:       x.Size,
 	})
 }
 
@@ -418,9 +339,11 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 		Db          string            `json:"db"`
 		Metadata    *DatabaseMetadata `json:"metadata"`
 		Collections []*collDesc       `json:"collections"`
+		Size        int64             `json:"size"`
 	}{
 		Db:       x.Db,
 		Metadata: x.Metadata,
+		Size:     x.Size,
 	}
 
 	for _, v := range x.Collections {
@@ -428,6 +351,7 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 			Collection: v.Collection,
 			Metadata:   v.Metadata,
 			Schema:     v.Schema,
+			Size:       v.Size,
 		})
 	}
 
@@ -493,4 +417,150 @@ func (x *DeleteResponse) MarshalJSON() ([]byte, error) {
 
 func (x *UpdateResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, ModifiedCount: x.ModifiedCount})
+}
+
+// MarshalJSON on read response avoid any encoding/decoding on x.Data. With this approach we are not doing any extra
+// marshaling/unmarshalling in returning the data from the database. The document returned from the database is stored
+// in x.Data and will return as-is.
+//
+// Note: This also means any changes in ReadResponse proto needs to make sure that we add that here and similarly
+// the openAPI specs needs to be specified Data as object instead of bytes.
+func (x *ReadResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Data        json.RawMessage `json:"data,omitempty"`
+		Metadata    Metadata        `json:"metadata,omitempty"`
+		ResumeToken []byte          `json:"resume_token,omitempty"`
+	}{
+		Data:        x.Data,
+		Metadata:    CreateMDFromResponseMD(x.Metadata),
+		ResumeToken: x.ResumeToken,
+	}
+	return json.Marshal(resp)
+}
+
+// Explicit custom marshalling of some search data structures required
+// to retain schema in the output even when fields are empty.
+
+func (x *SearchResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Hits   []*SearchHit            `json:"hits"`
+		Facets map[string]*SearchFacet `json:"facets"`
+		Meta   *SearchMetadata         `json:"meta"`
+	}{
+		Hits:   x.Hits,
+		Facets: x.Facets,
+		Meta:   x.Meta,
+	}
+
+	if resp.Hits == nil {
+		resp.Hits = make([]*SearchHit, 0)
+	}
+	if resp.Facets == nil {
+		resp.Facets = make(map[string]*SearchFacet)
+	}
+	return json.Marshal(resp)
+}
+
+func (x *SearchHit) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Data     json.RawMessage   `json:"data,omitempty"`
+		Metadata SearchHitMetadata `json:"metadata,omitempty"`
+	}{
+		Data:     x.Data,
+		Metadata: CreateMDFromSearchMD(x.Metadata),
+	}
+	return json.Marshal(resp)
+}
+
+func (x *SearchMetadata) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Found      int64 `json:"found"`
+		TotalPages int32 `json:"total_pages"`
+		Page       *Page `json:"page"`
+	}{
+		Found:      x.Found,
+		TotalPages: x.TotalPages,
+		Page:       x.Page,
+	}
+	return json.Marshal(resp)
+}
+
+func (x *SearchFacet) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Counts []*FacetCount `json:"counts"`
+		Stats  *FacetStats   `json:"stats"`
+	}{
+		Counts: x.Counts,
+		Stats:  x.Stats,
+	}
+	if resp.Counts == nil {
+		resp.Counts = make([]*FacetCount, 0)
+	}
+	return json.Marshal(resp)
+}
+
+func (x *FacetStats) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Avg   float64 `json:"avg,omitempty"`
+		Max   float64 `json:"max,omitempty"`
+		Min   float64 `json:"min,omitempty"`
+		Sum   float64 `json:"sum,omitempty"`
+		Count int64   `json:"count"`
+	}{
+		Avg:   x.Avg,
+		Max:   x.Max,
+		Min:   x.Min,
+		Sum:   x.Sum,
+		Count: x.Count,
+	}
+	return json.Marshal(resp)
+}
+
+type SearchHitMetadata struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+}
+
+type Metadata struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+}
+
+func CreateMDFromResponseMD(x *ResponseMetadata) Metadata {
+	var md Metadata
+	if x == nil {
+		return md
+	}
+	if x.CreatedAt != nil {
+		tm := x.CreatedAt.AsTime()
+		md.CreatedAt = &tm
+	}
+	if x.UpdatedAt != nil {
+		tm := x.UpdatedAt.AsTime()
+		md.UpdatedAt = &tm
+	}
+	if x.DeletedAt != nil {
+		tm := x.DeletedAt.AsTime()
+		md.DeletedAt = &tm
+	}
+
+	return md
+}
+
+func CreateMDFromSearchMD(x *SearchHitMeta) SearchHitMetadata {
+	var md SearchHitMetadata
+	if x == nil {
+		return md
+	}
+	if x.CreatedAt != nil {
+		tm := x.CreatedAt.AsTime()
+		md.CreatedAt = &tm
+	}
+	if x.UpdatedAt != nil {
+		tm := x.UpdatedAt.AsTime()
+		md.UpdatedAt = &tm
+	}
+
+	return md
 }

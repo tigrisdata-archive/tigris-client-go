@@ -249,10 +249,12 @@ func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*Describe
 
 	var r DescribeDatabaseResponse
 	r.Db = ToString(d.Db)
+	r.Size = ToInt64(d.Size)
 	for _, v := range *d.Collections {
 		r.Collections = append(r.Collections, &api.CollectionDescription{
 			Collection: ToString(v.Collection),
 			Schema:     v.Schema,
+			Size:       ToInt64(v.Size),
 		})
 	}
 	return &r, nil
@@ -405,6 +407,7 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 	r := &DescribeCollectionResponse{
 		Schema:     d.Schema,
 		Collection: ToString(d.Collection),
+		Size:       ToInt64(d.Size),
 	}
 
 	return r, nil
@@ -692,6 +695,13 @@ func ToBytes(b *[]byte) []byte {
 func ToBool(b *bool) bool {
 	if b == nil {
 		return false
+	}
+	return *b
+}
+
+func ToInt64(b *int64) int64 {
+	if b == nil {
+		return 0
 	}
 	return *b
 }

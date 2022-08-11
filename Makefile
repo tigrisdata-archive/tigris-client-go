@@ -33,7 +33,7 @@ ${API_DIR}/client/${V}/%/http.go: ${PROTO_DIR}/%_openapi.yaml
 		-o ${API_DIR}/client/${V}/$(*F)/http.go \
 		/tmp/$(*F)_openapi.yaml
 
-generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${API_DIR}/client/${V}/api/http.go
+generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${GEN_DIR}/admin.pb.go ${GEN_DIR}/auth.pb.go ${API_DIR}/client/${V}/api/http.go
 
 mock/api/grpc.go mock/driver.go:
 	mkdir -p mock/api

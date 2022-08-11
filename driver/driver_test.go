@@ -1076,18 +1076,15 @@ func TestHTTPDriverAuth(t *testing.T) {
 }
 
 func TestGRPCTokenRefresh(t *testing.T) {
-	TokenRefreshURL = test.HTTPURL(0) + "/token"
 
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Token: "token_config_123:refresh_token_123"})
+	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{URL: test.HTTPURL(0), Token: "token_config_123:refresh_token_123"})
 	defer cancel()
 
 	testDriverAuth(t, client, mockServer, "refreshed_token_config_123")
 }
 
 func TestHTTPTokenRefresh(t *testing.T) {
-	TokenRefreshURL = test.HTTPURL(2) + "/token"
-
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Token: "token_config_123:refresh_token_123"})
+	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{URL: test.HTTPURL(2), Token: "token_config_123:refresh_token_123"})
 	defer cancel()
 
 	testDriverAuth(t, client, mockServer, "refreshed_token_config_123")

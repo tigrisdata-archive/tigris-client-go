@@ -58,7 +58,7 @@ type txWithOptions interface {
 	Rollback(ctx context.Context) error
 }
 
-func getAuthToken(ctx context.Context, config *config.Driver) (*oauth2.Token, *oauth2.Config, context.Context) {
+func getAuthToken(_ context.Context, config *config.Driver) (*oauth2.Token, *oauth2.Config, context.Context) {
 	token := config.Token
 	if os.Getenv(TokenEnv) != "" {
 		token = os.Getenv(TokenEnv)
@@ -82,7 +82,15 @@ func getAuthToken(ctx context.Context, config *config.Driver) (*oauth2.Token, *o
 		TLSClientConfig: config.TLS,
 	}
 
-	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: TokenRefreshURL}}
+	tokenURL := config.URL + "/oauth/token"
+	if strings.HasPrefix(tokenURL, "dns:") {
+		tokenURL = tokenURL[4:]
+	}
+	if !strings.Contains(tokenURL, "://") {
+		tokenURL = "https://" + tokenURL
+	}
 
-	return &t, ocfg, context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: tr})
+	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: tokenURL}}
+
+	return &t, ocfg, context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Transport: tr})
 }

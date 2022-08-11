@@ -32,7 +32,6 @@ const (
 
 var (
 	DefaultProtocol = GRPC
-	TokenRefreshURL = "https://tigrisdata-dev.us.auth0.com/oauth/token"
 )
 
 type Document json.RawMessage

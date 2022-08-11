@@ -248,13 +248,13 @@ func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*Describe
 	}
 
 	var r DescribeDatabaseResponse
-	r.Db = ToString(d.Db)
-	r.Size = ToInt64(d.Size)
+	r.Db = toString(d.Db)
+	r.Size = toInt64(d.Size)
 	for _, v := range *d.Collections {
 		r.Collections = append(r.Collections, &api.CollectionDescription{
-			Collection: ToString(v.Collection),
+			Collection: toString(v.Collection),
 			Schema:     v.Schema,
-			Size:       ToInt64(v.Size),
+			Size:       toInt64(v.Size),
 		})
 	}
 	return &r, nil
@@ -304,7 +304,7 @@ func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options 
 		return nil, HTTPError(fmt.Errorf("empty transaction context in response"), nil)
 	}
 
-	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: ToString(bTx.TxCtx.Id), Origin: ToString(bTx.TxCtx.Origin)}}, nil
+	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: toString(bTx.TxCtx.Id), Origin: toString(bTx.TxCtx.Origin)}}, nil
 }
 
 func (c *httpCRUD) Commit(ctx context.Context) error {
@@ -406,8 +406,8 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 
 	r := &DescribeCollectionResponse{
 		Schema:     d.Schema,
-		Collection: ToString(d.Collection),
-		Size:       ToInt64(d.Size),
+		Collection: toString(d.Collection),
+		Size:       toInt64(d.Size),
 	}
 
 	return r, nil
@@ -663,14 +663,14 @@ func (g *httpEventStreamReader) read() (Event, error) {
 	}
 	e := res.Result.Event
 	return &api.StreamEvent{
-		Collection: ToString(e.Collection),
+		Collection: toString(e.Collection),
 		Data:       e.Data,
-		Key:        ToBytes(e.Key),
-		Last:       ToBool(e.Last),
-		Lkey:       ToBytes(e.Lkey),
-		Rkey:       ToBytes(e.Rkey),
-		Op:         ToString(e.Op),
-		TxId:       ToBytes(e.TxId),
+		Key:        toBytes(e.Key),
+		Last:       toBool(e.Last),
+		Lkey:       toBytes(e.Lkey),
+		Rkey:       toBytes(e.Rkey),
+		Op:         toString(e.Op),
+		TxId:       toBytes(e.TxId),
 	}, nil
 }
 
@@ -678,28 +678,28 @@ func (g *httpEventStreamReader) close() error {
 	return g.closer.Close()
 }
 
-func ToString(s *string) string {
+func toString(s *string) string {
 	if s == nil {
 		return ""
 	}
 	return *s
 }
 
-func ToBytes(b *[]byte) []byte {
+func toBytes(b *[]byte) []byte {
 	if b == nil {
 		return nil
 	}
 	return *b
 }
 
-func ToBool(b *bool) bool {
+func toBool(b *bool) bool {
 	if b == nil {
 		return false
 	}
 	return *b
 }
 
-func ToInt64(b *int64) int64 {
+func toInt64(b *int64) int64 {
 	if b == nil {
 		return 0
 	}

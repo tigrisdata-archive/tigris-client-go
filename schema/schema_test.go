@@ -70,7 +70,7 @@ func TestCollectionSchema(t *testing.T) {
 		Key1 string `json:"key_1" tigris:"primary_key:1"`
 	}
 
-	// invalid. promary key index greater then number of fields
+	// invalid. primary key index greater than number of fields
 	type pkOutOfBound struct {
 		Key3 string `json:"key_3" tigris:"primary_key:3"`
 		Key1 string `json:"key_1" tigris:"primary_key:1"`
@@ -220,123 +220,123 @@ func TestCollectionSchema(t *testing.T) {
 		{pkInvalidType{}, nil, fmt.Errorf("type is not supported for the key: bool")},
 		{pkInvalidTag{}, nil, fmt.Errorf("only one colon allowed in the tag")},
 		{input: noPK{}, output: &Schema{Name: "no_pks", Fields: map[string]*Field{
-			"ID":    {Type: typeString, Format: formatUUID, AutoGenerate: true},
-			"key_1": {Type: typeString}}, PrimaryKey: []string{"ID"}}},
+			"ID":    {Type: []string{typeString}, Format: formatUUID, AutoGenerate: true},
+			"key_1": {Type: []string{typeString}}}, PrimaryKey: []string{"ID"}}},
 		{input: pk{}, output: &Schema{Name: "pks", Fields: map[string]*Field{
-			"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}},
+			"key_1": {Type: []string{typeString}}}, PrimaryKey: []string{"key_1"}}},
 		{pk1{}, &Schema{Name: "pk_1", Fields: map[string]*Field{
-			"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}, nil},
+			"key_1": {Type: []string{typeString}}}, PrimaryKey: []string{"key_1"}}, nil},
 		{pk2{}, &Schema{Name: "pk_2", Fields: map[string]*Field{
-			"key_2": {Type: typeString}, "key_1": {Type: typeString}},
+			"key_2": {Type: []string{typeString}}, "key_1": {Type: []string{typeString}}},
 			PrimaryKey: []string{"key_1", "key_2"}}, nil},
 		{pk3{}, &Schema{Name: "pk_3", Fields: map[string]*Field{
-			"key_2": {Type: typeString}, "key_1": {Type: typeString}, "key_3": {Type: typeString}},
+			"key_2": {Type: []string{typeString}}, "key_1": {Type: []string{typeString}}, "key_3": {Type: []string{typeString}}},
 			PrimaryKey: []string{"key_1", "key_2", "key_3"}}, nil},
 		{allTypes{}, &Schema{Name: "all_types", Fields: map[string]*Field{
-			"Tm":      {Type: typeString, Format: formatDateTime},
-			"TmPtr":   {Type: typeString, Format: formatDateTime},
-			"UUID":    {Type: typeString, Format: formatUUID},
-			"UUIDPtr": {Type: typeString, Format: formatUUID},
+			"Tm":      {Type: []string{typeString}, Format: formatDateTime},
+			"TmPtr":   {Type: []string{typeString, null}, Format: formatDateTime},
+			"UUID":    {Type: []string{typeString}, Format: formatUUID},
+			"UUIDPtr": {Type: []string{typeString, null}, Format: formatUUID},
 
-			"int_32": {Type: typeInteger, Format: formatInt32},
+			"int_32": {Type: []string{typeInteger}, Format: formatInt32},
 
-			"int_64": {Type: typeInteger},
+			"int_64": {Type: []string{typeInteger}},
 			//			{Name: "uint_64", Type: typeInteger},
-			"int_1": {Type: typeInteger},
+			"int_1": {Type: []string{typeInteger}},
 
-			"bytes_1": {Type: typeString, Format: formatByte},
-			"bytes_2": {Type: typeString, Format: formatByte},
+			"bytes_1": {Type: []string{typeString}, Format: formatByte},
+			"bytes_2": {Type: []string{typeString}, Format: formatByte},
 
-			"float_32": {Type: typeNumber},
-			"float_64": {Type: typeNumber},
+			"float_32": {Type: []string{typeNumber}},
+			"float_64": {Type: []string{typeNumber}},
 
-			"bool_1": {Type: typeBoolean},
+			"bool_1": {Type: []string{typeBoolean}},
 
-			"string_1": {Type: typeString},
+			"string_1": {Type: []string{typeString}},
 
 			"data_1": {
-				Type: "object",
+				Type: []string{"object"},
 				Fields: map[string]*Field{
-					"field_1": {Type: typeString},
+					"field_1": {Type: []string{typeString}},
 					"Nested": {
-						Type: "object",
+						Type: []string{"object"},
 						Fields: map[string]*Field{
-							"ss_field_1": {Type: typeString},
+							"ss_field_1": {Type: []string{typeString}},
 						},
 					},
 				},
 			},
 
-			"slice_1": {Type: typeArray, Items: &Field{Type: typeString}},
-			"arr_1":   {Type: typeArray, Items: &Field{Type: typeString}},
-			"map_1":   {Type: typeObject},
+			"slice_1": {Type: []string{typeArray}, Items: &Field{Type: []string{typeString}}},
+			"arr_1":   {Type: []string{typeArray}, Items: &Field{Type: []string{typeString}}},
+			"map_1":   {Type: []string{typeObject}},
 
-			"slice_2": {Type: typeArray,
+			"slice_2": {Type: []string{typeArray},
 				Items: &Field{
-					Type: "object",
+					Type: []string{"object"},
 					Fields: map[string]*Field{
-						"field_1": {Type: typeString},
+						"field_1": {Type: []string{typeString}},
 						"Nested": {
-							Type: "object",
+							Type: []string{"object"},
 							Fields: map[string]*Field{
-								"ss_field_1": {Type: typeString},
+								"ss_field_1": {Type: []string{typeString}},
 							},
 						},
 					},
 				},
 			},
-			"map_2": {Type: typeObject},
+			"map_2": {Type: []string{typeObject}},
 
 			// use original name if JSON tag name is not defined
-			"bool_123": {Type: typeBoolean},
-			"PtrStruct": {Type: typeObject, Fields: map[string]*Field{
+			"bool_123": {Type: []string{typeBoolean}},
+			"PtrStruct": {Type: []string{typeObject, null}, Fields: map[string]*Field{
 				"ss_field_1": {
-					Type: "string",
+					Type: []string{"string"},
 				}}},
 			//	{Name: "DataEnc", Type: typeInteger, Tags: []string{"encrypted"}},
 			//	{Name: "DataPII", Type: typeInteger, Tags: []string{"pii"}},
 		}, PrimaryKey: []string{"string_1"}}, nil},
 		{embModel{}, &Schema{Name: "emb_models", Fields: map[string]*Field{
 			"Sub": {
-				Type: "object",
+				Type: []string{"object"},
 				Fields: map[string]*Field{
-					"ID": {Type: typeInteger},
+					"ID": {Type: []string{typeInteger}},
 					"Tm": {
-						Type: "object",
+						Type: []string{"object"},
 						Fields: map[string]*Field{
-							"ID": {Type: typeInteger},
+							"ID": {Type: []string{typeInteger}},
 						}},
 				}},
-			"ID":         {Type: typeInteger, AutoGenerate: true},
-			"ss_field_1": {Type: typeString},
+			"ID":         {Type: []string{typeInteger}, AutoGenerate: true},
+			"ss_field_1": {Type: []string{typeString}},
 			"Tm": {
-				Type: "object",
+				Type: []string{"object"},
 				Fields: map[string]*Field{
-					"ID": {Type: typeInteger},
+					"ID": {Type: []string{typeInteger}},
 				}},
 		},
 			PrimaryKey: []string{"ID"}}, nil},
 		{embModelPK{}, &Schema{Name: "emb_model_pks", Fields: map[string]*Field{
-			"ID":         {Type: typeInteger, AutoGenerate: true},
-			"ss_field_1": {Type: typeString},
+			"ID":         {Type: []string{typeInteger}, AutoGenerate: true},
+			"ss_field_1": {Type: []string{typeString}},
 		},
 			PrimaryKey: []string{"ID", "ss_field_1"}}, nil},
 		{autoGen{}, &Schema{Name: "auto_gens", Fields: map[string]*Field{
-			"Field1": {Type: typeString, AutoGenerate: true},
-			"Field2": {Type: typeInteger, AutoGenerate: true},
-			"Field3": {Type: typeInteger, AutoGenerate: true},
-			"Field4": {Type: typeString, Format: formatUUID, AutoGenerate: true},
-			"Field5": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
+			"Field1": {Type: []string{typeString}, AutoGenerate: true},
+			"Field2": {Type: []string{typeInteger}, AutoGenerate: true},
+			"Field3": {Type: []string{typeInteger}, AutoGenerate: true},
+			"Field4": {Type: []string{typeString}, Format: formatUUID, AutoGenerate: true},
+			"Field5": {Type: []string{typeString}, Format: formatDateTime, AutoGenerate: true},
 		},
 			PrimaryKey: []string{"Field1"}}, nil},
 		{autoGenNeg{}, nil, fmt.Errorf("type cannot be autogenerated: bool")},
 		{autoID{}, &Schema{Name: "auto_ids", Fields: map[string]*Field{
-			"ID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
+			"ID": {Type: []string{typeString}, Format: formatDateTime, AutoGenerate: true},
 		},
 			PrimaryKey: []string{"ID"}}, nil},
 		{autoIDOverride{}, &Schema{Name: "auto_id_overrides", Fields: map[string]*Field{
-			"RealID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
-			"ID":     {Type: typeString, Format: formatDateTime},
+			"RealID": {Type: []string{typeString}, Format: formatDateTime, AutoGenerate: true},
+			"ID":     {Type: []string{typeString}, Format: formatDateTime},
 		},
 			PrimaryKey: []string{"RealID"}}, nil},
 		{autoIDBadType{}, nil, fmt.Errorf("type is not supported for the key: array")},
@@ -357,15 +357,15 @@ func TestCollectionSchema(t *testing.T) {
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"}},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object"},"map_2":{"type":"object"},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
+		require.JSONEq(t, `{"title":"all_types","properties":{"PtrStruct":{"type":["object","null"],"properties":{"ss_field_1":{"type":["string"]}}},"Tm":{"type":["string"],"format":"date-time"},"TmPtr":{"type":["string","null"],"format":"date-time"},"UUID":{"type":["string"],"format":"uuid"},"UUIDPtr":{"type":["string","null"],"format":"uuid"},"arr_1":{"type":["array"],"items":{"type":["string"]}},"bool_1":{"type":["boolean"]},"bool_123":{"type":["boolean"]},"bytes_1":{"type":["string"],"format":"byte"},"bytes_2":{"type":["string"],"format":"byte"},"data_1":{"type":["object"],"properties":{"Nested":{"type":["object"],"properties":{"ss_field_1":{"type":["string"]}}},"field_1":{"type":["string"]}}},"float_32":{"type":["number"]},"float_64":{"type":["number"]},"int_1":{"type":["integer"]},"int_32":{"type":["integer"],"format":"int32"},"int_64":{"type":["integer"]},"map_1":{"type":["object"]},"map_2":{"type":["object"]},"slice_1":{"type":["array"],"items":{"type":["string"]}},"slice_2":{"type":["array"],"items":{"type":["object"],"properties":{"Nested":{"type":["object"],"properties":{"ss_field_1":{"type":["string"]}}},"field_1":{"type":["string"]}}}},"string_1":{"type":["string"]}},"primary_key":["string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {
 		s, err := FromCollectionModels(pk{}, pk1{})
 		require.NoError(t, err)
 
-		assert.Equal(t, map[string]*Schema{"pks": {Name: "pks", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}},
-			"pk_1": {Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}}, s)
+		assert.Equal(t, map[string]*Schema{"pks": {Name: "pks", Fields: map[string]*Field{"key_1": {Type: []string{typeString}}}, PrimaryKey: []string{"key_1"}},
+			"pk_1": {Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: []string{typeString}}}, PrimaryKey: []string{"key_1"}}}, s)
 	})
 
 	t.Run("duplicate_pk_index", func(t *testing.T) {
@@ -407,11 +407,11 @@ func TestDatabaseSchema(t *testing.T) {
 
 	_ = Db4{1}
 
-	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}}
-	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}}
-	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
-	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
-	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
+	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: []string{"integer"}}}, PrimaryKey: []string{"Key1"}}
+	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: []string{"integer"}}}, PrimaryKey: []string{"Key1"}}
+	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: []string{"integer"}}}, PrimaryKey: []string{"Key2"}}
+	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: []string{"integer"}}}, PrimaryKey: []string{"Key2"}}
+	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: []string{"integer"}}}, PrimaryKey: []string{"Key2"}}
 
 	var i int64
 

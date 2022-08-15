@@ -22,6 +22,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/tigrisdata/tigris-client-go/sort"
+	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
 func TestMatchAllQuery(t *testing.T) {
@@ -38,6 +40,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 		assert.Empty(t, req.SearchFields)
 		assert.Empty(t, req.Filter)
 		assert.Empty(t, req.Facet)
+		assert.Empty(t, req.Sort)
 		assert.Empty(t, req.IncludeFields)
 		assert.Empty(t, req.ExcludeFields)
 		assert.Nil(t, req.Options)
@@ -67,6 +70,24 @@ func TestRequestBuilder_Build(t *testing.T) {
 		assert.Contains(t, req.IncludeFields, "field_1")
 		assert.Subset(t, []string{"field_3", "field_2"}, req.ExcludeFields)
 
+	})
+
+	t.Run("with sorting", func(t *testing.T) {
+		req := NewRequestBuilder().
+			WithSorting(sort.Ascending("field_1"), sort.Descending("field_2")).
+			Build()
+		assert.Len(t, *req.Sort, 2)
+		b, err := req.Sort.Built()
+		assert.Nil(t, err)
+		assert.Equal(t, driver.SortOrder(`[{"field_1":"$asc"},{"field_2":"$desc"}]`), b)
+	})
+
+	t.Run("with sort oder", func(t *testing.T) {
+		order := sort.NewSortOrder(sort.Ascending("field_1"), sort.Descending("field_2"))
+		req := NewRequestBuilder().
+			WithSortOrder(order).
+			Build()
+		assert.Equal(t, &order, req.Sort)
 	})
 }
 

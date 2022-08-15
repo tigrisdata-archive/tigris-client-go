@@ -85,7 +85,7 @@ func TestResult_From(t *testing.T) {
 	})
 
 	t.Run("from complete response", func(t *testing.T) {
-		r := &Result[Coll1]{}
+		r, sum := &Result[Coll1]{}, float64(5)
 		pbtime := timestamppb.Now()
 		err := r.From(&api.SearchResponse{
 			Hits: []*api.SearchHit{{
@@ -97,7 +97,7 @@ func TestResult_From(t *testing.T) {
 					Counts: []*api.FacetCount{
 						{Value: "value2", Count: 6},
 					},
-					Stats: &api.FacetStats{Count: 1, Sum: 5},
+					Stats: &api.FacetStats{Count: 1, Sum: &sum},
 				},
 			},
 			Meta: &api.SearchMetadata{
@@ -119,8 +119,8 @@ func TestResult_From(t *testing.T) {
 		f := r.Facets["Field2"]
 		assert.ElementsMatch(t, []FacetCount{{Count: 6, Value: "value2"}}, f.Counts)
 		assert.Equal(t, int64(1), f.Stats.Count)
-		assert.Equal(t, float64(5), f.Stats.Sum)
-		assert.Equal(t, float64(0.0), f.Stats.Avg)
+		assert.Equal(t, float64(5), *f.Stats.Sum)
+		assert.Nil(t, f.Stats.Avg)
 
 		m := r.Meta
 		assert.Equal(t, int64(12), m.Found)
@@ -297,20 +297,21 @@ func TestFacetStats_From(t *testing.T) {
 	t.Run("from nil", func(t *testing.T) {
 		st := &FacetStats{}
 		st.From(nil)
-		assert.Equal(t, float64(0), st.Avg)
-		assert.Equal(t, float64(0), st.Max)
-		assert.Equal(t, float64(0), st.Min)
-		assert.Equal(t, float64(0), st.Sum)
+		assert.Nil(t, st.Avg)
+		assert.Nil(t, st.Max)
+		assert.Nil(t, st.Min)
+		assert.Nil(t, st.Sum)
 		assert.Equal(t, int64(0), st.Count)
 	})
 
 	t.Run("from partial api response", func(t *testing.T) {
 		st := &FacetStats{}
-		st.From(&api.FacetStats{Avg: 34.5, Count: 238, Sum: 45})
-		assert.Equal(t, float64(34.5), st.Avg)
-		assert.Equal(t, float64(0), st.Max)
-		assert.Equal(t, float64(0), st.Min)
-		assert.Equal(t, float64(45), st.Sum)
+		avg, sum := 34.5, float64(45)
+		st.From(&api.FacetStats{Avg: &avg, Count: 238, Sum: &sum})
+		assert.Equal(t, 34.5, *st.Avg)
+		assert.Nil(t, st.Max)
+		assert.Nil(t, st.Min)
+		assert.Equal(t, float64(45), *st.Sum)
 		assert.Equal(t, int64(238), st.Count)
 	})
 }

@@ -232,6 +232,17 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 			r.Facet = facet
 		}
 	}
+
+	if req.Sort != nil {
+		sortOrder, err := req.Sort.Built()
+		if err != nil {
+			return nil, err
+		}
+		if sortOrder != nil {
+			r.Sort = sortOrder
+		}
+	}
+
 	return &r, nil
 }
 

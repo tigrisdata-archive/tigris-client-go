@@ -364,6 +364,7 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 		SearchFields:  req.SearchFields,
 		Filter:        req.Filter,
 		Facet:         req.Facet,
+		Sort:          req.Sort,
 		IncludeFields: req.IncludeFields,
 		ExcludeFields: req.ExcludeFields,
 		PageSize:      req.PageSize,

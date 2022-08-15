@@ -40,6 +40,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/mock"
 	"github.com/tigrisdata/tigris-client-go/schema"
 	"github.com/tigrisdata/tigris-client-go/test"
+	"github.com/tigrisdata/tigris-client-go/sort"
 )
 
 type JSONMatcher struct {
@@ -305,6 +306,7 @@ func TestCollection_Search(t *testing.T) {
 			WithQuery("search query").
 			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
+			WithSorting(sort.Ascending("field_1"), sort.Descending("field_2")).
 			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
 			WithIncludeFields("field_4").
 			WithOptions(&search.DefaultSearchOptions).
@@ -314,6 +316,7 @@ func TestCollection_Search(t *testing.T) {
 			SearchFields:  sr.SearchFields,
 			Filter:        driver.Filter(`{"field_2":{"$eq":"some value"}}`),
 			Facet:         driver.Facet(`{"field_3":{"size":10}}`),
+			Sort:          driver.SortOrder(`[{"field_1":"$asc"},{"field_2":"$desc"}]`),
 			IncludeFields: []string{"field_4"},
 			ExcludeFields: nil,
 			Page:          sr.Options.Page,
@@ -345,6 +348,7 @@ func TestCollection_Search(t *testing.T) {
 			SearchFields:  []string{},
 			Filter:        nil,
 			Facet:         nil,
+			Sort:          nil,
 			IncludeFields: nil,
 			ExcludeFields: nil,
 			Page:          int32(0),

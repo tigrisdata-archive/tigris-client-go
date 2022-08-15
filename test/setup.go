@@ -20,7 +20,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -133,8 +133,8 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 	r.HandleFunc(apiPathPrefix+"/info", func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
 	})
-	r.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
-		b, err := ioutil.ReadAll(r.Body)
+	r.HandleFunc("/oauth/token", func(w http.ResponseWriter, r *http.Request) {
+		b, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
 		require.Equal(t, []byte(`grant_type=refresh_token&refresh_token=refresh_token_123`), b)
 		_, err = w.Write([]byte(`access_token=refreshed_token_config_123`))

@@ -443,7 +443,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Facet:         []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
 			IncludeFields: nil,
 			ExcludeFields: nil,
-			Sort:          nil,
+			Sort:          []byte(`[{"field_1":"$desc"},{"field_2":"$asc"},{"field_3":"$desc"}]`),
 			Filter:        nil,
 			PageSize:      12,
 			Page:          3,
@@ -452,6 +452,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 		Q:            "search text",
 		SearchFields: []string{"field_1"},
 		Facet:        Facet(`{"field_1":{"size":10},"field_2":{"size":10}}`),
+		Sort:         SortOrder(`[{"field_1":"$desc"},{"field_2":"$asc"},{"field_3":"$desc"}]`),
 		PageSize:     12,
 		Page:         3,
 	})
@@ -1076,18 +1077,15 @@ func TestHTTPDriverAuth(t *testing.T) {
 }
 
 func TestGRPCTokenRefresh(t *testing.T) {
-	TokenRefreshURL = test.HTTPURL(0) + "/token"
 
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Token: "token_config_123:refresh_token_123"})
+	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{URL: test.HTTPURL(0), Token: "token_config_123:refresh_token_123"})
 	defer cancel()
 
 	testDriverAuth(t, client, mockServer, "refreshed_token_config_123")
 }
 
 func TestHTTPTokenRefresh(t *testing.T) {
-	TokenRefreshURL = test.HTTPURL(2) + "/token"
-
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Token: "token_config_123:refresh_token_123"})
+	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{URL: test.HTTPURL(2), Token: "token_config_123:refresh_token_123"})
 	defer cancel()
 
 	testDriverAuth(t, client, mockServer, "refreshed_token_config_123")

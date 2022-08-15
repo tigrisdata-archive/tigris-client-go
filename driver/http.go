@@ -574,6 +574,7 @@ func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchReq
 		SearchFields:  &req.SearchFields,
 		Filter:        json.RawMessage(req.Filter),
 		Facet:         json.RawMessage(req.Facet),
+		Sort:          json.RawMessage(req.Sort),
 		IncludeFields: &req.IncludeFields,
 		ExcludeFields: &req.ExcludeFields,
 		Page:          &req.Page,

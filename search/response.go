@@ -162,13 +162,13 @@ func (f *FacetCount) From(apiFacetCount *api.FacetCount) {
 // FacetStats represent statistics for the faceted field
 type FacetStats struct {
 	// Average of all values in a field. Only available for numeric fields
-	Avg float64
+	Avg *float64
 	// Maximum of all values in a field. Only available for numeric fields
-	Max float64
+	Max *float64
 	// Minimum of all values in a field. Only available for numeric fields
-	Min float64
+	Min *float64
 	// Sum of all values in a field. Only available for numeric fields
-	Sum float64
+	Sum *float64
 	// Total number of values in a field
 	Count int64
 }

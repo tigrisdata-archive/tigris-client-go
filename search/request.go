@@ -21,6 +21,7 @@ import (
 
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/filter"
+	"github.com/tigrisdata/tigris-client-go/sort"
 )
 
 // Request for search
@@ -34,6 +35,8 @@ type Request struct {
 	Filter filter.Filter
 	// Optional Facet query can be used to request categorical arrangement of the indexed terms
 	Facet *FacetQuery
+	// Optional Sort order can be specified to order the search results
+	Sort *sort.Order
 	// Optional IncludeFields sets the document fields to include in search results
 	// By default, all documents fields will be included, unless ExcludeFields is specified
 	IncludeFields []string
@@ -58,6 +61,8 @@ type RequestBuilder interface {
 	WithFilter(filter.Filter) RequestBuilder
 	WithFacetFields(fields ...string) RequestBuilder
 	WithFacet(*FacetQuery) RequestBuilder
+	WithSorting(sortByFields ...sort.Sort) RequestBuilder
+	WithSortOrder(sortOrder sort.Order) RequestBuilder
 	WithIncludeFields(fields ...string) RequestBuilder
 	WithExcludeFields(fields ...string) RequestBuilder
 	WithOptions(*Options) RequestBuilder
@@ -69,6 +74,7 @@ type requestBuilder struct {
 	searchFields map[string]bool
 	filter       filter.Filter
 	facet        *FacetQuery
+	sort         *sort.Order
 	include      []string
 	exclude      []string
 	options      *Options
@@ -102,6 +108,17 @@ func (b *requestBuilder) WithFacet(facet *FacetQuery) RequestBuilder {
 	return b
 }
 
+func (b *requestBuilder) WithSorting(sortByFields ...sort.Sort) RequestBuilder {
+	s := sort.NewSortOrder(sortByFields...)
+	b.sort = &s
+	return b
+}
+
+func (b *requestBuilder) WithSortOrder(sortOrder sort.Order) RequestBuilder {
+	b.sort = &sortOrder
+	return b
+}
+
 func (b *requestBuilder) WithIncludeFields(fields ...string) RequestBuilder {
 	b.include = fields
 	return b
@@ -130,6 +147,7 @@ func (b *requestBuilder) Build() *Request {
 		SearchFields:  searchFields,
 		Filter:        b.filter,
 		Facet:         b.facet,
+		Sort:          b.sort,
 		IncludeFields: b.include,
 		ExcludeFields: b.exclude,
 		Options:       b.options,

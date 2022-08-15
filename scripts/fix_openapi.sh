@@ -56,6 +56,7 @@ yq_fix_json UpdateRequest fields
 yq_fix_json ReadRequest fields
 yq_fix_json SearchRequest fields
 yq_fix_json SearchRequest facet
+yq_fix_json SearchRequest sort
 yq_fix_json ReadResponse data
 yq_fix_json StreamEvent data
 yq_fix_json SearchHit data

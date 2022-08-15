@@ -40,6 +40,7 @@ type Projection json.RawMessage
 type Update json.RawMessage
 type Schema json.RawMessage
 type Facet json.RawMessage
+type SortOrder json.RawMessage
 type Event *api.StreamEvent
 
 type WriteOptions api.WriteOptions
@@ -70,6 +71,7 @@ type SearchRequest struct {
 	SearchFields  []string
 	Filter        Filter
 	Facet         Facet
+	Sort          SortOrder
 	IncludeFields []string
 	ExcludeFields []string
 	Page          int32

@@ -39,8 +39,8 @@ import (
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/mock"
 	"github.com/tigrisdata/tigris-client-go/schema"
-	"github.com/tigrisdata/tigris-client-go/test"
 	"github.com/tigrisdata/tigris-client-go/sort"
+	"github.com/tigrisdata/tigris-client-go/test"
 )
 
 type JSONMatcher struct {
@@ -267,6 +267,28 @@ func TestCollectionBasic(t *testing.T) {
 	err = c.Drop(ctx)
 	require.NoError(t, err)
 
+	mevit := mock.NewMockEventIterator(ctrl)
+
+	mdb.EXPECT().Events(ctx, "coll_1").Return(mevit, nil)
+
+	eit, err := c.Events(ctx)
+	require.NoError(t, err)
+
+	var ev Event[Coll1]
+	var dev driver.Event
+
+	mevit.EXPECT().Next(&dev).SetArg(0, &api.StreamEvent{Op: "insert", TxId: []byte("txid1"), Key: []byte("key1"), Lkey: []byte("lkey1"), Rkey: []byte("rkey1"), Data: []byte(`{"Key1":"k1","Field1":111}`)}).Return(true)
+	mevit.EXPECT().Next(&dev).Return(false)
+	mevit.EXPECT().Err().Return(nil)
+
+	for eit.Next(&ev) {
+		require.Equal(t, Event[Coll1]{Op: "insert", TxId: []byte("txid1"), Key: []byte("key1"), Lkey: []byte("lkey1"), Rkey: []byte("rkey1"), Data: Coll1{Key1: "k1", Field1: 111}}, ev)
+	}
+
+	require.NoError(t, eit.Err())
+
+	mevit.EXPECT().Close()
+	eit.Close()
 }
 
 func TestCollection_Search(t *testing.T) {
@@ -692,4 +714,70 @@ func TestClientSchemaMigration(t *testing.T) {
 
 	err = DropDatabase(ctx, cfg, "db1")
 	require.NoError(t, err)
+}
+
+func TestCollection(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	ctrl := gomock.NewController(t)
+	m := mock.NewMockDriver(ctrl)
+	mdb := mock.NewMockDatabase(ctrl)
+
+	mit := mock.NewMockIterator(ctrl)
+
+	db := newDatabase("db1", m)
+
+	type Coll1 struct {
+		Key1   string `tigris:"primary_key"`
+		Field1 int64
+	}
+
+	m.EXPECT().UseDatabase("db1").Return(mdb)
+
+	c := GetCollection[Coll1](db)
+
+	t.Run("read_limit_skip_offset", func(t *testing.T) {
+		mdb.EXPECT().Read(ctx, "coll_1",
+			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
+			driver.Projection(`{"Field1":true,"Key1":false}`),
+			&driver.ReadOptions{
+				Limit:  111,
+				Skip:   222,
+				Offset: []byte("333"),
+			},
+		).Return(mit, nil)
+
+		it, err := c.ReadWithOptions(ctx, filter.Or(
+			filter.Eq("Key1", "aaa"),
+			filter.Eq("Key1", "ccc")),
+			fields.Exclude("Key1").
+				Include("Field1"),
+			&ReadOptions{
+				Limit:  111,
+				Skip:   222,
+				Offset: []byte("333"),
+			},
+		)
+		require.NoError(t, err)
+
+		var d Coll1
+		var dd driver.Document
+		var dd1 driver.Document
+
+		d1 := &Coll1{Key1: "aaa", Field1: 123}
+
+		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
+		mit.EXPECT().Next(&dd1).Return(false)
+		mit.EXPECT().Err().Return(nil)
+
+		for it.Next(&d) {
+			require.Equal(t, *d1, d)
+		}
+
+		require.NoError(t, it.Err())
+
+		mit.EXPECT().Close()
+		it.Close()
+	})
 }

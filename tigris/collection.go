@@ -30,6 +30,22 @@ var (
 	errNotFound = fmt.Errorf("document not found")
 )
 
+// ReadOptions modifies read request behavior
+type ReadOptions struct {
+	// To read specific fields from a document. Default is all.
+	Fields *fields.Read
+	// Limit the number of documents returned by the read operation.
+	Limit int64
+	// Number of documents to skip before starting to return resulting documents.
+	Skip int64
+	// A cursor for use in pagination. The next streams will return documents after this offset.
+	Offset []byte
+}
+
+// EventsOptions modifies events request behavior
+type EventsOptions struct {
+}
+
 // Collection provides an interface for documents manipulation.
 // Such as Insert, Update, Delete, Read
 type Collection[T schema.Model] struct {
@@ -168,6 +184,31 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields .
 	return &Iterator[T]{Iterator: it}, nil
 }
 
+// ReadWithOptions returns specific fields of the documents according to the filter.
+// It allows further configure returned documents by providing options:
+//     Limit - only returned first "Limit" documents from the result
+//     Skip - start returning documents after skipping "Skip" documents from the result
+func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filter, fields *fields.Read, options *ReadOptions) (*Iterator[T], error) {
+	p, err := getFields(fields)
+	if err != nil {
+		return nil, err
+	}
+	f, err := filter.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	it, err := getDB(ctx, c.db).Read(ctx, c.name, f, p, &driver.ReadOptions{
+		Limit:  options.Limit,
+		Skip:   options.Skip,
+		Offset: options.Offset})
+	if err != nil {
+		return nil, err
+	}
+
+	return &Iterator[T]{Iterator: it}, nil
+}
+
 // ReadOne reads one document from the collection satisfying the filter.
 func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*T, error) {
 	var doc T
@@ -259,6 +300,16 @@ func (c *Collection[T]) Search(ctx context.Context, req *search.Request) (*Searc
 		return nil, err
 	}
 	return &SearchIterator[T]{Iterator: it}, err
+}
+
+// Events listens and iterates over collection documents modifications
+func (c *Collection[T]) Events(ctx context.Context, _ ...*EventsOptions) (*EventIterator[T], error) {
+	it, err := getDB(ctx, c.db).Events(ctx, c.name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &EventIterator[T]{Iterator: it}, nil
 }
 
 // Delete removes documents from the collection according to the filter.

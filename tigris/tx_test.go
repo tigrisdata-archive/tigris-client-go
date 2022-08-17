@@ -69,13 +69,23 @@ func TestCollectionTx(t *testing.T) {
 		mtx.EXPECT().Read(ctx, "coll_1",
 			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
 			driver.Projection(`{"Field1":true,"Key1":false}`),
+			&driver.ReadOptions{
+				Limit:  111,
+				Skip:   222,
+				Offset: []byte("333"),
+			},
 		).Return(mit, nil)
 
-		it, err := c.Read(ctx, filter.Or(
+		it, err := c.ReadWithOptions(ctx, filter.Or(
 			filter.Eq("Key1", "aaa"),
 			filter.Eq("Key1", "ccc")),
 			fields.Exclude("Key1").
 				Include("Field1"),
+			&ReadOptions{
+				Limit:  111,
+				Skip:   222,
+				Offset: []byte("333"),
+			},
 		)
 		require.NoError(t, err)
 

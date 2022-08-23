@@ -203,6 +203,7 @@ func TestCollectionSchema(t *testing.T) {
 		//		DataPII   int64 `tigris:"pii"`
 
 		// unexported fields should not be in the schema
+		//nolint:unused
 		skipUnexported int
 	}
 

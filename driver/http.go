@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -67,7 +66,7 @@ func HTTPError(err error, resp *http.Response) error {
 		}
 	}()
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
@@ -172,8 +171,6 @@ func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx) context.Contex
 
 // NewHTTPClient return Driver interface implementation using HTTP transport protocol
 func NewHTTPClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
-	token, oCfg, ctxClient := getAuthToken(ctx, config)
-
 	if !strings.Contains(url, ":") {
 		url = fmt.Sprintf("%s:%d", url, DefaultHTTPPort)
 	}
@@ -182,9 +179,11 @@ func NewHTTPClient(ctx context.Context, url string, config *config.Driver) (Driv
 		url = "https://" + url
 	}
 
+	oCfg, ctxClient := configAuth(config)
+
 	hc := &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
-	if token.AccessToken != "" || token.RefreshToken != "" {
-		hc = oCfg.Client(ctxClient, token)
+	if oCfg.ClientID != "" || oCfg.ClientSecret != "" {
+		hc = oCfg.Client(ctxClient)
 	}
 
 	c, err := apiHTTP.NewClientWithResponses(url, apiHTTP.WithHTTPClient(hc), apiHTTP.WithRequestEditorFn(setHeaders))

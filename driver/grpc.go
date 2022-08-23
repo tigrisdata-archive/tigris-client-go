@@ -52,13 +52,11 @@ func GRPCError(err error) error {
 
 // NewGRPCClient return Driver interface implementation using GRPC transport protocol
 func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
-	token, oCfg, ctxClient := getAuthToken(ctx, config)
-
-	ts := oCfg.TokenSource(ctxClient, token)
-
 	if !strings.Contains(url, ":") {
 		url = fmt.Sprintf("%s:%d", url, DefaultGRPCPort)
 	}
+
+	oCfg, ctxClient := configAuth(config)
 
 	opts := []grpc.DialOption{
 		grpc.FailOnNonTempDialError(true),
@@ -67,11 +65,11 @@ func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driv
 		grpc.WithBlock(),
 	}
 
-	if config.TLS != nil || token.AccessToken != "" || token.RefreshToken != "" {
+	if config.TLS != nil || oCfg.ClientID != "" || oCfg.ClientSecret != "" {
 		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(config.TLS)))
 
-		if token.AccessToken != "" || token.RefreshToken != "" {
-			opts = append(opts, grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: ts}))
+		if oCfg.ClientID != "" || oCfg.ClientSecret != "" {
+			opts = append(opts, grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: oCfg.TokenSource(ctxClient)}))
 		}
 	} else {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))

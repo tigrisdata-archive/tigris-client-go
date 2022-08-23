@@ -19,9 +19,10 @@ import "crypto/tls"
 
 // Driver contains connection and transport configuration
 type Driver struct {
-	TLS   *tls.Config `json:"tls,omitempty"`
-	Token string      `json:",omitempty"`
-	URL   string      `json:"url,omitempty"`
+	TLS               *tls.Config `json:"tls,omitempty"`
+	ApplicationId     string      `json:",omitempty"`
+	ApplicationSecret string      `json:",omitempty"`
+	URL               string      `json:"url,omitempty"`
 }
 
 // Database contains database and connection config

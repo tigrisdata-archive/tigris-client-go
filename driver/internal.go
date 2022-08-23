@@ -19,9 +19,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 )
@@ -58,39 +58,32 @@ type txWithOptions interface {
 	Rollback(ctx context.Context) error
 }
 
-func getAuthToken(_ context.Context, config *config.Driver) (*oauth2.Token, *oauth2.Config, context.Context) {
-	token := config.Token
-	if os.Getenv(TokenEnv) != "" {
-		token = os.Getenv(TokenEnv)
+func configAuth(config *config.Driver) (*clientcredentials.Config, context.Context) {
+	appID := config.ApplicationId
+	if os.Getenv(ApplicationID) != "" {
+		appID = os.Getenv(ApplicationID)
 	}
 
-	parts := strings.Split(token, ":")
-
-	t := oauth2.Token{}
-
-	if len(parts) > 0 {
-		t.AccessToken = parts[0]
-	}
-
-	if len(parts) > 1 {
-		t.RefreshToken = parts[1]
-		// So as we have refresh token, just disregard current access token and refresh immediately
-		t.Expiry = time.Now()
+	appSecret := config.ApplicationSecret
+	if os.Getenv(ApplicationSecret) != "" {
+		appSecret = os.Getenv(ApplicationSecret)
 	}
 
 	tr := &http.Transport{
 		TLSClientConfig: config.TLS,
 	}
 
-	tokenURL := config.URL + "/oauth/token"
-	if strings.HasPrefix(tokenURL, "dns:") {
-		tokenURL = tokenURL[4:]
-	}
+	tokenURL := config.URL + "/auth/token"
+	tokenURL = strings.TrimPrefix(tokenURL, "dns:")
 	if !strings.Contains(tokenURL, "://") {
 		tokenURL = "https://" + tokenURL
 	}
 
-	ocfg := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: tokenURL}}
+	if TokenURLOverride != "" {
+		tokenURL = TokenURLOverride
+	}
 
-	return &t, ocfg, context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Transport: tr})
+	oCfg := &clientcredentials.Config{TokenURL: tokenURL, ClientID: appID, ClientSecret: appSecret, AuthStyle: oauth2.AuthStyleInParams}
+
+	return oCfg, context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Transport: tr})
 }

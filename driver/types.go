@@ -24,7 +24,8 @@ const (
 	GRPC = iota
 	HTTP = iota
 
-	TokenEnv = "TIGRIS_TOKEN"
+	ApplicationID     = "TIGRIS_APPLICATION_ID"
+	ApplicationSecret = "TIGRIS_APPLICATION_SECRET"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version
@@ -32,6 +33,9 @@ const (
 
 var (
 	DefaultProtocol = GRPC
+
+	// TokenURLOverride Only used in tests to point auth to proper HTTP port in GRPC tests
+	TokenURLOverride string
 )
 
 type Document json.RawMessage

@@ -108,7 +108,7 @@ func TestCollectionTx(t *testing.T) {
 
 		mtx.EXPECT().Read(ctx, "coll_1", driver.Filter(`{}`), driver.Projection(`{}`)).Return(mit, nil)
 
-		it, err = c.ReadAll(ctx, fields.All)
+		_, err = c.ReadAll(ctx, fields.All)
 		require.NoError(t, err)
 
 		mtx.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{}`))

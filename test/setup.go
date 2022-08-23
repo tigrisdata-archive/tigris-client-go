@@ -133,11 +133,12 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 	r.HandleFunc(apiPathPrefix+"/info", func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
 	})
-	r.HandleFunc("/oauth/token", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/auth/token", func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
-		require.Equal(t, []byte(`grant_type=refresh_token&refresh_token=refresh_token_123`), b)
-		_, err = w.Write([]byte(`access_token=refreshed_token_config_123`))
+		require.Equal(t, []byte(`client_id=client_id_test&client_secret=client_secret_test&grant_type=client_credentials`), b)
+		w.Header().Set("Content-Type", "application/json")
+		_, err = w.Write([]byte(`{"access_token": "token_config_123", "refresh_token": "refresh_token_test_123", "expires_in" : 1}`))
 		require.NoError(t, err)
 	})
 

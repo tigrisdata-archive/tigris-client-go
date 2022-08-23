@@ -17,8 +17,9 @@
 package sort
 
 import (
-	"github.com/tigrisdata/tigris-client-go/driver"
 	"encoding/json"
+
+	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
 const (
@@ -44,9 +45,7 @@ func Descending(fieldName string) Sort {
 // NewSortOrder creates an array of multiple fields that will be used to sort results
 func NewSortOrder(sort ...Sort) Order {
 	o := make(Order, len(sort))
-	for i, s := range sort {
-		o[i] = s
-	}
+	copy(o, sort)
 	return o
 }
 

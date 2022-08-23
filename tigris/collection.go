@@ -49,11 +49,8 @@ type EventsOptions struct {
 // Collection provides an interface for documents manipulation.
 // Such as Insert, Update, Delete, Read
 type Collection[T schema.Model] struct {
-	name   string
-	driver driver.Driver
-	schema *schema.Schema
-	model  interface{}
-	db     driver.Database
+	name string
+	db   driver.Database
 }
 
 // Drop drops the collection

@@ -235,7 +235,7 @@ func TestCollectionBasic(t *testing.T) {
 
 	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(`{}`), driver.Projection(`{}`)).Return(mit, nil)
 
-	it, err = c.ReadAll(ctx, fields.All)
+	_, err = c.ReadAll(ctx, fields.All)
 	require.NoError(t, err)
 
 	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{}`))

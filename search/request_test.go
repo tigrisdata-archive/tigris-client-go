@@ -22,8 +22,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tigrisdata/tigris-client-go/sort"
 	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/sort"
 )
 
 func TestMatchAllQuery(t *testing.T) {
@@ -55,7 +55,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 	t.Run("with facet fields", func(t *testing.T) {
 		req := NewRequestBuilder().WithFacetFields("field_1", "field_2").Build()
 		assert.Len(t, req.Facet.FacetFields, 2)
-		for f, _ := range req.Facet.FacetFields {
+		for f := range req.Facet.FacetFields {
 			assert.Contains(t, []string{"field_1", "field_2"}, f)
 		}
 	})

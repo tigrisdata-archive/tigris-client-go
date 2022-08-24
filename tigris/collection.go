@@ -32,8 +32,6 @@ var (
 
 // ReadOptions modifies read request behavior
 type ReadOptions struct {
-	// To read specific fields from a document. Default is all.
-	Fields *fields.Read
 	// Limit the number of documents returned by the read operation.
 	Limit int64
 	// Number of documents to skip before starting to return resulting documents.
@@ -231,7 +229,7 @@ func (c *Collection[T]) ReadAll(ctx context.Context, fields ...*fields.Read) (*I
 	if err != nil {
 		return nil, err
 	}
-	it, err := getDB(ctx, c.db).Read(ctx, c.name, filter.All, p)
+	it, err := getDB(ctx, c.db).Read(ctx, c.name, driver.Filter("{}"), p)
 	return &Iterator[T]{Iterator: it}, err
 }
 
@@ -325,7 +323,7 @@ func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*Dele
 
 // DeleteAll removes all the documents from the collection.
 func (c *Collection[T]) DeleteAll(ctx context.Context) (*DeleteResponse, error) {
-	_, err := getDB(ctx, c.db).Delete(ctx, c.name, filter.All)
+	_, err := getDB(ctx, c.db).Delete(ctx, c.name, driver.Filter("{}"))
 	if err != nil {
 		return nil, err
 	}

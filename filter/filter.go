@@ -44,7 +44,7 @@ const (
 
 var (
 	//All represents filter which includes all the documents of the collection
-	All = driver.Filter(`{}`)
+	All = Expr{}
 )
 
 type Expr map[string]interface{}

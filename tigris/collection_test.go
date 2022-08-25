@@ -780,4 +780,26 @@ func TestCollection(t *testing.T) {
 		mit.EXPECT().Close()
 		it.Close()
 	})
+
+	t.Run("read_with_options_filter_all", func(t *testing.T) {
+		mdb.EXPECT().Read(ctx, "coll_1",
+			driver.Filter(`{}`),
+			driver.Projection(`{}`),
+			&driver.ReadOptions{
+				Limit:  111,
+				Skip:   222,
+				Offset: []byte("333"),
+			},
+		).Return(mit, nil)
+
+		_, err := c.ReadWithOptions(ctx, filter.All,
+			fields.All,
+			&ReadOptions{
+				Limit:  111,
+				Skip:   222,
+				Offset: []byte("333"),
+			},
+		)
+		require.NoError(t, err)
+	})
 }

@@ -27,6 +27,8 @@ import (
 	"unsafe"
 
 	"github.com/golang/mock/gomock"
+	metadata2 "google.golang.org/grpc/metadata"
+
 	//nolint:staticcheck
 	gproto "github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
@@ -220,7 +222,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
 
-	setGRPCTxCtx(ctx, txCtx)
+	setGRPCTxCtx(ctx, txCtx, metadata2.MD{})
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
@@ -759,7 +761,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-	setGRPCTxCtx(ctx, txCtx)
+	setGRPCTxCtx(ctx, txCtx, metadata2.MD{})
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{

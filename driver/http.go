@@ -163,22 +163,21 @@ func setHeaders(ctx context.Context, req *http.Request) error {
 	}
 
 	if v := ctx.Value(additionalOutboundHeadersCtxKey{}); v != nil {
-		additionalHeaders := v.(http.Header)
-		for headerKey, _ := range additionalHeaders {
-			req.Header[headerKey] = additionalHeaders.Values(headerKey)
+		cookies := v.([]*http.Cookie)
+		for _, cookie := range cookies {
+			req.AddCookie(cookie)
 		}
 	}
-
 	return nil
 }
 
-func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx, additionalHeader http.Header) context.Context {
+func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx, cookies []*http.Cookie) context.Context {
 	var result = ctx
 	if txCtx != nil && txCtx.Id != "" {
 		result = context.WithValue(result, txCtxKey{}, txCtx)
 	}
-	if additionalHeader != nil {
-		result = context.WithValue(result, additionalOutboundHeadersCtxKey{}, additionalHeader)
+	if cookies != nil {
+		result = context.WithValue(result, additionalOutboundHeadersCtxKey{}, cookies)
 	}
 	return result
 }
@@ -316,16 +315,16 @@ func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options 
 	if bTx.TxCtx == nil || bTx.TxCtx.Id == nil || *bTx.TxCtx.Id == "" {
 		return nil, HTTPError(fmt.Errorf("empty transaction context in response"), nil)
 	}
-	incomingCookies := resp.Header.Get(SetCookieHeaderKey)
-	additionalHeader := http.Header{}
-	if incomingCookies != "" {
-		additionalHeader.Add(CookieHeaderKey, incomingCookies)
+	var outboundCookies []*http.Cookie
+
+	for _, incomingCookie := range resp.Cookies() {
+		outboundCookies = append(outboundCookies, incomingCookie)
 	}
-	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: ToString(bTx.TxCtx.Id), Origin: ToString(bTx.TxCtx.Origin)}, additionalHeaders: additionalHeader}, nil
+	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: ToString(bTx.TxCtx.Id), Origin: ToString(bTx.TxCtx.Origin)}, cookies: outboundCookies}, nil
 }
 
 func (c *httpCRUD) Commit(ctx context.Context) error {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{})
 	err = HTTPError(err, resp)
@@ -336,7 +335,7 @@ func (c *httpCRUD) Commit(ctx context.Context) error {
 }
 
 func (c *httpCRUD) Rollback(ctx context.Context) error {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	if c.committed {
 		return nil
@@ -346,10 +345,10 @@ func (c *httpCRUD) Rollback(ctx context.Context) error {
 }
 
 type httpCRUD struct {
-	db                string
-	api               *apiHTTP.ClientWithResponses
-	txCtx             *api.TransactionCtx
-	additionalHeaders http.Header
+	db      string
+	api     *apiHTTP.ClientWithResponses
+	txCtx   *api.TransactionCtx
+	cookies []*http.Cookie
 
 	committed bool
 }
@@ -387,7 +386,7 @@ func (c *httpCRUD) convertEventsOptions(_ *EventsOptions) *apiHTTP.EventsRequest
 }
 
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisListCollections(ctx, c.db, apiHTTP.TigrisListCollectionsJSONRequestBody{
 		Options: c.convertCollectionOptions(options),
@@ -432,7 +431,7 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 }
 
 func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisCreateOrUpdateCollection(ctx, c.db, collection, apiHTTP.TigrisCreateOrUpdateCollectionJSONRequestBody{
 		Schema:  json.RawMessage(schema),
@@ -442,7 +441,7 @@ func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 }
 
 func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisDropCollection(ctx, c.db, collection, apiHTTP.TigrisDropCollectionJSONRequestBody{
 		Options: c.convertCollectionOptions(options),
@@ -451,7 +450,7 @@ func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, collection str
 }
 
 func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisInsert(ctx, c.db, collection, apiHTTP.TigrisInsertJSONRequestBody{
 		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
@@ -471,7 +470,7 @@ func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, doc
 }
 
 func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisReplace(ctx, c.db, collection, apiHTTP.TigrisReplaceJSONRequestBody{
 		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
@@ -491,7 +490,7 @@ func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, do
 }
 
 func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisUpdate(ctx, c.db, collection, apiHTTP.TigrisUpdateJSONRequestBody{
 		Filter:  json.RawMessage(filter),
@@ -512,7 +511,7 @@ func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisDelete(ctx, c.db, collection, apiHTTP.TigrisDeleteJSONRequestBody{
 		Filter:  json.RawMessage(filter),
@@ -532,7 +531,7 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.additionalHeaders)
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisRead(ctx, c.db, collection, apiHTTP.TigrisReadJSONRequestBody{
 		Filter:  json.RawMessage(filter),

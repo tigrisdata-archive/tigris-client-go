@@ -18,6 +18,7 @@ package driver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -271,6 +272,9 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	if cfg == nil {
 		cfg = &config.Driver{}
+	}
+	if cfg.TLS == nil && (cfg.ApplicationId != "" && cfg.ApplicationSecret != "") {
+		return nil, errors.New("credentials over plaintext communication is discouraged")
 	}
 	if DefaultProtocol == GRPC {
 		return NewGRPCClient(ctx, cfg.URL, cfg)

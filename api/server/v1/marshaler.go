@@ -16,6 +16,9 @@ package api
 
 import (
 	"encoding/json"
+	"io"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -24,10 +27,48 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+const (
+	refreshToken = "refresh_token"
+)
+
+type CustomDecoder struct {
+	jsonDecoder *json.Decoder
+	reader      io.Reader
+}
+
+func (f CustomDecoder) Decode(dst interface{}) error {
+	switch dst.(type) {
+	case *GetAccessTokenRequest:
+		{
+			byteArr, err := io.ReadAll(f.reader)
+			if err != nil {
+				return err
+			}
+			return unmarshalInternal(byteArr, dst)
+		}
+	}
+	return f.jsonDecoder.Decode(dst)
+}
+
 // CustomMarshaler is a marshaler to customize the response. Currently, it is only used to marshal custom error message
 // otherwise it just uses the inbuilt mux marshaller.
 type CustomMarshaler struct {
-	*runtime.JSONBuiltin
+	JSONBuiltin *runtime.JSONBuiltin
+}
+
+func (c *CustomMarshaler) NewDecoder(r io.Reader) runtime.Decoder {
+	return CustomDecoder{
+		jsonDecoder: json.NewDecoder(r),
+		reader:      r,
+	}
+}
+
+func (c *CustomMarshaler) NewEncoder(w io.Writer) runtime.Encoder {
+	return c.JSONBuiltin.NewEncoder(w)
+}
+
+func (c *CustomMarshaler) ContentType(v interface{}) string {
+	return c.JSONBuiltin.ContentType(v)
 }
 
 func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
@@ -51,6 +92,40 @@ func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
 		return c.JSONBuiltin.Marshal(v)
 	}
 	return c.JSONBuiltin.Marshal(v)
+}
+
+func (c *CustomMarshaler) Unmarshal(data []byte, v interface{}) error {
+	switch v.(type) {
+	case *GetAccessTokenRequest:
+		{
+			return unmarshalInternal(data, v)
+		}
+	}
+	return c.JSONBuiltin.Unmarshal(data, v)
+}
+
+func unmarshalInternal(data []byte, v interface{}) error {
+	switch v := v.(type) {
+	case *GetAccessTokenRequest:
+		{
+			values, err := url.ParseQuery(string(data))
+			if err != nil {
+				return err
+			}
+			grantType := strings.ToUpper(values.Get("grant_type"))
+
+			if grantType == GrantType_REFRESH_TOKEN.String() {
+				v.GrantType = GrantType_REFRESH_TOKEN
+				v.RefreshToken = values.Get(refreshToken)
+			} else if grantType == GrantType_CLIENT_CREDENTIALS.String() {
+				v.GrantType = GrantType_CLIENT_CREDENTIALS
+				v.ClientId = values.Get("client_id")
+				v.ClientSecret = values.Get("client_secret")
+			}
+			return nil
+		}
+	}
+	return Errorf(Code_INTERNAL, "not supported")
 }
 
 // UnmarshalJSON on ReadRequest avoids unmarshalling filter and instead this way we can write a custom struct to do
@@ -318,6 +393,134 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// UnmarshalJSON on QueryTimeSeriesMetricsRequest. Handles enum.
+func (x *QueryTimeSeriesMetricsRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "db":
+			if err := jsoniter.Unmarshal(value, &x.Db); err != nil {
+				return err
+			}
+		case "collection":
+			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
+			}
+		case "from":
+			if err := jsoniter.Unmarshal(value, &x.From); err != nil {
+				return err
+			}
+		case "to":
+			if err := jsoniter.Unmarshal(value, &x.To); err != nil {
+				return err
+			}
+		case "metric_name":
+			if err := jsoniter.Unmarshal(value, &x.MetricName); err != nil {
+				return err
+			}
+		case "tigris_operation":
+			var t string
+			if err := jsoniter.Unmarshal(value, &t); err != nil {
+				return err
+			}
+			switch strings.ToUpper(t) {
+			case "ALL":
+				x.TigrisOperation = TigrisOperation_ALL
+			case "READ":
+				x.TigrisOperation = TigrisOperation_READ
+			case "WRITE":
+				x.TigrisOperation = TigrisOperation_WRITE
+			}
+		case "space_aggregation":
+			var t string
+			if err := jsoniter.Unmarshal(value, &t); err != nil {
+				return err
+			}
+			switch strings.ToUpper(t) {
+			case "AVG":
+				x.SpaceAggregation = MetricQuerySpaceAggregation_AVG
+			case "MIN":
+				x.SpaceAggregation = MetricQuerySpaceAggregation_MIN
+			case "MAX":
+				x.SpaceAggregation = MetricQuerySpaceAggregation_MAX
+			case "SUM":
+				x.SpaceAggregation = MetricQuerySpaceAggregation_SUM
+			}
+		case "space_aggregated_by":
+			if err := jsoniter.Unmarshal(value, &x.SpaceAggregatedBy); err != nil {
+				return err
+			}
+		case "function":
+			var t string
+			if err := jsoniter.Unmarshal(value, &t); err != nil {
+				return err
+			}
+			switch strings.ToUpper(t) {
+			case "RATE":
+				x.Function = MetricQueryFunction_RATE
+			case "COUNT":
+				x.Function = MetricQueryFunction_COUNT
+			case "NONE":
+				x.Function = MetricQueryFunction_NONE
+			}
+		case "additional_functions":
+			var additionalFunctionRaw []jsoniter.RawMessage
+			if err := jsoniter.Unmarshal(value, &additionalFunctionRaw); err != nil {
+				return err
+			}
+
+			x.AdditionalFunctions = []*AdditionalFunction{}
+			for i := 0; i < len(additionalFunctionRaw); i++ {
+				additionalFunc, err := unmarshalAdditionalFunction(additionalFunctionRaw[i])
+				if err != nil {
+					return err
+				}
+				x.AdditionalFunctions = append(x.AdditionalFunctions, additionalFunc)
+			}
+		}
+	}
+	return nil
+}
+
+// UnmarshalJSON on GetAccessTokenRequest. Handles enum.
+func (x *GetAccessTokenRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "grant_type":
+			var grant string
+			if err := jsoniter.Unmarshal(value, &grant); err != nil {
+				return err
+			}
+			switch strings.ToUpper(grant) {
+			case "REFRESH_TOKEN":
+				x.GrantType = GrantType_REFRESH_TOKEN
+			case "CLIENT_CREDENTIALS":
+				x.GrantType = GrantType_CLIENT_CREDENTIALS
+			}
+		case "refresh_token":
+			if err := jsoniter.Unmarshal(value, &x.RefreshToken); err != nil {
+				return err
+			}
+		case "client_id":
+			if err := jsoniter.Unmarshal(value, &x.ClientId); err != nil {
+				return err
+			}
+		case "client_secret":
+			if err := jsoniter.Unmarshal(value, &x.ClientSecret); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 type collDesc struct {
 	Collection string              `json:"collection"`
 	Metadata   *CollectionMetadata `json:"metadata"`
@@ -385,6 +588,56 @@ func (x *EventsResponse) MarshalJSON() ([]byte, error) {
 		},
 	}
 	return json.Marshal(resp)
+}
+
+func (x *PublishRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "db":
+			if err := jsoniter.Unmarshal(value, &x.Db); err != nil {
+				return err
+			}
+		case "collection":
+			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
+			}
+		case "messages":
+			var docs []jsoniter.RawMessage
+			if err := jsoniter.Unmarshal(value, &docs); err != nil {
+				return err
+			}
+
+			x.Messages = make([][]byte, len(docs))
+			for i := 0; i < len(docs); i++ {
+				x.Messages[i] = docs[i]
+			}
+		case "options":
+			if err := jsoniter.Unmarshal(value, &x.Options); err != nil {
+				return err
+			}
+
+			var options map[string]jsoniter.RawMessage
+			if err := jsoniter.Unmarshal(value, &options); err != nil {
+				return err
+			}
+
+			part := false
+			for oKey := range options {
+				if oKey == "partition" {
+					part = true
+				}
+			}
+			if !part {
+				// use -1 to indicate that no partition option was set
+				x.Options.Partition = -1
+			}
+		}
+	}
+	return nil
 }
 
 // Proper marshal timestamp in metadata
@@ -563,4 +816,63 @@ func CreateMDFromSearchMD(x *SearchHitMeta) SearchHitMetadata {
 	}
 
 	return md
+}
+
+func unmarshalAdditionalFunction(data []byte) (*AdditionalFunction, error) {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return nil, err
+	}
+	result := &AdditionalFunction{}
+	for key, value := range mp {
+		switch key {
+		case "rollup":
+			rollup, err := unmarshalRollup(value)
+			if err != nil {
+				return nil, err
+			}
+			result.Rollup = rollup
+		}
+	}
+	return result, nil
+}
+
+func unmarshalRollup(data []byte) (*RollupFunction, error) {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return nil, err
+	}
+
+	result := &RollupFunction{}
+	for key, value := range mp {
+		switch key {
+		case "aggregator":
+			{
+				var t string
+				if err := jsoniter.Unmarshal(value, &t); err != nil {
+					return nil, err
+				}
+				switch strings.ToUpper(t) {
+				case "SUM":
+					result.Aggregator = RollupAggregator_ROLLUP_AGGREGATOR_SUM
+				case "COUNT":
+					result.Aggregator = RollupAggregator_ROLLUP_AGGREGATOR_COUNT
+				case "MIN":
+					result.Aggregator = RollupAggregator_ROLLUP_AGGREGATOR_MIN
+				case "MAX":
+					result.Aggregator = RollupAggregator_ROLLUP_AGGREGATOR_MAX
+				case "AVG":
+					result.Aggregator = RollupAggregator_ROLLUP_AGGREGATOR_AVG
+
+				}
+			}
+		case "interval":
+			var t int64
+			if err := jsoniter.Unmarshal(value, &t); err != nil {
+				return nil, err
+			}
+			result.Interval = t
+		}
+	}
+	return result, nil
 }

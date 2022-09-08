@@ -35,8 +35,9 @@ const (
 )
 
 type grpcDriver struct {
-	api api.TigrisClient
-	driverWithOptions
+	api  api.TigrisClient
+	auth api.AuthClient
+
 	conn *grpc.ClientConn
 }
 
@@ -50,13 +51,13 @@ func GRPCError(err error) error {
 	return &Error{api.FromStatusError(err)}
 }
 
-// NewGRPCClient return Driver interface implementation using GRPC transport protocol
-func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
+// newGRPCClient return Driver interface implementation using GRPC transport protocol
+func newGRPCClient(_ context.Context, url string, config *config.Driver) (*grpcDriver, error) {
 	if !strings.Contains(url, ":") {
 		url = fmt.Sprintf("%s:%d", url, DefaultGRPCPort)
 	}
 
-	oCfg, ctxClient := configAuth(config)
+	tokenSource, _, _ := configAuth(config)
 
 	opts := []grpc.DialOption{
 		grpc.FailOnNonTempDialError(true),
@@ -65,11 +66,11 @@ func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driv
 		grpc.WithBlock(),
 	}
 
-	if config.TLS != nil || oCfg.ClientID != "" || oCfg.ClientSecret != "" {
+	if config.TLS != nil || tokenSource != nil {
 		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(config.TLS)))
 
-		if oCfg.ClientID != "" || oCfg.ClientSecret != "" {
-			opts = append(opts, grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: oCfg.TokenSource(ctxClient)}))
+		if tokenSource != nil {
+			opts = append(opts, grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: tokenSource}))
 		}
 	} else {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -80,7 +81,7 @@ func NewGRPCClient(ctx context.Context, url string, config *config.Driver) (Driv
 		return nil, GRPCError(err)
 	}
 
-	return &driver{driverWithOptions: &grpcDriver{conn: conn, api: api.NewTigrisClient(conn)}}, nil
+	return &grpcDriver{conn: conn, api: api.NewTigrisClient(conn), auth: api.NewAuthClient(conn)}, nil
 }
 
 func (c *grpcDriver) Close() error {
@@ -445,4 +446,80 @@ func (g *grpcEventStreamReader) read() (Event, error) {
 func (g *grpcEventStreamReader) close() error {
 	g.cancel()
 	return nil
+}
+
+func (c *grpcDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
+	r, err := c.auth.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	if r.CreatedApplication == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return (*Application)(r.CreatedApplication), nil
+}
+
+func (c *grpcDriver) DeleteApplication(ctx context.Context, id string) error {
+	_, err := c.auth.DeleteApplication(ctx, &api.DeleteApplicationsRequest{Id: id})
+	return GRPCError(err)
+}
+
+func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
+	r, err := c.auth.UpdateApplication(ctx, &api.UpdateApplicationRequest{Id: id, Name: name, Description: description})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	if r.UpdatedApplication == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return (*Application)(r.UpdatedApplication), nil
+}
+
+func (c *grpcDriver) ListApplications(ctx context.Context) ([]*Application, error) {
+	r, err := c.auth.ListApplications(ctx, &api.ListApplicationsRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	applications := make([]*Application, 0, len(r.Applications))
+	for _, a := range r.GetApplications() {
+		applications = append(applications, (*Application)(a))
+	}
+	return applications, nil
+}
+
+func (c *grpcDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
+	r, err := c.auth.RotateApplicationSecret(ctx, &api.RotateApplicationSecretRequest{Id: id})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	if r.Application == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return (*Application)(r.Application), nil
+}
+
+func (c *grpcDriver) GetAccessToken(ctx context.Context, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error) {
+	tp := api.GrantType_CLIENT_CREDENTIALS
+	if refreshToken != "" {
+		tp = api.GrantType_REFRESH_TOKEN
+	}
+
+	r, err := c.auth.GetAccessToken(ctx, &api.GetAccessTokenRequest{
+		GrantType:    tp,
+		RefreshToken: refreshToken,
+		ClientId:     applicationID,
+		ClientSecret: applicationSecret,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*TokenResponse)(r), nil
 }

@@ -16,19 +16,25 @@ package driver
 
 import (
 	"encoding/json"
+	"time"
 
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
 const (
-	GRPC = iota
-	HTTP = iota
+	GRPC  = "GRPC"
+	HTTP  = "HTTP"
+	HTTPS = "HTTPS"
 
 	ApplicationID     = "TIGRIS_APPLICATION_ID"
 	ApplicationSecret = "TIGRIS_APPLICATION_SECRET"
+	Token             = "TIGRIS_TOKEN"
+	Protocol          = "TIGRIS_PROTOCOL"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version
+
+	tokenRequestTimeout = 15 * time.Second
 )
 
 var (
@@ -94,3 +100,6 @@ func (e *Error) As(i any) bool {
 	}
 	return false
 }
+
+type Application api.Application
+type TokenResponse api.GetAccessTokenResponse

@@ -20,7 +20,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -45,6 +44,7 @@ var (
 	databasePathPattern   = "/databases/*"
 	collectionPathPattern = "/collections/*"
 	documentPathPattern   = "/documents/*"
+	authPathPattern       = "/auth/*"
 )
 
 func GRPCURL(shift int) string {
@@ -90,23 +90,30 @@ func customMatcher(key string) (string, bool) {
 	}
 }
 
-func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
+func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, *mock.MockAuthServer, func()) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	c := gomock.NewController(t)
 
 	m := mock.NewMockTigrisServer(c)
+	a := mock.NewMockAuthServer(c)
 
 	inproc := &inprocgrpc.Channel{}
 	client := api.NewTigrisClient(inproc)
+	authClient := api.NewAuthClient(inproc)
 
 	mux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &api.CustomMarshaler{}),
 		runtime.WithIncomingHeaderMatcher(customMatcher))
+
 	err := api.RegisterTigrisHandlerClient(ctx, mux, client)
 	require.NoError(t, err)
+	err = api.RegisterAuthHandlerClient(ctx, mux, authClient)
+	require.NoError(t, err)
+
 	api.RegisterTigrisServer(inproc, m)
+	api.RegisterAuthServer(inproc, a)
 
 	cert, err := tls.X509KeyPair([]byte(ServerCert), []byte(ServerKey))
 	require.NoError(t, err)
@@ -118,6 +125,7 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 
 	s := grpc.NewServer(grpc.Creds(credentials.NewTLS(tlsConfig)))
 	api.RegisterTigrisServer(s, m)
+	api.RegisterAuthServer(s, a)
 
 	r := chi.NewRouter()
 
@@ -133,13 +141,8 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 	r.HandleFunc(apiPathPrefix+"/info", func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
 	})
-	r.HandleFunc("/auth/token", func(w http.ResponseWriter, r *http.Request) {
-		b, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
-		require.Equal(t, []byte(`client_id=client_id_test&client_secret=client_secret_test&grant_type=client_credentials`), b)
-		w.Header().Set("Content-Type", "application/json")
-		_, err = w.Write([]byte(`{"access_token": "token_config_123", "refresh_token": "refresh_token_test_123", "expires_in" : 1}`))
-		require.NoError(t, err)
+	r.HandleFunc(authPathPattern, func(w http.ResponseWriter, r *http.Request) {
+		mux.ServeHTTP(w, r)
 	})
 
 	var wg sync.WaitGroup
@@ -161,7 +164,7 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, func()) {
 		_ = server.ListenAndServeTLS("", "")
 	}()
 
-	return m, func() {
+	return m, a, func() {
 		err = server.Shutdown(context.Background())
 		require.NoError(t, err)
 		s.Stop()

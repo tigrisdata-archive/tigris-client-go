@@ -33,13 +33,13 @@ ${API_DIR}/client/${V}/%/http.go: ${PROTO_DIR}/%_openapi.yaml
 		-o ${API_DIR}/client/${V}/$(*F)/http.go \
 		/tmp/$(*F)_openapi.yaml
 
-generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${GEN_DIR}/admin.pb.go ${GEN_DIR}/auth.pb.go ${API_DIR}/client/${V}/api/http.go
+generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${GEN_DIR}/admin.pb.go ${GEN_DIR}/auth.pb.go ${GEN_DIR}/observability.pb.go ${API_DIR}/client/${V}/api/http.go ${API_DIR}/client/${V}/auth/http.go
 
-mock/api/grpc.go mock/driver.go:
+mock/api/grpc.go mock/driver.go: ${GEN_DIR}/api.pb.go ${GEN_DIR}/auth.pb.go
 	mkdir -p mock/api
 	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver \
 		Driver,Tx,Database,Iterator,SearchResultIterator,EventIterator
-	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer
+	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer,AuthServer
 
 mock: mock/api/grpc.go mock/driver.go
 

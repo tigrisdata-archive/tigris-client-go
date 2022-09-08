@@ -20,7 +20,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
+	"strings"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 )
@@ -267,19 +269,33 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 	return v.Index(0).Interface(), nil
 }
 
-// NewDriver connect to Tigris at the specified URL
+// NewDriver connect to the Tigris instance at the specified URL.
 // URL should be in the form: {hostname}:{port}
 func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	if cfg == nil {
 		cfg = &config.Driver{}
 	}
-	if cfg.TLS == nil && (cfg.ApplicationId != "" && cfg.ApplicationSecret != "") {
+	if cfg.TLS == nil && (cfg.ApplicationId != "" || cfg.ApplicationSecret != "" || cfg.Token != "") {
 		return nil, errors.New("credentials over plaintext communication is discouraged")
 	}
-	if DefaultProtocol == GRPC {
-		return NewGRPCClient(ctx, cfg.URL, cfg)
-	} else if DefaultProtocol == HTTP {
-		return NewHTTPClient(ctx, cfg.URL, cfg)
+
+	protocol := DefaultProtocol
+	if os.Getenv(Protocol) != "" {
+		protocol = strings.ToUpper(os.Getenv(Protocol))
 	}
-	return nil, fmt.Errorf("unsupported protocol")
+
+	var drv driverWithOptions
+	var err error
+	if protocol == GRPC {
+		drv, err = newGRPCClient(ctx, cfg.URL, cfg)
+	} else if protocol == HTTP || protocol == HTTPS {
+		drv, err = newHTTPClient(ctx, cfg.URL, cfg)
+	} else {
+		err = fmt.Errorf("unsupported protocol")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &driver{driverWithOptions: drv}, nil
 }

@@ -377,19 +377,9 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 			if err := jsoniter.Unmarshal(value, &x.Options); err != nil {
 				return err
 			}
-		case "type":
-			var t string
-			if err := jsoniter.Unmarshal(value, &t); err != nil {
-				return err
-			}
-			switch t {
-			case "documents":
-				x.Type = CollectionType_DOCUMENTS
-			case "messages":
-				x.Type = CollectionType_MESSAGES
-			}
 		}
 	}
+
 	return nil
 }
 
@@ -638,6 +628,15 @@ func (x *PublishRequest) UnmarshalJSON(data []byte) error {
 		}
 	}
 	return nil
+}
+
+func (x *SubscribeResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		Message json.RawMessage `json:"message"`
+	}{
+		Message: x.Message,
+	}
+	return json.Marshal(resp)
 }
 
 // Proper marshal timestamp in metadata

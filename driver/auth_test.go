@@ -156,7 +156,7 @@ func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *moc
 	if getToken {
 		mca.EXPECT().GetAccessToken(gomock.Any(),
 			pm(&api.GetAccessTokenRequest{ClientId: "client_id_test", ClientSecret: "client_secret_test", GrantType: api.GrantType_CLIENT_CREDENTIALS})).Return(
-			&api.GetAccessTokenResponse{AccessToken: token, RefreshToken: "refresh_token1"}, nil)
+			&api.GetAccessTokenResponse{AccessToken: token, RefreshToken: "refresh_token1", ExpiresIn: 11}, nil)
 	}
 
 	mc.EXPECT().Delete(gomock.Any(),
@@ -210,6 +210,10 @@ func TestGRPCDriverCredentials(t *testing.T) {
 		defer cancel()
 
 		testDriverToken(t, client, mockServer, mockAuthServer, "token_config_123", true)
+		// token expiry timeout is 11 seconds. oauth2 timeout delta is 10 seconds.
+		time.Sleep(1 * time.Second)
+		// check that new token requested after expiry
+		testDriverToken(t, client, mockServer, mockAuthServer, "token_config_123", true)
 	})
 
 	t.Run("env", func(t *testing.T) {
@@ -246,6 +250,9 @@ func TestHTTPDriverCredentials(t *testing.T) {
 		})
 		defer cancel()
 
+		testDriverToken(t, client, mockServer, mockAuthServer, "token_config_123", true)
+		time.Sleep(1 * time.Second)
+		// check that new token requested after expiry
 		testDriverToken(t, client, mockServer, mockAuthServer, "token_config_123", true)
 	})
 

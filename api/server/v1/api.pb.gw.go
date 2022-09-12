@@ -639,7 +639,111 @@ func request_Tigris_Read_0(ctx context.Context, marshaler runtime.Marshaler, cli
 
 }
 
+func request_Tigris_Read_1(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_ReadClient, runtime.ServerMetadata, error) {
+	var protoReq ReadRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["db"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+	}
+
+	protoReq.Db, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+	}
+
+	val, ok = pathParams["collection"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
+	}
+
+	protoReq.Collection, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
+	}
+
+	stream, err := client.Read(ctx, &protoReq)
+	if err != nil {
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
+
+}
+
 func request_Tigris_Search_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_SearchClient, runtime.ServerMetadata, error) {
+	var protoReq SearchRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["db"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+	}
+
+	protoReq.Db, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+	}
+
+	val, ok = pathParams["collection"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
+	}
+
+	protoReq.Collection, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
+	}
+
+	stream, err := client.Search(ctx, &protoReq)
+	if err != nil {
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
+
+}
+
+func request_Tigris_Search_1(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_SearchClient, runtime.ServerMetadata, error) {
 	var protoReq SearchRequest
 	var metadata runtime.ServerMetadata
 
@@ -1636,7 +1740,21 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		return
 	})
 
+	mux.Handle("POST", pattern_Tigris_Read_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
+	})
+
 	mux.Handle("POST", pattern_Tigris_Search_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
+	})
+
+	mux.Handle("POST", pattern_Tigris_Search_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1873,7 +1991,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/publish"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/messages/publish"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2106,6 +2224,27 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
+	mux.Handle("POST", pattern_Tigris_Read_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/messages/read"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Tigris_Read_1(ctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Tigris_Read_1(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("POST", pattern_Tigris_Search_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -2124,6 +2263,27 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		}
 
 		forward_Tigris_Search_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_Tigris_Search_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/messages/search"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Tigris_Search_1(ctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Tigris_Search_1(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2342,7 +2502,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/publish"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/messages/publish"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2363,7 +2523,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Subscribe", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/subscribe"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Subscribe", runtime.WithHTTPPathPattern("/api/v1/databases/{db}/collections/{collection}/messages/subscribe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2399,7 +2559,11 @@ var (
 
 	pattern_Tigris_Read_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "read"}, ""))
 
+	pattern_Tigris_Read_1 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "messages", "read"}, ""))
+
 	pattern_Tigris_Search_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "documents", "search"}, ""))
+
+	pattern_Tigris_Search_1 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "messages", "search"}, ""))
 
 	pattern_Tigris_CreateOrUpdateCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "createOrUpdate"}, ""))
 
@@ -2421,9 +2585,9 @@ var (
 
 	pattern_Tigris_GetInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "info"}, ""))
 
-	pattern_Tigris_Publish_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "publish"}, ""))
+	pattern_Tigris_Publish_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "messages", "publish"}, ""))
 
-	pattern_Tigris_Subscribe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "databases", "db", "collections", "collection", "subscribe"}, ""))
+	pattern_Tigris_Subscribe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"api", "v1", "databases", "db", "collections", "collection", "messages", "subscribe"}, ""))
 )
 
 var (
@@ -2443,7 +2607,11 @@ var (
 
 	forward_Tigris_Read_0 = runtime.ForwardResponseStream
 
+	forward_Tigris_Read_1 = runtime.ForwardResponseStream
+
 	forward_Tigris_Search_0 = runtime.ForwardResponseStream
+
+	forward_Tigris_Search_1 = runtime.ForwardResponseStream
 
 	forward_Tigris_CreateOrUpdateCollection_0 = runtime.ForwardResponseMessage
 

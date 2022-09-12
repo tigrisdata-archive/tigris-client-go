@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 	"unsafe"
@@ -27,6 +28,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
+	authHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/auth"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 )
@@ -35,6 +37,10 @@ const (
 	DefaultHTTPPort    = 443
 	SetCookieHeaderKey = "Set-Cookie"
 	CookieHeaderKey    = "Cookie"
+
+	grantTypeRefreshToken      = "refresh_token"
+	grantTypeClientCredentials = "client_credentials"
+	scope                      = "offline_access openid"
 )
 
 type txCtxKey struct{}
@@ -84,7 +90,11 @@ func HTTPError(err error, resp *http.Response) error {
 }
 
 type httpDriver struct {
-	api *apiHTTP.ClientWithResponses
+	api  *apiHTTP.ClientWithResponses
+	auth *authHTTP.ClientWithResponses
+
+	tokenURL string
+	cfg      *config.Driver
 }
 
 func respDecode(body io.ReadCloser, v interface{}) error {
@@ -182,8 +192,8 @@ func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx, cookies []*htt
 	return result
 }
 
-// NewHTTPClient return Driver interface implementation using HTTP transport protocol
-func NewHTTPClient(ctx context.Context, url string, config *config.Driver) (Driver, error) {
+// newHTTPClient return Driver interface implementation using HTTP transport protocol
+func newHTTPClient(_ context.Context, url string, config *config.Driver) (*httpDriver, error) {
 	if !strings.Contains(url, ":") {
 		url = fmt.Sprintf("%s:%d", url, DefaultHTTPPort)
 	}
@@ -192,20 +202,23 @@ func NewHTTPClient(ctx context.Context, url string, config *config.Driver) (Driv
 		url = "https://" + url
 	}
 
-	oCfg, ctxClient := configAuth(config)
+	_, httpClient, tokenURL := configAuth(config)
 
-	hc := &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
-	if oCfg.ClientID != "" || oCfg.ClientSecret != "" {
-		hc = oCfg.Client(ctxClient)
+	if httpClient == nil {
+		httpClient = &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
 	}
 
-	c, err := apiHTTP.NewClientWithResponses(url, apiHTTP.WithHTTPClient(hc), apiHTTP.WithRequestEditorFn(setHeaders))
+	c, err := apiHTTP.NewClientWithResponses(url, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(setHeaders))
 	if err != nil {
 		return nil, err
 	}
 
-	//	return &driver{driverWithOptions: &httpDriver{httpCRUD: &httpCRUD{api: c}}}, err
-	return &driver{driverWithOptions: &httpDriver{api: c}}, nil
+	ac, err := authHTTP.NewClientWithResponses(url, authHTTP.WithHTTPClient(httpClient), authHTTP.WithRequestEditorFn(setHeaders))
+	if err != nil {
+		return nil, err
+	}
+
+	return &httpDriver{api: c, auth: ac, tokenURL: tokenURL, cfg: config}, nil
 }
 
 func (c *httpDriver) Close() error {
@@ -260,13 +273,13 @@ func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*Describe
 	}
 
 	var r DescribeDatabaseResponse
-	r.Db = ToString(d.Db)
-	r.Size = ToInt64(d.Size)
+	r.Db = PtrToString(d.Db)
+	r.Size = PtrToInt64(d.Size)
 	for _, v := range *d.Collections {
 		r.Collections = append(r.Collections, &api.CollectionDescription{
-			Collection: ToString(v.Collection),
+			Collection: PtrToString(v.Collection),
 			Schema:     v.Schema,
-			Size:       ToInt64(v.Size),
+			Size:       PtrToInt64(v.Size),
 		})
 	}
 	return &r, nil
@@ -320,7 +333,7 @@ func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options 
 	for _, incomingCookie := range resp.Cookies() {
 		outboundCookies = append(outboundCookies, incomingCookie)
 	}
-	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: ToString(bTx.TxCtx.Id), Origin: ToString(bTx.TxCtx.Origin)}, cookies: outboundCookies}, nil
+	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: PtrToString(bTx.TxCtx.Id), Origin: PtrToString(bTx.TxCtx.Origin)}, cookies: outboundCookies}, nil
 }
 
 func (c *httpCRUD) Commit(ctx context.Context) error {
@@ -423,8 +436,8 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 
 	r := &DescribeCollectionResponse{
 		Schema:     d.Schema,
-		Collection: ToString(d.Collection),
-		Size:       ToInt64(d.Size),
+		Collection: PtrToString(d.Collection),
+		Size:       PtrToInt64(d.Size),
 	}
 
 	return r, nil
@@ -681,14 +694,14 @@ func (g *httpEventStreamReader) read() (Event, error) {
 	}
 	e := res.Result.Event
 	return &api.StreamEvent{
-		Collection: ToString(e.Collection),
+		Collection: PtrToString(e.Collection),
 		Data:       e.Data,
-		Key:        ToBytes(e.Key),
-		Last:       ToBool(e.Last),
-		Lkey:       ToBytes(e.Lkey),
-		Rkey:       ToBytes(e.Rkey),
-		Op:         ToString(e.Op),
-		TxId:       ToBytes(e.TxId),
+		Key:        PtrToBytes(e.Key),
+		Last:       PtrToBool(e.Last),
+		Lkey:       PtrToBytes(e.Lkey),
+		Rkey:       PtrToBytes(e.Rkey),
+		Op:         PtrToString(e.Op),
+		TxId:       PtrToBytes(e.TxId),
 	}, nil
 }
 
@@ -696,30 +709,120 @@ func (g *httpEventStreamReader) close() error {
 	return g.closer.Close()
 }
 
-func ToString(s *string) string {
-	if s == nil {
-		return ""
+func (c *httpDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
+	resp, err := c.auth.AuthCreateApplication(ctx, authHTTP.AuthCreateApplicationJSONBody{Name: &name, Description: &description})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
 	}
-	return *s
+
+	var app struct {
+		CreatedApplication Application `json:"created_application"`
+	}
+
+	if err := respDecode(resp.Body, &app); err != nil {
+		return nil, err
+	}
+
+	return &app.CreatedApplication, nil
 }
 
-func ToBytes(b *[]byte) []byte {
-	if b == nil {
-		return nil
-	}
-	return *b
+func (c *httpDriver) DeleteApplication(ctx context.Context, id string) error {
+	resp, err := c.auth.AuthDeleteApplication(ctx, authHTTP.AuthDeleteApplicationJSONBody{Id: &id})
+	return HTTPError(err, resp)
 }
 
-func ToBool(b *bool) bool {
-	if b == nil {
-		return false
+func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
+	resp, err := c.auth.AuthUpdateApplication(ctx, authHTTP.AuthUpdateApplicationJSONBody{Id: &id, Name: &name, Description: &description})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
 	}
-	return *b
+
+	var app struct {
+		UpdatedApplication Application `json:"updated_application"`
+	}
+
+	if err := respDecode(resp.Body, &app); err != nil {
+		return nil, err
+	}
+
+	return &app.UpdatedApplication, nil
 }
 
-func ToInt64(b *int64) int64 {
-	if b == nil {
-		return 0
+func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, error) {
+	resp, err := c.auth.AuthListApplications(ctx, authHTTP.AuthListApplicationsJSONBody{})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
 	}
-	return *b
+
+	var apps struct {
+		Applications []*Application
+	}
+
+	if err := respDecode(resp.Body, &apps); err != nil {
+		return nil, err
+	}
+
+	return apps.Applications, nil
+}
+
+func (c *httpDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
+	resp, err := c.auth.AuthRotateApplicationSecret(ctx, authHTTP.AuthRotateApplicationSecretJSONBody{Id: &id})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var app struct {
+		Application Application
+	}
+
+	if err := respDecode(resp.Body, &app); err != nil {
+		return nil, err
+	}
+
+	return &app.Application, nil
+}
+
+func (c *httpDriver) GetAccessToken(ctx context.Context, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error) {
+	data := url.Values{
+		"client_id":     {applicationID},
+		"client_secret": {applicationSecret},
+		"grant_type":    {grantTypeClientCredentials},
+		"scope":         {scope},
+	}
+	if refreshToken != "" {
+		data = url.Values{
+			"refresh_token": {refreshToken},
+			"client_id":     {applicationID},
+			"client_secret": {applicationSecret},
+			"grant_type":    {grantTypeRefreshToken},
+			"scope":         {scope},
+		}
+	}
+	t, ok := ctx.Deadline()
+	if !ok {
+		t = time.Now().Add(tokenRequestTimeout)
+	}
+	resp, err := (&http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: c.cfg.TLS,
+		},
+		Timeout: t.Sub(time.Now()),
+	}).PostForm(c.tokenURL, data)
+	if err != nil {
+		return nil, api.Errorf(api.Code_INTERNAL, "failed to get access token: reason = %s", err.Error())
+	}
+	defer func() { _ = resp.Body.Close() }()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, api.Errorf(api.Code_INTERNAL, "failed to get access token: reason = %s", err.Error())
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, api.Errorf(api.Code_INTERNAL, "failed to get access token: reason = %s", string(body))
+	}
+	var tr TokenResponse
+	err = json.Unmarshal(body, &tr)
+	if err != nil {
+		return nil, api.Errorf(api.Code_INTERNAL, "failed to parse external response: reason = %s", err.Error())
+	}
+	return &tr, nil
 }

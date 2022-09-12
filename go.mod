@@ -3,6 +3,7 @@ module github.com/tigrisdata/tigris-client-go
 go 1.18
 
 require (
+	github.com/ajg/form v1.5.1
 	github.com/deepmap/oapi-codegen v1.11.0
 	github.com/fullstorydev/grpchan v1.1.1
 	github.com/gertd/go-pluralize v0.2.1

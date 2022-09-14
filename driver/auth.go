@@ -2,7 +2,6 @@ package driver
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/tigrisdata/tigris-client-go/config"
@@ -22,12 +21,7 @@ type Auth interface {
 
 // NewAuth instantiates authentication API client
 func NewAuth(ctx context.Context, cfg *config.Driver) (Auth, error) {
-	if cfg == nil {
-		cfg = &config.Driver{}
-	}
-	if cfg.TLS == nil && (cfg.ApplicationId != "" || cfg.ApplicationSecret != "" || cfg.Token != "") {
-		return nil, errors.New("credentials over plaintext communication is discouraged")
-	}
+	cfg = initConfig(cfg)
 
 	var auth Auth
 	var err error

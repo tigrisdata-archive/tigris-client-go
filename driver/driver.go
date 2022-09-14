@@ -269,9 +269,7 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 	return v.Index(0).Interface(), nil
 }
 
-// NewDriver connect to the Tigris instance at the specified URL.
-// URL should be in the form: {hostname}:{port}
-func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
+func initConfig(cfg *config.Driver) *config.Driver {
 	if cfg == nil {
 		cfg = &config.Driver{}
 	}
@@ -279,6 +277,14 @@ func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	if cfg.TLS == nil && (cfg.ApplicationId != "" || cfg.ApplicationSecret != "" || cfg.Token != "") {
 		cfg.TLS = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
+
+	return cfg
+}
+
+// NewDriver connect to the Tigris instance at the specified URL.
+// URL should be in the form: {hostname}:{port}
+func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
+	cfg = initConfig(cfg)
 
 	protocol := DefaultProtocol
 	if os.Getenv(Protocol) != "" {

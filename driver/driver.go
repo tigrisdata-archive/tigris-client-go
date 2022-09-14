@@ -18,7 +18,7 @@ package driver
 
 import (
 	"context"
-	"errors"
+	"crypto/tls"
 	"fmt"
 	"os"
 	"reflect"
@@ -275,8 +275,9 @@ func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	if cfg == nil {
 		cfg = &config.Driver{}
 	}
+
 	if cfg.TLS == nil && (cfg.ApplicationId != "" || cfg.ApplicationSecret != "" || cfg.Token != "") {
-		return nil, errors.New("credentials over plaintext communication is discouraged")
+		cfg.TLS = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 
 	protocol := DefaultProtocol

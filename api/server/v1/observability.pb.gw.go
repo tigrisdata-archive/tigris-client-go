@@ -78,7 +78,7 @@ func RegisterObservabilityHandlerServer(ctx context.Context, mux *runtime.ServeM
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.observability.v1.Observability/QueryTimeSeriesMetrics", runtime.WithHTTPPathPattern("/observability/v1/metrics/timeseries/query"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.observability.v1.Observability/QueryTimeSeriesMetrics", runtime.WithHTTPPathPattern("/v1/observability/metrics/timeseries/query"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -141,7 +141,7 @@ func RegisterObservabilityHandlerClient(ctx context.Context, mux *runtime.ServeM
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.observability.v1.Observability/QueryTimeSeriesMetrics", runtime.WithHTTPPathPattern("/observability/v1/metrics/timeseries/query"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.observability.v1.Observability/QueryTimeSeriesMetrics", runtime.WithHTTPPathPattern("/v1/observability/metrics/timeseries/query"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -161,7 +161,7 @@ func RegisterObservabilityHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_Observability_QueryTimeSeriesMetrics_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"observability", "v1", "metrics", "timeseries", "query"}, ""))
+	pattern_Observability_QueryTimeSeriesMetrics_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"v1", "observability", "metrics", "timeseries", "query"}, ""))
 )
 
 var (

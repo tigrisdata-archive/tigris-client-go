@@ -25,16 +25,6 @@ type AuthClient interface {
 	// Gets an access token.
 	// supports two grant_type: [refresh_token, client_credentials]
 	GetAccessToken(ctx context.Context, in *GetAccessTokenRequest, opts ...grpc.CallOption) (*GetAccessTokenResponse, error)
-	// Create an application.
-	CreateApplication(ctx context.Context, in *CreateApplicationRequest, opts ...grpc.CallOption) (*CreateApplicationResponse, error)
-	// Update an application.
-	UpdateApplication(ctx context.Context, in *UpdateApplicationRequest, opts ...grpc.CallOption) (*UpdateApplicationResponse, error)
-	// Delete an application.
-	DeleteApplication(ctx context.Context, in *DeleteApplicationsRequest, opts ...grpc.CallOption) (*DeleteApplicationResponse, error)
-	// Lists all application visible to requesting actor.
-	ListApplications(ctx context.Context, in *ListApplicationsRequest, opts ...grpc.CallOption) (*ListApplicationsResponse, error)
-	// RotateApplicationRequest returns the new application with rotated secret
-	RotateApplicationSecret(ctx context.Context, in *RotateApplicationSecretRequest, opts ...grpc.CallOption) (*RotateApplicationSecretResponse, error)
 }
 
 type authClient struct {
@@ -54,51 +44,6 @@ func (c *authClient) GetAccessToken(ctx context.Context, in *GetAccessTokenReque
 	return out, nil
 }
 
-func (c *authClient) CreateApplication(ctx context.Context, in *CreateApplicationRequest, opts ...grpc.CallOption) (*CreateApplicationResponse, error) {
-	out := new(CreateApplicationResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.auth.v1.Auth/createApplication", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authClient) UpdateApplication(ctx context.Context, in *UpdateApplicationRequest, opts ...grpc.CallOption) (*UpdateApplicationResponse, error) {
-	out := new(UpdateApplicationResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.auth.v1.Auth/updateApplication", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authClient) DeleteApplication(ctx context.Context, in *DeleteApplicationsRequest, opts ...grpc.CallOption) (*DeleteApplicationResponse, error) {
-	out := new(DeleteApplicationResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.auth.v1.Auth/deleteApplication", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authClient) ListApplications(ctx context.Context, in *ListApplicationsRequest, opts ...grpc.CallOption) (*ListApplicationsResponse, error) {
-	out := new(ListApplicationsResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.auth.v1.Auth/listApplications", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authClient) RotateApplicationSecret(ctx context.Context, in *RotateApplicationSecretRequest, opts ...grpc.CallOption) (*RotateApplicationSecretResponse, error) {
-	out := new(RotateApplicationSecretResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.auth.v1.Auth/rotateApplicationSecret", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // AuthServer is the server API for Auth service.
 // All implementations should embed UnimplementedAuthServer
 // for forward compatibility
@@ -106,16 +51,6 @@ type AuthServer interface {
 	// Gets an access token.
 	// supports two grant_type: [refresh_token, client_credentials]
 	GetAccessToken(context.Context, *GetAccessTokenRequest) (*GetAccessTokenResponse, error)
-	// Create an application.
-	CreateApplication(context.Context, *CreateApplicationRequest) (*CreateApplicationResponse, error)
-	// Update an application.
-	UpdateApplication(context.Context, *UpdateApplicationRequest) (*UpdateApplicationResponse, error)
-	// Delete an application.
-	DeleteApplication(context.Context, *DeleteApplicationsRequest) (*DeleteApplicationResponse, error)
-	// Lists all application visible to requesting actor.
-	ListApplications(context.Context, *ListApplicationsRequest) (*ListApplicationsResponse, error)
-	// RotateApplicationRequest returns the new application with rotated secret
-	RotateApplicationSecret(context.Context, *RotateApplicationSecretRequest) (*RotateApplicationSecretResponse, error)
 }
 
 // UnimplementedAuthServer should be embedded to have forward compatible implementations.
@@ -124,21 +59,6 @@ type UnimplementedAuthServer struct {
 
 func (UnimplementedAuthServer) GetAccessToken(context.Context, *GetAccessTokenRequest) (*GetAccessTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAccessToken not implemented")
-}
-func (UnimplementedAuthServer) CreateApplication(context.Context, *CreateApplicationRequest) (*CreateApplicationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateApplication not implemented")
-}
-func (UnimplementedAuthServer) UpdateApplication(context.Context, *UpdateApplicationRequest) (*UpdateApplicationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateApplication not implemented")
-}
-func (UnimplementedAuthServer) DeleteApplication(context.Context, *DeleteApplicationsRequest) (*DeleteApplicationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteApplication not implemented")
-}
-func (UnimplementedAuthServer) ListApplications(context.Context, *ListApplicationsRequest) (*ListApplicationsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListApplications not implemented")
-}
-func (UnimplementedAuthServer) RotateApplicationSecret(context.Context, *RotateApplicationSecretRequest) (*RotateApplicationSecretResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RotateApplicationSecret not implemented")
 }
 
 // UnsafeAuthServer may be embedded to opt out of forward compatibility for this service.
@@ -170,96 +90,6 @@ func _Auth_GetAccessToken_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Auth_CreateApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateApplicationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).CreateApplication(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.auth.v1.Auth/createApplication",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).CreateApplication(ctx, req.(*CreateApplicationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Auth_UpdateApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateApplicationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).UpdateApplication(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.auth.v1.Auth/updateApplication",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).UpdateApplication(ctx, req.(*UpdateApplicationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Auth_DeleteApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteApplicationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).DeleteApplication(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.auth.v1.Auth/deleteApplication",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).DeleteApplication(ctx, req.(*DeleteApplicationsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Auth_ListApplications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListApplicationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).ListApplications(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.auth.v1.Auth/listApplications",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).ListApplications(ctx, req.(*ListApplicationsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Auth_RotateApplicationSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RotateApplicationSecretRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServer).RotateApplicationSecret(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.auth.v1.Auth/rotateApplicationSecret",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServer).RotateApplicationSecret(ctx, req.(*RotateApplicationSecretRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -270,26 +100,6 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getAccessToken",
 			Handler:    _Auth_GetAccessToken_Handler,
-		},
-		{
-			MethodName: "createApplication",
-			Handler:    _Auth_CreateApplication_Handler,
-		},
-		{
-			MethodName: "updateApplication",
-			Handler:    _Auth_UpdateApplication_Handler,
-		},
-		{
-			MethodName: "deleteApplication",
-			Handler:    _Auth_DeleteApplication_Handler,
-		},
-		{
-			MethodName: "listApplications",
-			Handler:    _Auth_ListApplications_Handler,
-		},
-		{
-			MethodName: "rotateApplicationSecret",
-			Handler:    _Auth_RotateApplicationSecret_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

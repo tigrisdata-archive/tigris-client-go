@@ -130,7 +130,7 @@ func RegisterAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/CreateNamespace", runtime.WithHTTPPathPattern("/admin/v1/namespaces/{name}/create"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/CreateNamespace", runtime.WithHTTPPathPattern("/v1/admin/namespaces/{name}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -154,7 +154,7 @@ func RegisterAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/ListNamespaces", runtime.WithHTTPPathPattern("/admin/v1/namespaces/list"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/ListNamespaces", runtime.WithHTTPPathPattern("/v1/admin/namespaces/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -217,7 +217,7 @@ func RegisterAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/CreateNamespace", runtime.WithHTTPPathPattern("/admin/v1/namespaces/{name}/create"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/CreateNamespace", runtime.WithHTTPPathPattern("/v1/admin/namespaces/{name}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -238,7 +238,7 @@ func RegisterAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/ListNamespaces", runtime.WithHTTPPathPattern("/admin/v1/namespaces/list"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.admin.v1.Admin/ListNamespaces", runtime.WithHTTPPathPattern("/v1/admin/namespaces/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -258,9 +258,9 @@ func RegisterAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Admin_CreateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"admin", "v1", "namespaces", "name", "create"}, ""))
+	pattern_Admin_CreateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "admin", "namespaces", "name", "create"}, ""))
 
-	pattern_Admin_ListNamespaces_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"admin", "v1", "namespaces", "list"}, ""))
+	pattern_Admin_ListNamespaces_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "admin", "namespaces", "list"}, ""))
 )
 
 var (

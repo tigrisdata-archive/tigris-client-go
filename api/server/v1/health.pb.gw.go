@@ -62,7 +62,7 @@ func RegisterHealthAPIHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/.HealthAPI/Health", runtime.WithHTTPPathPattern("/api/v1/health"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/.HealthAPI/Health", runtime.WithHTTPPathPattern("/v1/health"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -125,7 +125,7 @@ func RegisterHealthAPIHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/.HealthAPI/Health", runtime.WithHTTPPathPattern("/api/v1/health"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/.HealthAPI/Health", runtime.WithHTTPPathPattern("/v1/health"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -145,7 +145,7 @@ func RegisterHealthAPIHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 }
 
 var (
-	pattern_HealthAPI_Health_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "health"}, ""))
+	pattern_HealthAPI_Health_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "health"}, ""))
 )
 
 var (

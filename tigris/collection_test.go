@@ -557,7 +557,7 @@ func pm(m proto.Message) gomock.Matcher {
 }
 
 func TestClientSchemaMigration(t *testing.T) {
-	mc, _, cancel := test.SetupTests(t, 6)
+	mc, _, _, cancel := test.SetupTests(t, 6)
 	defer cancel()
 
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)

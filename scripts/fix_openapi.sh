@@ -19,6 +19,31 @@ set -e
 IN_FILE=$1
 OUT_FILE=$2
 
+main() {
+	fix_bytes
+
+	# Fix the types of filter and document fields to be object on HTTP wire.
+	# The original format in proto file is "bytes", which allows to skip
+	# unmarshalling in GRPC, we also implement custom unmarshalling for HTTP
+	for i in DeleteRequest UpdateRequest ReadRequest SearchRequest; do
+		yq_fix_json $i filter
+	done
+
+	yq_fix_json InsertRequest documents.items
+	yq_fix_json ReplaceRequest documents.items
+	yq_fix_json UpdateRequest fields
+	yq_fix_json ReadRequest fields
+	yq_fix_json SearchRequest fields
+	yq_fix_json SearchRequest facet
+	yq_fix_json SearchRequest sort
+	yq_fix_json ReadResponse data
+	yq_fix_json StreamEvent data
+	yq_fix_json SearchHit data
+	yq_fix_json CreateOrUpdateCollectionRequest schema
+	yq_fix_json CollectionDescription schema
+	yq_fix_json DescribeCollectionResponse schema
+}
+
 fix_bytes() {
 	# According to the OpenAPI spec format should be "byte",
 	# but protoc-gen-openapi generates it as "bytes".
@@ -26,11 +51,6 @@ fix_bytes() {
 	# This is done last to also copy input file to output
 	sed -e 's/format: bytes/format: byte/g' "$IN_FILE" >"$OUT_FILE"
 }
-
-if [[ "$OUT_FILE" != *"api_openapi"* ]]; then
-	fix_bytes
-	exit 0
-fi
 
 yq_cmd() {
 	yq -I 4 -i "$1" "$OUT_FILE"
@@ -41,25 +61,5 @@ yq_fix_json() {
 	yq_cmd ".components.schemas.$1.properties.$2.type=\"string\""
 }
 
-fix_bytes
+main
 
-# Fix the types of filter and document fields to be object on HTTP wire.
-# The original format in proto file is "bytes", which allows to skip
-# unmarshalling in GRPC, we also implement custom unmarshalling for HTTP
-for i in DeleteRequest UpdateRequest ReadRequest SearchRequest; do
-	yq_fix_json $i filter
-done
-
-yq_fix_json InsertRequest documents.items
-yq_fix_json ReplaceRequest documents.items
-yq_fix_json UpdateRequest fields
-yq_fix_json ReadRequest fields
-yq_fix_json SearchRequest fields
-yq_fix_json SearchRequest facet
-yq_fix_json SearchRequest sort
-yq_fix_json ReadResponse data
-yq_fix_json StreamEvent data
-yq_fix_json SearchHit data
-yq_fix_json CreateOrUpdateCollectionRequest schema
-yq_fix_json CollectionDescription schema
-yq_fix_json DescribeCollectionResponse schema

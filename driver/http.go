@@ -28,7 +28,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
-	authHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/auth"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 )
@@ -90,8 +89,7 @@ func HTTPError(err error, resp *http.Response) error {
 }
 
 type httpDriver struct {
-	api  *apiHTTP.ClientWithResponses
-	auth *authHTTP.ClientWithResponses
+	api *apiHTTP.ClientWithResponses
 
 	tokenURL string
 	cfg      *config.Driver
@@ -213,12 +211,7 @@ func newHTTPClient(_ context.Context, url string, config *config.Driver) (*httpD
 		return nil, err
 	}
 
-	ac, err := authHTTP.NewClientWithResponses(url, authHTTP.WithHTTPClient(httpClient), authHTTP.WithRequestEditorFn(setHeaders))
-	if err != nil {
-		return nil, err
-	}
-
-	return &httpDriver{api: c, auth: ac, tokenURL: tokenURL, cfg: config}, nil
+	return &httpDriver{api: c, tokenURL: tokenURL, cfg: config}, nil
 }
 
 func (c *httpDriver) Close() error {
@@ -710,7 +703,7 @@ func (g *httpEventStreamReader) close() error {
 }
 
 func (c *httpDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	resp, err := c.auth.AuthCreateApplication(ctx, authHTTP.AuthCreateApplicationJSONBody{Name: &name, Description: &description})
+	resp, err := c.api.UserCreateApplication(ctx, apiHTTP.UserCreateApplicationJSONBody{Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -727,12 +720,12 @@ func (c *httpDriver) CreateApplication(ctx context.Context, name string, descrip
 }
 
 func (c *httpDriver) DeleteApplication(ctx context.Context, id string) error {
-	resp, err := c.auth.AuthDeleteApplication(ctx, authHTTP.AuthDeleteApplicationJSONBody{Id: &id})
+	resp, err := c.api.UserDeleteApplication(ctx, apiHTTP.UserDeleteApplicationJSONBody{Id: &id})
 	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
-	resp, err := c.auth.AuthUpdateApplication(ctx, authHTTP.AuthUpdateApplicationJSONBody{Id: &id, Name: &name, Description: &description})
+	resp, err := c.api.UserUpdateApplication(ctx, apiHTTP.UserUpdateApplicationJSONBody{Id: &id, Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -749,7 +742,7 @@ func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name stri
 }
 
 func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	resp, err := c.auth.AuthListApplications(ctx, authHTTP.AuthListApplicationsJSONBody{})
+	resp, err := c.api.UserListApplications(ctx, apiHTTP.UserListApplicationsJSONBody{})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -766,7 +759,7 @@ func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, erro
 }
 
 func (c *httpDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
-	resp, err := c.auth.AuthRotateApplicationSecret(ctx, authHTTP.AuthRotateApplicationSecretJSONBody{Id: &id})
+	resp, err := c.api.UserRotateApplicationSecret(ctx, apiHTTP.UserRotateApplicationSecretJSONBody{Id: &id})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -783,6 +776,10 @@ func (c *httpDriver) RotateApplicationSecret(ctx context.Context, id string) (*A
 }
 
 func (c *httpDriver) GetAccessToken(ctx context.Context, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error) {
+	return getAccessToken(ctx, c.tokenURL, c.cfg, applicationID, applicationSecret, refreshToken)
+}
+
+func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error) {
 	data := url.Values{
 		"client_id":     {applicationID},
 		"client_secret": {applicationSecret},
@@ -793,7 +790,6 @@ func (c *httpDriver) GetAccessToken(ctx context.Context, applicationID string, a
 		data = url.Values{
 			"refresh_token": {refreshToken},
 			"client_id":     {applicationID},
-			"client_secret": {applicationSecret},
 			"grant_type":    {grantTypeRefreshToken},
 			"scope":         {scope},
 		}
@@ -804,10 +800,10 @@ func (c *httpDriver) GetAccessToken(ctx context.Context, applicationID string, a
 	}
 	resp, err := (&http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: c.cfg.TLS,
+			TLSClientConfig: cfg.TLS,
 		},
 		Timeout: t.Sub(time.Now()),
-	}).PostForm(c.tokenURL, data)
+	}).PostForm(tokenURL, data)
 	if err != nil {
 		return nil, api.Errorf(api.Code_INTERNAL, "failed to get access token: reason = %s", err.Error())
 	}

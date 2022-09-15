@@ -22,6 +22,10 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
+)
+
 // Defines values for ErrorCode.
 const (
 	ABORTED            ErrorCode = "ABORTED"
@@ -46,6 +50,76 @@ const (
 	UNKNOWN            ErrorCode = "UNKNOWN"
 )
 
+// Defines values for GetAccessTokenRequestGrantType.
+const (
+	CLIENTCREDENTIALS GetAccessTokenRequestGrantType = "CLIENT_CREDENTIALS"
+	REFRESHTOKEN      GetAccessTokenRequestGrantType = "REFRESH_TOKEN"
+)
+
+// Defines values for QueryTimeSeriesMetricsRequestFunction.
+const (
+	COUNT QueryTimeSeriesMetricsRequestFunction = "COUNT"
+	NONE  QueryTimeSeriesMetricsRequestFunction = "NONE"
+	RATE  QueryTimeSeriesMetricsRequestFunction = "RATE"
+)
+
+// Defines values for QueryTimeSeriesMetricsRequestSpaceAggregation.
+const (
+	AVG QueryTimeSeriesMetricsRequestSpaceAggregation = "AVG"
+	MAX QueryTimeSeriesMetricsRequestSpaceAggregation = "MAX"
+	MIN QueryTimeSeriesMetricsRequestSpaceAggregation = "MIN"
+	SUM QueryTimeSeriesMetricsRequestSpaceAggregation = "SUM"
+)
+
+// Defines values for QueryTimeSeriesMetricsRequestTigrisOperation.
+const (
+	ALL   QueryTimeSeriesMetricsRequestTigrisOperation = "ALL"
+	READ  QueryTimeSeriesMetricsRequestTigrisOperation = "READ"
+	WRITE QueryTimeSeriesMetricsRequestTigrisOperation = "WRITE"
+)
+
+// Defines values for RollupFunctionAggregator.
+const (
+	ROLLUPAGGREGATORAVG   RollupFunctionAggregator = "ROLLUP_AGGREGATOR_AVG"
+	ROLLUPAGGREGATORCOUNT RollupFunctionAggregator = "ROLLUP_AGGREGATOR_COUNT"
+	ROLLUPAGGREGATORMAX   RollupFunctionAggregator = "ROLLUP_AGGREGATOR_MAX"
+	ROLLUPAGGREGATORMIN   RollupFunctionAggregator = "ROLLUP_AGGREGATOR_MIN"
+	ROLLUPAGGREGATORSUM   RollupFunctionAggregator = "ROLLUP_AGGREGATOR_SUM"
+)
+
+// Additional function to apply on metrics query
+type AdditionalFunction struct {
+	// Rollup function aggregates the slices of metrics returned by original query and lets you operate on the slices using aggregator and constructs the bigger slice of your choice of interval (specified in seconds).
+	Rollup *RollupFunction `json:"rollup,omitempty"`
+}
+
+// An user application
+type Application struct {
+	// Created at
+	CreatedAt *int64 `json:"created_at,omitempty"`
+
+	// Created by
+	CreatedBy *string `json:"created_by,omitempty"`
+
+	// A human readable app description
+	Description *string `json:"description,omitempty"`
+
+	// Generated client id
+	Id *string `json:"id,omitempty"`
+
+	// A human readable app name
+	Name *string `json:"name,omitempty"`
+
+	// Generated app secret
+	Secret *string `json:"secret,omitempty"`
+
+	// Updated at
+	UpdatedAt *int64 `json:"updated_at,omitempty"`
+
+	// Updated by
+	UpdatedBy *string `json:"updated_by,omitempty"`
+}
+
 // Start new transaction in database specified by "db".
 type BeginTransactionRequest struct {
 	// Options that can be used to modify the transaction semantics.
@@ -56,6 +130,11 @@ type BeginTransactionRequest struct {
 type BeginTransactionResponse struct {
 	// Contains ID which uniquely identifies transaction This context is returned by BeginTransaction request and should be passed in the metadata (headers) of subsequent requests in order to run them in the context of the same transaction.
 	TxCtx *TransactionCtx `json:"tx_ctx,omitempty"`
+}
+
+// A collation allows you to specify string comparison rules. Default is case-sensitive, to override it you can set this option to 'ci' that will apply to all the text fields in the filters.
+type Collation struct {
+	Case *string `json:"case,omitempty"`
 }
 
 // CollectionDescription defines model for CollectionDescription.
@@ -93,6 +172,21 @@ type CommitTransactionResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// Request creation of user application
+type CreateApplicationRequest struct {
+	// A human readable app description
+	Description *string `json:"description,omitempty"`
+
+	// A human readable app name
+	Name *string `json:"name,omitempty"`
+}
+
+// CreateApplication returns created application
+type CreateApplicationResponse struct {
+	// An user application
+	CreatedApplication *Application `json:"created_application,omitempty"`
+}
+
 // CreateDatabaseRequest defines model for CreateDatabaseRequest.
 type CreateDatabaseRequest struct {
 	// Database requests modifying options.
@@ -101,6 +195,21 @@ type CreateDatabaseRequest struct {
 
 // CreateDatabaseResponse defines model for CreateDatabaseResponse.
 type CreateDatabaseResponse struct {
+	// A detailed response message.
+	Message *string `json:"message,omitempty"`
+
+	// An enum with value set as "created".
+	Status *string `json:"status,omitempty"`
+}
+
+// CreateNamespaceRequest defines model for CreateNamespaceRequest.
+type CreateNamespaceRequest struct {
+	// A unique namespace id.
+	Id *int32 `json:"id,omitempty"`
+}
+
+// CreateNamespaceResponse defines model for CreateNamespaceResponse.
+type CreateNamespaceResponse struct {
 	// A detailed response message.
 	Message *string `json:"message,omitempty"`
 
@@ -129,6 +238,12 @@ type CreateOrUpdateCollectionResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// Represents the data point in timeseries.
+type DataPoint struct {
+	Timestamp *int64   `json:"timestamp,omitempty"`
+	Value     *float64 `json:"value,omitempty"`
+}
+
 // DatabaseInfo defines model for DatabaseInfo.
 type DatabaseInfo struct {
 	// Database name.
@@ -142,6 +257,18 @@ type DatabaseMetadata = map[string]interface{}
 // Database requests modifying options.
 type DatabaseOptions = map[string]interface{}
 
+// DeleteApplication returns the flag to convey if application was deleted
+type DeleteApplicationResponse struct {
+	// status flag for delete operation
+	Deleted *bool `json:"deleted,omitempty"`
+}
+
+// Request deletion of an application
+type DeleteApplicationsRequest struct {
+	// application id
+	Id *string `json:"id,omitempty"`
+}
+
 // DeleteRequest defines model for DeleteRequest.
 type DeleteRequest struct {
 	// Delete documents which matching specified filter. A filter can simply be key, value where key is the field name and value would be the value for this field. Or a filter can be logical where two or more fields can be logically joined using $or and $and. A few examples of filter: <li> To delete a user document where the id has a value 1: ```{"id": 1 }``` <li> To delete all the user documents where the key "id" has a value 1 or 2 or 3: `{"$or": [{"id": 1}, {"id": 2}, {"id": 3}]}`
@@ -153,6 +280,9 @@ type DeleteRequest struct {
 
 // Additional options for deleted requests.
 type DeleteRequestOptions struct {
+	// A collation allows you to specify string comparison rules. Default is case-sensitive, to override it you can set this option to 'ci' that will apply to all the text fields in the filters.
+	Collation *Collation `json:"collation,omitempty"`
+
 	// Additional options to modify write requests.
 	WriteOptions *WriteOptions `json:"write_options,omitempty"`
 }
@@ -291,9 +421,54 @@ type FacetStats struct {
 	Sum *float64 `json:"sum,omitempty"`
 }
 
+// Requests the access token by specifying grant_type:refresh_token & refresh_token or grant_type:client_credentials & [client_id, client_secret]
+type GetAccessTokenRequest struct {
+	// case: client_credentials: A valid credentials (client_id, client_secret, audience)
+	ClientId     *string                         `json:"client_id,omitempty"`
+	ClientSecret *string                         `json:"client_secret,omitempty"`
+	GrantType    *GetAccessTokenRequestGrantType `json:"grant_type,omitempty"`
+
+	// case: refresh_token: A valid refresh token
+	RefreshToken *string `json:"refresh_token,omitempty"`
+}
+
+// GetAccessTokenRequestGrantType defines model for GetAccessTokenRequest.GrantType.
+type GetAccessTokenRequestGrantType string
+
+// GetAccessToken returns response containing access_token and optionally refresh_token
+type GetAccessTokenResponse struct {
+	// An access token.
+	AccessToken *string `json:"access_token,omitempty"`
+
+	// Access token expiration timeout in seconds
+	ExpiresIn *int32 `json:"expires_in,omitempty"`
+
+	// Refresh token.
+	RefreshToken *string `json:"refresh_token,omitempty"`
+}
+
 // GetInfoResponse defines model for GetInfoResponse.
 type GetInfoResponse struct {
 	ServerVersion *string `json:"server_version,omitempty"`
+}
+
+// Request user metadata
+type GetUserMetadataRequest struct {
+	MetadataKey *string                 `json:"metadataKey,omitempty"`
+	Value       *map[string]interface{} `json:"value,omitempty"`
+}
+
+// User metadata response
+type GetUserMetadataResponse struct {
+	MetadataKey *string                 `json:"metadataKey,omitempty"`
+	NamespaceId *uint32                 `json:"namespaceId,omitempty"`
+	UserId      *string                 `json:"userId,omitempty"`
+	Value       *map[string]interface{} `json:"value,omitempty"`
+}
+
+// HealthCheckResponse defines model for HealthCheckResponse.
+type HealthCheckResponse struct {
+	Response *string `json:"response,omitempty"`
 }
 
 // InsertRequest defines model for InsertRequest.
@@ -323,6 +498,28 @@ type InsertResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// Request insertion of user metadata
+type InsertUserMetadataRequest struct {
+	MetadataKey *string                 `json:"metadataKey,omitempty"`
+	Value       *map[string]interface{} `json:"value,omitempty"`
+}
+
+// Insertion of user metadata response
+type InsertUserMetadataResponse struct {
+	MetadataKey *string                 `json:"metadataKey,omitempty"`
+	NamespaceId *uint32                 `json:"namespaceId,omitempty"`
+	UserId      *string                 `json:"userId,omitempty"`
+	Value       *map[string]interface{} `json:"value,omitempty"`
+}
+
+// Request listing of all the application those are visible to requesting actor
+type ListApplicationsRequest = map[string]interface{}
+
+// ListApplication returns one or more visible application to user
+type ListApplicationsResponse struct {
+	Applications *[]Application `json:"applications,omitempty"`
+}
+
 // ListCollectionsRequest defines model for ListCollectionsRequest.
 type ListCollectionsRequest struct {
 	// Collection requests modifying options.
@@ -342,6 +539,29 @@ type ListCollectionsResponse struct {
 type ListDatabasesResponse struct {
 	// List of the databases.
 	Databases *[]DatabaseInfo `json:"databases,omitempty"`
+}
+
+// ListNamespacesResponse defines model for ListNamespacesResponse.
+type ListNamespacesResponse struct {
+	Namespaces *[]NamespaceInfo `json:"namespaces,omitempty"`
+}
+
+// Represents series in timeseries based on input query.
+type MetricSeries struct {
+	DataPoints *[]DataPoint `json:"dataPoints,omitempty"`
+	From       *int64       `json:"from,omitempty"`
+	Metric     *string      `json:"metric,omitempty"`
+	Scope      *string      `json:"scope,omitempty"`
+	To         *int64       `json:"to,omitempty"`
+}
+
+// NamespaceInfo defines model for NamespaceInfo.
+type NamespaceInfo struct {
+	// A unique namespace id.
+	Id *int32 `json:"id,omitempty"`
+
+	// A namespace name.
+	Name *string `json:"name,omitempty"`
 }
 
 // Pagination metadata for SearchResponse
@@ -375,12 +595,44 @@ type PublishResponse struct {
 	Status   *string           `json:"status,omitempty"`
 }
 
+// Requests the time series metrics
+type QueryTimeSeriesMetricsRequest struct {
+	AdditionalFunctions *[]AdditionalFunction                          `json:"additionalFunctions,omitempty"`
+	Collection          *string                                        `json:"collection,omitempty"`
+	Db                  *string                                        `json:"db,omitempty"`
+	From                *int64                                         `json:"from,omitempty"`
+	Function            *QueryTimeSeriesMetricsRequestFunction         `json:"function,omitempty"`
+	MetricName          *string                                        `json:"metric_name,omitempty"`
+	Quantile            *float32                                       `json:"quantile,omitempty"`
+	SpaceAggregatedBy   *[]string                                      `json:"space_aggregated_by,omitempty"`
+	SpaceAggregation    *QueryTimeSeriesMetricsRequestSpaceAggregation `json:"space_aggregation,omitempty"`
+	TigrisOperation     *QueryTimeSeriesMetricsRequestTigrisOperation  `json:"tigris_operation,omitempty"`
+	To                  *int64                                         `json:"to,omitempty"`
+}
+
+// QueryTimeSeriesMetricsRequestFunction defines model for QueryTimeSeriesMetricsRequest.Function.
+type QueryTimeSeriesMetricsRequestFunction string
+
+// QueryTimeSeriesMetricsRequestSpaceAggregation defines model for QueryTimeSeriesMetricsRequest.SpaceAggregation.
+type QueryTimeSeriesMetricsRequestSpaceAggregation string
+
+// QueryTimeSeriesMetricsRequestTigrisOperation defines model for QueryTimeSeriesMetricsRequest.TigrisOperation.
+type QueryTimeSeriesMetricsRequestTigrisOperation string
+
+// QueryTimeSeriesMetric responds with this type.
+type QueryTimeSeriesMetricsResponse struct {
+	From   *int64          `json:"from,omitempty"`
+	Query  *string         `json:"query,omitempty"`
+	Series *[]MetricSeries `json:"series,omitempty"`
+	To     *int64          `json:"to,omitempty"`
+}
+
 // ReadRequest defines model for ReadRequest.
 type ReadRequest struct {
 	// To read specific fields from a document. Default is all.
 	Fields json.RawMessage `json:"fields,omitempty"`
 
-	// Returns documents matching this filter. A filter can simply be a key, value pair where a key is the field name and the value would be the value for this field. Tigris also allows complex filtering by passing logical expressions. Logical filters are applied on two or more fields using `$or` and `$and`. A few examples of filters: <li> To read a user document where the id has a value 1: ```{"id": 1 }``` <li> To read all the user documents where the key "id" has a value 1 or 2 or 3: `{"$or": [{"id": 1}, {"id": 2}, {"id": 3}]}` The detailed documentation of the filter is <a href="https://docs.tigrisdata.com/overview/query#specification-1" title="here">here</a>.
+	// Returns documents matching this filter. A filter can simply be a key, value pair where a key is the field name and the value would be the value for this field. Tigris also allows complex filtering by passing logical expressions. Logical filters are applied on two or more fields using `$or` and `$and`. A few examples of filters: <li> To read a user document where the id has a value 1: ```{"id": 1 }``` <li> To read all the user documents where the key "id" has a value 1 or 2 or 3: `{"$or": [{"id": 1}, {"id": 2}, {"id": 3}]}` Filter allows setting collation on an individual field level. To set collation for all the fields see options. The detailed documentation of the filter is <a href="https://docs.tigrisdata.com/overview/query#specification-1" title="here">here</a>.
 	Filter json.RawMessage `json:"filter,omitempty"`
 
 	// Options that can be used to modify the results, for example "limit" to control the number of documents returned by the server.
@@ -389,6 +641,9 @@ type ReadRequest struct {
 
 // Options that can be used to modify the results, for example "limit" to control the number of documents returned by the server.
 type ReadRequestOptions struct {
+	// A collation allows you to specify string comparison rules. Default is case-sensitive, to override it you can set this option to 'ci' that will apply to all the text fields in the filters.
+	Collation *Collation `json:"collation,omitempty"`
+
 	// Limit the number of documents returned by the read operation.
 	Limit *int64 `json:"limit,omitempty"`
 
@@ -459,6 +714,26 @@ type RollbackTransactionResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// Rollup function aggregates the slices of metrics returned by original query and lets you operate on the slices using aggregator and constructs the bigger slice of your choice of interval (specified in seconds).
+type RollupFunction struct {
+	Aggregator *RollupFunctionAggregator `json:"aggregator,omitempty"`
+	Interval   *int64                    `json:"interval,omitempty"`
+}
+
+// RollupFunctionAggregator defines model for RollupFunction.Aggregator.
+type RollupFunctionAggregator string
+
+// Request rotation of an application secret
+type RotateApplicationSecretRequest struct {
+	Id *string `json:"id,omitempty"`
+}
+
+// RotateApplicationRequest returns the new application with rotated secret
+type RotateApplicationSecretResponse struct {
+	// An user application
+	Application *Application `json:"application,omitempty"`
+}
+
 // SearchFacet defines model for SearchFacet.
 type SearchFacet struct {
 	Counts *[]FacetCount `json:"counts,omitempty"`
@@ -499,6 +774,9 @@ type SearchMetadata struct {
 
 // SearchRequest defines model for SearchRequest.
 type SearchRequest struct {
+	// A collation allows you to specify string comparison rules. Default is case-sensitive, to override it you can set this option to 'ci' that will apply to all the text fields in the filters.
+	Collation *Collation `json:"collation,omitempty"`
+
 	// Array of document field names to exclude from results. `include_fields`, if specified, takes precedence over `exclude_fields`.
 	ExcludeFields *[]string `json:"exclude_fields,omitempty"`
 
@@ -617,6 +895,24 @@ type TransactionCtx struct {
 // Options that can be used to modify the transaction semantics.
 type TransactionOptions = map[string]interface{}
 
+// Request creation of user application
+type UpdateApplicationRequest struct {
+	// A new human readable app description
+	Description *string `json:"description,omitempty"`
+
+	// application id
+	Id *string `json:"id,omitempty"`
+
+	// A new human readable app name
+	Name *string `json:"name,omitempty"`
+}
+
+// CreateApplication returns created application
+type UpdateApplicationResponse struct {
+	// An user application
+	UpdatedApplication *Application `json:"updated_application,omitempty"`
+}
+
 // UpdateRequest defines model for UpdateRequest.
 type UpdateRequest struct {
 	// Fields contains set of fields with the values which need to be updated. Should be proper JSON object.
@@ -631,6 +927,9 @@ type UpdateRequest struct {
 
 // Additional options for update requests.
 type UpdateRequestOptions struct {
+	// A collation allows you to specify string comparison rules. Default is case-sensitive, to override it you can set this option to 'ci' that will apply to all the text fields in the filters.
+	Collation *Collation `json:"collation,omitempty"`
+
 	// Additional options to modify write requests.
 	WriteOptions *WriteOptions `json:"write_options,omitempty"`
 }
@@ -647,8 +946,43 @@ type UpdateResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// Request update of user metadata
+type UpdateUserMetadataRequest struct {
+	MetadataKey *string                 `json:"metadataKey,omitempty"`
+	Value       *map[string]interface{} `json:"value,omitempty"`
+}
+
+// Update of user metadata response
+type UpdateUserMetadataResponse struct {
+	MetadataKey *string                 `json:"metadataKey,omitempty"`
+	NamespaceId *uint32                 `json:"namespaceId,omitempty"`
+	UserId      *string                 `json:"userId,omitempty"`
+	Value       *map[string]interface{} `json:"value,omitempty"`
+}
+
 // Additional options to modify write requests.
 type WriteOptions = map[string]interface{}
+
+// AdminCreateNamespaceJSONBody defines parameters for AdminCreateNamespace.
+type AdminCreateNamespaceJSONBody = CreateNamespaceRequest
+
+// UserCreateApplicationJSONBody defines parameters for UserCreateApplication.
+type UserCreateApplicationJSONBody = CreateApplicationRequest
+
+// UserDeleteApplicationJSONBody defines parameters for UserDeleteApplication.
+type UserDeleteApplicationJSONBody = DeleteApplicationsRequest
+
+// UserListApplicationsJSONBody defines parameters for UserListApplications.
+type UserListApplicationsJSONBody = ListApplicationsRequest
+
+// UserRotateApplicationSecretJSONBody defines parameters for UserRotateApplicationSecret.
+type UserRotateApplicationSecretJSONBody = RotateApplicationSecretRequest
+
+// UserUpdateApplicationJSONBody defines parameters for UserUpdateApplication.
+type UserUpdateApplicationJSONBody = UpdateApplicationRequest
+
+// AuthGetAccessTokenJSONBody defines parameters for AuthGetAccessToken.
+type AuthGetAccessTokenJSONBody = GetAccessTokenRequest
 
 // TigrisListCollectionsJSONBody defines parameters for TigrisListCollections.
 type TigrisListCollectionsJSONBody = ListCollectionsRequest
@@ -707,6 +1041,39 @@ type TigrisCommitTransactionJSONBody = CommitTransactionRequest
 // TigrisRollbackTransactionJSONBody defines parameters for TigrisRollbackTransaction.
 type TigrisRollbackTransactionJSONBody = RollbackTransactionRequest
 
+// ObservabilityQueryTimeSeriesMetricsJSONBody defines parameters for ObservabilityQueryTimeSeriesMetrics.
+type ObservabilityQueryTimeSeriesMetricsJSONBody = QueryTimeSeriesMetricsRequest
+
+// UserGetUserMetadataJSONBody defines parameters for UserGetUserMetadata.
+type UserGetUserMetadataJSONBody = GetUserMetadataRequest
+
+// UserInsertUserMetadataJSONBody defines parameters for UserInsertUserMetadata.
+type UserInsertUserMetadataJSONBody = InsertUserMetadataRequest
+
+// UserUpdateUserMetadataJSONBody defines parameters for UserUpdateUserMetadata.
+type UserUpdateUserMetadataJSONBody = UpdateUserMetadataRequest
+
+// AdminCreateNamespaceJSONRequestBody defines body for AdminCreateNamespace for application/json ContentType.
+type AdminCreateNamespaceJSONRequestBody = AdminCreateNamespaceJSONBody
+
+// UserCreateApplicationJSONRequestBody defines body for UserCreateApplication for application/json ContentType.
+type UserCreateApplicationJSONRequestBody = UserCreateApplicationJSONBody
+
+// UserDeleteApplicationJSONRequestBody defines body for UserDeleteApplication for application/json ContentType.
+type UserDeleteApplicationJSONRequestBody = UserDeleteApplicationJSONBody
+
+// UserListApplicationsJSONRequestBody defines body for UserListApplications for application/json ContentType.
+type UserListApplicationsJSONRequestBody = UserListApplicationsJSONBody
+
+// UserRotateApplicationSecretJSONRequestBody defines body for UserRotateApplicationSecret for application/json ContentType.
+type UserRotateApplicationSecretJSONRequestBody = UserRotateApplicationSecretJSONBody
+
+// UserUpdateApplicationJSONRequestBody defines body for UserUpdateApplication for application/json ContentType.
+type UserUpdateApplicationJSONRequestBody = UserUpdateApplicationJSONBody
+
+// AuthGetAccessTokenJSONRequestBody defines body for AuthGetAccessToken for application/json ContentType.
+type AuthGetAccessTokenJSONRequestBody = AuthGetAccessTokenJSONBody
+
 // TigrisListCollectionsJSONRequestBody defines body for TigrisListCollections for application/json ContentType.
 type TigrisListCollectionsJSONRequestBody = TigrisListCollectionsJSONBody
 
@@ -763,6 +1130,18 @@ type TigrisCommitTransactionJSONRequestBody = TigrisCommitTransactionJSONBody
 
 // TigrisRollbackTransactionJSONRequestBody defines body for TigrisRollbackTransaction for application/json ContentType.
 type TigrisRollbackTransactionJSONRequestBody = TigrisRollbackTransactionJSONBody
+
+// ObservabilityQueryTimeSeriesMetricsJSONRequestBody defines body for ObservabilityQueryTimeSeriesMetrics for application/json ContentType.
+type ObservabilityQueryTimeSeriesMetricsJSONRequestBody = ObservabilityQueryTimeSeriesMetricsJSONBody
+
+// UserGetUserMetadataJSONRequestBody defines body for UserGetUserMetadata for application/json ContentType.
+type UserGetUserMetadataJSONRequestBody = UserGetUserMetadataJSONBody
+
+// UserInsertUserMetadataJSONRequestBody defines body for UserInsertUserMetadata for application/json ContentType.
+type UserInsertUserMetadataJSONRequestBody = UserInsertUserMetadataJSONBody
+
+// UserUpdateUserMetadataJSONRequestBody defines body for UserUpdateUserMetadata for application/json ContentType.
+type UserUpdateUserMetadataJSONRequestBody = UserUpdateUserMetadataJSONBody
 
 // Getter for additional properties for SearchResponse_Facets. Returns the specified
 // element and whether it was found
@@ -890,6 +1269,44 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// AdminListNamespaces request
+	AdminListNamespaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AdminCreateNamespace request with any body
+	AdminCreateNamespaceWithBody(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	AdminCreateNamespace(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserCreateApplication request with any body
+	UserCreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserCreateApplication(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserDeleteApplication request with any body
+	UserDeleteApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserDeleteApplication(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserListApplications request with any body
+	UserListApplicationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserListApplications(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserRotateApplicationSecret request with any body
+	UserRotateApplicationSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserRotateApplicationSecret(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserUpdateApplication request with any body
+	UserUpdateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserUpdateApplication(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AuthGetAccessToken request with any body
+	AuthGetAccessTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	AuthGetAccessToken(ctx context.Context, body AuthGetAccessTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// TigrisListDatabases request
 	TigrisListDatabases(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -988,8 +1405,211 @@ type ClientInterface interface {
 
 	TigrisRollbackTransaction(ctx context.Context, db string, body TigrisRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// HealthAPIHealth request
+	HealthAPIHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// TigrisGetInfo request
 	TigrisGetInfo(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ObservabilityQueryTimeSeriesMetrics request with any body
+	ObservabilityQueryTimeSeriesMetricsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ObservabilityQueryTimeSeriesMetrics(ctx context.Context, body ObservabilityQueryTimeSeriesMetricsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserGetUserMetadata request with any body
+	UserGetUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserGetUserMetadata(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserInsertUserMetadata request with any body
+	UserInsertUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserInsertUserMetadata(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UserUpdateUserMetadata request with any body
+	UserUpdateUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UserUpdateUserMetadata(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) AdminListNamespaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAdminListNamespacesRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AdminCreateNamespaceWithBody(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAdminCreateNamespaceRequestWithBody(c.Server, name, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AdminCreateNamespace(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAdminCreateNamespaceRequest(c.Server, name, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserCreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserCreateApplicationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserCreateApplication(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserCreateApplicationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserDeleteApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserDeleteApplicationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserDeleteApplication(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserDeleteApplicationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserListApplicationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserListApplicationsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserListApplications(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserListApplicationsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserRotateApplicationSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserRotateApplicationSecretRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserRotateApplicationSecret(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserRotateApplicationSecretRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserUpdateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserUpdateApplicationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserUpdateApplication(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserUpdateApplicationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AuthGetAccessTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthGetAccessTokenRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AuthGetAccessToken(ctx context.Context, body AuthGetAccessTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthGetAccessTokenRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) TigrisListDatabases(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1460,6 +2080,18 @@ func (c *Client) TigrisRollbackTransaction(ctx context.Context, db string, body 
 	return c.Client.Do(req)
 }
 
+func (c *Client) HealthAPIHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewHealthAPIHealthRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) TigrisGetInfo(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewTigrisGetInfoRequest(c.Server)
 	if err != nil {
@@ -1472,6 +2104,416 @@ func (c *Client) TigrisGetInfo(ctx context.Context, reqEditors ...RequestEditorF
 	return c.Client.Do(req)
 }
 
+func (c *Client) ObservabilityQueryTimeSeriesMetricsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewObservabilityQueryTimeSeriesMetricsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ObservabilityQueryTimeSeriesMetrics(ctx context.Context, body ObservabilityQueryTimeSeriesMetricsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewObservabilityQueryTimeSeriesMetricsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserGetUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserGetUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserGetUserMetadata(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserGetUserMetadataRequest(c.Server, metadataKey, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserInsertUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserInsertUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserInsertUserMetadata(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserInsertUserMetadataRequest(c.Server, metadataKey, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserUpdateUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserUpdateUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UserUpdateUserMetadata(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUserUpdateUserMetadataRequest(c.Server, metadataKey, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewAdminListNamespacesRequest generates requests for AdminListNamespaces
+func NewAdminListNamespacesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/admin/namespaces/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewAdminCreateNamespaceRequest calls the generic AdminCreateNamespace builder with application/json body
+func NewAdminCreateNamespaceRequest(server string, name string, body AdminCreateNamespaceJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAdminCreateNamespaceRequestWithBody(server, name, "application/json", bodyReader)
+}
+
+// NewAdminCreateNamespaceRequestWithBody generates requests for AdminCreateNamespace with any type of body
+func NewAdminCreateNamespaceRequestWithBody(server string, name string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "name", runtime.ParamLocationPath, name)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/admin/namespaces/%s/create", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserCreateApplicationRequest calls the generic UserCreateApplication builder with application/json body
+func NewUserCreateApplicationRequest(server string, body UserCreateApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserCreateApplicationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewUserCreateApplicationRequestWithBody generates requests for UserCreateApplication with any type of body
+func NewUserCreateApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/applications/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserDeleteApplicationRequest calls the generic UserDeleteApplication builder with application/json body
+func NewUserDeleteApplicationRequest(server string, body UserDeleteApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserDeleteApplicationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewUserDeleteApplicationRequestWithBody generates requests for UserDeleteApplication with any type of body
+func NewUserDeleteApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/applications/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserListApplicationsRequest calls the generic UserListApplications builder with application/json body
+func NewUserListApplicationsRequest(server string, body UserListApplicationsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserListApplicationsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewUserListApplicationsRequestWithBody generates requests for UserListApplications with any type of body
+func NewUserListApplicationsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/applications/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserRotateApplicationSecretRequest calls the generic UserRotateApplicationSecret builder with application/json body
+func NewUserRotateApplicationSecretRequest(server string, body UserRotateApplicationSecretJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserRotateApplicationSecretRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewUserRotateApplicationSecretRequestWithBody generates requests for UserRotateApplicationSecret with any type of body
+func NewUserRotateApplicationSecretRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/applications/rotate")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserUpdateApplicationRequest calls the generic UserUpdateApplication builder with application/json body
+func NewUserUpdateApplicationRequest(server string, body UserUpdateApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserUpdateApplicationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewUserUpdateApplicationRequestWithBody generates requests for UserUpdateApplication with any type of body
+func NewUserUpdateApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/applications/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewAuthGetAccessTokenRequest calls the generic AuthGetAccessToken builder with application/json body
+func NewAuthGetAccessTokenRequest(server string, body AuthGetAccessTokenJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAuthGetAccessTokenRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewAuthGetAccessTokenRequestWithBody generates requests for AuthGetAccessToken with any type of body
+func NewAuthGetAccessTokenRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/auth/token")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewTigrisListDatabasesRequest generates requests for TigrisListDatabases
 func NewTigrisListDatabasesRequest(server string) (*http.Request, error) {
 	var err error
@@ -1481,7 +2523,7 @@ func NewTigrisListDatabasesRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/list")
+	operationPath := fmt.Sprintf("/v1/databases/list")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1526,7 +2568,7 @@ func NewTigrisListCollectionsRequestWithBody(server string, db string, contentTy
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/list", pathParam0)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/list", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1580,7 +2622,7 @@ func NewTigrisCreateOrUpdateCollectionRequestWithBody(server string, db string, 
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/createOrUpdate", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/createOrUpdate", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1634,7 +2676,7 @@ func NewTigrisDescribeCollectionRequestWithBody(server string, db string, collec
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/describe", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/describe", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1688,7 +2730,7 @@ func NewTigrisDeleteRequestWithBody(server string, db string, collection string,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/documents/delete", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/documents/delete", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1742,7 +2784,7 @@ func NewTigrisInsertRequestWithBody(server string, db string, collection string,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/documents/insert", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/documents/insert", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1796,7 +2838,7 @@ func NewTigrisReadRequestWithBody(server string, db string, collection string, c
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/documents/read", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/documents/read", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1850,7 +2892,7 @@ func NewTigrisReplaceRequestWithBody(server string, db string, collection string
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/documents/replace", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/documents/replace", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1904,7 +2946,7 @@ func NewTigrisSearchRequestWithBody(server string, db string, collection string,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/documents/search", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/documents/search", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1958,7 +3000,7 @@ func NewTigrisUpdateRequestWithBody(server string, db string, collection string,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/documents/update", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/documents/update", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2012,7 +3054,7 @@ func NewTigrisDropCollectionRequestWithBody(server string, db string, collection
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/drop", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/drop", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2066,7 +3108,7 @@ func NewTigrisEventsRequestWithBody(server string, db string, collection string,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/events", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/events", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2120,7 +3162,7 @@ func NewTigrisPublishRequestWithBody(server string, db string, collection string
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/messages/publish", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/messages/publish", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2174,7 +3216,7 @@ func NewTigrisSubscribeRequestWithBody(server string, db string, collection stri
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/collections/%s/messages/subscribe", pathParam0, pathParam1)
+	operationPath := fmt.Sprintf("/v1/databases/%s/collections/%s/messages/subscribe", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2221,7 +3263,7 @@ func NewTigrisCreateDatabaseRequestWithBody(server string, db string, contentTyp
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/create", pathParam0)
+	operationPath := fmt.Sprintf("/v1/databases/%s/create", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2268,7 +3310,7 @@ func NewTigrisDescribeDatabaseRequestWithBody(server string, db string, contentT
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/describe", pathParam0)
+	operationPath := fmt.Sprintf("/v1/databases/%s/describe", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2315,7 +3357,7 @@ func NewTigrisDropDatabaseRequestWithBody(server string, db string, contentType 
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/drop", pathParam0)
+	operationPath := fmt.Sprintf("/v1/databases/%s/drop", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2362,7 +3404,7 @@ func NewTigrisBeginTransactionRequestWithBody(server string, db string, contentT
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/transactions/begin", pathParam0)
+	operationPath := fmt.Sprintf("/v1/databases/%s/transactions/begin", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2409,7 +3451,7 @@ func NewTigrisCommitTransactionRequestWithBody(server string, db string, content
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/transactions/commit", pathParam0)
+	operationPath := fmt.Sprintf("/v1/databases/%s/transactions/commit", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2456,7 +3498,7 @@ func NewTigrisRollbackTransactionRequestWithBody(server string, db string, conte
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/databases/%s/transactions/rollback", pathParam0)
+	operationPath := fmt.Sprintf("/v1/databases/%s/transactions/rollback", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2476,8 +3518,8 @@ func NewTigrisRollbackTransactionRequestWithBody(server string, db string, conte
 	return req, nil
 }
 
-// NewTigrisGetInfoRequest generates requests for TigrisGetInfo
-func NewTigrisGetInfoRequest(server string) (*http.Request, error) {
+// NewHealthAPIHealthRequest generates requests for HealthAPIHealth
+func NewHealthAPIHealthRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2485,7 +3527,7 @@ func NewTigrisGetInfoRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/api/v1/info")
+	operationPath := fmt.Sprintf("/v1/health")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2499,6 +3541,214 @@ func NewTigrisGetInfoRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewTigrisGetInfoRequest generates requests for TigrisGetInfo
+func NewTigrisGetInfoRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/info")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewObservabilityQueryTimeSeriesMetricsRequest calls the generic ObservabilityQueryTimeSeriesMetrics builder with application/json body
+func NewObservabilityQueryTimeSeriesMetricsRequest(server string, body ObservabilityQueryTimeSeriesMetricsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewObservabilityQueryTimeSeriesMetricsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewObservabilityQueryTimeSeriesMetricsRequestWithBody generates requests for ObservabilityQueryTimeSeriesMetrics with any type of body
+func NewObservabilityQueryTimeSeriesMetricsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/observability/metrics/timeseries/query")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserGetUserMetadataRequest calls the generic UserGetUserMetadata builder with application/json body
+func NewUserGetUserMetadataRequest(server string, metadataKey string, body UserGetUserMetadataJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserGetUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
+}
+
+// NewUserGetUserMetadataRequestWithBody generates requests for UserGetUserMetadata with any type of body
+func NewUserGetUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/metadata/%s/get", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserInsertUserMetadataRequest calls the generic UserInsertUserMetadata builder with application/json body
+func NewUserInsertUserMetadataRequest(server string, metadataKey string, body UserInsertUserMetadataJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserInsertUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
+}
+
+// NewUserInsertUserMetadataRequestWithBody generates requests for UserInsertUserMetadata with any type of body
+func NewUserInsertUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/metadata/%s/insert", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUserUpdateUserMetadataRequest calls the generic UserUpdateUserMetadata builder with application/json body
+func NewUserUpdateUserMetadataRequest(server string, metadataKey string, body UserUpdateUserMetadataJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUserUpdateUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
+}
+
+// NewUserUpdateUserMetadataRequestWithBody generates requests for UserUpdateUserMetadata with any type of body
+func NewUserUpdateUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/metadata/%s/update", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2546,6 +3796,44 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// AdminListNamespaces request
+	AdminListNamespacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*AdminListNamespacesResponse, error)
+
+	// AdminCreateNamespace request with any body
+	AdminCreateNamespaceWithBodyWithResponse(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error)
+
+	AdminCreateNamespaceWithResponse(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error)
+
+	// UserCreateApplication request with any body
+	UserCreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error)
+
+	UserCreateApplicationWithResponse(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error)
+
+	// UserDeleteApplication request with any body
+	UserDeleteApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error)
+
+	UserDeleteApplicationWithResponse(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error)
+
+	// UserListApplications request with any body
+	UserListApplicationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error)
+
+	UserListApplicationsWithResponse(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error)
+
+	// UserRotateApplicationSecret request with any body
+	UserRotateApplicationSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error)
+
+	UserRotateApplicationSecretWithResponse(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error)
+
+	// UserUpdateApplication request with any body
+	UserUpdateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error)
+
+	UserUpdateApplicationWithResponse(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error)
+
+	// AuthGetAccessToken request with any body
+	AuthGetAccessTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthGetAccessTokenResponse, error)
+
+	AuthGetAccessTokenWithResponse(ctx context.Context, body AuthGetAccessTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthGetAccessTokenResponse, error)
+
 	// TigrisListDatabases request
 	TigrisListDatabasesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisListDatabasesResponse, error)
 
@@ -2644,8 +3932,215 @@ type ClientWithResponsesInterface interface {
 
 	TigrisRollbackTransactionWithResponse(ctx context.Context, db string, body TigrisRollbackTransactionJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisRollbackTransactionResponse, error)
 
+	// HealthAPIHealth request
+	HealthAPIHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthAPIHealthResponse, error)
+
 	// TigrisGetInfo request
 	TigrisGetInfoWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisGetInfoResponse, error)
+
+	// ObservabilityQueryTimeSeriesMetrics request with any body
+	ObservabilityQueryTimeSeriesMetricsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ObservabilityQueryTimeSeriesMetricsResponse, error)
+
+	ObservabilityQueryTimeSeriesMetricsWithResponse(ctx context.Context, body ObservabilityQueryTimeSeriesMetricsJSONRequestBody, reqEditors ...RequestEditorFn) (*ObservabilityQueryTimeSeriesMetricsResponse, error)
+
+	// UserGetUserMetadata request with any body
+	UserGetUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error)
+
+	UserGetUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error)
+
+	// UserInsertUserMetadata request with any body
+	UserInsertUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error)
+
+	UserInsertUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error)
+
+	// UserUpdateUserMetadata request with any body
+	UserUpdateUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error)
+
+	UserUpdateUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error)
+}
+
+type AdminListNamespacesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListNamespacesResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r AdminListNamespacesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AdminListNamespacesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type AdminCreateNamespaceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateNamespaceResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r AdminCreateNamespaceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AdminCreateNamespaceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserCreateApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateApplicationResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserCreateApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserCreateApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserDeleteApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DeleteApplicationResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserDeleteApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserDeleteApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserListApplicationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListApplicationsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserListApplicationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserListApplicationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserRotateApplicationSecretResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RotateApplicationSecretResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserRotateApplicationSecretResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserRotateApplicationSecretResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserUpdateApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UpdateApplicationResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserUpdateApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserUpdateApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type AuthGetAccessTokenResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetAccessTokenResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r AuthGetAccessTokenResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AuthGetAccessTokenResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type TigrisListDatabasesResponse struct {
@@ -3108,6 +4603,29 @@ func (r TigrisRollbackTransactionResponse) StatusCode() int {
 	return 0
 }
 
+type HealthAPIHealthResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *HealthCheckResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r HealthAPIHealthResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r HealthAPIHealthResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type TigrisGetInfoResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3129,6 +4647,226 @@ func (r TigrisGetInfoResponse) StatusCode() int {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
+}
+
+type ObservabilityQueryTimeSeriesMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *QueryTimeSeriesMetricsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ObservabilityQueryTimeSeriesMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ObservabilityQueryTimeSeriesMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserGetUserMetadataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetUserMetadataResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserGetUserMetadataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserGetUserMetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserInsertUserMetadataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsertUserMetadataResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserInsertUserMetadataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserInsertUserMetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UserUpdateUserMetadataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UpdateUserMetadataResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r UserUpdateUserMetadataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UserUpdateUserMetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// AdminListNamespacesWithResponse request returning *AdminListNamespacesResponse
+func (c *ClientWithResponses) AdminListNamespacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*AdminListNamespacesResponse, error) {
+	rsp, err := c.AdminListNamespaces(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAdminListNamespacesResponse(rsp)
+}
+
+// AdminCreateNamespaceWithBodyWithResponse request with arbitrary body returning *AdminCreateNamespaceResponse
+func (c *ClientWithResponses) AdminCreateNamespaceWithBodyWithResponse(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error) {
+	rsp, err := c.AdminCreateNamespaceWithBody(ctx, name, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAdminCreateNamespaceResponse(rsp)
+}
+
+func (c *ClientWithResponses) AdminCreateNamespaceWithResponse(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error) {
+	rsp, err := c.AdminCreateNamespace(ctx, name, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAdminCreateNamespaceResponse(rsp)
+}
+
+// UserCreateApplicationWithBodyWithResponse request with arbitrary body returning *UserCreateApplicationResponse
+func (c *ClientWithResponses) UserCreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error) {
+	rsp, err := c.UserCreateApplicationWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserCreateApplicationResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserCreateApplicationWithResponse(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error) {
+	rsp, err := c.UserCreateApplication(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserCreateApplicationResponse(rsp)
+}
+
+// UserDeleteApplicationWithBodyWithResponse request with arbitrary body returning *UserDeleteApplicationResponse
+func (c *ClientWithResponses) UserDeleteApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error) {
+	rsp, err := c.UserDeleteApplicationWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserDeleteApplicationResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserDeleteApplicationWithResponse(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error) {
+	rsp, err := c.UserDeleteApplication(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserDeleteApplicationResponse(rsp)
+}
+
+// UserListApplicationsWithBodyWithResponse request with arbitrary body returning *UserListApplicationsResponse
+func (c *ClientWithResponses) UserListApplicationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error) {
+	rsp, err := c.UserListApplicationsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserListApplicationsResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserListApplicationsWithResponse(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error) {
+	rsp, err := c.UserListApplications(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserListApplicationsResponse(rsp)
+}
+
+// UserRotateApplicationSecretWithBodyWithResponse request with arbitrary body returning *UserRotateApplicationSecretResponse
+func (c *ClientWithResponses) UserRotateApplicationSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error) {
+	rsp, err := c.UserRotateApplicationSecretWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserRotateApplicationSecretResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserRotateApplicationSecretWithResponse(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error) {
+	rsp, err := c.UserRotateApplicationSecret(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserRotateApplicationSecretResponse(rsp)
+}
+
+// UserUpdateApplicationWithBodyWithResponse request with arbitrary body returning *UserUpdateApplicationResponse
+func (c *ClientWithResponses) UserUpdateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error) {
+	rsp, err := c.UserUpdateApplicationWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserUpdateApplicationResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserUpdateApplicationWithResponse(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error) {
+	rsp, err := c.UserUpdateApplication(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserUpdateApplicationResponse(rsp)
+}
+
+// AuthGetAccessTokenWithBodyWithResponse request with arbitrary body returning *AuthGetAccessTokenResponse
+func (c *ClientWithResponses) AuthGetAccessTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthGetAccessTokenResponse, error) {
+	rsp, err := c.AuthGetAccessTokenWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthGetAccessTokenResponse(rsp)
+}
+
+func (c *ClientWithResponses) AuthGetAccessTokenWithResponse(ctx context.Context, body AuthGetAccessTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthGetAccessTokenResponse, error) {
+	rsp, err := c.AuthGetAccessToken(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthGetAccessTokenResponse(rsp)
 }
 
 // TigrisListDatabasesWithResponse request returning *TigrisListDatabasesResponse
@@ -3463,6 +5201,15 @@ func (c *ClientWithResponses) TigrisRollbackTransactionWithResponse(ctx context.
 	return ParseTigrisRollbackTransactionResponse(rsp)
 }
 
+// HealthAPIHealthWithResponse request returning *HealthAPIHealthResponse
+func (c *ClientWithResponses) HealthAPIHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthAPIHealthResponse, error) {
+	rsp, err := c.HealthAPIHealth(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseHealthAPIHealthResponse(rsp)
+}
+
 // TigrisGetInfoWithResponse request returning *TigrisGetInfoResponse
 func (c *ClientWithResponses) TigrisGetInfoWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisGetInfoResponse, error) {
 	rsp, err := c.TigrisGetInfo(ctx, reqEditors...)
@@ -3470,6 +5217,338 @@ func (c *ClientWithResponses) TigrisGetInfoWithResponse(ctx context.Context, req
 		return nil, err
 	}
 	return ParseTigrisGetInfoResponse(rsp)
+}
+
+// ObservabilityQueryTimeSeriesMetricsWithBodyWithResponse request with arbitrary body returning *ObservabilityQueryTimeSeriesMetricsResponse
+func (c *ClientWithResponses) ObservabilityQueryTimeSeriesMetricsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ObservabilityQueryTimeSeriesMetricsResponse, error) {
+	rsp, err := c.ObservabilityQueryTimeSeriesMetricsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseObservabilityQueryTimeSeriesMetricsResponse(rsp)
+}
+
+func (c *ClientWithResponses) ObservabilityQueryTimeSeriesMetricsWithResponse(ctx context.Context, body ObservabilityQueryTimeSeriesMetricsJSONRequestBody, reqEditors ...RequestEditorFn) (*ObservabilityQueryTimeSeriesMetricsResponse, error) {
+	rsp, err := c.ObservabilityQueryTimeSeriesMetrics(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseObservabilityQueryTimeSeriesMetricsResponse(rsp)
+}
+
+// UserGetUserMetadataWithBodyWithResponse request with arbitrary body returning *UserGetUserMetadataResponse
+func (c *ClientWithResponses) UserGetUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error) {
+	rsp, err := c.UserGetUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserGetUserMetadataResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserGetUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error) {
+	rsp, err := c.UserGetUserMetadata(ctx, metadataKey, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserGetUserMetadataResponse(rsp)
+}
+
+// UserInsertUserMetadataWithBodyWithResponse request with arbitrary body returning *UserInsertUserMetadataResponse
+func (c *ClientWithResponses) UserInsertUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error) {
+	rsp, err := c.UserInsertUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserInsertUserMetadataResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserInsertUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error) {
+	rsp, err := c.UserInsertUserMetadata(ctx, metadataKey, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserInsertUserMetadataResponse(rsp)
+}
+
+// UserUpdateUserMetadataWithBodyWithResponse request with arbitrary body returning *UserUpdateUserMetadataResponse
+func (c *ClientWithResponses) UserUpdateUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error) {
+	rsp, err := c.UserUpdateUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserUpdateUserMetadataResponse(rsp)
+}
+
+func (c *ClientWithResponses) UserUpdateUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error) {
+	rsp, err := c.UserUpdateUserMetadata(ctx, metadataKey, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUserUpdateUserMetadataResponse(rsp)
+}
+
+// ParseAdminListNamespacesResponse parses an HTTP response from a AdminListNamespacesWithResponse call
+func ParseAdminListNamespacesResponse(rsp *http.Response) (*AdminListNamespacesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AdminListNamespacesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListNamespacesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAdminCreateNamespaceResponse parses an HTTP response from a AdminCreateNamespaceWithResponse call
+func ParseAdminCreateNamespaceResponse(rsp *http.Response) (*AdminCreateNamespaceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AdminCreateNamespaceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateNamespaceResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserCreateApplicationResponse parses an HTTP response from a UserCreateApplicationWithResponse call
+func ParseUserCreateApplicationResponse(rsp *http.Response) (*UserCreateApplicationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserCreateApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateApplicationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserDeleteApplicationResponse parses an HTTP response from a UserDeleteApplicationWithResponse call
+func ParseUserDeleteApplicationResponse(rsp *http.Response) (*UserDeleteApplicationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserDeleteApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeleteApplicationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserListApplicationsResponse parses an HTTP response from a UserListApplicationsWithResponse call
+func ParseUserListApplicationsResponse(rsp *http.Response) (*UserListApplicationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserListApplicationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListApplicationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserRotateApplicationSecretResponse parses an HTTP response from a UserRotateApplicationSecretWithResponse call
+func ParseUserRotateApplicationSecretResponse(rsp *http.Response) (*UserRotateApplicationSecretResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserRotateApplicationSecretResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RotateApplicationSecretResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserUpdateApplicationResponse parses an HTTP response from a UserUpdateApplicationWithResponse call
+func ParseUserUpdateApplicationResponse(rsp *http.Response) (*UserUpdateApplicationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserUpdateApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UpdateApplicationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAuthGetAccessTokenResponse parses an HTTP response from a AuthGetAccessTokenWithResponse call
+func ParseAuthGetAccessTokenResponse(rsp *http.Response) (*AuthGetAccessTokenResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AuthGetAccessTokenResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetAccessTokenResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseTigrisListDatabasesResponse parses an HTTP response from a TigrisListDatabasesWithResponse call
@@ -4132,6 +6211,39 @@ func ParseTigrisRollbackTransactionResponse(rsp *http.Response) (*TigrisRollback
 	return response, nil
 }
 
+// ParseHealthAPIHealthResponse parses an HTTP response from a HealthAPIHealthWithResponse call
+func ParseHealthAPIHealthResponse(rsp *http.Response) (*HealthAPIHealthResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &HealthAPIHealthResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest HealthCheckResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseTigrisGetInfoResponse parses an HTTP response from a TigrisGetInfoWithResponse call
 func ParseTigrisGetInfoResponse(rsp *http.Response) (*TigrisGetInfoResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -4165,124 +6277,295 @@ func ParseTigrisGetInfoResponse(rsp *http.Response) (*TigrisGetInfoResponse, err
 	return response, nil
 }
 
+// ParseObservabilityQueryTimeSeriesMetricsResponse parses an HTTP response from a ObservabilityQueryTimeSeriesMetricsWithResponse call
+func ParseObservabilityQueryTimeSeriesMetricsResponse(rsp *http.Response) (*ObservabilityQueryTimeSeriesMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ObservabilityQueryTimeSeriesMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest QueryTimeSeriesMetricsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserGetUserMetadataResponse parses an HTTP response from a UserGetUserMetadataWithResponse call
+func ParseUserGetUserMetadataResponse(rsp *http.Response) (*UserGetUserMetadataResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserGetUserMetadataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetUserMetadataResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserInsertUserMetadataResponse parses an HTTP response from a UserInsertUserMetadataWithResponse call
+func ParseUserInsertUserMetadataResponse(rsp *http.Response) (*UserInsertUserMetadataResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserInsertUserMetadataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsertUserMetadataResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUserUpdateUserMetadataResponse parses an HTTP response from a UserUpdateUserMetadataWithResponse call
+func ParseUserUpdateUserMetadataResponse(rsp *http.Response) (*UserUpdateUserMetadataResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UserUpdateUserMetadataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UpdateUserMetadataResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"7rt7f/d/AQAA//+pCSQ2GKQAAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

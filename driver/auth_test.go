@@ -19,6 +19,8 @@ import (
 	"github.com/tigrisdata/tigris-client-go/test"
 )
 
+var testTokenURLOverride = "https://localhost:33333/v1/auth/token"
+
 func appEqual(t *testing.T, exp *api.Application, act *Application) {
 	require.Equal(t, exp.Id, act.Id)
 	require.Equal(t, exp.Name, act.Name)
@@ -27,7 +29,7 @@ func appEqual(t *testing.T, exp *api.Application, act *Application) {
 	require.Equal(t, exp.Description, act.Description)
 }
 
-func testDriverAuthNegative(t *testing.T, c Auth, mc *mock.MockAuthServer) {
+func testDriverAuthNegative(t *testing.T, c Auth, mc *mock.MockUserServer) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -53,7 +55,7 @@ func testDriverAuthNegative(t *testing.T, c Auth, mc *mock.MockAuthServer) {
 	require.Error(t, err)
 }
 
-func testDriverAuth(t *testing.T, c Auth, mc *mock.MockAuthServer) {
+func testDriverAuth(t *testing.T, c Auth, mc *mock.MockUserServer, ma *mock.MockAuthServer) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -119,7 +121,7 @@ func testDriverAuth(t *testing.T, c Auth, mc *mock.MockAuthServer) {
 
 	appEqual(t, lapp2, app)
 
-	mc.EXPECT().GetAccessToken(gomock.Any(),
+	ma.EXPECT().GetAccessToken(gomock.Any(),
 		pm(&api.GetAccessTokenRequest{ClientId: "client_id1", ClientSecret: "secret1", GrantType: api.GrantType_CLIENT_CREDENTIALS})).Return(
 		&api.GetAccessTokenResponse{AccessToken: "access_token1", RefreshToken: "refresh_token1"}, nil)
 
@@ -128,7 +130,7 @@ func testDriverAuth(t *testing.T, c Auth, mc *mock.MockAuthServer) {
 	require.Equal(t, "access_token1", token.AccessToken)
 	require.Equal(t, "refresh_token1", token.RefreshToken)
 
-	mc.EXPECT().GetAccessToken(gomock.Any(),
+	ma.EXPECT().GetAccessToken(gomock.Any(),
 		pm(&api.GetAccessTokenRequest{ClientId: "", ClientSecret: "", RefreshToken: "refresh_token_req", GrantType: api.GrantType_REFRESH_TOKEN})).Return(
 		&api.GetAccessTokenResponse{AccessToken: "access_token2", RefreshToken: "refresh_token2"}, nil)
 
@@ -139,16 +141,16 @@ func testDriverAuth(t *testing.T, c Auth, mc *mock.MockAuthServer) {
 }
 
 func TestGRPCAuthDriver(t *testing.T) {
-	_, client, _, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{})
+	_, client, _, mockUserServer, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{})
 	defer cancel()
-	testDriverAuth(t, client, mockAuthServer)
-	testDriverAuthNegative(t, client, mockAuthServer)
+	testDriverAuth(t, client, mockUserServer, mockAuthServer)
+	testDriverAuthNegative(t, client, mockUserServer)
 }
 
 func TestHTTPAuthDriver(t *testing.T) {
-	_, client, _, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{})
+	_, client, _, mockUserServer, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{})
 	defer cancel()
-	testDriverAuth(t, client, mockAuthServer)
+	testDriverAuth(t, client, mockUserServer, mockAuthServer)
 }
 
 func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *mock.MockAuthServer, token string, getToken bool) {
@@ -203,8 +205,8 @@ func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *moc
 
 func TestGRPCDriverCredentials(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
-		TokenURLOverride = "https://localhost:33333/auth/token"
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
+		TokenURLOverride = testTokenURLOverride
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
 			URL:               test.GRPCURL(0),
 			ApplicationId:     "client_id_test",
 			ApplicationSecret: "client_secret_test",
@@ -219,7 +221,7 @@ func TestGRPCDriverCredentials(t *testing.T) {
 	})
 
 	t.Run("env", func(t *testing.T) {
-		TokenURLOverride = "https://localhost:33333/auth/token"
+		TokenURLOverride = testTokenURLOverride
 
 		err := os.Setenv(ApplicationID, "client_id_test")
 		require.NoError(t, err)
@@ -233,7 +235,7 @@ func TestGRPCDriverCredentials(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
 			URL: test.GRPCURL(0),
 		})
 		defer cancel()
@@ -245,7 +247,7 @@ func TestGRPCDriverCredentials(t *testing.T) {
 func TestHTTPDriverCredentials(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
 		TokenURLOverride = ""
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
 			URL:               test.HTTPURL(2),
 			ApplicationId:     "client_id_test",
 			ApplicationSecret: "client_secret_test",
@@ -271,7 +273,7 @@ func TestHTTPDriverCredentials(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
 			URL: test.HTTPURL(2),
 		})
 		defer cancel()
@@ -284,8 +286,9 @@ func TestGRPCDriverToken(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
 		// this is needed because in the tests GRPC and HTTP servers listen on different ports
 		// HTTP - 33333, GRPC 33334
-		TokenURLOverride = "https://localhost:33333/auth/token"
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
+		TokenURLOverride = testTokenURLOverride
+
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
 			URL:   test.GRPCURL(0),
 			Token: "token_grpc_config_1",
 		})
@@ -295,7 +298,7 @@ func TestGRPCDriverToken(t *testing.T) {
 	})
 
 	t.Run("env", func(t *testing.T) {
-		TokenURLOverride = "https://localhost:33333/auth/token"
+		TokenURLOverride = testTokenURLOverride
 
 		err := os.Setenv(Token, "token_grpc_env_1")
 		require.NoError(t, err)
@@ -304,7 +307,7 @@ func TestGRPCDriverToken(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthGRPCTests(t, &config.Driver{
 			URL: test.GRPCURL(0),
 		})
 		defer cancel()
@@ -316,7 +319,7 @@ func TestGRPCDriverToken(t *testing.T) {
 func TestHTTPDriverToken(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
 		TokenURLOverride = ""
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
 			URL:   test.HTTPURL(2),
 			Token: "token_http_config_1",
 		})
@@ -334,7 +337,7 @@ func TestHTTPDriverToken(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		client, _, mockServer, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
+		client, _, mockServer, _, mockAuthServer, cancel := SetupAuthHTTPTests(t, &config.Driver{
 			URL: test.HTTPURL(2),
 		})
 		defer cancel()
@@ -344,7 +347,7 @@ func TestHTTPDriverToken(t *testing.T) {
 }
 
 func TestNewAuth(t *testing.T) {
-	_, _, cancel := test.SetupTests(t, 4)
+	_, _, _, cancel := test.SetupTests(t, 4)
 	defer cancel()
 
 	DefaultProtocol = HTTP

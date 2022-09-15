@@ -40,11 +40,17 @@ import (
 )
 
 var (
-	apiPathPrefix         = "/api/v1"
-	databasePathPattern   = "/databases/*"
-	collectionPathPattern = "/collections/*"
-	documentPathPattern   = "/documents/*"
-	authPathPattern       = "/auth/*"
+	apiPathPrefix = "/v1"
+
+	HTTPRoutes = []string{
+		apiPathPrefix + ("/databases/*"),
+		apiPathPrefix + ("/collections/*"),
+		apiPathPrefix + ("/documents/*"),
+		apiPathPrefix + "/info",
+		apiPathPrefix + ("/users/*"),
+		apiPathPrefix + ("/applications/*"),
+		apiPathPrefix + ("/auth/*"),
+	}
 )
 
 func GRPCURL(shift int) string {
@@ -90,7 +96,7 @@ func customMatcher(key string) (string, bool) {
 	}
 }
 
-func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, *mock.MockAuthServer, func()) {
+func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, *mock.MockUserServer, *mock.MockAuthServer, func()) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -98,10 +104,12 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, *mock.Mock
 
 	m := mock.NewMockTigrisServer(c)
 	a := mock.NewMockAuthServer(c)
+	u := mock.NewMockUserServer(c)
 
 	inproc := &inprocgrpc.Channel{}
 	client := api.NewTigrisClient(inproc)
 	authClient := api.NewAuthClient(inproc)
+	userClient := api.NewUserClient(inproc)
 
 	mux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &api.CustomMarshaler{}),
@@ -111,9 +119,12 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, *mock.Mock
 	require.NoError(t, err)
 	err = api.RegisterAuthHandlerClient(ctx, mux, authClient)
 	require.NoError(t, err)
+	err = api.RegisterUserHandlerClient(ctx, mux, userClient)
+	require.NoError(t, err)
 
 	api.RegisterTigrisServer(inproc, m)
 	api.RegisterAuthServer(inproc, a)
+	api.RegisterUserServer(inproc, u)
 
 	cert, err := tls.X509KeyPair([]byte(ServerCert), []byte(ServerKey))
 	require.NoError(t, err)
@@ -126,24 +137,15 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, *mock.Mock
 	s := grpc.NewServer(grpc.Creds(credentials.NewTLS(tlsConfig)))
 	api.RegisterTigrisServer(s, m)
 	api.RegisterAuthServer(s, a)
+	api.RegisterUserServer(s, u)
 
 	r := chi.NewRouter()
 
-	r.HandleFunc(apiPathPrefix+databasePathPattern, func(w http.ResponseWriter, r *http.Request) {
-		mux.ServeHTTP(w, r)
-	})
-	r.HandleFunc(apiPathPrefix+collectionPathPattern, func(w http.ResponseWriter, r *http.Request) {
-		mux.ServeHTTP(w, r)
-	})
-	r.HandleFunc(apiPathPrefix+documentPathPattern, func(w http.ResponseWriter, r *http.Request) {
-		mux.ServeHTTP(w, r)
-	})
-	r.HandleFunc(apiPathPrefix+"/info", func(w http.ResponseWriter, r *http.Request) {
-		mux.ServeHTTP(w, r)
-	})
-	r.HandleFunc(authPathPattern, func(w http.ResponseWriter, r *http.Request) {
-		mux.ServeHTTP(w, r)
-	})
+	for _, v := range HTTPRoutes {
+		r.HandleFunc(v, func(w http.ResponseWriter, r *http.Request) {
+			mux.ServeHTTP(w, r)
+		})
+	}
 
 	var wg sync.WaitGroup
 
@@ -164,7 +166,7 @@ func SetupTests(t *testing.T, portShift int) (*mock.MockTigrisServer, *mock.Mock
 		_ = server.ListenAndServeTLS("", "")
 	}()
 
-	return m, a, func() {
+	return m, u, a, func() {
 		err = server.Shutdown(context.Background())
 		require.NoError(t, err)
 		s.Stop()

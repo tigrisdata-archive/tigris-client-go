@@ -36,6 +36,7 @@ const (
 
 type grpcDriver struct {
 	api  api.TigrisClient
+	user api.UserClient
 	auth api.AuthClient
 
 	conn *grpc.ClientConn
@@ -81,7 +82,7 @@ func newGRPCClient(_ context.Context, url string, config *config.Driver) (*grpcD
 		return nil, GRPCError(err)
 	}
 
-	return &grpcDriver{conn: conn, api: api.NewTigrisClient(conn), auth: api.NewAuthClient(conn)}, nil
+	return &grpcDriver{conn: conn, api: api.NewTigrisClient(conn), user: api.NewUserClient(conn), auth: api.NewAuthClient(conn)}, nil
 }
 
 func (c *grpcDriver) Close() error {
@@ -449,7 +450,7 @@ func (g *grpcEventStreamReader) close() error {
 }
 
 func (c *grpcDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	r, err := c.auth.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description})
+	r, err := c.user.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -462,12 +463,12 @@ func (c *grpcDriver) CreateApplication(ctx context.Context, name string, descrip
 }
 
 func (c *grpcDriver) DeleteApplication(ctx context.Context, id string) error {
-	_, err := c.auth.DeleteApplication(ctx, &api.DeleteApplicationsRequest{Id: id})
+	_, err := c.user.DeleteApplication(ctx, &api.DeleteApplicationsRequest{Id: id})
 	return GRPCError(err)
 }
 
 func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
-	r, err := c.auth.UpdateApplication(ctx, &api.UpdateApplicationRequest{Id: id, Name: name, Description: description})
+	r, err := c.user.UpdateApplication(ctx, &api.UpdateApplicationRequest{Id: id, Name: name, Description: description})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -480,7 +481,7 @@ func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name stri
 }
 
 func (c *grpcDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	r, err := c.auth.ListApplications(ctx, &api.ListApplicationsRequest{})
+	r, err := c.user.ListApplications(ctx, &api.ListApplicationsRequest{})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -493,7 +494,7 @@ func (c *grpcDriver) ListApplications(ctx context.Context) ([]*Application, erro
 }
 
 func (c *grpcDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
-	r, err := c.auth.RotateApplicationSecret(ctx, &api.RotateApplicationSecretRequest{Id: id})
+	r, err := c.user.RotateApplicationSecret(ctx, &api.RotateApplicationSecretRequest{Id: id})
 	if err != nil {
 		return nil, GRPCError(err)
 	}

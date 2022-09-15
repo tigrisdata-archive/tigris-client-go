@@ -78,7 +78,7 @@ func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string
 		TLSClientConfig: config.TLS,
 	}
 
-	tokenURL := config.URL + "/auth/token"
+	tokenURL := config.URL + "/v1/auth/token"
 	tokenURL = strings.TrimPrefix(tokenURL, "dns:")
 	if !strings.Contains(tokenURL, "://") {
 		tokenURL = "https://" + tokenURL

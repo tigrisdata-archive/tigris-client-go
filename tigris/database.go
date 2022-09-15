@@ -32,7 +32,7 @@ import (
 // method of this interface.
 // Similarly to get access to collection APIs in a transaction
 // top level GetTxCollection(ctx, tx) function should be used
-// instead of method of Tx interface
+// instead of method of Tx interface.
 type Database struct {
 	name   string
 	driver driver.Driver
@@ -47,7 +47,7 @@ func newDatabase(name string, driver driver.Driver) *Database {
 
 // CreateCollections creates collections in the Database using provided collection models
 // This method is only needed if collections need to be created dynamically,
-// all static collections are created by OpenDatabase
+// all static collections are created by OpenDatabase.
 func (db *Database) CreateCollections(ctx context.Context, model schema.Model, models ...schema.Model) error {
 	schemas, err := schema.FromCollectionModels(schema.Documents, model, models...)
 	if err != nil {
@@ -57,7 +57,7 @@ func (db *Database) CreateCollections(ctx context.Context, model schema.Model, m
 	return db.createCollectionsFromSchemas(ctx, db.name, schemas)
 }
 
-// CreateTopics creates message type collections
+// CreateTopics creates message type collections.
 func (db *Database) CreateTopics(ctx context.Context, model schema.Model, models ...schema.Model) error {
 	schemas, err := schema.FromCollectionModels(schema.Messages, model, models...)
 	if err != nil {
@@ -73,8 +73,8 @@ func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driv
 		if err != nil {
 			return err
 		}
-		err = tx.CreateOrUpdateCollection(ctx, v.Name, sch)
-		if err != nil {
+
+		if err = tx.CreateOrUpdateCollection(ctx, v.Name, sch); err != nil {
 			return err
 		}
 	}
@@ -82,8 +82,10 @@ func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driv
 	return nil
 }
 
-// createCollectionsFromSchemas transactionally creates collections from the provided schema map
-func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName string, schemas map[string]*schema.Schema) error {
+// createCollectionsFromSchemas transactionally creates collections from the provided schema map.
+func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName string,
+	schemas map[string]*schema.Schema,
+) error {
 	// Run in existing transaction
 	if tx := getTxCtx(ctx); tx != nil {
 		return db.createCollectionsFromSchemasLow(ctx, tx.tx, schemas)
@@ -94,6 +96,7 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 	if err != nil {
 		return err
 	}
+
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	if err = db.createCollectionsFromSchemasLow(ctx, tx, schemas); err != nil {
@@ -107,8 +110,10 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 	return nil
 }
 
-// openDatabaseFromModels creates Database and collections from the provided collection models
-func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Database, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+// openDatabaseFromModels creates Database and collections from the provided collection models.
+func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Database, dbName string,
+	model schema.Model, models ...schema.Model,
+) (*Database, error) {
 	// optionally creates database if it's allowed
 	if !cfg.MustExist {
 		err := d.CreateDatabase(ctx, dbName)
@@ -131,8 +136,10 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Da
 
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
-// Creates and migrates schemas of the collections which constitutes the Database
-func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+// Creates and migrates schemas of the collections which constitutes the Database.
+func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, model schema.Model,
+	models ...schema.Model,
+) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
 	}
@@ -145,7 +152,7 @@ func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, mode
 	return openDatabaseFromModels(ctx, d, cfg, dbName, model, models...)
 }
 
-// DropDatabase deletes the database and all collections in it
+// DropDatabase deletes the database and all collections in it.
 func DropDatabase(ctx context.Context, cfg *config.Database, dbName string) error {
 	if getTxCtx(ctx) != nil {
 		return ErrNotTransactional
@@ -155,12 +162,13 @@ func DropDatabase(ctx context.Context, cfg *config.Database, dbName string) erro
 	if err != nil {
 		return err
 	}
+
 	defer func() { _ = d.Close() }()
 
 	return d.DropDatabase(ctx, dbName)
 }
 
-// GetCollection returns collection object corresponding to collection model T
+// GetCollection returns collection object corresponding to collection model T.
 func GetCollection[T schema.Model](db *Database) *Collection[T] {
 	var m T
 	name := schema.ModelName(&m)
@@ -171,7 +179,7 @@ func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T
 	return &Collection[T]{name: name, db: db.driver.UseDatabase(db.name)}
 }
 
-// GetTopic returns topic object corresponding to topic model T
+// GetTopic returns topic object corresponding to topic model T.
 func GetTopic[T schema.Model](db *Database) *Topic[T] {
 	var m T
 	name := schema.ModelName(&m)

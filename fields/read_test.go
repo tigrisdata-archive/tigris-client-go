@@ -21,7 +21,6 @@ import (
 )
 
 func TestFieldsBasic(t *testing.T) {
-
 	cases := []struct {
 		name   string
 		fields *Read

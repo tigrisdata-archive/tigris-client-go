@@ -22,7 +22,7 @@ import (
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
-// metadataSetter allows user document model to customize metadata handling
+// metadataSetter allows user document model to customize metadata handling.
 type metadataSetter interface {
 	setCreatedAt(t time.Time)
 	setUpdatedAt(t time.Time)
@@ -41,12 +41,13 @@ type Metadata struct {
 // Metadata is populated automatically if embedded into user document
 //
 // Example:
-//    type User {
-//       tigris.Model
-//       // User fields
-//       Name string
-//       ...
-//    }
+//
+//	type User {
+//	   tigris.Model
+//	   // User fields
+//	   Name string
+//	   ...
+//	}
 type Model struct {
 	Metadata
 
@@ -57,17 +58,17 @@ type Model struct {
 	ID uuid.UUID `tigris:"primary_key,autoGenerate"`
 }
 
-// GetCreatedAt returns time of document creation
+// GetCreatedAt returns time of document creation.
 func (m *Metadata) GetCreatedAt() time.Time {
 	return m.createdAt
 }
 
-// GetUpdatedAt returns time of last document update
+// GetUpdatedAt returns time of last document update.
 func (m *Metadata) GetUpdatedAt() time.Time {
 	return m.updatedAt
 }
 
-// GetDeletedAt returns time of document deletion
+// GetDeletedAt returns time of document deletion.
 func (m *Metadata) GetDeletedAt() time.Time {
 	return m.deletedAt
 }

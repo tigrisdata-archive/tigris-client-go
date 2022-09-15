@@ -23,10 +23,8 @@ import (
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
-var (
-	//All represents fields which includes all field of the documents
-	All = &Read{built: driver.Projection(`{}`), fields: map[string]bool{}}
-)
+// All represents fields which includes all field of the documents.
+var All = &Read{built: driver.Projection(`{}`), fields: map[string]bool{}}
 
 type Read struct {
 	built  driver.Projection
@@ -37,15 +35,17 @@ func ReadBuilder() *Read {
 	return &Read{fields: map[string]bool{}}
 }
 
-// Include flags the field to be returned by read
+// Include flags the field to be returned by read.
 func (pr *Read) Include(field string) *Read {
 	pr.fields[field] = true
+
 	return pr
 }
 
-// Exclude flags the fields to be excluded by the read
+// Exclude flags the fields to be excluded by the read.
 func (pr *Read) Exclude(field string) *Read {
 	pr.fields[field] = false
+
 	return pr
 }
 
@@ -55,15 +55,21 @@ func (pr *Read) Build() (*Read, error) {
 	if pr == nil {
 		return All, nil
 	}
+
 	if pr.fields == nil || len(pr.fields) == 0 {
 		pr.built = All.built
+
 		return pr, nil
 	}
+
 	if pr.built != nil {
 		return pr, nil
 	}
+
 	var err error
+
 	pr.built, err = json.Marshal(pr.fields)
+
 	return pr, err
 }
 
@@ -71,16 +77,18 @@ func (pr *Read) Built() driver.Projection {
 	return pr.built
 }
 
-// Include flags the field to be returned by read
+// Include flags the field to be returned by read.
 func Include(field string) *Read {
 	pr := Read{fields: map[string]bool{}}
 	pr.fields[field] = true
+
 	return &pr
 }
 
-// Exclude flags the fields to be excluded by the read
+// Exclude flags the fields to be excluded by the read.
 func Exclude(field string) *Read {
 	pr := Read{fields: map[string]bool{}}
 	pr.fields[field] = false
+
 	return &pr
 }

@@ -24,63 +24,72 @@ import (
 
 // SetInt64 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetInt64(field string, value int64) *Update {
 	return Set(field, value)
 }
 
 // SetInt instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetInt(field string, value int) *Update {
 	return Set(field, value)
 }
 
 // SetInt32 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetInt32(field string, value int32) *Update {
 	return Set(field, value)
 }
 
 // SetString instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetString(field string, value string) *Update {
 	return Set(field, value)
 }
 
 // SetBytes instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetBytes(field string, value []byte) *Update {
 	return Set(field, value)
 }
 
 // SetFloat32 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetFloat32(field string, value float32) *Update {
 	return Set(field, value)
 }
 
 // SetFloat64 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetFloat64(field string, value float64) *Update {
 	return Set(field, value)
 }
 
 // SetTime composes 'equal' operation. from time.Time value.
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetTime(field string, value time.Time) *Update {
 	return Set(field, value)
 }
 
 // SetUUID composes 'equal' operation. from uuid.UUID value.
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func SetUUID(field string, value uuid.UUID) *Update {
 	return Set(field, value)
 }
@@ -89,63 +98,72 @@ func SetUUID(field string, value uuid.UUID) *Update {
 
 // SetInt64 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetInt64(field string, value int64) *Update {
 	return u.Set(field, value)
 }
 
 // SetInt instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetInt(field string, value int) *Update {
 	return Set(field, value)
 }
 
 // SetInt32 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetInt32(field string, value int32) *Update {
 	return Set(field, value)
 }
 
 // SetString instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetString(field string, value string) *Update {
 	return Set(field, value)
 }
 
 // SetBytes instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetBytes(field string, value []byte) *Update {
 	return Set(field, value)
 }
 
 // SetFloat32 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetFloat32(field string, value float32) *Update {
 	return Set(field, value)
 }
 
 // SetFloat64 instructs update to set given field to the provided value
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetFloat64(field string, value float64) *Update {
 	return Set(field, value)
 }
 
 // SetTime composes 'equal' operation. from time.Time value.
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetTime(field string, value time.Time) *Update {
 	return Set(field, value)
 }
 
 // SetUUID composes 'equal' operation. from uuid.UUID value.
 // Result is equivalent to:
-//   field = value
+//
+//	field = value
 func (u *Update) SetUUID(field string, value uuid.UUID) *Update {
 	return Set(field, value)
 }

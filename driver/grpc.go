@@ -16,6 +16,7 @@ package driver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -47,13 +48,15 @@ func GRPCError(err error) error {
 	if err == nil {
 		return nil
 	}
-	if err == io.EOF {
+
+	if errors.Is(err, io.EOF) {
 		return err
 	}
+
 	return &Error{api.FromStatusError(err)}
 }
 
-// newGRPCClient return Driver interface implementation using GRPC transport protocol
+// newGRPCClient return Driver interface implementation using GRPC transport protocol.
 func newGRPCClient(_ context.Context, url string, config *config.Driver) (*grpcDriver, error) {
 	if !strings.Contains(url, ":") {
 		url = fmt.Sprintf("%s:%d", url, DefaultGRPCPort)
@@ -83,7 +86,8 @@ func newGRPCClient(_ context.Context, url string, config *config.Driver) (*grpcD
 		return nil, GRPCError(err)
 	}
 
-	return &grpcDriver{conn: conn,
+	return &grpcDriver{
+		conn: conn,
 		api:  api.NewTigrisClient(conn),
 		mgmt: api.NewManagementClient(conn),
 		auth: api.NewAuthClient(conn),
@@ -117,10 +121,11 @@ func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
 		return nil, GRPCError(err)
 	}
 
-	var databases []string
+	databases := make([]string, 0, len(r.GetDatabases()))
 	for _, c := range r.GetDatabases() {
 		databases = append(databases, c.GetDb())
 	}
+
 	return databases, nil
 }
 
@@ -153,19 +158,21 @@ func (c *grpcDriver) dropDatabaseWithOptions(ctx context.Context, db string, opt
 
 func (c *grpcDriver) beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error) {
 	var respHeaders meta.MD // variable to store header and trailer
+
 	resp, err := c.api.BeginTransaction(ctx, &api.BeginTransactionRequest{
 		Db:      db,
 		Options: (*api.TransactionOptions)(options),
 	}, grpc.Header(&respHeaders))
-
 	if err != nil {
 		return nil, GRPCError(err)
 	}
+
 	if resp.GetTxCtx() == nil {
 		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
 	}
 
 	additionalHeaders := meta.New(map[string]string{})
+
 	if respHeaders.Get(SetCookieHeaderKey) != nil {
 		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
 			additionalHeaders = meta.Join(additionalHeaders, meta.Pairs(CookieHeaderKey, incomingCookie))
@@ -179,7 +186,9 @@ func setGRPCTxCtx(ctx context.Context, txCtx *api.TransactionCtx, additionalMeta
 	if txCtx == nil || txCtx.Id == "" {
 		return ctx
 	}
+
 	outgoingMd := meta.Pairs(api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin)
+
 	if additionalMetadata != nil {
 		outgoingMd = meta.Join(outgoingMd, additionalMetadata)
 	}
@@ -207,6 +216,7 @@ func (c *grpcCRUD) Rollback(ctx context.Context) error {
 	if c.committed {
 		return nil
 	}
+
 	_, err := c.api.RollbackTransaction(ctx, &api.RollbackTransactionRequest{
 		Db: c.db,
 	})
@@ -234,10 +244,11 @@ func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *Coll
 		return nil, GRPCError(err)
 	}
 
-	var collections []string
+	collections := make([]string, 0, len(r.GetCollections()))
 	for _, c := range r.GetCollections() {
 		collections = append(collections, c.GetCollection())
 	}
+
 	return collections, nil
 }
 
@@ -284,7 +295,6 @@ func (c *grpcCRUD) insertWithOptions(ctx context.Context, collection string, doc
 		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
 		Options:    (*api.InsertRequestOptions)(options),
 	})
-
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -301,7 +311,6 @@ func (c *grpcCRUD) replaceWithOptions(ctx context.Context, collection string, do
 		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
 		Options:    (*api.ReplaceRequestOptions)(options),
 	})
-
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -349,6 +358,7 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filte
 	})
 	if err != nil {
 		cancel()
+
 		return nil, GRPCError(err)
 	}
 
@@ -371,6 +381,7 @@ func (g *grpcStreamReader) read() (Document, error) {
 
 func (g *grpcStreamReader) close() error {
 	g.cancel()
+
 	return nil
 }
 
@@ -391,9 +402,9 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 		PageSize:      req.PageSize,
 		Page:          req.Page,
 	})
-
 	if err != nil {
 		cancel()
+
 		return nil, GRPCError(err)
 	}
 
@@ -417,6 +428,7 @@ func (g *grpcSearchReader) read() (SearchResponse, error) {
 
 func (g *grpcSearchReader) close() error {
 	g.cancel()
+
 	return nil
 }
 
@@ -435,6 +447,7 @@ func (c *grpcDriver) CreateApplication(ctx context.Context, name string, descrip
 
 func (c *grpcDriver) DeleteApplication(ctx context.Context, id string) error {
 	_, err := c.mgmt.DeleteApplication(ctx, &api.DeleteApplicationsRequest{Id: id})
+
 	return GRPCError(err)
 }
 
@@ -477,7 +490,9 @@ func (c *grpcDriver) RotateClientSecret(ctx context.Context, id string) (*Applic
 	return (*Application)(r.Application), nil
 }
 
-func (c *grpcDriver) GetAccessToken(ctx context.Context, clientId string, clientSecret string, refreshToken string) (*TokenResponse, error) {
+func (c *grpcDriver) GetAccessToken(ctx context.Context, clientID string, clientSecret string,
+	refreshToken string,
+) (*TokenResponse, error) {
 	tp := api.GrantType_CLIENT_CREDENTIALS
 	if refreshToken != "" {
 		tp = api.GrantType_REFRESH_TOKEN
@@ -486,7 +501,7 @@ func (c *grpcDriver) GetAccessToken(ctx context.Context, clientId string, client
 	r, err := c.auth.GetAccessToken(ctx, &api.GetAccessTokenRequest{
 		GrantType:    tp,
 		RefreshToken: refreshToken,
-		ClientId:     clientId,
+		ClientId:     clientID,
 		ClientSecret: clientSecret,
 	})
 	if err != nil {
@@ -505,7 +520,6 @@ func (c *grpcCRUD) publishWithOptions(ctx context.Context, collection string, ms
 		Messages:   *(*[][]byte)(unsafe.Pointer(&msgs)),
 		Options:    (*api.PublishRequestOptions)(options),
 	})
-
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -529,6 +543,7 @@ func (g *grpcSubscribeStreamReader) read() (Document, error) {
 
 func (g *grpcSubscribeStreamReader) close() error {
 	g.cancel()
+
 	return nil
 }
 
@@ -546,6 +561,7 @@ func (c *grpcCRUD) subscribeWithOptions(ctx context.Context, collection string, 
 	})
 	if err != nil {
 		cancel()
+
 		return nil, GRPCError(err)
 	}
 

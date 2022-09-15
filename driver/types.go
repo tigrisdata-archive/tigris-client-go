@@ -26,10 +26,10 @@ const (
 	HTTP  = "HTTP"
 	HTTPS = "HTTPS"
 
-	ApplicationID     = "TIGRIS_APPLICATION_ID"
-	ApplicationSecret = "TIGRIS_APPLICATION_SECRET"
-	Token             = "TIGRIS_TOKEN"
-	Protocol          = "TIGRIS_PROTOCOL"
+	EnvClientID     = "TIGRIS_CLIENT_ID"
+	EnvClientSecret = "TIGRIS_CLIENT_SECRET" //nolint:golint,gosec
+	EnvToken        = "TIGRIS_TOKEN"         //nolint:golint,gosec
+	EnvProtocol     = "TIGRIS_PROTOCOL"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version
@@ -40,42 +40,53 @@ const (
 var (
 	DefaultProtocol = GRPC
 
-	// TokenURLOverride Only used in tests to point auth to proper HTTP port in GRPC tests
+	// TokenURLOverride Only used in tests to point auth to proper HTTP port in GRPC tests.
 	TokenURLOverride string
 )
 
-type Document json.RawMessage
-type Message json.RawMessage
-type Filter json.RawMessage
-type Projection json.RawMessage
-type Update json.RawMessage
-type Schema json.RawMessage
-type Facet json.RawMessage
-type SortOrder json.RawMessage
-type Collation api.Collation
-type WriteOptions api.WriteOptions
+type (
+	Document   json.RawMessage
+	Message    json.RawMessage
+	Filter     json.RawMessage
+	Projection json.RawMessage
+	Update     json.RawMessage
+	Schema     json.RawMessage
+	Facet      json.RawMessage
+	SortOrder  json.RawMessage
+)
 
-type InsertOptions api.InsertRequestOptions
-type ReplaceOptions api.ReplaceRequestOptions
-type UpdateOptions api.UpdateRequestOptions
-type DeleteOptions api.DeleteRequestOptions
-type ReadOptions api.ReadRequestOptions
-type PublishOptions api.PublishRequestOptions
-type SubscribeOptions api.SubscribeRequestOptions
+type (
+	InsertOptions    api.InsertRequestOptions
+	ReplaceOptions   api.ReplaceRequestOptions
+	UpdateOptions    api.UpdateRequestOptions
+	DeleteOptions    api.DeleteRequestOptions
+	ReadOptions      api.ReadRequestOptions
+	EventsOptions    api.EventsRequestOptions
+	WriteOptions     api.WriteOptions
+	Collation        api.Collation
+	PublishOptions   api.PublishRequestOptions
+	SubscribeOptions api.SubscribeRequestOptions
+)
 
-type CollectionOptions api.CollectionOptions
-type DatabaseOptions api.DatabaseOptions
-type TxOptions api.TransactionOptions
+type (
+	CollectionOptions api.CollectionOptions
+	DatabaseOptions   api.DatabaseOptions
+	TxOptions         api.TransactionOptions
+)
 
-type InsertResponse api.InsertResponse
-type ReplaceResponse api.ReplaceResponse
-type UpdateResponse api.UpdateResponse
-type DeleteResponse api.DeleteResponse
-type PublishResponse api.PublishResponse
-type SubscribeResponse api.SubscribeResponse
+type (
+	InsertResponse    api.InsertResponse
+	ReplaceResponse   api.ReplaceResponse
+	UpdateResponse    api.UpdateResponse
+	DeleteResponse    api.DeleteResponse
+	SubscribeResponse api.SubscribeResponse
+	PublishResponse   api.PublishResponse
+)
 
-type DescribeDatabaseResponse api.DescribeDatabaseResponse
-type DescribeCollectionResponse api.DescribeCollectionResponse
+type (
+	DescribeDatabaseResponse   api.DescribeDatabaseResponse
+	DescribeCollectionResponse api.DescribeCollectionResponse
+)
 
 type InfoResponse api.GetInfoResponse
 
@@ -96,7 +107,7 @@ type Error struct {
 	*api.TigrisError
 }
 
-// As converts driver.Error the error which implements AsTigrisError interface
+// As converts driver.Error the error which implements AsTigrisError interface.
 func (e *Error) As(i any) bool {
 	if x, ok := i.(interface{ AsTigrisError(*Error) bool }); ok && x.AsTigrisError(e) {
 		return true
@@ -104,5 +115,7 @@ func (e *Error) As(i any) bool {
 	return false
 }
 
-type Application api.Application
-type TokenResponse api.GetAccessTokenResponse
+type (
+	Application   api.Application
+	TokenResponse api.GetAccessTokenResponse
+)

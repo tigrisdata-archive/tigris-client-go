@@ -17,7 +17,7 @@
 //
 // Collection model is declared using Go struct tags. The "tigris" tag contains field properties.
 // The following properties are recognised:
-//  * primary_key - declares primary key of the collection
+//   - primary_key - declares primary key of the collection
 //
 // Composite primary keys defined using optional tag indexes.
 //
@@ -41,7 +41,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
-// Tags supported by Tigris
+// Tags supported by Tigris.
 const (
 	tagName = "tigris"
 
@@ -52,16 +52,16 @@ const (
 	id = "ID"
 )
 
-// Collection types
+// Collection types.
 const (
 	Documents = "documents" // Regular collection containing documents
 	Messages  = "messages"  // Publish/subscribe collection containing messages
 )
 
-// Model represents types supported as collection models
+// Model represents types supported as collection models.
 type Model interface{}
 
-// PrimitiveFieldType represents types supported by non-composite fields
+// PrimitiveFieldType represents types supported by non-composite fields.
 type PrimitiveFieldType interface {
 	string |
 		int | int32 | int64 |
@@ -76,7 +76,7 @@ func init() {
 }
 
 // Supported data types
-// See translateType for Golang to JSON schema translation rules
+// See translateType for Golang to JSON schema translation rules.
 const (
 	typeInteger = "integer"
 	typeString  = "string"
@@ -86,7 +86,7 @@ const (
 	typeObject  = "object"
 )
 
-// Supported subtypes
+// Supported subtypes.
 const (
 	formatInt32    = "int32"
 	formatByte     = "byte"
@@ -94,7 +94,7 @@ const (
 	formatUUID     = "uuid"
 )
 
-// Field represents JSON schema object
+// Field represents JSON schema object.
 type Field struct {
 	Type   string            `json:"type,omitempty"`
 	Format string            `json:"format,omitempty"`
@@ -106,7 +106,7 @@ type Field struct {
 	AutoGenerate bool `json:"autoGenerate,omitempty"`
 }
 
-// Schema is top level JSON schema object
+// Schema is top level JSON schema object.
 type Schema struct {
 	Name       string            `json:"title,omitempty"`
 	Desc       string            `json:"description,omitempty"`
@@ -116,27 +116,30 @@ type Schema struct {
 	CollectionType string `json:"collection_type,omitempty"`
 }
 
-// DatabaseModelName returns name of the database derived from the given database model
+// DatabaseModelName returns name of the database derived from the given database model.
 func DatabaseModelName(s interface{}) string {
 	t := reflect.TypeOf(s)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
+
 	return t.Name()
 }
 
 // ModelName returns name of the collection derived from the given collection model type.
 // The name is snake case pluralized.
-// If the original name ends with digit then it's not pluralized
+// If the original name ends with digit then it's not pluralized.
 func ModelName(s interface{}) string {
 	t := reflect.TypeOf(s)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
+
 	name := strcase.ToSnake(t.Name())
 	if unicode.IsDigit(rune(name[len(name)-1])) {
 		return name
 	}
+
 	return plural.Plural(name)
 }
 
@@ -144,11 +147,14 @@ func translateType(t reflect.Type) (string, string, error) {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
+
+	//nolint:golint,exhaustive
 	switch t.Kind() {
 	case reflect.Struct:
 		if t.PkgPath() == "time" && t.Name() == "Time" {
 			return typeString, formatDateTime, nil
 		}
+
 		return typeObject, "", nil
 	case reflect.Array:
 		if t.Elem().Kind() == reflect.Uint8 {
@@ -157,6 +163,7 @@ func translateType(t reflect.Type) (string, string, error) {
 			}
 			return typeString, formatByte, nil
 		}
+
 		return typeArray, "", nil
 	case reflect.Slice:
 		if t.Elem().Kind() == reflect.Uint8 {
@@ -190,33 +197,37 @@ func isPrimaryKeyType(tp string) bool {
 	return tp != typeArray && tp != typeNumber && tp != typeObject && tp != typeBoolean
 }
 
-// Build converts structured schema to driver schema
+// Build converts structured schema to driver schema.
 func Build(sch *Schema) (driver.Schema, error) {
 	return json.Marshal(sch)
 }
 
-// Build converts structured schema to driver schema
+// Build converts structured schema to driver schema.
 func (sch *Schema) Build() (driver.Schema, error) {
 	return Build(sch)
 }
 
 // parsePrimaryKeyIndex parses primary key tag
 // The tag is expected to be in the form:
-//   primary_key:{index}
+//
+//	primary_key:{index}
+//
 // where {index} is primary key index part order in
 // the composite key. Index starts from 1.
 func parsePrimaryKeyIndex(tag string) (int, error) {
-	pks := strings.Split(tag, ":")
-	i := 1
+	i, pks := 1, strings.Split(tag, ":")
 	if len(pks) > 1 {
 		if len(pks) > 2 {
 			return 0, fmt.Errorf("only one colon allowed in the tag")
 		}
+
 		var err error
+
 		i, err = strconv.Atoi(pks[1])
 		if err != nil {
-			return 0, fmt.Errorf("error parsing primary key index %s", err)
+			return 0, fmt.Errorf("error parsing primary key index %w", err)
 		}
+
 		if i == 0 {
 			return 0, fmt.Errorf("primary key index starts from 1")
 		}
@@ -231,7 +242,7 @@ func isTag(name string, tag string) bool {
 
 // parseTag parses "tigris" tag and returns recognised tags.
 // It also returns encountered "primary_key" tagged field in "pk" map,
-// which maps field name to primary key index part
+// which maps field name to primary key index part.
 func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, error) {
 	if tag == "" {
 		return false, nil
@@ -246,19 +257,22 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 	}
 
 	for _, tag := range tagList {
-		if strings.HasPrefix(tag, tagPrimaryKey) ||
-			strings.HasPrefix(tag, strcase.ToSnake(tagPrimaryKey)) {
+		switch {
+		case strings.HasPrefix(tag, tagPrimaryKey) ||
+			strings.HasPrefix(tag, strcase.ToSnake(tagPrimaryKey)):
 			if pk == nil {
 				return false, nil
 			}
+
 			i, err := parsePrimaryKeyIndex(tag)
 			if err != nil {
 				return false, err
 			}
+
 			pk[name] = i
-		} else if isTag(tag, tagAutoGenerate) {
+		case isTag(tag, tagAutoGenerate):
 			field.AutoGenerate = true
-		} else {
+		default:
 			return false, fmt.Errorf("unknown tigris tag: %s", tag)
 		}
 	}
@@ -266,7 +280,7 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 	return false, nil
 }
 
-// traverseFields recursively parses the model structure and build the schema structure out of it
+// traverseFields recursively parses the model structure and build the schema structure out of it.
 func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk map[string]int, nFields *int) error {
 	if prefix != "" {
 		prefix += "."
@@ -328,6 +342,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 				if err = traverseFields(prefix+fName, tp, fields, lpk, nFields); err != nil {
 					return err
 				}
+
 				continue
 			}
 
@@ -338,7 +353,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 		} else if f.Type == typeArray {
 			if field.Type.Elem().Kind() == reflect.Struct {
 				f.Items = &Field{
-					//Name:   tp.Elem().Name(),
+					// Name:   tp.Elem().Name(),
 					Type:   typeObject,
 					Fields: make(map[string]*Field),
 				}
@@ -369,12 +384,14 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
+
 	if t.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("model should be of struct type, not %s", t.Name())
 	}
 
 	sch := Schema{Name: ModelName(model), Fields: make(map[string]*Field)}
 	pk := make(map[string]int)
+
 	var nFields int
 
 	if err := traverseFields("", t, sch.Fields, pk, &nFields); err != nil {
@@ -382,16 +399,20 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 	}
 
 	sch.PrimaryKey = make([]string, len(pk))
+
 	for k, v := range pk {
 		if v > nFields {
 			return nil, fmt.Errorf("maximum primary key index is %v", nFields)
 		}
+
 		if v > len(pk) {
 			return nil, fmt.Errorf("gap in the primary key index")
 		}
+
 		if sch.PrimaryKey[v-1] != "" {
 			return nil, fmt.Errorf("duplicate primary key index %d set for %s and %s", v, k, sch.PrimaryKey[v-1])
 		}
+
 		sch.PrimaryKey[v-1] = k
 	}
 
@@ -401,8 +422,10 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 
 	// No explicit primary key defined and no tigris.Model embedded
 	if len(pk) == 0 && typ == Documents {
-		var p *Field
-		var ok bool
+		var (
+			p  *Field
+			ok bool
+		)
 		name := id
 		// Check for existing and not annotated Id and ID fields
 		// add `ID uuid.UUID` if none found
@@ -412,10 +435,13 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 			sch.Fields[id] = &Field{Type: typeString, Format: formatUUID, AutoGenerate: true}
 			p = sch.Fields[id]
 		}
+
 		if !isPrimaryKeyType(p.Type) {
 			return nil, fmt.Errorf("type is not supported for the key: %s", p.Type)
 		}
+
 		p.AutoGenerate = true
+
 		sch.PrimaryKey = append(sch.PrimaryKey, name)
 	}
 
@@ -428,15 +454,15 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 	return &sch, nil
 }
 
-// FromCollectionModels converts provided model(s) to the schema structure
+// FromCollectionModels converts provided model(s) to the schema structure.
 func FromCollectionModels(tp string, model Model, models ...Model) (map[string]*Schema, error) {
-	//models parameter added to require at least one schema to migrate
 	schemas := make(map[string]*Schema)
 
 	schema, err := fromCollectionModel(model, tp)
 	if err != nil {
 		return nil, err
 	}
+
 	schemas[schema.Name] = schema
 
 	for _, m := range models {
@@ -444,18 +470,20 @@ func FromCollectionModels(tp string, model Model, models ...Model) (map[string]*
 		if err != nil {
 			return nil, err
 		}
+
 		schemas[schema.Name] = schema
 	}
 
 	return schemas, nil
 }
 
-// FromDatabaseModel converts provided database model to collections schema structures
+// FromDatabaseModel converts provided database model to collections schema structures.
 func FromDatabaseModel(dbModel interface{}) (string, map[string]*Schema, error) {
 	t := reflect.TypeOf(dbModel)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
+
 	if t.Kind() != reflect.Struct {
 		return "", nil, fmt.Errorf("database model should be of struct type containing collection models types as fields")
 	}

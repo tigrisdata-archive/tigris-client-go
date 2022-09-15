@@ -27,7 +27,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/config"
 )
 
-// Driver implements Tigris API
+// Driver implements Tigris API.
 type Driver interface {
 	// Info returns server information
 	Info(ctx context.Context) (*InfoResponse, error)
@@ -54,7 +54,7 @@ type Driver interface {
 }
 
 // Tx object is used to atomically modify documents.
-// This object is returned by BeginTx
+// This object is returned by BeginTx.
 type Tx interface {
 	// Commit all the modification of the transaction
 	Commit(ctx context.Context) error
@@ -68,20 +68,24 @@ type Tx interface {
 // Database is the interface that encapsulates the CRUD portions of the transaction API.
 type Database interface {
 	// Insert array of documents into specified database and collection.
-	Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (*InsertResponse, error)
+	Insert(ctx context.Context, collection string, docs []Document,
+		options ...*InsertOptions) (*InsertResponse, error)
 
 	// Replace array of documents into specified database and collection
 	// Creates document if it doesn't exist.
-	Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (*ReplaceResponse, error)
+	Replace(ctx context.Context, collection string, docs []Document,
+		options ...*ReplaceOptions) (*ReplaceResponse, error)
 
 	// Read documents from the collection matching the specified filter.
-	Read(ctx context.Context, collection string, filter Filter, fields Projection, options ...*ReadOptions) (Iterator, error)
+	Read(ctx context.Context, collection string, filter Filter, fields Projection,
+		options ...*ReadOptions) (Iterator, error)
 
-	//Search for documents in the collection matching specified query
+	// Search for documents in the collection matching specified query
 	Search(ctx context.Context, collection string, request *SearchRequest) (SearchResultIterator, error)
 
 	// Update documents in the collection matching the specified filter.
-	Update(ctx context.Context, collection string, filter Filter, fields Update, options ...*UpdateOptions) (*UpdateResponse, error)
+	Update(ctx context.Context, collection string, filter Filter, fields Update,
+		options ...*UpdateOptions) (*UpdateResponse, error)
 
 	// Delete documents from the collection matching specified filter.
 	Delete(ctx context.Context, collection string, filter Filter, options ...*DeleteOptions) (*DeleteResponse, error)
@@ -102,7 +106,8 @@ type Database interface {
 	//     }
 	//   }
 	// More detailed information here: https://docs.tigrisdata.com/datamodels/types
-	CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error
+	CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema,
+		options ...*CollectionOptions) error
 
 	// DropCollection deletes the collection and all documents it contains.
 	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
@@ -111,7 +116,8 @@ type Database interface {
 	ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error)
 
 	// DescribeCollection returns metadata of the collection in the database
-	DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (*DescribeCollectionResponse, error)
+	DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (
+		*DescribeCollectionResponse, error)
 
 	Publish(ctx context.Context, collection string, docs []Message, options ...*PublishOptions) (*PublishResponse, error)
 
@@ -139,6 +145,7 @@ func (c *driver) DropDatabase(ctx context.Context, db string, options ...*Databa
 
 	return c.dropDatabaseWithOptions(ctx, db, opts.(*DatabaseOptions))
 }
+
 func (c *driver) BeginTx(ctx context.Context, db string, options ...*TxOptions) (Tx, error) {
 	opts, err := validateOptionsParam(options, &TxOptions{})
 	if err != nil {
@@ -149,6 +156,7 @@ func (c *driver) BeginTx(ctx context.Context, db string, options ...*TxOptions) 
 	if err != nil {
 		return nil, err
 	}
+
 	return &driverCRUDTx{driverCRUD: &driverCRUD{tx}, txWithOptions: tx}, nil
 }
 
@@ -161,7 +169,9 @@ type driverCRUD struct {
 	CRUDWithOptions
 }
 
-func (c *driverCRUD) Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (*InsertResponse, error) {
+func (c *driverCRUD) Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (
+	*InsertResponse, error,
+) {
 	opts, err := validateOptionsParam(options, &InsertOptions{})
 	if err != nil {
 		return nil, err
@@ -170,7 +180,9 @@ func (c *driverCRUD) Insert(ctx context.Context, collection string, docs []Docum
 	return c.insertWithOptions(ctx, collection, docs, opts.(*InsertOptions))
 }
 
-func (c *driverCRUD) Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (*ReplaceResponse, error) {
+func (c *driverCRUD) Replace(ctx context.Context, collection string, docs []Document, options ...*ReplaceOptions) (
+	*ReplaceResponse, error,
+) {
 	opts, err := validateOptionsParam(options, &ReplaceOptions{})
 	if err != nil {
 		return nil, err
@@ -179,7 +191,9 @@ func (c *driverCRUD) Replace(ctx context.Context, collection string, docs []Docu
 	return c.replaceWithOptions(ctx, collection, docs, opts.(*ReplaceOptions))
 }
 
-func (c *driverCRUD) Update(ctx context.Context, collection string, filter Filter, fields Update, options ...*UpdateOptions) (*UpdateResponse, error) {
+func (c *driverCRUD) Update(ctx context.Context, collection string, filter Filter, fields Update,
+	options ...*UpdateOptions,
+) (*UpdateResponse, error) {
 	opts, err := validateOptionsParam(options, &UpdateOptions{})
 	if err != nil {
 		return nil, err
@@ -188,7 +202,9 @@ func (c *driverCRUD) Update(ctx context.Context, collection string, filter Filte
 	return c.updateWithOptions(ctx, collection, filter, fields, opts.(*UpdateOptions))
 }
 
-func (c *driverCRUD) Delete(ctx context.Context, collection string, filter Filter, options ...*DeleteOptions) (*DeleteResponse, error) {
+func (c *driverCRUD) Delete(ctx context.Context, collection string, filter Filter, options ...*DeleteOptions) (
+	*DeleteResponse, error,
+) {
 	opts, err := validateOptionsParam(options, &DeleteOptions{})
 	if err != nil {
 		return nil, err
@@ -197,7 +213,9 @@ func (c *driverCRUD) Delete(ctx context.Context, collection string, filter Filte
 	return c.deleteWithOptions(ctx, collection, filter, opts.(*DeleteOptions))
 }
 
-func (c *driverCRUD) Read(ctx context.Context, collection string, filter Filter, fields Projection, options ...*ReadOptions) (Iterator, error) {
+func (c *driverCRUD) Read(ctx context.Context, collection string, filter Filter, fields Projection,
+	options ...*ReadOptions,
+) (Iterator, error) {
 	opts, err := validateOptionsParam(options, &ReadOptions{})
 	if err != nil {
 		return nil, err
@@ -206,14 +224,19 @@ func (c *driverCRUD) Read(ctx context.Context, collection string, filter Filter,
 	return c.readWithOptions(ctx, collection, filter, fields, opts.(*ReadOptions))
 }
 
-func (c *driverCRUD) Search(ctx context.Context, collection string, request *SearchRequest) (SearchResultIterator, error) {
+func (c *driverCRUD) Search(ctx context.Context, collection string, request *SearchRequest) (
+	SearchResultIterator, error,
+) {
 	if request == nil {
 		return nil, fmt.Errorf("API does accept nil Search Request")
 	}
+
 	return c.search(ctx, collection, request)
 }
 
-func (c *driverCRUD) CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema, options ...*CollectionOptions) error {
+func (c *driverCRUD) CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema,
+	options ...*CollectionOptions,
+) error {
 	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return err
@@ -239,7 +262,9 @@ func (c *driverCRUD) ListCollections(ctx context.Context, options ...*Collection
 	return c.listCollectionsWithOptions(ctx, opts.(*CollectionOptions))
 }
 
-func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (*DescribeCollectionResponse, error) {
+func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (
+	*DescribeCollectionResponse, error,
+) {
 	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
 		return nil, err
@@ -293,24 +318,29 @@ func initConfig(cfg *config.Driver) *config.Driver {
 }
 
 // NewDriver connect to the Tigris instance at the specified URL.
-// URL should be in the form: {hostname}:{port}
+// URL should be in the form: {hostname}:{port}.
 func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	cfg = initConfig(cfg)
 
 	protocol := DefaultProtocol
-	if os.Getenv(Protocol) != "" {
-		protocol = strings.ToUpper(os.Getenv(Protocol))
+	if os.Getenv(EnvProtocol) != "" {
+		protocol = strings.ToUpper(os.Getenv(EnvProtocol))
 	}
 
-	var drv driverWithOptions
-	var err error
-	if protocol == GRPC {
+	var (
+		drv driverWithOptions
+		err error
+	)
+
+	switch protocol {
+	case GRPC:
 		drv, err = newGRPCClient(ctx, cfg.URL, cfg)
-	} else if protocol == HTTP || protocol == HTTPS {
+	case HTTP:
 		drv, err = newHTTPClient(ctx, cfg.URL, cfg)
-	} else {
+	default:
 		err = fmt.Errorf("unsupported protocol")
 	}
+
 	if err != nil {
 		return nil, err
 	}

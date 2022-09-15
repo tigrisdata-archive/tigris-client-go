@@ -27,9 +27,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/search"
 )
 
-var (
-	errNotFound = fmt.Errorf("document not found")
-)
+var errNotFound = fmt.Errorf("document not found")
 
 // Collation allows you to specify string comparison rules. Default is case-sensitive.
 type Collation struct {
@@ -38,7 +36,7 @@ type Collation struct {
 	Case string
 }
 
-// ReadOptions modifies read request behavior
+// ReadOptions modifies read request behavior.
 type ReadOptions struct {
 	// Limit the number of documents returned by the read operation.
 	Limit int64
@@ -51,13 +49,13 @@ type ReadOptions struct {
 }
 
 // Collection provides an interface for documents manipulation.
-// Such as Insert, Update, Delete, Read
+// Such as Insert, Update, Delete, Read.
 type Collection[T schema.Model] struct {
 	name string
 	db   driver.Database
 }
 
-// Drop drops the collection
+// Drop drops the collection.
 func (c *Collection[T]) Drop(ctx context.Context) error {
 	return getDB(ctx, c.db).DropCollection(ctx, c.name)
 }
@@ -68,6 +66,7 @@ func (c *Collection[T]) Insert(ctx context.Context, docs ...*T) (*InsertResponse
 	var err error
 
 	bdocs := make([]driver.Document, len(docs))
+
 	for k, v := range docs {
 		if bdocs[k], err = json.Marshal(v); err != nil {
 			return nil, err
@@ -102,6 +101,7 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 	var err error
 
 	bdocs := make([]driver.Document, len(docs))
+
 	for k, v := range docs {
 		if bdocs[k], err = json.Marshal(v); err != nil {
 			return nil, err
@@ -137,10 +137,12 @@ func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update
 	if err != nil {
 		return nil, err
 	}
+
 	u, err := update.Build()
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = getDB(ctx, c.db).Update(ctx, c.name, f, u.Built())
 	if err != nil {
 		return nil, err
@@ -152,16 +154,20 @@ func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update
 
 func getFields(fields ...*fields.Read) (driver.Projection, error) {
 	p := driver.Projection(nil)
+
 	if len(fields) > 0 {
 		if len(fields) > 1 {
 			return nil, fmt.Errorf("only one fields parameter is allowed")
 		}
+
 		f, err := fields[0].Build()
 		if err != nil {
 			return nil, err
 		}
+
 		p = f.Built()
 	}
+
 	return p, nil
 }
 
@@ -172,6 +178,7 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields .
 	if err != nil {
 		return nil, err
 	}
+
 	f, err := filter.Build()
 	if err != nil {
 		return nil, err
@@ -195,6 +202,7 @@ func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filte
 	if err != nil {
 		return nil, err
 	}
+
 	f, err := filter.Build()
 	if err != nil {
 		return nil, err
@@ -219,11 +227,14 @@ func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filte
 // ReadOne reads one document from the collection satisfying the filter.
 func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*T, error) {
 	var doc T
+
 	it, err := c.Read(ctx, filter, fields...)
 	if err != nil {
 		return nil, err
 	}
+
 	defer it.Close()
+
 	if !it.Next(&doc) {
 		if it.Err() != nil {
 			return nil, it.Err()
@@ -231,6 +242,7 @@ func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, field
 
 		return nil, errNotFound
 	}
+
 	return &doc, nil
 }
 
@@ -241,7 +253,9 @@ func (c *Collection[T]) ReadAll(ctx context.Context, fields ...*fields.Read) (*I
 	if err != nil {
 		return nil, err
 	}
+
 	it, err := getDB(ctx, c.db).Read(ctx, c.name, driver.Filter("{}"), p)
+
 	return &Iterator[T]{Iterator: it}, err
 }
 
@@ -286,6 +300,7 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		if sortOrder != nil {
 			r.Sort = sortOrder
 		}
@@ -295,7 +310,7 @@ func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
 }
 
 // Search returns Iterator which iterates over matched documents
-// in the collection
+// in the collection.
 func (c *Collection[T]) Search(ctx context.Context, req *search.Request) (*SearchIterator[T], error) {
 	r, err := getSearchRequest(req)
 	if err != nil || r == nil {
@@ -315,10 +330,12 @@ func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*Dele
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = getDB(ctx, c.db).Delete(ctx, c.name, f)
 	if err != nil {
 		return nil, err
 	}
+
 	// TODO: forward response
 	return &DeleteResponse{}, err
 }

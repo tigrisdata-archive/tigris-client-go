@@ -37,18 +37,37 @@ func TestPrefixFilterBuilderBasic(t *testing.T) {
 			{"not(not(eq))", Not(Not(Eq("a", 1))), `{"$not":{"$not":{"a":{"$eq":1}}}}`},
 		*/
 		{"and(eq)", And(Eq("a", 1)), `{"$and":[{"a":{"$eq":1}}]}`},
-		{"and(eq, eq)", And(Eq("a", 1), Eq("b", 2)), `{"$and":[{"a":{"$eq":1}},{"b":{"$eq":2}}]}`},
+		{
+			"and(eq, eq)", And(Eq("a", 1), Eq("b", 2)),
+			`{"$and":[{"a":{"$eq":1}},{"b":{"$eq":2}}]}`,
+		},
 		{"or(eq)", Or(Eq("a", 1)), `{"$or":[{"a":{"$eq":1}}]}`},
-		{"or(eq, eq)", Or(Eq("a", 1), Eq("b", 2)), `{"$or":[{"a":{"$eq":1}},{"b":{"$eq":2}}]}`},
-		{"or(and(eq), eq)", Or(And(Eq("a", 1)), Eq("b", 2)), `{"$or":[{"$and":[{"a":{"$eq":1}}]},{"b":{"$eq":2}}]}`},
-		{"and(or(eq), eq)", And(Or(Eq("a", 1)), Eq("b", 2)), `{"$and":[{"$or":[{"a":{"$eq":1}}]},{"b":{"$eq":2}}]}`},
-		{"and(or(eq, and(eq, eq)), eq)", And(Or(Eq("a", 1), And(Eq("c", 3), Eq("d", 4))), Eq("b", 2)), `{"$and":[{"$or":[{"a":{"$eq":1}},{"$and":[{"c":{"$eq":3}},{"d":{"$eq":4}}]}]},{"b":{"$eq":2}}]}`},
+		{
+			"or(eq, eq)", Or(Eq("a", 1), Eq("b", 2)),
+			`{"$or":[{"a":{"$eq":1}},{"b":{"$eq":2}}]}`,
+		},
+		{
+			"or(and(eq), eq)", Or(And(Eq("a", 1)), Eq("b", 2)),
+			`{"$or":[{"$and":[{"a":{"$eq":1}}]},{"b":{"$eq":2}}]}`,
+		},
+		{
+			"and(or(eq), eq)", And(Or(Eq("a", 1)), Eq("b", 2)),
+			`{"$and":[{"$or":[{"a":{"$eq":1}}]},{"b":{"$eq":2}}]}`,
+		},
+		{
+			"and(or(eq, and(eq, eq)), eq)", And(Or(Eq("a", 1), And(Eq("c", 3),
+				Eq("d", 4))), Eq("b", 2)),
+			`{"$and":[{"$or":[{"a":{"$eq":1}},{"$and":[{"c":{"$eq":3}},{"d":{"$eq":4}}]}]},{"b":{"$eq":2}}]}`,
+		},
 		{"lt", Lt("a", 10), `{"a":{"$lt":10}}`},
 		{"lte", Lte("a", 10), `{"a":{"$lte":10}}`},
 		{"gt", Gt("a", 10), `{"a":{"$gt":10}}`},
 		{"gte", Gte("a", 10), `{"a":{"$gte":10}}`},
 		{"and(lt)", And(Lt("a", 10)), `{"$and":[{"a":{"$lt":10}}]}`},
-		{"or(and(gte,lt,eq),eq)", Or(And(Gte("a", 1), Lt("a", 9), Eq("b", "hello")), Eq("c", 13)), `{"$or":[{"$and":[{"a":{"$gte":1}},{"a":{"$lt":9}},{"b":{"$eq":"hello"}}]},{"c":{"$eq":13}}]}`},
+		{
+			"or(and(gte,lt,eq),eq)", Or(And(Gte("a", 1), Lt("a", 9), Eq("b", "hello")), Eq("c", 13)),
+			`{"$or":[{"$and":[{"a":{"$gte":1}},{"a":{"$lt":9}},{"b":{"$eq":"hello"}}]},{"c":{"$eq":13}}]}`,
+		},
 		{"or(lt,gt)", Or(Lt("a", 10), Gt("b", 13)), `{"$or":[{"a":{"$lt":10}},{"b":{"$gt":13}}]}`},
 		{"or(lte,gte)", Or(Lte("a", 10), Gte("b", 13)), `{"$or":[{"a":{"$lte":10}},{"b":{"$gte":13}}]}`},
 		{"and(lt,gt)", And(Lt("a", 10), Gt("b", 13)), `{"$and":[{"a":{"$lt":10}},{"b":{"$gt":13}}]}`},

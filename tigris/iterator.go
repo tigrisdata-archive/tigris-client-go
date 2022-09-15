@@ -22,14 +22,14 @@ import (
 )
 
 // Iterator is used to iterate documents
-// returned by streaming APIs
+// returned by streaming APIs.
 type Iterator[T interface{}] struct {
 	driver.Iterator
 	err error
 }
 
 // Next populates 'doc' with the next document in the iteration order
-// Returns false at the end of the stream or in the case of error
+// Returns false at the end of the stream or in the case of error.
 func (it *Iterator[T]) Next(doc *T) bool {
 	var b driver.Document
 
@@ -56,7 +56,7 @@ func (it *Iterator[T]) Next(doc *T) bool {
 }
 
 // Err returns nil if iteration was successful,
-// otherwise return error details
+// otherwise return error details.
 func (it *Iterator[T]) Err() error {
 	if it.Iterator.Err() != nil {
 		return it.Iterator.Err()
@@ -64,12 +64,12 @@ func (it *Iterator[T]) Err() error {
 	return it.err
 }
 
-// Close closes Iterator stream
+// Close closes Iterator stream.
 func (it *Iterator[T]) Close() {
 	it.Iterator.Close()
 }
 
-// SearchIterator is used to iterate search documents
+// SearchIterator is used to iterate search documents.
 type SearchIterator[T interface{}] struct {
 	Iterator driver.SearchResultIterator
 	err      error
@@ -77,6 +77,7 @@ type SearchIterator[T interface{}] struct {
 
 func (it *SearchIterator[T]) Next(res *search.Result[T]) bool {
 	var r driver.SearchResponse
+
 	if it.err != nil {
 		return false
 	}
@@ -84,17 +85,19 @@ func (it *SearchIterator[T]) Next(res *search.Result[T]) bool {
 	if !it.Iterator.Next(&r) {
 		return false
 	}
+
 	// catching json marshaling error
 	if err := res.From(r); err != nil {
 		it.err = err
 		it.Close()
 		return false
 	}
+
 	return true
 }
 
 // Err returns nil if iteration was successful,
-// otherwise return error details
+// otherwise return error details.
 func (it *SearchIterator[T]) Err() error {
 	if it.Iterator.Err() != nil {
 		return it.Iterator.Err()
@@ -102,7 +105,7 @@ func (it *SearchIterator[T]) Err() error {
 	return it.err
 }
 
-// Close closes Iterator stream
+// Close closes Iterator stream.
 func (it *SearchIterator[T]) Close() {
 	it.Iterator.Close()
 }

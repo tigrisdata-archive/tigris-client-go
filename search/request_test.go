@@ -1,18 +1,16 @@
-/*
- * Copyright 2022 Tigris Data, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2022 Tigris Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package search
 
@@ -69,7 +67,6 @@ func TestRequestBuilder_Build(t *testing.T) {
 		assert.Len(t, req.ExcludeFields, 2)
 		assert.Contains(t, req.IncludeFields, "field_1")
 		assert.Subset(t, []string{"field_3", "field_2"}, req.ExcludeFields)
-
 	})
 
 	t.Run("with sorting", func(t *testing.T) {
@@ -92,7 +89,6 @@ func TestRequestBuilder_Build(t *testing.T) {
 }
 
 func TestFacetQueryBuilder_Build(t *testing.T) {
-
 	t.Run("empty build", func(t *testing.T) {
 		f := NewFacetQueryBuilder().Build()
 		assert.Len(t, f.FacetFields, 0)
@@ -131,7 +127,6 @@ func TestFacetQueryBuilder_Build(t *testing.T) {
 }
 
 func TestFacetQuery_Built(t *testing.T) {
-
 	t.Run("nil object marshal", func(t *testing.T) {
 		b, err := (&FacetQuery{}).Built()
 		assert.Nil(t, err)
@@ -160,7 +155,10 @@ func ExampleNewRequestBuilder() {
 
 func ExampleRequestBuilder_WithSearchFields() {
 	req := NewRequestBuilder().WithQuery("some text").WithSearchFields("field_1").Build()
-	b, _ := json.Marshal(req.SearchFields)
+	b, err := json.Marshal(req.SearchFields)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(string(b))
 	// Output: ["field_1"]
 }

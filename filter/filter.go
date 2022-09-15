@@ -24,8 +24,10 @@ import (
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
-type Operand map[string]comparison
-type value interface{}
+type (
+	Operand map[string]comparison
+	value   interface{}
+)
 
 type comparison struct {
 	Gt  value `json:"$gt,omitempty"`
@@ -42,22 +44,22 @@ const (
 	//	not = "$not"
 )
 
-var (
-	//All represents filter which includes all the documents of the collection
-	All = Expr{}
+// All represents filter which includes all the documents of the collection.
+var All = Expr{}
+
+type (
+	Expr   map[string]interface{}
+	Filter = Expr
 )
 
-type Expr map[string]interface{}
-type Filter = Expr
-
 // And composes 'and' operation.
-// Result is equivalent to: (ops[0] && ... && ops[len(ops-1])
+// Result is equivalent to: (ops[0] && ... && ops[len(ops-1]).
 func And(ops ...Expr) Expr {
 	return Expr{and: ops}
 }
 
 // Or composes 'or' operation.
-// Result is equivalent to: (ops[0] || ... || ops[len(ops-1])
+// Result is equivalent to: (ops[0] || ... || ops[len(ops-1]).
 func Or(ops ...Expr) Expr {
 	return Expr{or: ops}
 }
@@ -71,7 +73,7 @@ func Not(op Expr) Expr {
 */
 
 // Eq composes 'equal' operation.
-// Result is equivalent to: field == value
+// Result is equivalent to: field == value.
 func Eq[T schema.PrimitiveFieldType](field string, value T) Expr {
 	return Expr{field: comparison{Eq: value}}
 }
@@ -85,34 +87,34 @@ func Ne(field string, value interface{}) Expr {
 */
 
 // Gt composes 'greater than' operation.
-// Result is equivalent to: field > value
+// Result is equivalent to: field > value.
 func Gt(field string, value interface{}) Expr {
 	return Expr{field: comparison{Gt: value}}
 }
 
 // Gte composes 'greater than or equal' operation.
-// Result is equivalent to: field >= value
+// Result is equivalent to: field >= value.
 func Gte(field string, value interface{}) Expr {
 	return Expr{field: comparison{Gte: value}}
 }
 
 // Lt composes 'less than' operation.
-// Result is equivalent to: field < value
+// Result is equivalent to: field < value.
 func Lt(field string, value interface{}) Expr {
 	return Expr{field: comparison{Lt: value}}
 }
 
 // Lte composes 'less than or equal' operation.
-// Result is equivalent to: field <= value
+// Result is equivalent to: field <= value.
 func Lte(field string, value interface{}) Expr {
 	return Expr{field: comparison{Lte: value}}
 }
 
-// Build materializes the filter
+// Build materializes the filter.
 func (prev Expr) Build() (driver.Filter, error) {
 	if prev == nil {
 		return nil, nil
 	}
-	b, err := json.Marshal(prev)
-	return b, err
+
+	return json.Marshal(prev)
 }

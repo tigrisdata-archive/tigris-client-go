@@ -59,17 +59,23 @@ func (matcher *JSONMatcher) Got(actual interface{}) string {
 }
 
 func jm(t *testing.T, expected string) gomock.Matcher {
+	t.Helper()
+
 	j := &JSONMatcher{T: t, Expected: []byte(expected)}
 	return gomock.GotFormatterAdapter(j, j)
 }
 
 func toDocument(t *testing.T, doc interface{}) driver.Document {
+	t.Helper()
+
 	b, err := json.Marshal(doc)
 	require.NoError(t, err)
 	return b
 }
 
 func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
+	t.Helper()
+
 	d, err := json.Marshal(doc)
 	require.NoError(t, err)
 	tm := time.Now()
@@ -214,8 +220,10 @@ func TestCollectionBasic(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	var d Coll1
-	var dd driver.Document
+	var (
+		d  Coll1
+		dd driver.Document
+	)
 
 	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
 	mit.EXPECT().Next(&dd).Return(false)
@@ -409,6 +417,7 @@ func TestCollectionNegative(t *testing.T) {
 	require.Error(t, err)
 
 	mit.EXPECT().Close()
+
 	_, err = c.ReadOne(ctx, nil, fields.All, fields.All)
 	require.Error(t, err)
 
@@ -417,6 +426,7 @@ func TestCollectionNegative(t *testing.T) {
 
 	// Iterator error
 	var dd driver.Document
+
 	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(nil), driver.Projection(`{}`)).Return(mit, nil)
 	mit.EXPECT().Next(&dd).Return(false)
 	mit.EXPECT().Err().Return(fmt.Errorf("error0"))
@@ -453,7 +463,9 @@ func TestCollectionNegative(t *testing.T) {
 	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{"all":{"$eq":"b"}}`)).Return(nil, &driver.Error{TigrisError: &api.TigrisError{Code: api.Code_CONFLICT}})
 	_, err = c.Delete(ctx, filter.Eq("all", "b"))
 	require.Error(t, err)
+
 	var te Error
+
 	require.True(t, errors.As(err, &te))
 
 	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{}`)).Return(nil, fmt.Errorf("error"))
@@ -464,7 +476,7 @@ func TestCollectionNegative(t *testing.T) {
 	_, err = c.Update(ctx, filter.Eq("all", "b"), fields.Set("a", 123))
 	require.Error(t, err)
 
-	var doc = Coll1{Key1: "aaa"}
+	doc := Coll1{Key1: "aaa"}
 	mdb.EXPECT().Insert(ctx, "coll_1", []driver.Document{driver.Document(`{"Key1":"aaa"}`)}).Return(nil, fmt.Errorf("error"))
 	_, err = c.Insert(ctx, &doc)
 	require.Error(t, err)
@@ -507,8 +519,10 @@ func TestCollectionReadOmitEmpty(t *testing.T) {
 	it, err := c.ReadAll(ctx)
 	require.NoError(t, err)
 
-	var d Coll1
-	var dd driver.Document
+	var (
+		d  Coll1
+		dd driver.Document
+	)
 
 	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
 	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d2)).Return(true)
@@ -534,7 +548,7 @@ func TestClientSchemaMigration(t *testing.T) {
 	ms, cancel := test.SetupTests(t, 6)
 	defer cancel()
 
-	mc := ms.Api
+	mc := ms.API
 
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()

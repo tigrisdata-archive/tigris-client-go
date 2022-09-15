@@ -23,7 +23,6 @@ import (
 )
 
 func TestUpdateBasic(t *testing.T) {
-
 	cases := []struct {
 		name   string
 		fields *Update

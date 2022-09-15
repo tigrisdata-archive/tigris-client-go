@@ -2,6 +2,8 @@ package driver
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"os"
 	"strings"
 	"testing"
@@ -339,4 +341,29 @@ func TestHTTPDriverToken(t *testing.T) {
 
 		testDriverToken(t, client, mockServer, mockAuthServer, "token_http_env_1", false)
 	})
+}
+
+func TestNewAuth(t *testing.T) {
+	_, _, cancel := test.SetupTests(t, 4)
+	defer cancel()
+
+	DefaultProtocol = HTTP
+	cfg := config.Driver{URL: test.HTTPURL(4)}
+	client, err := NewAuth(context.Background(), &cfg)
+	require.NoError(t, err)
+	_ = client.Close()
+
+	DefaultProtocol = GRPC
+
+	certPool := x509.NewCertPool()
+	require.True(t, certPool.AppendCertsFromPEM([]byte(test.CaCert)))
+
+	cfg = config.Driver{URL: test.GRPCURL(4), TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost"}}
+	client, err = NewAuth(context.Background(), &cfg)
+	require.NoError(t, err)
+	_ = client.Close()
+
+	DefaultProtocol = "SOMETHING"
+	_, err = NewAuth(context.Background(), nil)
+	require.Error(t, err)
 }

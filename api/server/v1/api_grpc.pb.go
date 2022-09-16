@@ -79,8 +79,6 @@ type TigrisClient interface {
 	// identifier attached to it and will have a boolean flag “last” set to the last event of the transaction which will be useful
 	// if a transaction performed more than one operation in the collection.
 	Events(ctx context.Context, in *EventsRequest, opts ...grpc.CallOption) (Tigris_EventsClient, error)
-	// Provides the information about the server. This information includes returning the server version, etc.
-	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error)
 	// Publish API is use to publish messages to the collection.
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
 	// Subscribe is used to subscribe to the collection and receive messages from it.
@@ -326,15 +324,6 @@ func (x *tigrisEventsClient) Recv() (*EventsResponse, error) {
 	return m, nil
 }
 
-func (c *tigrisClient) GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error) {
-	out := new(GetInfoResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/GetInfo", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *tigrisClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error) {
 	out := new(PublishResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Publish", in, out, opts...)
@@ -437,8 +426,6 @@ type TigrisServer interface {
 	// identifier attached to it and will have a boolean flag “last” set to the last event of the transaction which will be useful
 	// if a transaction performed more than one operation in the collection.
 	Events(*EventsRequest, Tigris_EventsServer) error
-	// Provides the information about the server. This information includes returning the server version, etc.
-	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 	// Publish API is use to publish messages to the collection.
 	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
 	// Subscribe is used to subscribe to the collection and receive messages from it.
@@ -502,9 +489,6 @@ func (UnimplementedTigrisServer) DescribeCollection(context.Context, *DescribeCo
 }
 func (UnimplementedTigrisServer) Events(*EventsRequest, Tigris_EventsServer) error {
 	return status.Errorf(codes.Unimplemented, "method Events not implemented")
-}
-func (UnimplementedTigrisServer) GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
 func (UnimplementedTigrisServer) Publish(context.Context, *PublishRequest) (*PublishResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Publish not implemented")
@@ -857,24 +841,6 @@ func (x *tigrisEventsServer) Send(m *EventsResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Tigris_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetInfoRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TigrisServer).GetInfo(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.v1.Tigris/GetInfo",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TigrisServer).GetInfo(ctx, req.(*GetInfoRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Tigris_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PublishRequest)
 	if err := dec(in); err != nil {
@@ -980,10 +946,6 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DescribeCollection",
 			Handler:    _Tigris_DescribeCollection_Handler,
-		},
-		{
-			MethodName: "GetInfo",
-			Handler:    _Tigris_GetInfo_Handler,
 		},
 		{
 			MethodName: "Publish",

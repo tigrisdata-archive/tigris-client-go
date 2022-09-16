@@ -7,8 +7,8 @@ import (
 	"github.com/tigrisdata/tigris-client-go/config"
 )
 
-// Auth declares Tigris Auth APIs
-type Auth interface {
+// Management declares Tigris Management APIs
+type Management interface {
 	CreateApplication(ctx context.Context, name string, description string) (*Application, error)
 	DeleteApplication(ctx context.Context, id string) error
 	UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error)
@@ -19,11 +19,11 @@ type Auth interface {
 	Close() error
 }
 
-// NewAuth instantiates authentication API client
-func NewAuth(ctx context.Context, cfg *config.Driver) (Auth, error) {
+// NewManagement instantiates authentication API client
+func NewManagement(ctx context.Context, cfg *config.Driver) (Management, error) {
 	cfg = initConfig(cfg)
 
-	var auth Auth
+	var auth Management
 	var err error
 	if DefaultProtocol == GRPC {
 		auth, err = newGRPCClient(ctx, cfg.URL, cfg)

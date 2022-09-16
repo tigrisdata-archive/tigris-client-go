@@ -868,9 +868,12 @@ type StreamingSubscribeResponse struct {
 
 // SubscribeRequest defines model for SubscribeRequest.
 type SubscribeRequest struct {
-	Collection *string                  `json:"collection,omitempty"`
-	Db         *string                  `json:"db,omitempty"`
-	Options    *SubscribeRequestOptions `json:"options,omitempty"`
+	Collection *string `json:"collection,omitempty"`
+	Db         *string `json:"db,omitempty"`
+
+	// Filter allows you to subscribe only for events that you need. Filter syntax is similar to `ReadRequest.filter`.
+	Filter  *map[string]interface{}  `json:"filter,omitempty"`
+	Options *SubscribeRequestOptions `json:"options,omitempty"`
 }
 
 // SubscribeRequestOptions defines model for SubscribeRequestOptions.
@@ -963,9 +966,6 @@ type UpdateUserMetadataResponse struct {
 // Additional options to modify write requests.
 type WriteOptions = map[string]interface{}
 
-// AdminCreateNamespaceJSONBody defines parameters for AdminCreateNamespace.
-type AdminCreateNamespaceJSONBody = CreateNamespaceRequest
-
 // AuthGetAccessTokenJSONBody defines parameters for AuthGetAccessToken.
 type AuthGetAccessTokenJSONBody = GetAccessTokenRequest
 
@@ -1026,35 +1026,35 @@ type TigrisCommitTransactionJSONBody = CommitTransactionRequest
 // TigrisRollbackTransactionJSONBody defines parameters for TigrisRollbackTransaction.
 type TigrisRollbackTransactionJSONBody = RollbackTransactionRequest
 
+// ManagementCreateApplicationJSONBody defines parameters for ManagementCreateApplication.
+type ManagementCreateApplicationJSONBody = CreateApplicationRequest
+
+// ManagementDeleteApplicationJSONBody defines parameters for ManagementDeleteApplication.
+type ManagementDeleteApplicationJSONBody = DeleteApplicationsRequest
+
+// ManagementListApplicationsJSONBody defines parameters for ManagementListApplications.
+type ManagementListApplicationsJSONBody = ListApplicationsRequest
+
+// ManagementRotateApplicationSecretJSONBody defines parameters for ManagementRotateApplicationSecret.
+type ManagementRotateApplicationSecretJSONBody = RotateApplicationSecretRequest
+
+// ManagementUpdateApplicationJSONBody defines parameters for ManagementUpdateApplication.
+type ManagementUpdateApplicationJSONBody = UpdateApplicationRequest
+
+// ManagementCreateNamespaceJSONBody defines parameters for ManagementCreateNamespace.
+type ManagementCreateNamespaceJSONBody = CreateNamespaceRequest
+
+// ManagementGetUserMetadataJSONBody defines parameters for ManagementGetUserMetadata.
+type ManagementGetUserMetadataJSONBody = GetUserMetadataRequest
+
+// ManagementInsertUserMetadataJSONBody defines parameters for ManagementInsertUserMetadata.
+type ManagementInsertUserMetadataJSONBody = InsertUserMetadataRequest
+
+// ManagementUpdateUserMetadataJSONBody defines parameters for ManagementUpdateUserMetadata.
+type ManagementUpdateUserMetadataJSONBody = UpdateUserMetadataRequest
+
 // ObservabilityQueryTimeSeriesMetricsJSONBody defines parameters for ObservabilityQueryTimeSeriesMetrics.
 type ObservabilityQueryTimeSeriesMetricsJSONBody = QueryTimeSeriesMetricsRequest
-
-// UserCreateApplicationJSONBody defines parameters for UserCreateApplication.
-type UserCreateApplicationJSONBody = CreateApplicationRequest
-
-// UserDeleteApplicationJSONBody defines parameters for UserDeleteApplication.
-type UserDeleteApplicationJSONBody = DeleteApplicationsRequest
-
-// UserListApplicationsJSONBody defines parameters for UserListApplications.
-type UserListApplicationsJSONBody = ListApplicationsRequest
-
-// UserRotateApplicationSecretJSONBody defines parameters for UserRotateApplicationSecret.
-type UserRotateApplicationSecretJSONBody = RotateApplicationSecretRequest
-
-// UserUpdateApplicationJSONBody defines parameters for UserUpdateApplication.
-type UserUpdateApplicationJSONBody = UpdateApplicationRequest
-
-// UserGetUserMetadataJSONBody defines parameters for UserGetUserMetadata.
-type UserGetUserMetadataJSONBody = GetUserMetadataRequest
-
-// UserInsertUserMetadataJSONBody defines parameters for UserInsertUserMetadata.
-type UserInsertUserMetadataJSONBody = InsertUserMetadataRequest
-
-// UserUpdateUserMetadataJSONBody defines parameters for UserUpdateUserMetadata.
-type UserUpdateUserMetadataJSONBody = UpdateUserMetadataRequest
-
-// AdminCreateNamespaceJSONRequestBody defines body for AdminCreateNamespace for application/json ContentType.
-type AdminCreateNamespaceJSONRequestBody = AdminCreateNamespaceJSONBody
 
 // AuthGetAccessTokenJSONRequestBody defines body for AuthGetAccessToken for application/json ContentType.
 type AuthGetAccessTokenJSONRequestBody = AuthGetAccessTokenJSONBody
@@ -1116,32 +1116,35 @@ type TigrisCommitTransactionJSONRequestBody = TigrisCommitTransactionJSONBody
 // TigrisRollbackTransactionJSONRequestBody defines body for TigrisRollbackTransaction for application/json ContentType.
 type TigrisRollbackTransactionJSONRequestBody = TigrisRollbackTransactionJSONBody
 
+// ManagementCreateApplicationJSONRequestBody defines body for ManagementCreateApplication for application/json ContentType.
+type ManagementCreateApplicationJSONRequestBody = ManagementCreateApplicationJSONBody
+
+// ManagementDeleteApplicationJSONRequestBody defines body for ManagementDeleteApplication for application/json ContentType.
+type ManagementDeleteApplicationJSONRequestBody = ManagementDeleteApplicationJSONBody
+
+// ManagementListApplicationsJSONRequestBody defines body for ManagementListApplications for application/json ContentType.
+type ManagementListApplicationsJSONRequestBody = ManagementListApplicationsJSONBody
+
+// ManagementRotateApplicationSecretJSONRequestBody defines body for ManagementRotateApplicationSecret for application/json ContentType.
+type ManagementRotateApplicationSecretJSONRequestBody = ManagementRotateApplicationSecretJSONBody
+
+// ManagementUpdateApplicationJSONRequestBody defines body for ManagementUpdateApplication for application/json ContentType.
+type ManagementUpdateApplicationJSONRequestBody = ManagementUpdateApplicationJSONBody
+
+// ManagementCreateNamespaceJSONRequestBody defines body for ManagementCreateNamespace for application/json ContentType.
+type ManagementCreateNamespaceJSONRequestBody = ManagementCreateNamespaceJSONBody
+
+// ManagementGetUserMetadataJSONRequestBody defines body for ManagementGetUserMetadata for application/json ContentType.
+type ManagementGetUserMetadataJSONRequestBody = ManagementGetUserMetadataJSONBody
+
+// ManagementInsertUserMetadataJSONRequestBody defines body for ManagementInsertUserMetadata for application/json ContentType.
+type ManagementInsertUserMetadataJSONRequestBody = ManagementInsertUserMetadataJSONBody
+
+// ManagementUpdateUserMetadataJSONRequestBody defines body for ManagementUpdateUserMetadata for application/json ContentType.
+type ManagementUpdateUserMetadataJSONRequestBody = ManagementUpdateUserMetadataJSONBody
+
 // ObservabilityQueryTimeSeriesMetricsJSONRequestBody defines body for ObservabilityQueryTimeSeriesMetrics for application/json ContentType.
 type ObservabilityQueryTimeSeriesMetricsJSONRequestBody = ObservabilityQueryTimeSeriesMetricsJSONBody
-
-// UserCreateApplicationJSONRequestBody defines body for UserCreateApplication for application/json ContentType.
-type UserCreateApplicationJSONRequestBody = UserCreateApplicationJSONBody
-
-// UserDeleteApplicationJSONRequestBody defines body for UserDeleteApplication for application/json ContentType.
-type UserDeleteApplicationJSONRequestBody = UserDeleteApplicationJSONBody
-
-// UserListApplicationsJSONRequestBody defines body for UserListApplications for application/json ContentType.
-type UserListApplicationsJSONRequestBody = UserListApplicationsJSONBody
-
-// UserRotateApplicationSecretJSONRequestBody defines body for UserRotateApplicationSecret for application/json ContentType.
-type UserRotateApplicationSecretJSONRequestBody = UserRotateApplicationSecretJSONBody
-
-// UserUpdateApplicationJSONRequestBody defines body for UserUpdateApplication for application/json ContentType.
-type UserUpdateApplicationJSONRequestBody = UserUpdateApplicationJSONBody
-
-// UserGetUserMetadataJSONRequestBody defines body for UserGetUserMetadata for application/json ContentType.
-type UserGetUserMetadataJSONRequestBody = UserGetUserMetadataJSONBody
-
-// UserInsertUserMetadataJSONRequestBody defines body for UserInsertUserMetadata for application/json ContentType.
-type UserInsertUserMetadataJSONRequestBody = UserInsertUserMetadataJSONBody
-
-// UserUpdateUserMetadataJSONRequestBody defines body for UserUpdateUserMetadata for application/json ContentType.
-type UserUpdateUserMetadataJSONRequestBody = UserUpdateUserMetadataJSONBody
 
 // Getter for additional properties for SearchResponse_Facets. Returns the specified
 // element and whether it was found
@@ -1269,14 +1272,6 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// AdminListNamespaces request
-	AdminListNamespaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// AdminCreateNamespace request with any body
-	AdminCreateNamespaceWithBody(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	AdminCreateNamespace(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// AuthGetAccessToken request with any body
 	AuthGetAccessTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1383,89 +1378,61 @@ type ClientInterface interface {
 	// HealthAPIHealth request
 	HealthAPIHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// TigrisGetInfo request
-	TigrisGetInfo(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ManagementCreateApplication request with any body
+	ManagementCreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementCreateApplication(ctx context.Context, body ManagementCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementDeleteApplication request with any body
+	ManagementDeleteApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementDeleteApplication(ctx context.Context, body ManagementDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementListApplications request with any body
+	ManagementListApplicationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementListApplications(ctx context.Context, body ManagementListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementRotateApplicationSecret request with any body
+	ManagementRotateApplicationSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementRotateApplicationSecret(ctx context.Context, body ManagementRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementUpdateApplication request with any body
+	ManagementUpdateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementUpdateApplication(ctx context.Context, body ManagementUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementListNamespaces request
+	ManagementListNamespaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementCreateNamespace request with any body
+	ManagementCreateNamespaceWithBody(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementCreateNamespace(ctx context.Context, name string, body ManagementCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementGetUserMetadata request with any body
+	ManagementGetUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementGetUserMetadata(ctx context.Context, metadataKey string, body ManagementGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementInsertUserMetadata request with any body
+	ManagementInsertUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementInsertUserMetadata(ctx context.Context, metadataKey string, body ManagementInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ManagementUpdateUserMetadata request with any body
+	ManagementUpdateUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ManagementUpdateUserMetadata(ctx context.Context, metadataKey string, body ManagementUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ObservabilityGetInfo request
+	ObservabilityGetInfo(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ObservabilityQueryTimeSeriesMetrics request with any body
 	ObservabilityQueryTimeSeriesMetricsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	ObservabilityQueryTimeSeriesMetrics(ctx context.Context, body ObservabilityQueryTimeSeriesMetricsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserCreateApplication request with any body
-	UserCreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserCreateApplication(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserDeleteApplication request with any body
-	UserDeleteApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserDeleteApplication(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserListApplications request with any body
-	UserListApplicationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserListApplications(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserRotateApplicationSecret request with any body
-	UserRotateApplicationSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserRotateApplicationSecret(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserUpdateApplication request with any body
-	UserUpdateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserUpdateApplication(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserGetUserMetadata request with any body
-	UserGetUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserGetUserMetadata(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserInsertUserMetadata request with any body
-	UserInsertUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserInsertUserMetadata(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UserUpdateUserMetadata request with any body
-	UserUpdateUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UserUpdateUserMetadata(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-}
-
-func (c *Client) AdminListNamespaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAdminListNamespacesRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) AdminCreateNamespaceWithBody(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAdminCreateNamespaceRequestWithBody(c.Server, name, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) AdminCreateNamespace(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAdminCreateNamespaceRequest(c.Server, name, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
 }
 
 func (c *Client) AuthGetAccessTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1972,8 +1939,236 @@ func (c *Client) HealthAPIHealth(ctx context.Context, reqEditors ...RequestEdito
 	return c.Client.Do(req)
 }
 
-func (c *Client) TigrisGetInfo(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewTigrisGetInfoRequest(c.Server)
+func (c *Client) ManagementCreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementCreateApplicationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementCreateApplication(ctx context.Context, body ManagementCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementCreateApplicationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementDeleteApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementDeleteApplicationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementDeleteApplication(ctx context.Context, body ManagementDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementDeleteApplicationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementListApplicationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementListApplicationsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementListApplications(ctx context.Context, body ManagementListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementListApplicationsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementRotateApplicationSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementRotateApplicationSecretRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementRotateApplicationSecret(ctx context.Context, body ManagementRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementRotateApplicationSecretRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementUpdateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementUpdateApplicationRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementUpdateApplication(ctx context.Context, body ManagementUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementUpdateApplicationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementListNamespaces(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementListNamespacesRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementCreateNamespaceWithBody(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementCreateNamespaceRequestWithBody(c.Server, name, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementCreateNamespace(ctx context.Context, name string, body ManagementCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementCreateNamespaceRequest(c.Server, name, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementGetUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementGetUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementGetUserMetadata(ctx context.Context, metadataKey string, body ManagementGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementGetUserMetadataRequest(c.Server, metadataKey, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementInsertUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementInsertUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementInsertUserMetadata(ctx context.Context, metadataKey string, body ManagementInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementInsertUserMetadataRequest(c.Server, metadataKey, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementUpdateUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementUpdateUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ManagementUpdateUserMetadata(ctx context.Context, metadataKey string, body ManagementUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewManagementUpdateUserMetadataRequest(c.Server, metadataKey, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ObservabilityGetInfo(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewObservabilityGetInfoRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -2006,272 +2201,6 @@ func (c *Client) ObservabilityQueryTimeSeriesMetrics(ctx context.Context, body O
 		return nil, err
 	}
 	return c.Client.Do(req)
-}
-
-func (c *Client) UserCreateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserCreateApplicationRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserCreateApplication(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserCreateApplicationRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserDeleteApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserDeleteApplicationRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserDeleteApplication(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserDeleteApplicationRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserListApplicationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserListApplicationsRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserListApplications(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserListApplicationsRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserRotateApplicationSecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserRotateApplicationSecretRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserRotateApplicationSecret(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserRotateApplicationSecretRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserUpdateApplicationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserUpdateApplicationRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserUpdateApplication(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserUpdateApplicationRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserGetUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserGetUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserGetUserMetadata(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserGetUserMetadataRequest(c.Server, metadataKey, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserInsertUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserInsertUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserInsertUserMetadata(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserInsertUserMetadataRequest(c.Server, metadataKey, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserUpdateUserMetadataWithBody(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserUpdateUserMetadataRequestWithBody(c.Server, metadataKey, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UserUpdateUserMetadata(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUserUpdateUserMetadataRequest(c.Server, metadataKey, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// NewAdminListNamespacesRequest generates requests for AdminListNamespaces
-func NewAdminListNamespacesRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/admin/namespaces/list")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewAdminCreateNamespaceRequest calls the generic AdminCreateNamespace builder with application/json body
-func NewAdminCreateNamespaceRequest(server string, name string, body AdminCreateNamespaceJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewAdminCreateNamespaceRequestWithBody(server, name, "application/json", bodyReader)
-}
-
-// NewAdminCreateNamespaceRequestWithBody generates requests for AdminCreateNamespace with any type of body
-func NewAdminCreateNamespaceRequestWithBody(server string, name string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "name", runtime.ParamLocationPath, name)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/admin/namespaces/%s/create", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
 }
 
 // NewAuthGetAccessTokenRequest calls the generic AuthGetAccessToken builder with application/json body
@@ -3345,8 +3274,19 @@ func NewHealthAPIHealthRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewTigrisGetInfoRequest generates requests for TigrisGetInfo
-func NewTigrisGetInfoRequest(server string) (*http.Request, error) {
+// NewManagementCreateApplicationRequest calls the generic ManagementCreateApplication builder with application/json body
+func NewManagementCreateApplicationRequest(server string, body ManagementCreateApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementCreateApplicationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewManagementCreateApplicationRequestWithBody generates requests for ManagementCreateApplication with any type of body
+func NewManagementCreateApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3354,7 +3294,411 @@ func NewTigrisGetInfoRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/v1/info")
+	operationPath := fmt.Sprintf("/v1/management/applications/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementDeleteApplicationRequest calls the generic ManagementDeleteApplication builder with application/json body
+func NewManagementDeleteApplicationRequest(server string, body ManagementDeleteApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementDeleteApplicationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewManagementDeleteApplicationRequestWithBody generates requests for ManagementDeleteApplication with any type of body
+func NewManagementDeleteApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/applications/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementListApplicationsRequest calls the generic ManagementListApplications builder with application/json body
+func NewManagementListApplicationsRequest(server string, body ManagementListApplicationsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementListApplicationsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewManagementListApplicationsRequestWithBody generates requests for ManagementListApplications with any type of body
+func NewManagementListApplicationsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/applications/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementRotateApplicationSecretRequest calls the generic ManagementRotateApplicationSecret builder with application/json body
+func NewManagementRotateApplicationSecretRequest(server string, body ManagementRotateApplicationSecretJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementRotateApplicationSecretRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewManagementRotateApplicationSecretRequestWithBody generates requests for ManagementRotateApplicationSecret with any type of body
+func NewManagementRotateApplicationSecretRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/applications/rotate")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementUpdateApplicationRequest calls the generic ManagementUpdateApplication builder with application/json body
+func NewManagementUpdateApplicationRequest(server string, body ManagementUpdateApplicationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementUpdateApplicationRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewManagementUpdateApplicationRequestWithBody generates requests for ManagementUpdateApplication with any type of body
+func NewManagementUpdateApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/applications/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementListNamespacesRequest generates requests for ManagementListNamespaces
+func NewManagementListNamespacesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/namespaces/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewManagementCreateNamespaceRequest calls the generic ManagementCreateNamespace builder with application/json body
+func NewManagementCreateNamespaceRequest(server string, name string, body ManagementCreateNamespaceJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementCreateNamespaceRequestWithBody(server, name, "application/json", bodyReader)
+}
+
+// NewManagementCreateNamespaceRequestWithBody generates requests for ManagementCreateNamespace with any type of body
+func NewManagementCreateNamespaceRequestWithBody(server string, name string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "name", runtime.ParamLocationPath, name)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/namespaces/%s/create", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementGetUserMetadataRequest calls the generic ManagementGetUserMetadata builder with application/json body
+func NewManagementGetUserMetadataRequest(server string, metadataKey string, body ManagementGetUserMetadataJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementGetUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
+}
+
+// NewManagementGetUserMetadataRequestWithBody generates requests for ManagementGetUserMetadata with any type of body
+func NewManagementGetUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/users/metadata/%s/get", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementInsertUserMetadataRequest calls the generic ManagementInsertUserMetadata builder with application/json body
+func NewManagementInsertUserMetadataRequest(server string, metadataKey string, body ManagementInsertUserMetadataJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementInsertUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
+}
+
+// NewManagementInsertUserMetadataRequestWithBody generates requests for ManagementInsertUserMetadata with any type of body
+func NewManagementInsertUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/users/metadata/%s/insert", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewManagementUpdateUserMetadataRequest calls the generic ManagementUpdateUserMetadata builder with application/json body
+func NewManagementUpdateUserMetadataRequest(server string, metadataKey string, body ManagementUpdateUserMetadataJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewManagementUpdateUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
+}
+
+// NewManagementUpdateUserMetadataRequestWithBody generates requests for ManagementUpdateUserMetadata with any type of body
+func NewManagementUpdateUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/management/users/metadata/%s/update", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewObservabilityGetInfoRequest generates requests for ObservabilityGetInfo
+func NewObservabilityGetInfoRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/observability/info")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -3393,347 +3737,6 @@ func NewObservabilityQueryTimeSeriesMetricsRequestWithBody(server string, conten
 	}
 
 	operationPath := fmt.Sprintf("/v1/observability/metrics/timeseries/query")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserCreateApplicationRequest calls the generic UserCreateApplication builder with application/json body
-func NewUserCreateApplicationRequest(server string, body UserCreateApplicationJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserCreateApplicationRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewUserCreateApplicationRequestWithBody generates requests for UserCreateApplication with any type of body
-func NewUserCreateApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/applications/create")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserDeleteApplicationRequest calls the generic UserDeleteApplication builder with application/json body
-func NewUserDeleteApplicationRequest(server string, body UserDeleteApplicationJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserDeleteApplicationRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewUserDeleteApplicationRequestWithBody generates requests for UserDeleteApplication with any type of body
-func NewUserDeleteApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/applications/delete")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("DELETE", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserListApplicationsRequest calls the generic UserListApplications builder with application/json body
-func NewUserListApplicationsRequest(server string, body UserListApplicationsJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserListApplicationsRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewUserListApplicationsRequestWithBody generates requests for UserListApplications with any type of body
-func NewUserListApplicationsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/applications/list")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserRotateApplicationSecretRequest calls the generic UserRotateApplicationSecret builder with application/json body
-func NewUserRotateApplicationSecretRequest(server string, body UserRotateApplicationSecretJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserRotateApplicationSecretRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewUserRotateApplicationSecretRequestWithBody generates requests for UserRotateApplicationSecret with any type of body
-func NewUserRotateApplicationSecretRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/applications/rotate")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserUpdateApplicationRequest calls the generic UserUpdateApplication builder with application/json body
-func NewUserUpdateApplicationRequest(server string, body UserUpdateApplicationJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserUpdateApplicationRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewUserUpdateApplicationRequestWithBody generates requests for UserUpdateApplication with any type of body
-func NewUserUpdateApplicationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/applications/update")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserGetUserMetadataRequest calls the generic UserGetUserMetadata builder with application/json body
-func NewUserGetUserMetadataRequest(server string, metadataKey string, body UserGetUserMetadataJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserGetUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
-}
-
-// NewUserGetUserMetadataRequestWithBody generates requests for UserGetUserMetadata with any type of body
-func NewUserGetUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/metadata/%s/get", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserInsertUserMetadataRequest calls the generic UserInsertUserMetadata builder with application/json body
-func NewUserInsertUserMetadataRequest(server string, metadataKey string, body UserInsertUserMetadataJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserInsertUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
-}
-
-// NewUserInsertUserMetadataRequestWithBody generates requests for UserInsertUserMetadata with any type of body
-func NewUserInsertUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/metadata/%s/insert", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewUserUpdateUserMetadataRequest calls the generic UserUpdateUserMetadata builder with application/json body
-func NewUserUpdateUserMetadataRequest(server string, metadataKey string, body UserUpdateUserMetadataJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUserUpdateUserMetadataRequestWithBody(server, metadataKey, "application/json", bodyReader)
-}
-
-// NewUserUpdateUserMetadataRequestWithBody generates requests for UserUpdateUserMetadata with any type of body
-func NewUserUpdateUserMetadataRequestWithBody(server string, metadataKey string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "metadataKey", runtime.ParamLocationPath, metadataKey)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/users/metadata/%s/update", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -3796,14 +3799,6 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// AdminListNamespaces request
-	AdminListNamespacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*AdminListNamespacesResponse, error)
-
-	// AdminCreateNamespace request with any body
-	AdminCreateNamespaceWithBodyWithResponse(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error)
-
-	AdminCreateNamespaceWithResponse(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error)
-
 	// AuthGetAccessToken request with any body
 	AuthGetAccessTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthGetAccessTokenResponse, error)
 
@@ -3910,99 +3905,61 @@ type ClientWithResponsesInterface interface {
 	// HealthAPIHealth request
 	HealthAPIHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthAPIHealthResponse, error)
 
-	// TigrisGetInfo request
-	TigrisGetInfoWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisGetInfoResponse, error)
+	// ManagementCreateApplication request with any body
+	ManagementCreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementCreateApplicationResponse, error)
+
+	ManagementCreateApplicationWithResponse(ctx context.Context, body ManagementCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementCreateApplicationResponse, error)
+
+	// ManagementDeleteApplication request with any body
+	ManagementDeleteApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementDeleteApplicationResponse, error)
+
+	ManagementDeleteApplicationWithResponse(ctx context.Context, body ManagementDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementDeleteApplicationResponse, error)
+
+	// ManagementListApplications request with any body
+	ManagementListApplicationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementListApplicationsResponse, error)
+
+	ManagementListApplicationsWithResponse(ctx context.Context, body ManagementListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementListApplicationsResponse, error)
+
+	// ManagementRotateApplicationSecret request with any body
+	ManagementRotateApplicationSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementRotateApplicationSecretResponse, error)
+
+	ManagementRotateApplicationSecretWithResponse(ctx context.Context, body ManagementRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementRotateApplicationSecretResponse, error)
+
+	// ManagementUpdateApplication request with any body
+	ManagementUpdateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementUpdateApplicationResponse, error)
+
+	ManagementUpdateApplicationWithResponse(ctx context.Context, body ManagementUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementUpdateApplicationResponse, error)
+
+	// ManagementListNamespaces request
+	ManagementListNamespacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ManagementListNamespacesResponse, error)
+
+	// ManagementCreateNamespace request with any body
+	ManagementCreateNamespaceWithBodyWithResponse(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementCreateNamespaceResponse, error)
+
+	ManagementCreateNamespaceWithResponse(ctx context.Context, name string, body ManagementCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementCreateNamespaceResponse, error)
+
+	// ManagementGetUserMetadata request with any body
+	ManagementGetUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementGetUserMetadataResponse, error)
+
+	ManagementGetUserMetadataWithResponse(ctx context.Context, metadataKey string, body ManagementGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementGetUserMetadataResponse, error)
+
+	// ManagementInsertUserMetadata request with any body
+	ManagementInsertUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementInsertUserMetadataResponse, error)
+
+	ManagementInsertUserMetadataWithResponse(ctx context.Context, metadataKey string, body ManagementInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementInsertUserMetadataResponse, error)
+
+	// ManagementUpdateUserMetadata request with any body
+	ManagementUpdateUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementUpdateUserMetadataResponse, error)
+
+	ManagementUpdateUserMetadataWithResponse(ctx context.Context, metadataKey string, body ManagementUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementUpdateUserMetadataResponse, error)
+
+	// ObservabilityGetInfo request
+	ObservabilityGetInfoWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ObservabilityGetInfoResponse, error)
 
 	// ObservabilityQueryTimeSeriesMetrics request with any body
 	ObservabilityQueryTimeSeriesMetricsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ObservabilityQueryTimeSeriesMetricsResponse, error)
 
 	ObservabilityQueryTimeSeriesMetricsWithResponse(ctx context.Context, body ObservabilityQueryTimeSeriesMetricsJSONRequestBody, reqEditors ...RequestEditorFn) (*ObservabilityQueryTimeSeriesMetricsResponse, error)
-
-	// UserCreateApplication request with any body
-	UserCreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error)
-
-	UserCreateApplicationWithResponse(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error)
-
-	// UserDeleteApplication request with any body
-	UserDeleteApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error)
-
-	UserDeleteApplicationWithResponse(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error)
-
-	// UserListApplications request with any body
-	UserListApplicationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error)
-
-	UserListApplicationsWithResponse(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error)
-
-	// UserRotateApplicationSecret request with any body
-	UserRotateApplicationSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error)
-
-	UserRotateApplicationSecretWithResponse(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error)
-
-	// UserUpdateApplication request with any body
-	UserUpdateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error)
-
-	UserUpdateApplicationWithResponse(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error)
-
-	// UserGetUserMetadata request with any body
-	UserGetUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error)
-
-	UserGetUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error)
-
-	// UserInsertUserMetadata request with any body
-	UserInsertUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error)
-
-	UserInsertUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error)
-
-	// UserUpdateUserMetadata request with any body
-	UserUpdateUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error)
-
-	UserUpdateUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error)
-}
-
-type AdminListNamespacesResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListNamespacesResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r AdminListNamespacesResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r AdminListNamespacesResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type AdminCreateNamespaceResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CreateNamespaceResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r AdminCreateNamespaceResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r AdminCreateNamespaceResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
 }
 
 type AuthGetAccessTokenResponse struct {
@@ -4511,15 +4468,15 @@ func (r HealthAPIHealthResponse) StatusCode() int {
 	return 0
 }
 
-type TigrisGetInfoResponse struct {
+type ManagementCreateApplicationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *GetInfoResponse
+	JSON200      *CreateApplicationResponse
 	JSONDefault  *Status
 }
 
 // Status returns HTTPResponse.Status
-func (r TigrisGetInfoResponse) Status() string {
+func (r ManagementCreateApplicationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -4527,7 +4484,237 @@ func (r TigrisGetInfoResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r TigrisGetInfoResponse) StatusCode() int {
+func (r ManagementCreateApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementDeleteApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DeleteApplicationResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementDeleteApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementDeleteApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementListApplicationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListApplicationsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementListApplicationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementListApplicationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementRotateApplicationSecretResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RotateApplicationSecretResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementRotateApplicationSecretResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementRotateApplicationSecretResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementUpdateApplicationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UpdateApplicationResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementUpdateApplicationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementUpdateApplicationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementListNamespacesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListNamespacesResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementListNamespacesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementListNamespacesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementCreateNamespaceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateNamespaceResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementCreateNamespaceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementCreateNamespaceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementGetUserMetadataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetUserMetadataResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementGetUserMetadataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementGetUserMetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementInsertUserMetadataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsertUserMetadataResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementInsertUserMetadataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementInsertUserMetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ManagementUpdateUserMetadataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UpdateUserMetadataResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ManagementUpdateUserMetadataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ManagementUpdateUserMetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ObservabilityGetInfoResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetInfoResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ObservabilityGetInfoResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ObservabilityGetInfoResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4555,216 +4742,6 @@ func (r ObservabilityQueryTimeSeriesMetricsResponse) StatusCode() int {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
-}
-
-type UserCreateApplicationResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CreateApplicationResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserCreateApplicationResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserCreateApplicationResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type UserDeleteApplicationResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *DeleteApplicationResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserDeleteApplicationResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserDeleteApplicationResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type UserListApplicationsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListApplicationsResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserListApplicationsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserListApplicationsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type UserRotateApplicationSecretResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *RotateApplicationSecretResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserRotateApplicationSecretResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserRotateApplicationSecretResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type UserUpdateApplicationResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *UpdateApplicationResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserUpdateApplicationResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserUpdateApplicationResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type UserGetUserMetadataResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *GetUserMetadataResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserGetUserMetadataResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserGetUserMetadataResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type UserInsertUserMetadataResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *InsertUserMetadataResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserInsertUserMetadataResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserInsertUserMetadataResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type UserUpdateUserMetadataResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *UpdateUserMetadataResponse
-	JSONDefault  *Status
-}
-
-// Status returns HTTPResponse.Status
-func (r UserUpdateUserMetadataResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UserUpdateUserMetadataResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// AdminListNamespacesWithResponse request returning *AdminListNamespacesResponse
-func (c *ClientWithResponses) AdminListNamespacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*AdminListNamespacesResponse, error) {
-	rsp, err := c.AdminListNamespaces(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseAdminListNamespacesResponse(rsp)
-}
-
-// AdminCreateNamespaceWithBodyWithResponse request with arbitrary body returning *AdminCreateNamespaceResponse
-func (c *ClientWithResponses) AdminCreateNamespaceWithBodyWithResponse(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error) {
-	rsp, err := c.AdminCreateNamespaceWithBody(ctx, name, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseAdminCreateNamespaceResponse(rsp)
-}
-
-func (c *ClientWithResponses) AdminCreateNamespaceWithResponse(ctx context.Context, name string, body AdminCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*AdminCreateNamespaceResponse, error) {
-	rsp, err := c.AdminCreateNamespace(ctx, name, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseAdminCreateNamespaceResponse(rsp)
 }
 
 // AuthGetAccessTokenWithBodyWithResponse request with arbitrary body returning *AuthGetAccessTokenResponse
@@ -5125,13 +5102,175 @@ func (c *ClientWithResponses) HealthAPIHealthWithResponse(ctx context.Context, r
 	return ParseHealthAPIHealthResponse(rsp)
 }
 
-// TigrisGetInfoWithResponse request returning *TigrisGetInfoResponse
-func (c *ClientWithResponses) TigrisGetInfoWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisGetInfoResponse, error) {
-	rsp, err := c.TigrisGetInfo(ctx, reqEditors...)
+// ManagementCreateApplicationWithBodyWithResponse request with arbitrary body returning *ManagementCreateApplicationResponse
+func (c *ClientWithResponses) ManagementCreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementCreateApplicationResponse, error) {
+	rsp, err := c.ManagementCreateApplicationWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTigrisGetInfoResponse(rsp)
+	return ParseManagementCreateApplicationResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementCreateApplicationWithResponse(ctx context.Context, body ManagementCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementCreateApplicationResponse, error) {
+	rsp, err := c.ManagementCreateApplication(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementCreateApplicationResponse(rsp)
+}
+
+// ManagementDeleteApplicationWithBodyWithResponse request with arbitrary body returning *ManagementDeleteApplicationResponse
+func (c *ClientWithResponses) ManagementDeleteApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementDeleteApplicationResponse, error) {
+	rsp, err := c.ManagementDeleteApplicationWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementDeleteApplicationResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementDeleteApplicationWithResponse(ctx context.Context, body ManagementDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementDeleteApplicationResponse, error) {
+	rsp, err := c.ManagementDeleteApplication(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementDeleteApplicationResponse(rsp)
+}
+
+// ManagementListApplicationsWithBodyWithResponse request with arbitrary body returning *ManagementListApplicationsResponse
+func (c *ClientWithResponses) ManagementListApplicationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementListApplicationsResponse, error) {
+	rsp, err := c.ManagementListApplicationsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementListApplicationsResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementListApplicationsWithResponse(ctx context.Context, body ManagementListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementListApplicationsResponse, error) {
+	rsp, err := c.ManagementListApplications(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementListApplicationsResponse(rsp)
+}
+
+// ManagementRotateApplicationSecretWithBodyWithResponse request with arbitrary body returning *ManagementRotateApplicationSecretResponse
+func (c *ClientWithResponses) ManagementRotateApplicationSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementRotateApplicationSecretResponse, error) {
+	rsp, err := c.ManagementRotateApplicationSecretWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementRotateApplicationSecretResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementRotateApplicationSecretWithResponse(ctx context.Context, body ManagementRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementRotateApplicationSecretResponse, error) {
+	rsp, err := c.ManagementRotateApplicationSecret(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementRotateApplicationSecretResponse(rsp)
+}
+
+// ManagementUpdateApplicationWithBodyWithResponse request with arbitrary body returning *ManagementUpdateApplicationResponse
+func (c *ClientWithResponses) ManagementUpdateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementUpdateApplicationResponse, error) {
+	rsp, err := c.ManagementUpdateApplicationWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementUpdateApplicationResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementUpdateApplicationWithResponse(ctx context.Context, body ManagementUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementUpdateApplicationResponse, error) {
+	rsp, err := c.ManagementUpdateApplication(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementUpdateApplicationResponse(rsp)
+}
+
+// ManagementListNamespacesWithResponse request returning *ManagementListNamespacesResponse
+func (c *ClientWithResponses) ManagementListNamespacesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ManagementListNamespacesResponse, error) {
+	rsp, err := c.ManagementListNamespaces(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementListNamespacesResponse(rsp)
+}
+
+// ManagementCreateNamespaceWithBodyWithResponse request with arbitrary body returning *ManagementCreateNamespaceResponse
+func (c *ClientWithResponses) ManagementCreateNamespaceWithBodyWithResponse(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementCreateNamespaceResponse, error) {
+	rsp, err := c.ManagementCreateNamespaceWithBody(ctx, name, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementCreateNamespaceResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementCreateNamespaceWithResponse(ctx context.Context, name string, body ManagementCreateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementCreateNamespaceResponse, error) {
+	rsp, err := c.ManagementCreateNamespace(ctx, name, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementCreateNamespaceResponse(rsp)
+}
+
+// ManagementGetUserMetadataWithBodyWithResponse request with arbitrary body returning *ManagementGetUserMetadataResponse
+func (c *ClientWithResponses) ManagementGetUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementGetUserMetadataResponse, error) {
+	rsp, err := c.ManagementGetUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementGetUserMetadataResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementGetUserMetadataWithResponse(ctx context.Context, metadataKey string, body ManagementGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementGetUserMetadataResponse, error) {
+	rsp, err := c.ManagementGetUserMetadata(ctx, metadataKey, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementGetUserMetadataResponse(rsp)
+}
+
+// ManagementInsertUserMetadataWithBodyWithResponse request with arbitrary body returning *ManagementInsertUserMetadataResponse
+func (c *ClientWithResponses) ManagementInsertUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementInsertUserMetadataResponse, error) {
+	rsp, err := c.ManagementInsertUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementInsertUserMetadataResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementInsertUserMetadataWithResponse(ctx context.Context, metadataKey string, body ManagementInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementInsertUserMetadataResponse, error) {
+	rsp, err := c.ManagementInsertUserMetadata(ctx, metadataKey, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementInsertUserMetadataResponse(rsp)
+}
+
+// ManagementUpdateUserMetadataWithBodyWithResponse request with arbitrary body returning *ManagementUpdateUserMetadataResponse
+func (c *ClientWithResponses) ManagementUpdateUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ManagementUpdateUserMetadataResponse, error) {
+	rsp, err := c.ManagementUpdateUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementUpdateUserMetadataResponse(rsp)
+}
+
+func (c *ClientWithResponses) ManagementUpdateUserMetadataWithResponse(ctx context.Context, metadataKey string, body ManagementUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*ManagementUpdateUserMetadataResponse, error) {
+	rsp, err := c.ManagementUpdateUserMetadata(ctx, metadataKey, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseManagementUpdateUserMetadataResponse(rsp)
+}
+
+// ObservabilityGetInfoWithResponse request returning *ObservabilityGetInfoResponse
+func (c *ClientWithResponses) ObservabilityGetInfoWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ObservabilityGetInfoResponse, error) {
+	rsp, err := c.ObservabilityGetInfo(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseObservabilityGetInfoResponse(rsp)
 }
 
 // ObservabilityQueryTimeSeriesMetricsWithBodyWithResponse request with arbitrary body returning *ObservabilityQueryTimeSeriesMetricsResponse
@@ -5149,208 +5288,6 @@ func (c *ClientWithResponses) ObservabilityQueryTimeSeriesMetricsWithResponse(ct
 		return nil, err
 	}
 	return ParseObservabilityQueryTimeSeriesMetricsResponse(rsp)
-}
-
-// UserCreateApplicationWithBodyWithResponse request with arbitrary body returning *UserCreateApplicationResponse
-func (c *ClientWithResponses) UserCreateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error) {
-	rsp, err := c.UserCreateApplicationWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserCreateApplicationResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserCreateApplicationWithResponse(ctx context.Context, body UserCreateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserCreateApplicationResponse, error) {
-	rsp, err := c.UserCreateApplication(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserCreateApplicationResponse(rsp)
-}
-
-// UserDeleteApplicationWithBodyWithResponse request with arbitrary body returning *UserDeleteApplicationResponse
-func (c *ClientWithResponses) UserDeleteApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error) {
-	rsp, err := c.UserDeleteApplicationWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserDeleteApplicationResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserDeleteApplicationWithResponse(ctx context.Context, body UserDeleteApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserDeleteApplicationResponse, error) {
-	rsp, err := c.UserDeleteApplication(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserDeleteApplicationResponse(rsp)
-}
-
-// UserListApplicationsWithBodyWithResponse request with arbitrary body returning *UserListApplicationsResponse
-func (c *ClientWithResponses) UserListApplicationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error) {
-	rsp, err := c.UserListApplicationsWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserListApplicationsResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserListApplicationsWithResponse(ctx context.Context, body UserListApplicationsJSONRequestBody, reqEditors ...RequestEditorFn) (*UserListApplicationsResponse, error) {
-	rsp, err := c.UserListApplications(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserListApplicationsResponse(rsp)
-}
-
-// UserRotateApplicationSecretWithBodyWithResponse request with arbitrary body returning *UserRotateApplicationSecretResponse
-func (c *ClientWithResponses) UserRotateApplicationSecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error) {
-	rsp, err := c.UserRotateApplicationSecretWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserRotateApplicationSecretResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserRotateApplicationSecretWithResponse(ctx context.Context, body UserRotateApplicationSecretJSONRequestBody, reqEditors ...RequestEditorFn) (*UserRotateApplicationSecretResponse, error) {
-	rsp, err := c.UserRotateApplicationSecret(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserRotateApplicationSecretResponse(rsp)
-}
-
-// UserUpdateApplicationWithBodyWithResponse request with arbitrary body returning *UserUpdateApplicationResponse
-func (c *ClientWithResponses) UserUpdateApplicationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error) {
-	rsp, err := c.UserUpdateApplicationWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserUpdateApplicationResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserUpdateApplicationWithResponse(ctx context.Context, body UserUpdateApplicationJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateApplicationResponse, error) {
-	rsp, err := c.UserUpdateApplication(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserUpdateApplicationResponse(rsp)
-}
-
-// UserGetUserMetadataWithBodyWithResponse request with arbitrary body returning *UserGetUserMetadataResponse
-func (c *ClientWithResponses) UserGetUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error) {
-	rsp, err := c.UserGetUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserGetUserMetadataResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserGetUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserGetUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserGetUserMetadataResponse, error) {
-	rsp, err := c.UserGetUserMetadata(ctx, metadataKey, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserGetUserMetadataResponse(rsp)
-}
-
-// UserInsertUserMetadataWithBodyWithResponse request with arbitrary body returning *UserInsertUserMetadataResponse
-func (c *ClientWithResponses) UserInsertUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error) {
-	rsp, err := c.UserInsertUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserInsertUserMetadataResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserInsertUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserInsertUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserInsertUserMetadataResponse, error) {
-	rsp, err := c.UserInsertUserMetadata(ctx, metadataKey, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserInsertUserMetadataResponse(rsp)
-}
-
-// UserUpdateUserMetadataWithBodyWithResponse request with arbitrary body returning *UserUpdateUserMetadataResponse
-func (c *ClientWithResponses) UserUpdateUserMetadataWithBodyWithResponse(ctx context.Context, metadataKey string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error) {
-	rsp, err := c.UserUpdateUserMetadataWithBody(ctx, metadataKey, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserUpdateUserMetadataResponse(rsp)
-}
-
-func (c *ClientWithResponses) UserUpdateUserMetadataWithResponse(ctx context.Context, metadataKey string, body UserUpdateUserMetadataJSONRequestBody, reqEditors ...RequestEditorFn) (*UserUpdateUserMetadataResponse, error) {
-	rsp, err := c.UserUpdateUserMetadata(ctx, metadataKey, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUserUpdateUserMetadataResponse(rsp)
-}
-
-// ParseAdminListNamespacesResponse parses an HTTP response from a AdminListNamespacesWithResponse call
-func ParseAdminListNamespacesResponse(rsp *http.Response) (*AdminListNamespacesResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &AdminListNamespacesResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListNamespacesResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseAdminCreateNamespaceResponse parses an HTTP response from a AdminCreateNamespaceWithResponse call
-func ParseAdminCreateNamespaceResponse(rsp *http.Response) (*AdminCreateNamespaceResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &AdminCreateNamespaceResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CreateNamespaceResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
 }
 
 // ParseAuthGetAccessTokenResponse parses an HTTP response from a AuthGetAccessTokenWithResponse call
@@ -6079,15 +6016,345 @@ func ParseHealthAPIHealthResponse(rsp *http.Response) (*HealthAPIHealthResponse,
 	return response, nil
 }
 
-// ParseTigrisGetInfoResponse parses an HTTP response from a TigrisGetInfoWithResponse call
-func ParseTigrisGetInfoResponse(rsp *http.Response) (*TigrisGetInfoResponse, error) {
+// ParseManagementCreateApplicationResponse parses an HTTP response from a ManagementCreateApplicationWithResponse call
+func ParseManagementCreateApplicationResponse(rsp *http.Response) (*ManagementCreateApplicationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &TigrisGetInfoResponse{
+	response := &ManagementCreateApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateApplicationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementDeleteApplicationResponse parses an HTTP response from a ManagementDeleteApplicationWithResponse call
+func ParseManagementDeleteApplicationResponse(rsp *http.Response) (*ManagementDeleteApplicationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementDeleteApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeleteApplicationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementListApplicationsResponse parses an HTTP response from a ManagementListApplicationsWithResponse call
+func ParseManagementListApplicationsResponse(rsp *http.Response) (*ManagementListApplicationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementListApplicationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListApplicationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementRotateApplicationSecretResponse parses an HTTP response from a ManagementRotateApplicationSecretWithResponse call
+func ParseManagementRotateApplicationSecretResponse(rsp *http.Response) (*ManagementRotateApplicationSecretResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementRotateApplicationSecretResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RotateApplicationSecretResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementUpdateApplicationResponse parses an HTTP response from a ManagementUpdateApplicationWithResponse call
+func ParseManagementUpdateApplicationResponse(rsp *http.Response) (*ManagementUpdateApplicationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementUpdateApplicationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UpdateApplicationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementListNamespacesResponse parses an HTTP response from a ManagementListNamespacesWithResponse call
+func ParseManagementListNamespacesResponse(rsp *http.Response) (*ManagementListNamespacesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementListNamespacesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListNamespacesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementCreateNamespaceResponse parses an HTTP response from a ManagementCreateNamespaceWithResponse call
+func ParseManagementCreateNamespaceResponse(rsp *http.Response) (*ManagementCreateNamespaceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementCreateNamespaceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateNamespaceResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementGetUserMetadataResponse parses an HTTP response from a ManagementGetUserMetadataWithResponse call
+func ParseManagementGetUserMetadataResponse(rsp *http.Response) (*ManagementGetUserMetadataResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementGetUserMetadataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetUserMetadataResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementInsertUserMetadataResponse parses an HTTP response from a ManagementInsertUserMetadataWithResponse call
+func ParseManagementInsertUserMetadataResponse(rsp *http.Response) (*ManagementInsertUserMetadataResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementInsertUserMetadataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsertUserMetadataResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseManagementUpdateUserMetadataResponse parses an HTTP response from a ManagementUpdateUserMetadataWithResponse call
+func ParseManagementUpdateUserMetadataResponse(rsp *http.Response) (*ManagementUpdateUserMetadataResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ManagementUpdateUserMetadataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UpdateUserMetadataResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseObservabilityGetInfoResponse parses an HTTP response from a ObservabilityGetInfoWithResponse call
+func ParseObservabilityGetInfoResponse(rsp *http.Response) (*ObservabilityGetInfoResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ObservabilityGetInfoResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -6145,427 +6412,164 @@ func ParseObservabilityQueryTimeSeriesMetricsResponse(rsp *http.Response) (*Obse
 	return response, nil
 }
 
-// ParseUserCreateApplicationResponse parses an HTTP response from a UserCreateApplicationWithResponse call
-func ParseUserCreateApplicationResponse(rsp *http.Response) (*UserCreateApplicationResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserCreateApplicationResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CreateApplicationResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUserDeleteApplicationResponse parses an HTTP response from a UserDeleteApplicationWithResponse call
-func ParseUserDeleteApplicationResponse(rsp *http.Response) (*UserDeleteApplicationResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserDeleteApplicationResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest DeleteApplicationResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUserListApplicationsResponse parses an HTTP response from a UserListApplicationsWithResponse call
-func ParseUserListApplicationsResponse(rsp *http.Response) (*UserListApplicationsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserListApplicationsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListApplicationsResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUserRotateApplicationSecretResponse parses an HTTP response from a UserRotateApplicationSecretWithResponse call
-func ParseUserRotateApplicationSecretResponse(rsp *http.Response) (*UserRotateApplicationSecretResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserRotateApplicationSecretResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest RotateApplicationSecretResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUserUpdateApplicationResponse parses an HTTP response from a UserUpdateApplicationWithResponse call
-func ParseUserUpdateApplicationResponse(rsp *http.Response) (*UserUpdateApplicationResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserUpdateApplicationResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UpdateApplicationResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUserGetUserMetadataResponse parses an HTTP response from a UserGetUserMetadataWithResponse call
-func ParseUserGetUserMetadataResponse(rsp *http.Response) (*UserGetUserMetadataResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserGetUserMetadataResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest GetUserMetadataResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUserInsertUserMetadataResponse parses an HTTP response from a UserInsertUserMetadataWithResponse call
-func ParseUserInsertUserMetadataResponse(rsp *http.Response) (*UserInsertUserMetadataResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserInsertUserMetadataResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest InsertUserMetadataResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUserUpdateUserMetadataResponse parses an HTTP response from a UserUpdateUserMetadataWithResponse call
-func ParseUserUpdateUserMetadataResponse(rsp *http.Response) (*UserUpdateUserMetadataResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UserUpdateUserMetadataResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UpdateUserMetadataResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
-		var dest Status
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSONDefault = &dest
-
-	}
-
-	return response, nil
-}
-
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"AAAA//9aAApEYuoAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

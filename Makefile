@@ -8,6 +8,8 @@ PROTO_DIR=${API_DIR}/proto/server/${V}
 BUILD_PARAM=-tags=release -ldflags "-X 'github.com/tigrisdata/tigris-client-go/main.Version=$(VERSION)'" $(shell printenv BUILD_PARAM)
 TEST_PARAM=-cover -race -tags=test $(shell printenv TEST_PARAM)
 
+SERVICES = api health auth observability management
+
 all: generate ${GO_SRC}
 	#go build ${BUILD_PARAM} .
 
@@ -33,14 +35,13 @@ ${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml
 		-o ${API_DIR}/client/${V}/api/http.go \
 		/tmp/openapi.yaml
 
+generate: $(SERVICES:%=$(GEN_DIR)/%.pb.go) ${API_DIR}/client/${V}/api/http.go
 
-generate: ${GEN_DIR}/api.pb.go ${GEN_DIR}/health.pb.go ${GEN_DIR}/admin.pb.go ${GEN_DIR}/user.pb.go ${GEN_DIR}/auth.pb.go ${GEN_DIR}/observability.pb.go ${API_DIR}/client/${V}/api/http.go
-
-mock/api/grpc.go mock/driver.go: ${GEN_DIR}/api.pb.go ${GEN_DIR}/user.pb.go ${GEN_DIR}/auth.pb.go
+mock/api/grpc.go mock/driver.go: $(SERVICES:%=$(GEN_DIR)/%.pb.go)
 	mkdir -p mock/api
 	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver \
 		Driver,Tx,Database,Iterator,SearchResultIterator,EventIterator
-	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer,AuthServer,UserServer
+	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer,AuthServer,ManagementServer,ObservabilityServer
 
 mock: mock/api/grpc.go mock/driver.go
 

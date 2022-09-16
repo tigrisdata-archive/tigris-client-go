@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/credentials/oauth"
-	grpcmd "google.golang.org/grpc/metadata"
+	meta "google.golang.org/grpc/metadata"
 )
 
 const (
@@ -36,8 +36,9 @@ const (
 
 type grpcDriver struct {
 	api  api.TigrisClient
-	user api.UserClient
+	mgmt api.ManagementClient
 	auth api.AuthClient
+	o11y api.ObservabilityClient
 
 	conn *grpc.ClientConn
 }
@@ -82,7 +83,12 @@ func newGRPCClient(_ context.Context, url string, config *config.Driver) (*grpcD
 		return nil, GRPCError(err)
 	}
 
-	return &grpcDriver{conn: conn, api: api.NewTigrisClient(conn), user: api.NewUserClient(conn), auth: api.NewAuthClient(conn)}, nil
+	return &grpcDriver{conn: conn,
+		api:  api.NewTigrisClient(conn),
+		mgmt: api.NewManagementClient(conn),
+		auth: api.NewAuthClient(conn),
+		o11y: api.NewObservabilityClient(conn),
+	}, nil
 }
 
 func (c *grpcDriver) Close() error {
@@ -97,7 +103,7 @@ func (c *grpcDriver) UseDatabase(name string) Database {
 }
 
 func (c *grpcDriver) Info(ctx context.Context) (*InfoResponse, error) {
-	r, err := c.api.GetInfo(ctx, &api.GetInfoRequest{})
+	r, err := c.o11y.GetInfo(ctx, &api.GetInfoRequest{})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -146,7 +152,7 @@ func (c *grpcDriver) dropDatabaseWithOptions(ctx context.Context, db string, opt
 }
 
 func (c *grpcDriver) beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error) {
-	var respHeaders grpcmd.MD // variable to store header and trailer
+	var respHeaders meta.MD // variable to store header and trailer
 	resp, err := c.api.BeginTransaction(ctx, &api.BeginTransactionRequest{
 		Db:      db,
 		Options: (*api.TransactionOptions)(options),
@@ -159,26 +165,26 @@ func (c *grpcDriver) beginTxWithOptions(ctx context.Context, db string, options 
 		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
 	}
 
-	additionalHeaders := grpcmd.New(map[string]string{})
+	additionalHeaders := meta.New(map[string]string{})
 	if respHeaders.Get(SetCookieHeaderKey) != nil {
 		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
-			additionalHeaders = grpcmd.Join(additionalHeaders, grpcmd.Pairs(CookieHeaderKey, incomingCookie))
+			additionalHeaders = meta.Join(additionalHeaders, meta.Pairs(CookieHeaderKey, incomingCookie))
 		}
 	}
 
 	return &grpcCRUD{db: db, api: c.api, txCtx: resp.GetTxCtx(), additionalMetadata: additionalHeaders}, nil
 }
 
-func setGRPCTxCtx(ctx context.Context, txCtx *api.TransactionCtx, additionalMetadata grpcmd.MD) context.Context {
+func setGRPCTxCtx(ctx context.Context, txCtx *api.TransactionCtx, additionalMetadata meta.MD) context.Context {
 	if txCtx == nil || txCtx.Id == "" {
 		return ctx
 	}
-	outgoingMd := grpcmd.Pairs(api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin)
+	outgoingMd := meta.Pairs(api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin)
 	if additionalMetadata != nil {
-		outgoingMd = grpcmd.Join(outgoingMd, additionalMetadata)
+		outgoingMd = meta.Join(outgoingMd, additionalMetadata)
 	}
 
-	return grpcmd.NewOutgoingContext(ctx, outgoingMd)
+	return meta.NewOutgoingContext(ctx, outgoingMd)
 }
 
 func (c *grpcCRUD) Commit(ctx context.Context) error {
@@ -212,7 +218,7 @@ type grpcCRUD struct {
 	db                 string
 	api                api.TigrisClient
 	txCtx              *api.TransactionCtx
-	additionalMetadata grpcmd.MD
+	additionalMetadata meta.MD
 
 	committed bool
 }
@@ -331,11 +337,10 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithCancel(setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata))
 
-	cctx, cancel := context.WithCancel(ctx)
-
-	resp, err := c.api.Read(cctx, &api.ReadRequest{
+	resp, err := c.api.Read(ctx, &api.ReadRequest{
 		Db:         c.db,
 		Collection: collection,
 		Filter:     filter,
@@ -370,9 +375,10 @@ func (g *grpcStreamReader) close() error {
 }
 
 func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error) {
-	cctx, cancel := context.WithCancel(ctx)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithCancel(ctx)
 
-	resp, err := c.api.Search(cctx, &api.SearchRequest{
+	resp, err := c.api.Search(ctx, &api.SearchRequest{
 		Db:            c.db,
 		Collection:    collection,
 		Q:             req.Q,
@@ -415,9 +421,10 @@ func (g *grpcSearchReader) close() error {
 }
 
 func (c *grpcCRUD) eventsWithOptions(ctx context.Context, collection string, options *EventsOptions) (EventIterator, error) {
-	cctx, cancel := context.WithCancel(ctx)
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithCancel(ctx)
 
-	resp, err := c.api.Events(cctx, &api.EventsRequest{
+	resp, err := c.api.Events(ctx, &api.EventsRequest{
 		Db:         c.db,
 		Collection: collection,
 		Options:    (*api.EventsRequestOptions)(options),
@@ -450,7 +457,7 @@ func (g *grpcEventStreamReader) close() error {
 }
 
 func (c *grpcDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	r, err := c.user.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description})
+	r, err := c.mgmt.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -463,12 +470,12 @@ func (c *grpcDriver) CreateApplication(ctx context.Context, name string, descrip
 }
 
 func (c *grpcDriver) DeleteApplication(ctx context.Context, id string) error {
-	_, err := c.user.DeleteApplication(ctx, &api.DeleteApplicationsRequest{Id: id})
+	_, err := c.mgmt.DeleteApplication(ctx, &api.DeleteApplicationsRequest{Id: id})
 	return GRPCError(err)
 }
 
 func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
-	r, err := c.user.UpdateApplication(ctx, &api.UpdateApplicationRequest{Id: id, Name: name, Description: description})
+	r, err := c.mgmt.UpdateApplication(ctx, &api.UpdateApplicationRequest{Id: id, Name: name, Description: description})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -481,7 +488,7 @@ func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name stri
 }
 
 func (c *grpcDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	r, err := c.user.ListApplications(ctx, &api.ListApplicationsRequest{})
+	r, err := c.mgmt.ListApplications(ctx, &api.ListApplicationsRequest{})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -494,7 +501,7 @@ func (c *grpcDriver) ListApplications(ctx context.Context) ([]*Application, erro
 }
 
 func (c *grpcDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
-	r, err := c.user.RotateApplicationSecret(ctx, &api.RotateApplicationSecretRequest{Id: id})
+	r, err := c.mgmt.RotateApplicationSecret(ctx, &api.RotateApplicationSecretRequest{Id: id})
 	if err != nil {
 		return nil, GRPCError(err)
 	}

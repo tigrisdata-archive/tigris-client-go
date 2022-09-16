@@ -24,6 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 type ObservabilityClient interface {
 	// Queries time series metrics
 	QueryTimeSeriesMetrics(ctx context.Context, in *QueryTimeSeriesMetricsRequest, opts ...grpc.CallOption) (*QueryTimeSeriesMetricsResponse, error)
+	// Provides the information about the server. This information includes returning the server version, etc.
+	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error)
 }
 
 type observabilityClient struct {
@@ -43,12 +45,23 @@ func (c *observabilityClient) QueryTimeSeriesMetrics(ctx context.Context, in *Qu
 	return out, nil
 }
 
+func (c *observabilityClient) GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error) {
+	out := new(GetInfoResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.observability.v1.Observability/GetInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ObservabilityServer is the server API for Observability service.
 // All implementations should embed UnimplementedObservabilityServer
 // for forward compatibility
 type ObservabilityServer interface {
 	// Queries time series metrics
 	QueryTimeSeriesMetrics(context.Context, *QueryTimeSeriesMetricsRequest) (*QueryTimeSeriesMetricsResponse, error)
+	// Provides the information about the server. This information includes returning the server version, etc.
+	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 }
 
 // UnimplementedObservabilityServer should be embedded to have forward compatible implementations.
@@ -57,6 +70,9 @@ type UnimplementedObservabilityServer struct {
 
 func (UnimplementedObservabilityServer) QueryTimeSeriesMetrics(context.Context, *QueryTimeSeriesMetricsRequest) (*QueryTimeSeriesMetricsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryTimeSeriesMetrics not implemented")
+}
+func (UnimplementedObservabilityServer) GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
 
 // UnsafeObservabilityServer may be embedded to opt out of forward compatibility for this service.
@@ -88,6 +104,24 @@ func _Observability_QueryTimeSeriesMetrics_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Observability_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObservabilityServer).GetInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.observability.v1.Observability/GetInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObservabilityServer).GetInfo(ctx, req.(*GetInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Observability_ServiceDesc is the grpc.ServiceDesc for Observability service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +132,10 @@ var Observability_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "QueryTimeSeriesMetrics",
 			Handler:    _Observability_QueryTimeSeriesMetrics_Handler,
+		},
+		{
+			MethodName: "GetInfo",
+			Handler:    _Observability_GetInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

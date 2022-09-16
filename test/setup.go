@@ -48,7 +48,6 @@ var (
 		apiPathPrefix + ("/documents/*"),
 		apiPathPrefix + "/info",
 		apiPathPrefix + ("/users/*"),
-		apiPathPrefix + ("/applications/*"),
 		apiPathPrefix + ("/auth/*"),
 	}
 )

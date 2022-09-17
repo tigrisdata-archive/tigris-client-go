@@ -13,8 +13,10 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	mc, _, _, cancel := test.SetupTests(t, 8)
+	ms, cancel := test.SetupTests(t, 8)
 	defer cancel()
+
+	mc := ms.Api
 
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()

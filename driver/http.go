@@ -223,7 +223,7 @@ func (c *httpDriver) UseDatabase(name string) Database {
 }
 
 func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
-	resp, err := c.api.TigrisGetInfo(ctx)
+	resp, err := c.api.ObservabilityGetInfo(ctx)
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -703,7 +703,7 @@ func (g *httpEventStreamReader) close() error {
 }
 
 func (c *httpDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	resp, err := c.api.UserCreateApplication(ctx, apiHTTP.UserCreateApplicationJSONBody{Name: &name, Description: &description})
+	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONBody{Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -720,12 +720,12 @@ func (c *httpDriver) CreateApplication(ctx context.Context, name string, descrip
 }
 
 func (c *httpDriver) DeleteApplication(ctx context.Context, id string) error {
-	resp, err := c.api.UserDeleteApplication(ctx, apiHTTP.UserDeleteApplicationJSONBody{Id: &id})
+	resp, err := c.api.ManagementDeleteApplication(ctx, apiHTTP.ManagementDeleteApplicationJSONBody{Id: &id})
 	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
-	resp, err := c.api.UserUpdateApplication(ctx, apiHTTP.UserUpdateApplicationJSONBody{Id: &id, Name: &name, Description: &description})
+	resp, err := c.api.ManagementUpdateApplication(ctx, apiHTTP.ManagementUpdateApplicationJSONBody{Id: &id, Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -742,7 +742,7 @@ func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name stri
 }
 
 func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	resp, err := c.api.UserListApplications(ctx, apiHTTP.UserListApplicationsJSONBody{})
+	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONBody{})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -759,7 +759,7 @@ func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, erro
 }
 
 func (c *httpDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
-	resp, err := c.api.UserRotateApplicationSecret(ctx, apiHTTP.UserRotateApplicationSecretJSONBody{Id: &id})
+	resp, err := c.api.ManagementRotateApplicationSecret(ctx, apiHTTP.ManagementRotateApplicationSecretJSONBody{Id: &id})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}

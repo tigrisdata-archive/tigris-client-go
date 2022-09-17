@@ -37,7 +37,7 @@ func NewAuthClient(cc grpc.ClientConnInterface) AuthClient {
 
 func (c *authClient) GetAccessToken(ctx context.Context, in *GetAccessTokenRequest, opts ...grpc.CallOption) (*GetAccessTokenResponse, error) {
 	out := new(GetAccessTokenResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.auth.v1.Auth/getAccessToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.auth.v1.Auth/GetAccessToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func _Auth_GetAccessToken_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/tigrisdata.auth.v1.Auth/getAccessToken",
+		FullMethod: "/tigrisdata.auth.v1.Auth/GetAccessToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServer).GetAccessToken(ctx, req.(*GetAccessTokenRequest))
@@ -98,7 +98,7 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "getAccessToken",
+			MethodName: "GetAccessToken",
 			Handler:    _Auth_GetAccessToken_Handler,
 		},
 	},

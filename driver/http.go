@@ -152,6 +152,9 @@ func dmlRespDecode(body io.ReadCloser, v interface{}) error {
 	case *DeleteResponse:
 		v.Status = r.Status
 		v.Metadata = newRespMetadata(&r.Metadata)
+	case *PublishResponse:
+		v.Status = r.Status
+		v.Metadata = newRespMetadata(&r.Metadata)
 	default:
 		return fmt.Errorf("unkknown response type")
 	}
@@ -392,11 +395,11 @@ func (c *httpCRUD) convertEventsOptions(_ *EventsOptions) *apiHTTP.EventsRequest
 }
 
 func (c *httpCRUD) convertPublishOptions(o *PublishOptions) *apiHTTP.PublishRequestOptions {
-	return &apiHTTP.PublishRequestOptions{}
+	return &apiHTTP.PublishRequestOptions{Partition: o.Partition}
 }
 
-func (c *httpCRUD) convertSubscribeOptions(_ *SubscribeOptions) *apiHTTP.SubscribeRequestOptions {
-	return &apiHTTP.SubscribeRequestOptions{}
+func (c *httpCRUD) convertSubscribeOptions(o *SubscribeOptions) *apiHTTP.SubscribeRequestOptions {
+	return &apiHTTP.SubscribeRequestOptions{Partitions: &o.Partitions}
 }
 
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
@@ -851,15 +854,42 @@ func (c *httpCRUD) publishWithOptions(ctx context.Context, collection string, do
 	return &d, nil
 }
 
-func (c *httpCRUD) subscribeWithOptions(ctx context.Context, collection string, options *SubscribeOptions) (Iterator, error) {
+type subscribeStreamReader struct {
+	closer io.Closer
+	stream *json.Decoder
+}
+
+func (g *subscribeStreamReader) read() (Document, error) {
+	var res struct {
+		Result *apiHTTP.SubscribeResponse
+		Error  *api.ErrorDetails
+	}
+
+	if err := g.stream.Decode(&res); err != nil {
+		return nil, HTTPError(err, nil)
+	}
+
+	if res.Error != nil {
+		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
+	}
+
+	return Document(res.Result.Message), nil
+}
+
+func (g *subscribeStreamReader) close() error {
+	return g.closer.Close()
+}
+
+func (c *httpCRUD) subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisSubscribe(ctx, c.db, collection, apiHTTP.TigrisSubscribeJSONBody{
+		Filter:  json.RawMessage(filter),
 		Options: c.convertSubscribeOptions(options),
 	})
 
 	err = HTTPError(err, resp)
 	dec := json.NewDecoder(resp.Body)
 
-	return &readIterator{streamReader: &httpStreamReader{stream: dec, closer: resp.Body}, err: err, eof: err != nil}, nil
+	return &readIterator{streamReader: &subscribeStreamReader{stream: dec, closer: resp.Body}, err: err, eof: err != nil}, nil
 }

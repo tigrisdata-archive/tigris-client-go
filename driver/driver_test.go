@@ -1075,3 +1075,87 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
 }
+
+func testDriverPublishSubscribe(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	db := c.UseDatabase("db1")
+
+	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
+
+	mc.EXPECT().Publish(gomock.Any(),
+		pm(&api.PublishRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Messages:   *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.PublishRequestOptions{},
+		})).Return(&api.PublishResponse{Status: "published"}, nil)
+
+	_, err := db.Publish(ctx, "c1", doc1)
+	require.NoError(t, err)
+
+	mc.EXPECT().Subscribe(
+		pm(&api.SubscribeRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Options:    &api.SubscribeRequestOptions{},
+		}), gomock.Any()).DoAndReturn(func(r *api.SubscribeRequest, srv api.Tigris_SubscribeServer) error {
+		err := srv.Send(&api.SubscribeResponse{Message: Document(`{"aaa":"bbbb"}`)})
+		require.NoError(t, err)
+		err = srv.Send(&api.SubscribeResponse{Message: Document(`{"aaa":"cccc"}`)})
+		require.NoError(t, err)
+		return &api.TigrisError{Code: api.Code_DATA_LOSS, Message: "subscribe error"}
+	})
+
+	it, err := db.Subscribe(ctx, "c1", Filter(`{"filter":"value"}`))
+	require.NoError(t, err)
+
+	var doc Document
+	require.True(t, it.Next(&doc))
+	require.Equal(t, Document(`{"aaa":"bbbb"}`), doc)
+	require.True(t, it.Next(&doc))
+	require.Equal(t, Document(`{"aaa":"cccc"}`), doc)
+	require.False(t, it.Next(&doc))
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "subscribe error"}}, it.Err())
+
+	var p int32 = 0
+	mc.EXPECT().Publish(gomock.Any(),
+		pm(&api.PublishRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Messages:   *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.PublishRequestOptions{Partition: &p},
+		})).Return(&api.PublishResponse{Status: "published"}, nil)
+
+	_, err = db.Publish(ctx, "c1", doc1, &PublishOptions{Partition: &p})
+	require.NoError(t, err)
+
+	mc.EXPECT().Subscribe(
+		pm(&api.SubscribeRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Options:    &api.SubscribeRequestOptions{Partitions: []int32{1, 5}},
+		}), gomock.Any()).DoAndReturn(func(r *api.SubscribeRequest, srv api.Tigris_SubscribeServer) error {
+		return nil
+	})
+
+	_, err = db.Subscribe(ctx, "c1", Filter(`{"filter":"value"}`), &SubscribeOptions{Partitions: []int32{1, 5}})
+	require.NoError(t, err)
+}
+
+func TestGRPCPubSub(t *testing.T) {
+	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
+	defer cancel()
+	testDriverPublishSubscribe(t, client, mockServer)
+}
+
+func TestHTTPPubSub(t *testing.T) {
+	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
+	defer cancel()
+	testDriverPublishSubscribe(t, client, mockServer)
+}

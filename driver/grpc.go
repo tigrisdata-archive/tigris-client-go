@@ -551,6 +551,7 @@ func (c *grpcCRUD) publishWithOptions(ctx context.Context, collection string, do
 
 type grpcSubscribeStreamReader struct {
 	stream api.Tigris_SubscribeClient
+	cancel context.CancelFunc
 }
 
 func (g *grpcSubscribeStreamReader) read() (Document, error) {
@@ -563,20 +564,25 @@ func (g *grpcSubscribeStreamReader) read() (Document, error) {
 }
 
 func (g *grpcSubscribeStreamReader) close() error {
+	g.cancel()
 	return nil
 }
 
-func (c *grpcCRUD) subscribeWithOptions(ctx context.Context, collection string, options *SubscribeOptions) (Iterator, error) {
+func (c *grpcCRUD) subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error) {
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithCancel(ctx)
+
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	resp, err := c.api.Subscribe(ctx, &api.SubscribeRequest{
 		Db:         c.db,
 		Collection: collection,
+		Filter:     filter,
 		Options:    (*api.SubscribeRequestOptions)(options),
 	})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
 
-	return &readIterator{streamReader: &grpcSubscribeStreamReader{resp}}, nil
+	return &readIterator{streamReader: &grpcSubscribeStreamReader{stream: resp, cancel: cancel}}, nil
 }

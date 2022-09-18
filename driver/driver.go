@@ -117,7 +117,7 @@ type Database interface {
 
 	Publish(ctx context.Context, collection string, docs []Document, options ...*PublishOptions) (*PublishResponse, error)
 
-	Subscribe(ctx context.Context, collection string, options ...*SubscribeOptions) (Iterator, error)
+	Subscribe(ctx context.Context, collection string, filter Filter, options ...*SubscribeOptions) (Iterator, error)
 }
 
 type driver struct {
@@ -268,13 +268,13 @@ func (c *driverCRUD) Publish(ctx context.Context, collection string, docs []Docu
 	return c.publishWithOptions(ctx, collection, docs, opts.(*PublishOptions))
 }
 
-func (c *driverCRUD) Subscribe(ctx context.Context, collection string, options ...*SubscribeOptions) (Iterator, error) {
+func (c *driverCRUD) Subscribe(ctx context.Context, collection string, filter Filter, options ...*SubscribeOptions) (Iterator, error) {
 	opts, err := validateOptionsParam(options, &SubscribeOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.subscribeWithOptions(ctx, collection, opts.(*SubscribeOptions))
+	return c.subscribeWithOptions(ctx, collection, filter, opts.(*SubscribeOptions))
 }
 
 func validateOptionsParam(options interface{}, out interface{}) (interface{}, error) {

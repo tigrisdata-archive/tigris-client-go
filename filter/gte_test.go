@@ -22,23 +22,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestEq(t *testing.T) {
+func TestGte(t *testing.T) {
 	cases := []struct {
 		name string
 		expr Expr
 		exp  string
 	}{
-		{"int", EqInt("f", 12345), `{"f":{"$eq":12345}}`},
-		{"int32", EqInt32("f", 12345), `{"f":{"$eq":12345}}`},
-		{"int64", EqInt64("f", 123456789012), `{"f":{"$eq":123456789012}}`},
-		{"float32", EqFloat32("f", 12345.67), `{"f":{"$eq":12345.67}}`},
-		{"float64", EqFloat64("f", 123456789012.34), `{"f":{"$eq":123456789012.34}}`},
-		{"string", EqString("f", "1234"), `{"f":{"$eq":"1234"}}`},
-		{"bytes", EqBytes("f", []byte("123")), `{"f":{"$eq":"MTIz"}}`},
-		{"time", EqTime("f", time.Time{}), `{"f":{"$eq":"0001-01-01T00:00:00Z"}}`},
+		{"int", GteInt("f", 12345), `{"f":{"$gte":12345}}`},
+		{"int32", GteInt32("f", 12345), `{"f":{"$gte":12345}}`},
+		{"int64", GteInt64("f", 123456789012), `{"f":{"$gte":123456789012}}`},
+		{"float32", GteFloat32("f", 12345.67), `{"f":{"$gte":12345.67}}`},
+		{"float64", GteFloat64("f", 123456789012.34), `{"f":{"$gte":123456789012.34}}`},
+		{"string", GteString("f", "1234"), `{"f":{"$gte":"1234"}}`},
+		{"bytes", GteBytes("f", []byte("123")), `{"f":{"$gte":"MTIz"}}`},
+		{"time", GteTime("f", time.Time{}), `{"f":{"$gte":"0001-01-01T00:00:00Z"}}`},
 		{
-			"uuid", EqUUID("f", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36")),
-			`{"f":{"$eq":"11111111-00b6-4eb5-a64d-351be56afe36"}}`,
+			"uuid", GteUUID("f", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36")),
+			`{"f":{"$gte":"11111111-00b6-4eb5-a64d-351be56afe36"}}`,
 		},
 	}
 

@@ -22,23 +22,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestEq(t *testing.T) {
+func TestLt(t *testing.T) {
 	cases := []struct {
 		name string
 		expr Expr
 		exp  string
 	}{
-		{"int", EqInt("f", 12345), `{"f":{"$eq":12345}}`},
-		{"int32", EqInt32("f", 12345), `{"f":{"$eq":12345}}`},
-		{"int64", EqInt64("f", 123456789012), `{"f":{"$eq":123456789012}}`},
-		{"float32", EqFloat32("f", 12345.67), `{"f":{"$eq":12345.67}}`},
-		{"float64", EqFloat64("f", 123456789012.34), `{"f":{"$eq":123456789012.34}}`},
-		{"string", EqString("f", "1234"), `{"f":{"$eq":"1234"}}`},
-		{"bytes", EqBytes("f", []byte("123")), `{"f":{"$eq":"MTIz"}}`},
-		{"time", EqTime("f", time.Time{}), `{"f":{"$eq":"0001-01-01T00:00:00Z"}}`},
+		{"int", LtInt("f", 12345), `{"f":{"$lt":12345}}`},
+		{"int32", LtInt32("f", 12345), `{"f":{"$lt":12345}}`},
+		{"int64", LtInt64("f", 123456789012), `{"f":{"$lt":123456789012}}`},
+		{"float32", LtFloat32("f", 12345.67), `{"f":{"$lt":12345.67}}`},
+		{"float64", LtFloat64("f", 123456789012.34), `{"f":{"$lt":123456789012.34}}`},
+		{"string", LtString("f", "1234"), `{"f":{"$lt":"1234"}}`},
+		{"bytes", LtBytes("f", []byte("123")), `{"f":{"$lt":"MTIz"}}`},
+		{"time", LtTime("f", time.Time{}), `{"f":{"$lt":"0001-01-01T00:00:00Z"}}`},
 		{
-			"uuid", EqUUID("f", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36")),
-			`{"f":{"$eq":"11111111-00b6-4eb5-a64d-351be56afe36"}}`,
+			"uuid", LtUUID("f", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36")),
+			`{"f":{"$lt":"11111111-00b6-4eb5-a64d-351be56afe36"}}`,
 		},
 	}
 

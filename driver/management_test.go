@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/golang/mock/gomock"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/stretchr/testify/assert"
@@ -177,7 +176,6 @@ func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *moc
 		if metautils.ExtractIncoming(ctx).Get(ua) == "" {
 			ua = "user-agent"
 		}
-		spew.Dump(ctx)
 		assert.True(t, strings.Contains(metautils.ExtractIncoming(ctx).Get(ua), UserAgent))
 	}).Return(&api.DeleteResponse{}, nil)
 

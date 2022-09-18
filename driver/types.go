@@ -45,13 +45,13 @@ var (
 )
 
 type Document json.RawMessage
+type Message json.RawMessage
 type Filter json.RawMessage
 type Projection json.RawMessage
 type Update json.RawMessage
 type Schema json.RawMessage
 type Facet json.RawMessage
 type SortOrder json.RawMessage
-type Event *api.StreamEvent
 
 type WriteOptions api.WriteOptions
 
@@ -60,7 +60,6 @@ type ReplaceOptions api.ReplaceRequestOptions
 type UpdateOptions api.UpdateRequestOptions
 type DeleteOptions api.DeleteRequestOptions
 type ReadOptions api.ReadRequestOptions
-type EventsOptions api.EventsRequestOptions
 type PublishOptions api.PublishRequestOptions
 type SubscribeOptions api.SubscribeRequestOptions
 

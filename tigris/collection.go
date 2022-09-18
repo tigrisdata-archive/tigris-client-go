@@ -40,10 +40,6 @@ type ReadOptions struct {
 	Offset []byte
 }
 
-// EventsOptions modifies events request behavior
-type EventsOptions struct {
-}
-
 // Collection provides an interface for documents manipulation.
 // Such as Insert, Update, Delete, Read
 type Collection[T schema.Model] struct {
@@ -295,16 +291,6 @@ func (c *Collection[T]) Search(ctx context.Context, req *search.Request) (*Searc
 		return nil, err
 	}
 	return &SearchIterator[T]{Iterator: it}, err
-}
-
-// Events listens and iterates over collection documents modifications
-func (c *Collection[T]) Events(ctx context.Context, _ ...*EventsOptions) (*EventIterator[T], error) {
-	it, err := getDB(ctx, c.db).Events(ctx, c.name)
-	if err != nil {
-		return nil, err
-	}
-
-	return &EventIterator[T]{Iterator: it}, nil
 }
 
 // Delete removes documents from the collection according to the filter.

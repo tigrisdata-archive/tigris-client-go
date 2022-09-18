@@ -113,9 +113,7 @@ type Database interface {
 	// DescribeCollection returns metadata of the collection in the database
 	DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (*DescribeCollectionResponse, error)
 
-	Events(ctx context.Context, collection string, options ...*EventsOptions) (EventIterator, error)
-
-	Publish(ctx context.Context, collection string, docs []Document, options ...*PublishOptions) (*PublishResponse, error)
+	Publish(ctx context.Context, collection string, docs []Message, options ...*PublishOptions) (*PublishResponse, error)
 
 	Subscribe(ctx context.Context, collection string, filter Filter, options ...*SubscribeOptions) (Iterator, error)
 }
@@ -250,22 +248,13 @@ func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, 
 	return c.describeCollectionWithOptions(ctx, collection, opts.(*CollectionOptions))
 }
 
-func (c *driverCRUD) Events(ctx context.Context, collection string, options ...*EventsOptions) (EventIterator, error) {
-	opts, err := validateOptionsParam(options, &EventsOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return c.eventsWithOptions(ctx, collection, opts.(*EventsOptions))
-}
-
-func (c *driverCRUD) Publish(ctx context.Context, collection string, docs []Document, options ...*PublishOptions) (*PublishResponse, error) {
+func (c *driverCRUD) Publish(ctx context.Context, collection string, msgs []Message, options ...*PublishOptions) (*PublishResponse, error) {
 	opts, err := validateOptionsParam(options, &PublishOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.publishWithOptions(ctx, collection, docs, opts.(*PublishOptions))
+	return c.publishWithOptions(ctx, collection, msgs, opts.(*PublishOptions))
 }
 
 func (c *driverCRUD) Subscribe(ctx context.Context, collection string, filter Filter, options ...*SubscribeOptions) (Iterator, error) {

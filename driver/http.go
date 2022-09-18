@@ -390,10 +390,6 @@ func (c *httpCRUD) convertReadOptions(_ *ReadOptions) *apiHTTP.ReadRequestOption
 	return &opts
 }
 
-func (c *httpCRUD) convertEventsOptions(_ *EventsOptions) *apiHTTP.EventsRequestOptions {
-	return &apiHTTP.EventsRequestOptions{}
-}
-
 func (c *httpCRUD) convertPublishOptions(o *PublishOptions) *apiHTTP.PublishRequestOptions {
 	return &apiHTTP.PublishRequestOptions{Partition: o.Partition}
 }
@@ -659,60 +655,6 @@ func (g *httpSearchReader) close() error {
 	return g.closer.Close()
 }
 
-func (c *httpCRUD) eventsWithOptions(ctx context.Context, collection string, options *EventsOptions) (EventIterator, error) {
-	resp, err := c.api.TigrisEvents(ctx, c.db, collection, apiHTTP.TigrisEventsJSONRequestBody{
-		Collection: &collection,
-		Options:    c.convertEventsOptions(options),
-	})
-
-	err = HTTPError(err, resp)
-
-	e := &eventReadIterator{err: err, eof: err != nil}
-
-	if err == nil {
-		e.eventStreamReader = &httpEventStreamReader{stream: json.NewDecoder(resp.Body), closer: resp.Body}
-	}
-
-	return e, nil
-}
-
-type httpEventStreamReader struct {
-	closer io.Closer
-	stream *json.Decoder
-}
-
-func (g *httpEventStreamReader) read() (Event, error) {
-	var res struct {
-		Result struct {
-			Event *apiHTTP.StreamEvent
-		}
-		Error *api.ErrorDetails
-	}
-
-	if err := g.stream.Decode(&res); err != nil {
-		return nil, HTTPError(err, nil)
-	}
-
-	if res.Error != nil {
-		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
-	}
-	e := res.Result.Event
-	return &api.StreamEvent{
-		Collection: PtrToString(e.Collection),
-		Data:       e.Data,
-		Key:        PtrToBytes(e.Key),
-		Last:       PtrToBool(e.Last),
-		Lkey:       PtrToBytes(e.Lkey),
-		Rkey:       PtrToBytes(e.Rkey),
-		Op:         PtrToString(e.Op),
-		TxId:       PtrToBytes(e.TxId),
-	}, nil
-}
-
-func (g *httpEventStreamReader) close() error {
-	return g.closer.Close()
-}
-
 func (c *httpDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
 	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONBody{Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
@@ -834,11 +776,11 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, ap
 	return &tr, nil
 }
 
-func (c *httpCRUD) publishWithOptions(ctx context.Context, collection string, docs []Document, options *PublishOptions) (*PublishResponse, error) {
+func (c *httpCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisPublish(ctx, c.db, collection, apiHTTP.TigrisPublishJSONRequestBody{
-		Messages: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
+		Messages: (*[]json.RawMessage)(unsafe.Pointer(&msgs)),
 		Options:  c.convertPublishOptions(options),
 	})
 

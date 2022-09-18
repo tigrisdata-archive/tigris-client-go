@@ -48,8 +48,7 @@ type CRUDWithOptions interface {
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) (*DescribeCollectionResponse, error)
-	eventsWithOptions(ctx context.Context, collection string, options *EventsOptions) (EventIterator, error)
-	publishWithOptions(ctx context.Context, collection string, docs []Document, options *PublishOptions) (*PublishResponse, error)
+	publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error)
 	subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error)
 }
 

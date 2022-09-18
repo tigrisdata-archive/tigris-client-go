@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HealthAPIClient interface {
+	// This endpoint can be used to check the liveness of the server.
 	Health(ctx context.Context, in *HealthCheckInput, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
@@ -46,6 +47,7 @@ func (c *healthAPIClient) Health(ctx context.Context, in *HealthCheckInput, opts
 // All implementations should embed UnimplementedHealthAPIServer
 // for forward compatibility
 type HealthAPIServer interface {
+	// This endpoint can be used to check the liveness of the server.
 	Health(context.Context, *HealthCheckInput) (*HealthCheckResponse, error)
 }
 

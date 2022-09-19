@@ -831,7 +831,12 @@ func (c *httpCRUD) subscribeWithOptions(ctx context.Context, collection string, 
 	})
 
 	err = HTTPError(err, resp)
-	dec := json.NewDecoder(resp.Body)
 
-	return &readIterator{streamReader: &subscribeStreamReader{stream: dec, closer: resp.Body}, err: err, eof: err != nil}, nil
+	e := &readIterator{err: err, eof: err != nil}
+
+	if err == nil {
+		e.streamReader = &subscribeStreamReader{stream: json.NewDecoder(resp.Body), closer: resp.Body}
+	}
+
+	return e, nil
 }

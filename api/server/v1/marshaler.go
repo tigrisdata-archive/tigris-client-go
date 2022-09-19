@@ -160,7 +160,7 @@ func (x *ReadRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalJSON for SearchRequest avoids unmarshalling filter, facets, sort and fields
+// UnmarshalJSON for SearchRequest avoids unmarshalling filter, facets, sort and fields.
 func (x *SearchRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
@@ -207,6 +207,10 @@ func (x *SearchRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "page":
 			if err := jsoniter.Unmarshal(value, &x.Page); err != nil {
+				return err
+			}
+		case "collation":
+			if err := jsoniter.Unmarshal(value, &x.Collation); err != nil {
 				return err
 			}
 		}
@@ -609,21 +613,32 @@ func (x *PublishRequest) UnmarshalJSON(data []byte) error {
 			if err := jsoniter.Unmarshal(value, &x.Options); err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
 
-			var options map[string]jsoniter.RawMessage
-			if err := jsoniter.Unmarshal(value, &options); err != nil {
+func (x *SubscribeRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "db":
+			if err := jsoniter.Unmarshal(value, &x.Db); err != nil {
 				return err
 			}
-
-			part := false
-			for oKey := range options {
-				if oKey == "partition" {
-					part = true
-				}
+		case "collection":
+			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
 			}
-			if !part {
-				// use -1 to indicate that no partition option was set
-				x.Options.Partition = -1
+		case "filter":
+			// not decoding it here and let it decode during filter parsing
+			x.Filter = value
+		case "options":
+			if err := jsoniter.Unmarshal(value, &x.Options); err != nil {
+				return err
 			}
 		}
 	}
@@ -639,7 +654,88 @@ func (x *SubscribeResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(resp)
 }
 
-// Proper marshal timestamp in metadata
+func (x *InsertUserMetadataRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "metadataKey":
+			if err := jsoniter.Unmarshal(value, &x.MetadataKey); err != nil {
+				return err
+			}
+		case "value":
+			x.Value = value
+		}
+	}
+	return nil
+}
+
+func (x *UpdateUserMetadataRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "metadataKey":
+			if err := jsoniter.Unmarshal(value, &x.MetadataKey); err != nil {
+				return err
+			}
+		case "value":
+			x.Value = value
+		}
+	}
+	return nil
+}
+
+func (x *GetUserMetadataResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		MetadataKey string          `json:"metadataKey,omitempty"`
+		NamespaceId uint32          `json:"namespaceId,omitempty"`
+		UserId      string          `json:"userId,omitempty"`
+		Value       json.RawMessage `json:"value,omitempty"`
+	}{
+		MetadataKey: x.MetadataKey,
+		NamespaceId: x.NamespaceId,
+		UserId:      x.UserId,
+		Value:       x.Value,
+	}
+	return json.Marshal(resp)
+}
+
+func (x *InsertUserMetadataResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		MetadataKey string          `json:"metadataKey,omitempty"`
+		NamespaceId uint32          `json:"namespaceId,omitempty"`
+		UserId      string          `json:"userId,omitempty"`
+		Value       json.RawMessage `json:"value,omitempty"`
+	}{
+		MetadataKey: x.MetadataKey,
+		NamespaceId: x.NamespaceId,
+		UserId:      x.UserId,
+		Value:       x.Value,
+	}
+	return json.Marshal(resp)
+}
+
+func (x *UpdateUserMetadataResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		MetadataKey string          `json:"metadataKey,omitempty"`
+		NamespaceId uint32          `json:"namespaceId,omitempty"`
+		UserId      string          `json:"userId,omitempty"`
+		Value       json.RawMessage `json:"value,omitempty"`
+	}{
+		MetadataKey: x.MetadataKey,
+		NamespaceId: x.NamespaceId,
+		UserId:      x.UserId,
+		Value:       x.Value,
+	}
+	return json.Marshal(resp)
+}
+
+// Proper marshal timestamp in metadata.
 type dmlResponse struct {
 	Metadata      Metadata          `json:"metadata,omitempty"`
 	Status        string            `json:"status,omitempty"`
@@ -862,7 +958,6 @@ func unmarshalRollup(data []byte) (*RollupFunction, error) {
 					result.Aggregator = RollupAggregator_ROLLUP_AGGREGATOR_MAX
 				case "AVG":
 					result.Aggregator = RollupAggregator_ROLLUP_AGGREGATOR_AVG
-
 				}
 			}
 		case "interval":

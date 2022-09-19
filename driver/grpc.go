@@ -420,42 +420,6 @@ func (g *grpcSearchReader) close() error {
 	return nil
 }
 
-func (c *grpcCRUD) eventsWithOptions(ctx context.Context, collection string, options *EventsOptions) (EventIterator, error) {
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithCancel(ctx)
-
-	resp, err := c.api.Events(ctx, &api.EventsRequest{
-		Db:         c.db,
-		Collection: collection,
-		Options:    (*api.EventsRequestOptions)(options),
-	})
-	if err != nil {
-		cancel()
-		return nil, GRPCError(err)
-	}
-
-	return &eventReadIterator{eventStreamReader: &grpcEventStreamReader{stream: resp, cancel: cancel}}, nil
-}
-
-type grpcEventStreamReader struct {
-	stream api.Tigris_EventsClient
-	cancel context.CancelFunc
-}
-
-func (g *grpcEventStreamReader) read() (Event, error) {
-	resp, err := g.stream.Recv()
-	if err != nil {
-		return nil, GRPCError(err)
-	}
-
-	return resp.Event, nil
-}
-
-func (g *grpcEventStreamReader) close() error {
-	g.cancel()
-	return nil
-}
-
 func (c *grpcDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
 	r, err := c.mgmt.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description})
 	if err != nil {
@@ -530,4 +494,60 @@ func (c *grpcDriver) GetAccessToken(ctx context.Context, applicationID string, a
 	}
 
 	return (*TokenResponse)(r), nil
+}
+
+func (c *grpcCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {
+	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+
+	resp, err := c.api.Publish(ctx, &api.PublishRequest{
+		Db:         c.db,
+		Collection: collection,
+		Messages:   *(*[][]byte)(unsafe.Pointer(&msgs)),
+		Options:    (*api.PublishRequestOptions)(options),
+	})
+
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*PublishResponse)(resp), nil
+}
+
+type grpcSubscribeStreamReader struct {
+	stream api.Tigris_SubscribeClient
+	cancel context.CancelFunc
+}
+
+func (g *grpcSubscribeStreamReader) read() (Document, error) {
+	resp, err := g.stream.Recv()
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return resp.Message, nil
+}
+
+func (g *grpcSubscribeStreamReader) close() error {
+	g.cancel()
+	return nil
+}
+
+func (c *grpcCRUD) subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error) {
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithCancel(ctx)
+
+	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+
+	resp, err := c.api.Subscribe(ctx, &api.SubscribeRequest{
+		Db:         c.db,
+		Collection: collection,
+		Filter:     filter,
+		Options:    (*api.SubscribeRequestOptions)(options),
+	})
+	if err != nil {
+		cancel()
+		return nil, GRPCError(err)
+	}
+
+	return &readIterator{streamReader: &grpcSubscribeStreamReader{stream: resp, cancel: cancel}}, nil
 }

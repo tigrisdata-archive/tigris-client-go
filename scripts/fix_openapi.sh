@@ -25,7 +25,7 @@ main() {
 	# Fix the types of filter and document fields to be object on HTTP wire.
 	# The original format in proto file is "bytes", which allows to skip
 	# unmarshalling in GRPC, we also implement custom unmarshalling for HTTP
-	for i in DeleteRequest UpdateRequest ReadRequest SearchRequest; do
+	for i in DeleteRequest UpdateRequest ReadRequest SearchRequest SubscribeRequest; do
 		yq_fix_json $i filter
 	done
 
@@ -42,6 +42,8 @@ main() {
 	yq_fix_json CreateOrUpdateCollectionRequest schema
 	yq_fix_json CollectionDescription schema
 	yq_fix_json DescribeCollectionResponse schema
+	yq_fix_json PublishRequest messages.items
+	yq_fix_json SubscribeResponse message
 }
 
 fix_bytes() {

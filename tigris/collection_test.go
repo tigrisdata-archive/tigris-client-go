@@ -266,29 +266,6 @@ func TestCollectionBasic(t *testing.T) {
 
 	err = c.Drop(ctx)
 	require.NoError(t, err)
-
-	mevit := mock.NewMockEventIterator(ctrl)
-
-	mdb.EXPECT().Events(ctx, "coll_1").Return(mevit, nil)
-
-	eit, err := c.Events(ctx)
-	require.NoError(t, err)
-
-	var ev Event[Coll1]
-	var dev driver.Event
-
-	mevit.EXPECT().Next(&dev).SetArg(0, &api.StreamEvent{Op: "insert", TxId: []byte("txid1"), Key: []byte("key1"), Lkey: []byte("lkey1"), Rkey: []byte("rkey1"), Data: []byte(`{"Key1":"k1","Field1":111}`)}).Return(true)
-	mevit.EXPECT().Next(&dev).Return(false)
-	mevit.EXPECT().Err().Return(nil)
-
-	for eit.Next(&ev) {
-		require.Equal(t, Event[Coll1]{Op: "insert", TxId: []byte("txid1"), Key: []byte("key1"), Lkey: []byte("lkey1"), Rkey: []byte("rkey1"), Data: Coll1{Key1: "k1", Field1: 111}}, ev)
-	}
-
-	require.NoError(t, eit.Err())
-
-	mevit.EXPECT().Close()
-	eit.Close()
 }
 
 func TestCollection_Search(t *testing.T) {

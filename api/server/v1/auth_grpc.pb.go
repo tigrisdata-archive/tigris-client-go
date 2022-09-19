@@ -22,8 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthClient interface {
-	// Gets an access token.
-	// supports two grant_type: [refresh_token, client_credentials]
+	// Endpoint for receiving access token from Tigris Server. The endpoint requires Grant Type(`grant_type`) which has
+	// two possible values <i>"REFRESH_TOKEN"</i> or <i>"CLIENT_CREDENTIALS"</i> based on which either Refresh token(`refresh_token`)
+	// needs to be set or client credentials(`client_id`, `client_secret`).
 	GetAccessToken(ctx context.Context, in *GetAccessTokenRequest, opts ...grpc.CallOption) (*GetAccessTokenResponse, error)
 }
 
@@ -48,8 +49,9 @@ func (c *authClient) GetAccessToken(ctx context.Context, in *GetAccessTokenReque
 // All implementations should embed UnimplementedAuthServer
 // for forward compatibility
 type AuthServer interface {
-	// Gets an access token.
-	// supports two grant_type: [refresh_token, client_credentials]
+	// Endpoint for receiving access token from Tigris Server. The endpoint requires Grant Type(`grant_type`) which has
+	// two possible values <i>"REFRESH_TOKEN"</i> or <i>"CLIENT_CREDENTIALS"</i> based on which either Refresh token(`refresh_token`)
+	// needs to be set or client credentials(`client_id`, `client_secret`).
 	GetAccessToken(context.Context, *GetAccessTokenRequest) (*GetAccessTokenResponse, error)
 }
 

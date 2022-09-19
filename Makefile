@@ -28,7 +28,7 @@ ${GEN_DIR}/%.pb.go ${GEN_DIR}/%.pb.gw.go: ${PROTO_DIR}/%.proto
 	make -C api/proto generate GEN_DIR=../../${GEN_DIR} API_DIR=..
 
 # generate Go HTTP client from openapi spec
-${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml
+${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml scripts/fix_openapi.sh
 	mkdir -p ${API_DIR}/client/${V}/api
 	/bin/bash scripts/fix_openapi.sh ${PROTO_DIR}/openapi.yaml /tmp/openapi.yaml
 	oapi-codegen --old-config-style -package api -generate "client, types, spec" \
@@ -40,7 +40,7 @@ generate: $(SERVICES:%=$(GEN_DIR)/%.pb.go) ${API_DIR}/client/${V}/api/http.go
 mock/api/grpc.go mock/driver.go: $(SERVICES:%=$(GEN_DIR)/%.pb.go)
 	mkdir -p mock/api
 	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver \
-		Driver,Tx,Database,Iterator,SearchResultIterator,EventIterator
+		Driver,Tx,Database,Iterator,SearchResultIterator
 	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer,AuthServer,ManagementServer,ObservabilityServer
 
 mock: mock/api/grpc.go mock/driver.go

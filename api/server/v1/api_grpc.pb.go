@@ -55,10 +55,9 @@ type TigrisClient interface {
 	Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (Tigris_SearchClient, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
-	// This endpoint allows the creation of a collection based on the type. <p></p>
-	// There are two collection types supported by Tigris:
-	//    <li> DOCUMENTS: Support CRUD APIs.
-	//    <li> MESSAGES: Supports Pub/Sub APIs.
+	// Tigris Offers two types of collections: <p></p>
+	//    <li> `DOCUMENTS`: Offers rich CRUD APIs.
+	//    <li> `MESSAGES`: Offers event streaming APIs.
 	CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error)
 	// Drop the collection inside this database. This API deletes all of the documents inside this collection and any metadata associated with it.
 	DropCollection(ctx context.Context, in *DropCollectionRequest, opts ...grpc.CallOption) (*DropCollectionResponse, error)
@@ -79,9 +78,10 @@ type TigrisClient interface {
 	// identifier attached to it and will have a boolean flag “last” set to the last event of the transaction which will be useful
 	// if a transaction performed more than one operation in the collection.
 	Events(ctx context.Context, in *EventsRequest, opts ...grpc.CallOption) (Tigris_EventsClient, error)
-	// Publish API is use to publish messages to the collection.
+	// Endpoint for publishing messages to a topic.
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
-	// Subscribe is used to subscribe to the collection and receive messages from it.
+	// Endpoint for subscribing to a topic to receive a stream of messages. The `partition` can be set to stream only
+	// from a specific partition.
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (Tigris_SubscribeClient, error)
 }
 
@@ -402,10 +402,9 @@ type TigrisServer interface {
 	Search(*SearchRequest, Tigris_SearchServer) error
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
-	// This endpoint allows the creation of a collection based on the type. <p></p>
-	// There are two collection types supported by Tigris:
-	//    <li> DOCUMENTS: Support CRUD APIs.
-	//    <li> MESSAGES: Supports Pub/Sub APIs.
+	// Tigris Offers two types of collections: <p></p>
+	//    <li> `DOCUMENTS`: Offers rich CRUD APIs.
+	//    <li> `MESSAGES`: Offers event streaming APIs.
 	CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error)
 	// Drop the collection inside this database. This API deletes all of the documents inside this collection and any metadata associated with it.
 	DropCollection(context.Context, *DropCollectionRequest) (*DropCollectionResponse, error)
@@ -426,9 +425,10 @@ type TigrisServer interface {
 	// identifier attached to it and will have a boolean flag “last” set to the last event of the transaction which will be useful
 	// if a transaction performed more than one operation in the collection.
 	Events(*EventsRequest, Tigris_EventsServer) error
-	// Publish API is use to publish messages to the collection.
+	// Endpoint for publishing messages to a topic.
 	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
-	// Subscribe is used to subscribe to the collection and receive messages from it.
+	// Endpoint for subscribing to a topic to receive a stream of messages. The `partition` can be set to stream only
+	// from a specific partition.
 	Subscribe(*SubscribeRequest, Tigris_SubscribeServer) error
 }
 

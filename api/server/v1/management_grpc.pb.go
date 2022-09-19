@@ -34,7 +34,7 @@ type ManagementClient interface {
 	DeleteApplication(ctx context.Context, in *DeleteApplicationsRequest, opts ...grpc.CallOption) (*DeleteApplicationResponse, error)
 	// Lists all application visible to requesting actor.
 	ListApplications(ctx context.Context, in *ListApplicationsRequest, opts ...grpc.CallOption) (*ListApplicationsResponse, error)
-	// rotateApplicationSecret returns the new application with rotated secret
+	// Endpoint is used to rotate the secret for the application.
 	RotateApplicationSecret(ctx context.Context, in *RotateApplicationSecretRequest, opts ...grpc.CallOption) (*RotateApplicationSecretResponse, error)
 	// insertUserMetadata inserts the user metadata object
 	InsertUserMetadata(ctx context.Context, in *InsertUserMetadataRequest, opts ...grpc.CallOption) (*InsertUserMetadataResponse, error)
@@ -158,7 +158,7 @@ type ManagementServer interface {
 	DeleteApplication(context.Context, *DeleteApplicationsRequest) (*DeleteApplicationResponse, error)
 	// Lists all application visible to requesting actor.
 	ListApplications(context.Context, *ListApplicationsRequest) (*ListApplicationsResponse, error)
-	// rotateApplicationSecret returns the new application with rotated secret
+	// Endpoint is used to rotate the secret for the application.
 	RotateApplicationSecret(context.Context, *RotateApplicationSecretRequest) (*RotateApplicationSecretResponse, error)
 	// insertUserMetadata inserts the user metadata object
 	InsertUserMetadata(context.Context, *InsertUserMetadataRequest) (*InsertUserMetadataResponse, error)

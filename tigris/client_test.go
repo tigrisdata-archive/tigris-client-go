@@ -45,7 +45,7 @@ func TestClient(t *testing.T) {
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "coll_1",
-			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"]}`),
+			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
 			Options: &api.CollectionOptions{},
 		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
 	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)

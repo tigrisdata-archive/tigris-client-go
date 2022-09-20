@@ -163,8 +163,8 @@ func TestCollectionBasic(t *testing.T) {
 
 	m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
 
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"]}`))
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_2", jm(t, `{"title":"coll_2","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"]}`))
+	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
+	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_2", jm(t, `{"title":"coll_2","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
@@ -284,7 +284,7 @@ func TestCollection_Search(t *testing.T) {
 
 	m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
 
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"]}`))
+	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
@@ -571,7 +571,7 @@ func TestClientSchemaMigration(t *testing.T) {
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "test_schema_1",
-			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"]}`),
+			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
 			Options: &api.CollectionOptions{},
 		})).DoAndReturn(
 		func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
@@ -606,7 +606,7 @@ func TestClientSchemaMigration(t *testing.T) {
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "test_schema_2",
-			Schema:  []byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"]}`),
+			Schema:  []byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"],"collection_type":"documents"}`),
 			Options: &api.CollectionOptions{},
 		})).DoAndReturn(
 		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
@@ -617,7 +617,7 @@ func TestClientSchemaMigration(t *testing.T) {
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "test_schema_1",
-			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"]}`),
+			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
 			Options: &api.CollectionOptions{},
 		})).DoAndReturn(
 		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
@@ -638,13 +638,13 @@ func TestClientSchemaMigration(t *testing.T) {
 	require.NoError(t, err)
 
 	var m map[string]string
-	_, err = schema.FromCollectionModels(&m)
+	_, err = schema.FromCollectionModels(schema.Documents, &m)
 	require.Error(t, err)
 	_, _, err = schema.FromDatabaseModel(&m)
 	require.Error(t, err)
 
 	var i int
-	_, err = schema.FromCollectionModels(&i)
+	_, err = schema.FromCollectionModels(schema.Documents, &i)
 	require.Error(t, err)
 	_, _, err = schema.FromDatabaseModel(&i)
 	require.Error(t, err)
@@ -668,7 +668,7 @@ func TestClientSchemaMigration(t *testing.T) {
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Db: "db1", Collection: "coll_1",
-			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"]}`),
+			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
 			Options: &api.CollectionOptions{},
 		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
 	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)

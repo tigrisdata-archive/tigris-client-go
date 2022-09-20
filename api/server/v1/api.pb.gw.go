@@ -1553,13 +1553,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/begin"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/begin"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_BeginTransaction_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_BeginTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1577,13 +1576,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/commit"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/commit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_CommitTransaction_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_CommitTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1601,13 +1599,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/rollback"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/rollback"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_RollbackTransaction_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_RollbackTransaction_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1625,13 +1622,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/insert"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_Insert_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Insert_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1649,13 +1645,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/replace"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/replace"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_Replace_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Replace_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1673,13 +1668,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/delete"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_Delete_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1697,13 +1691,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/update"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_Update_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Update_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1749,13 +1742,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/createOrUpdate"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/createOrUpdate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_CreateOrUpdateCollection_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_CreateOrUpdateCollection_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1773,13 +1765,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/drop"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_DropCollection_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DropCollection_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1797,13 +1788,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/v1/databases/list"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/v1/databases/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_ListDatabases_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_ListDatabases_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1821,13 +1811,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/list"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_ListCollections_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_ListCollections_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1845,13 +1834,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/create"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_CreateDatabase_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_CreateDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1869,13 +1857,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/drop"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_DropDatabase_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DropDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1893,13 +1880,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/describe"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_DescribeDatabase_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DescribeDatabase_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1917,13 +1903,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/describe"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_DescribeCollection_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DescribeCollection_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1948,13 +1933,12 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/publish"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/publish"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_Publish_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_Publish_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -2018,13 +2002,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/begin"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/begin"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_BeginTransaction_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_BeginTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2039,13 +2022,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/commit"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/commit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_CommitTransaction_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_CommitTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2060,13 +2042,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/rollback"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/rollback"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_RollbackTransaction_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_RollbackTransaction_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2081,13 +2062,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/insert"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Insert_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Insert_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2102,13 +2082,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/replace"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/replace"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Replace_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Replace_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2123,13 +2102,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/delete"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Delete_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Delete_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2144,13 +2122,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/update"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Update_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Update_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2165,13 +2142,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/read"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/read"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Read_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Read_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2186,13 +2162,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/read"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/read"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Read_1(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Read_1(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2207,13 +2182,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/search"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Search_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Search_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2228,13 +2202,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/search"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Search_1(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Search_1(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2249,13 +2222,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/createOrUpdate"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/createOrUpdate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_CreateOrUpdateCollection_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_CreateOrUpdateCollection_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2270,13 +2242,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/drop"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_DropCollection_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DropCollection_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2291,13 +2262,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/v1/databases/list"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/v1/databases/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_ListDatabases_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_ListDatabases_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2312,13 +2282,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/list"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_ListCollections_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_ListCollections_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2333,13 +2302,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/create"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_CreateDatabase_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_CreateDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2354,13 +2322,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/drop"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_DropDatabase_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DropDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2375,13 +2342,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/describe"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_DescribeDatabase_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DescribeDatabase_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2396,13 +2362,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/describe"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_DescribeCollection_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DescribeCollection_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2417,13 +2382,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Events", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/events"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Events", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/events"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Events_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Events_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2438,13 +2402,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/publish"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/publish"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Publish_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Publish_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2459,13 +2422,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Subscribe", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/subscribe"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Subscribe", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/subscribe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_Subscribe_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_Subscribe_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)

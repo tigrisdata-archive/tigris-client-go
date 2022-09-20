@@ -385,8 +385,15 @@ func (c *httpCRUD) convertDeleteOptions(o *DeleteOptions) *apiHTTP.DeleteRequest
 	return &apiHTTP.DeleteRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
-func (c *httpCRUD) convertReadOptions(_ *ReadOptions) *apiHTTP.ReadRequestOptions {
-	opts := apiHTTP.ReadRequestOptions{}
+func (c *httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOptions {
+	opts := apiHTTP.ReadRequestOptions{
+		Skip:   &i.Skip,
+		Limit:  &i.Limit,
+		Offset: &i.Offset,
+	}
+	if i.Collation != nil {
+		opts.Collation = &apiHTTP.Collation{Case: &i.Collation.Case}
+	}
 	return &opts
 }
 

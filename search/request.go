@@ -155,8 +155,9 @@ func (b *requestBuilder) Build() *Request {
 }
 
 type Options struct {
-	Page     int32
-	PageSize int32
+	Page      int32
+	PageSize  int32
+	Collation *driver.Collation
 }
 
 var DefaultSearchOptions = Options{Page: 1, PageSize: 20}

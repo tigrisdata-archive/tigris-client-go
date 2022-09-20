@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -30,6 +31,13 @@ var (
 	errNotFound = fmt.Errorf("document not found")
 )
 
+// Collation allows you to specify string comparison rules. Default is case-sensitive.
+type Collation struct {
+	// Case is case-sensitive by default, to perform case-insensitive query override it and set
+	// this to 'ci'.
+	Case string
+}
+
 // ReadOptions modifies read request behavior
 type ReadOptions struct {
 	// Limit the number of documents returned by the read operation.
@@ -38,6 +46,8 @@ type ReadOptions struct {
 	Skip int64
 	// A cursor for use in pagination. The next streams will return documents after this offset.
 	Offset []byte
+	// Collation allows you to specify string comparison rules. Default is case-sensitive.
+	Collation *driver.Collation
 }
 
 // Collection provides an interface for documents manipulation.
@@ -177,8 +187,9 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields .
 
 // ReadWithOptions returns specific fields of the documents according to the filter.
 // It allows further configure returned documents by providing options:
-//     Limit - only returned first "Limit" documents from the result
-//     Skip - start returning documents after skipping "Skip" documents from the result
+//
+//	Limit - only returned first "Limit" documents from the result
+//	Skip - start returning documents after skipping "Skip" documents from the result
 func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filter, fields *fields.Read, options *ReadOptions) (*Iterator[T], error) {
 	p, err := getFields(fields)
 	if err != nil {
@@ -188,11 +199,16 @@ func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filte
 	if err != nil {
 		return nil, err
 	}
+	if options == nil {
+		return nil, fmt.Errorf("API expecting options but received null")
+	}
 
 	it, err := getDB(ctx, c.db).Read(ctx, c.name, f, p, &driver.ReadOptions{
-		Limit:  options.Limit,
-		Skip:   options.Skip,
-		Offset: options.Offset})
+		Limit:     options.Limit,
+		Skip:      options.Skip,
+		Offset:    options.Offset,
+		Collation: (*api.Collation)(options.Collation),
+	})
 	if err != nil {
 		return nil, err
 	}

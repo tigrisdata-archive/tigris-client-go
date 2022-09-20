@@ -503,13 +503,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateNamespace", runtime.WithHTTPPathPattern("/v1/management/namespaces/{name}/create"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateNamespace", runtime.WithHTTPPathPattern("/v1/management/namespaces/{name}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_CreateNamespace_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_CreateNamespace_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -527,13 +526,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListNamespaces", runtime.WithHTTPPathPattern("/v1/management/namespaces/list"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListNamespaces", runtime.WithHTTPPathPattern("/v1/management/namespaces/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_ListNamespaces_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_ListNamespaces_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -551,13 +549,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/create"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_CreateApplication_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_CreateApplication_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -575,13 +572,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/update"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_UpdateApplication_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_UpdateApplication_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -599,13 +595,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/DeleteApplication", runtime.WithHTTPPathPattern("/v1/management/applications/delete"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/DeleteApplication", runtime.WithHTTPPathPattern("/v1/management/applications/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_DeleteApplication_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_DeleteApplication_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -623,13 +618,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListApplications", runtime.WithHTTPPathPattern("/v1/management/applications/list"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListApplications", runtime.WithHTTPPathPattern("/v1/management/applications/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_ListApplications_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_ListApplications_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -647,13 +641,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/RotateApplicationSecret", runtime.WithHTTPPathPattern("/v1/management/applications/rotate"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/RotateApplicationSecret", runtime.WithHTTPPathPattern("/v1/management/applications/rotate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_RotateApplicationSecret_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_RotateApplicationSecret_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -671,13 +664,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/InsertUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/insert"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/InsertUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_InsertUserMetadata_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_InsertUserMetadata_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -695,13 +687,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/GetUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/get"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/GetUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_GetUserMetadata_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_GetUserMetadata_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -719,13 +710,12 @@ func RegisterManagementHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/update"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Management_UpdateUserMetadata_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Management_UpdateUserMetadata_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -782,13 +772,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateNamespace", runtime.WithHTTPPathPattern("/v1/management/namespaces/{name}/create"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateNamespace", runtime.WithHTTPPathPattern("/v1/management/namespaces/{name}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_CreateNamespace_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_CreateNamespace_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -803,13 +792,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListNamespaces", runtime.WithHTTPPathPattern("/v1/management/namespaces/list"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListNamespaces", runtime.WithHTTPPathPattern("/v1/management/namespaces/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_ListNamespaces_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_ListNamespaces_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -824,13 +812,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/create"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/CreateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_CreateApplication_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_CreateApplication_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -845,13 +832,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/update"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateApplication", runtime.WithHTTPPathPattern("/v1/management/applications/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_UpdateApplication_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_UpdateApplication_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -866,13 +852,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/DeleteApplication", runtime.WithHTTPPathPattern("/v1/management/applications/delete"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/DeleteApplication", runtime.WithHTTPPathPattern("/v1/management/applications/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_DeleteApplication_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_DeleteApplication_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -887,13 +872,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListApplications", runtime.WithHTTPPathPattern("/v1/management/applications/list"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/ListApplications", runtime.WithHTTPPathPattern("/v1/management/applications/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_ListApplications_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_ListApplications_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -908,13 +892,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/RotateApplicationSecret", runtime.WithHTTPPathPattern("/v1/management/applications/rotate"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/RotateApplicationSecret", runtime.WithHTTPPathPattern("/v1/management/applications/rotate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_RotateApplicationSecret_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_RotateApplicationSecret_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -929,13 +912,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/InsertUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/insert"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/InsertUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_InsertUserMetadata_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_InsertUserMetadata_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -950,13 +932,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/GetUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/get"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/GetUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_GetUserMetadata_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_GetUserMetadata_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -971,13 +952,12 @@ func RegisterManagementHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/update"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.management.v1.Management/UpdateUserMetadata", runtime.WithHTTPPathPattern("/v1/management/users/metadata/{metadataKey}/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Management_UpdateUserMetadata_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Management_UpdateUserMetadata_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)

@@ -23,15 +23,9 @@ import (
 	"time"
 	"unsafe"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
-	"github.com/tigrisdata/tigris-client-go/search"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/proto"
-
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -39,8 +33,11 @@ import (
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/mock"
 	"github.com/tigrisdata/tigris-client-go/schema"
+	"github.com/tigrisdata/tigris-client-go/search"
 	"github.com/tigrisdata/tigris-client-go/sort"
 	"github.com/tigrisdata/tigris-client-go/test"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type JSONMatcher struct {

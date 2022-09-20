@@ -52,7 +52,7 @@ type Update json.RawMessage
 type Schema json.RawMessage
 type Facet json.RawMessage
 type SortOrder json.RawMessage
-
+type Collation api.Collation
 type WriteOptions api.WriteOptions
 
 type InsertOptions api.InsertRequestOptions

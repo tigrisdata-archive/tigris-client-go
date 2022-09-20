@@ -1,9 +1,50 @@
 #!/bin/bash
+# Copyright 2022 Tigris Data, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 set -e
 
 IN_FILE=$1
 OUT_FILE=$2
+
+main() {
+	fix_bytes
+
+	# Fix the types of filter and document fields to be object on HTTP wire.
+	# The original format in proto file is "bytes", which allows to skip
+	# unmarshalling in GRPC, we also implement custom unmarshalling for HTTP
+	for i in DeleteRequest UpdateRequest ReadRequest SearchRequest SubscribeRequest; do
+		yq_fix_json $i filter
+	done
+
+	yq_fix_json InsertRequest documents.items
+	yq_fix_json ReplaceRequest documents.items
+	yq_fix_json UpdateRequest fields
+	yq_fix_json ReadRequest fields
+	yq_fix_json SearchRequest fields
+	yq_fix_json SearchRequest facet
+	yq_fix_json SearchRequest sort
+	yq_fix_json ReadResponse data
+	yq_fix_json StreamEvent data
+	yq_fix_json SearchHit data
+	yq_fix_json CreateOrUpdateCollectionRequest schema
+	yq_fix_json CollectionDescription schema
+	yq_fix_json DescribeCollectionResponse schema
+	yq_fix_json PublishRequest messages.items
+	yq_fix_json SubscribeResponse message
+}
 
 fix_bytes() {
 	# According to the OpenAPI spec format should be "byte",
@@ -13,36 +54,14 @@ fix_bytes() {
 	sed -e 's/format: bytes/format: byte/g' "$IN_FILE" >"$OUT_FILE"
 }
 
-if [[ "$OUT_FILE" != *"user_openapi"* ]]; then
-	fix_bytes
-	exit 0
-fi
-
 yq_cmd() {
 	yq -I 4 -i "$1" "$OUT_FILE"
 }
 
-yq_fix_object() {
+yq_fix_json() {
 	yq_cmd ".components.schemas.$1.properties.$2.format=\"json\""
 	yq_cmd ".components.schemas.$1.properties.$2.type=\"string\""
 }
 
-fix_bytes
-
-# Fix the types of filter and document fields to be object on HTTP wire.
-# The original format in proto file is "bytes", which allows to skip
-# unmarshalling in GRPC, we also implement custom unmashalling for HTTP
-for i in DeleteRequest UpdateRequest ReadRequest; do
-	yq_fix_object $i filter
-done
-
-for i in InsertRequest ReplaceRequest; do
-	yq_fix_object $i documents.items
-done
-
-yq_fix_object UpdateRequest fields
-yq_fix_object ReadResponse doc
-yq_fix_object CreateCollectionRequest schema
-yq_fix_object AlterCollectionRequest schema
-
+main
 

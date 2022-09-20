@@ -1,0 +1,34 @@
+name: go-test
+on:
+  push:
+  workflow_call:
+    secrets:
+      API_DEPLOY_KEY:
+        required: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH deploy keys
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.API_DEPLOY_KEY }}
+          
+      - name: Check out code
+        uses: actions/checkout@v3
+        
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.18'
+
+      - name: Install test deps
+        run: |
+          /bin/bash scripts/install_build_deps.sh
+          /bin/bash scripts/install_test_deps.sh
+
+      - name: Run tests
+        run: TEST_PARAM="-coverprofile=coverage.out -covermode=atomic" make test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2

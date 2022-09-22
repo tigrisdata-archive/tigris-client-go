@@ -718,7 +718,7 @@ func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, erro
 	return apps.Applications, nil
 }
 
-func (c *httpDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
+func (c *httpDriver) RotateClientSecret(ctx context.Context, id string) (*Application, error) {
 	resp, err := c.api.ManagementRotateApplicationSecret(ctx, apiHTTP.ManagementRotateApplicationSecretJSONBody{Id: &id})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
@@ -735,21 +735,21 @@ func (c *httpDriver) RotateApplicationSecret(ctx context.Context, id string) (*A
 	return &app.Application, nil
 }
 
-func (c *httpDriver) GetAccessToken(ctx context.Context, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error) {
-	return getAccessToken(ctx, c.tokenURL, c.cfg, applicationID, applicationSecret, refreshToken)
+func (c *httpDriver) GetAccessToken(ctx context.Context, clientId string, clientSecret string, refreshToken string) (*TokenResponse, error) {
+	return getAccessToken(ctx, c.tokenURL, c.cfg, clientId, clientSecret, refreshToken)
 }
 
-func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error) {
+func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, clientId string, clientSecret string, refreshToken string) (*TokenResponse, error) {
 	data := url.Values{
-		"client_id":     {applicationID},
-		"client_secret": {applicationSecret},
+		"client_id":     {clientId},
+		"client_secret": {clientSecret},
 		"grant_type":    {grantTypeClientCredentials},
 		"scope":         {scope},
 	}
 	if refreshToken != "" {
 		data = url.Values{
 			"refresh_token": {refreshToken},
-			"client_id":     {applicationID},
+			"client_id":     {clientId},
 			"grant_type":    {grantTypeRefreshToken},
 			"scope":         {scope},
 		}

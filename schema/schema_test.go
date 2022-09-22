@@ -345,15 +345,22 @@ func TestCollectionSchema(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(reflect.TypeOf(c.input).Name(), func(t *testing.T) {
-			schema, err := fromCollectionModel(c.input)
+			schema, err := fromCollectionModel(c.input, Documents)
 			assert.Equal(t, c.err, err)
+			if schema != nil {
+				assert.Equal(t, Documents, schema.CollectionType)
+				c.output.CollectionType = Documents
+			}
 			assert.Equal(t, c.output, schema)
 		})
 	}
 
 	t.Run("build", func(t *testing.T) {
-		s, err := fromCollectionModel(allTypes{})
+		s, err := fromCollectionModel(allTypes{}, Documents)
 		require.NoError(t, err)
+
+		assert.Equal(t, Documents, s.CollectionType)
+		s.CollectionType = ""
 
 		b, err := s.Build()
 		require.NoError(t, err)
@@ -362,15 +369,17 @@ func TestCollectionSchema(t *testing.T) {
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {
-		s, err := FromCollectionModels(pk{}, pk1{})
+		s, err := FromCollectionModels(Documents, pk{}, pk1{})
 		require.NoError(t, err)
 
-		assert.Equal(t, map[string]*Schema{"pks": {Name: "pks", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}},
-			"pk_1": {Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}}, s)
+		assert.Equal(t, map[string]*Schema{
+			"pks":  {Name: "pks", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
+			"pk_1": {Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
+		}, s)
 	})
 
 	t.Run("duplicate_pk_index", func(t *testing.T) {
-		_, err := FromCollectionModels(pkDup{})
+		_, err := FromCollectionModels(Documents, pkDup{})
 		if err.Error() == "duplicate primary key index 1 set for key_1 and key_2" {
 			require.Equal(t, err, fmt.Errorf("duplicate primary key index 1 set for key_1 and key_2"))
 		} else {
@@ -408,11 +417,11 @@ func TestDatabaseSchema(t *testing.T) {
 
 	_ = Db4{1}
 
-	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}}
-	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}}
-	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
-	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
-	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}}
+	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
+	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
+	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 
 	var i int64
 
@@ -432,6 +441,38 @@ func TestDatabaseSchema(t *testing.T) {
 			name, schema, err := FromDatabaseModel(c.input)
 			assert.Equal(t, c.name, name)
 			assert.Equal(t, c.err, err)
+			assert.Equal(t, c.output, schema)
+		})
+	}
+}
+
+func TestMessagesSchema(t *testing.T) {
+	type valid struct {
+		Key1 string `json:"key_1"`
+	}
+
+	type invalid struct {
+		Key1 string `json:"key_1" tigris:"primary_key:1"`
+	}
+
+	cases := []struct {
+		input  interface{}
+		output *Schema
+		err    error
+	}{
+		{valid{}, &Schema{Name: "valids", Fields: map[string]*Field{
+			"key_1": {Type: typeString}}, PrimaryKey: []string{}}, nil},
+		{invalid{}, nil, fmt.Errorf("primary key should not be defined for `messages` collection type")},
+	}
+
+	for _, c := range cases {
+		t.Run(reflect.TypeOf(c.input).Name(), func(t *testing.T) {
+			schema, err := fromCollectionModel(c.input, Messages)
+			assert.Equal(t, c.err, err)
+			if schema != nil {
+				assert.Equal(t, Messages, schema.CollectionType)
+				c.output.CollectionType = Messages
+			}
 			assert.Equal(t, c.output, schema)
 		})
 	}

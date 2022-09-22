@@ -49,7 +49,17 @@ func newDatabase(name string, driver driver.Driver) *Database {
 // This method is only needed if collections need to be created dynamically,
 // all static collections are created by OpenDatabase
 func (db *Database) CreateCollections(ctx context.Context, model schema.Model, models ...schema.Model) error {
-	schemas, err := schema.FromCollectionModels(model, models...)
+	schemas, err := schema.FromCollectionModels(schema.Documents, model, models...)
+	if err != nil {
+		return fmt.Errorf("error parsing model schema: %w", err)
+	}
+
+	return db.createCollectionsFromSchemas(ctx, db.name, schemas)
+}
+
+// CreateTopics creates message type collections
+func (db *Database) CreateTopics(ctx context.Context, model schema.Model, models ...schema.Model) error {
+	schemas, err := schema.FromCollectionModels(schema.Messages, model, models...)
 	if err != nil {
 		return fmt.Errorf("error parsing model schema: %w", err)
 	}
@@ -159,4 +169,15 @@ func GetCollection[T schema.Model](db *Database) *Collection[T] {
 
 func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {
 	return &Collection[T]{name: name, db: db.driver.UseDatabase(db.name)}
+}
+
+// GetTopic returns topic object corresponding to topic model T
+func GetTopic[T schema.Model](db *Database) *Topic[T] {
+	var m T
+	name := schema.ModelName(&m)
+	return getNamedTopic[T](db, name)
+}
+
+func getNamedTopic[T schema.Model](db *Database, name string) *Topic[T] {
+	return &Topic[T]{name: name, db: db.driver.UseDatabase(db.name)}
 }

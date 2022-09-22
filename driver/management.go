@@ -13,8 +13,8 @@ type Management interface {
 	DeleteApplication(ctx context.Context, id string) error
 	UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error)
 	ListApplications(ctx context.Context) ([]*Application, error)
-	RotateApplicationSecret(ctx context.Context, id string) (*Application, error)
-	GetAccessToken(ctx context.Context, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error)
+	RotateClientSecret(ctx context.Context, id string) (*Application, error)
+	GetAccessToken(ctx context.Context, clientId string, clientSecret string, refreshToken string) (*TokenResponse, error)
 
 	Close() error
 }

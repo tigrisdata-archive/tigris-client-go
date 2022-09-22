@@ -52,6 +52,12 @@ const (
 	id = "ID"
 )
 
+// Collection types
+const (
+	Documents = "documents" // Regular collection containing documents
+	Messages  = "messages"  // Publish/subscribe collection containing messages
+)
+
 // Model represents types supported as collection models
 type Model interface{}
 
@@ -106,6 +112,8 @@ type Schema struct {
 	Desc       string            `json:"description,omitempty"`
 	Fields     map[string]*Field `json:"properties,omitempty"`
 	PrimaryKey []string          `json:"primary_key,omitempty"`
+
+	CollectionType string `json:"collection_type,omitempty"`
 }
 
 // DatabaseModelName returns name of the database derived from the given database model
@@ -356,7 +364,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 	return nil
 }
 
-func fromCollectionModel(model interface{}) (*Schema, error) {
+func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 	t := reflect.TypeOf(model)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -392,7 +400,7 @@ func fromCollectionModel(model interface{}) (*Schema, error) {
 	}
 
 	// No explicit primary key defined and no tigris.Model embedded
-	if len(pk) == 0 {
+	if len(pk) == 0 && typ == Documents {
 		var p *Field
 		var ok bool
 		name := id
@@ -411,22 +419,28 @@ func fromCollectionModel(model interface{}) (*Schema, error) {
 		sch.PrimaryKey = append(sch.PrimaryKey, name)
 	}
 
+	if len(pk) != 0 && typ == Messages {
+		return nil, fmt.Errorf("primary key should not be defined for `messages` collection type")
+	}
+
+	sch.CollectionType = typ
+
 	return &sch, nil
 }
 
 // FromCollectionModels converts provided model(s) to the schema structure
-func FromCollectionModels(model Model, models ...Model) (map[string]*Schema, error) {
+func FromCollectionModels(tp string, model Model, models ...Model) (map[string]*Schema, error) {
 	//models parameter added to require at least one schema to migrate
 	schemas := make(map[string]*Schema)
 
-	schema, err := fromCollectionModel(model)
+	schema, err := fromCollectionModel(model, tp)
 	if err != nil {
 		return nil, err
 	}
 	schemas[schema.Name] = schema
 
 	for _, m := range models {
-		schema, err := fromCollectionModel(m)
+		schema, err := fromCollectionModel(m, tp)
 		if err != nil {
 			return nil, err
 		}
@@ -472,7 +486,7 @@ func FromDatabaseModel(dbModel interface{}) (string, map[string]*Schema, error) 
 			tt = field.Type.Elem()
 		}
 
-		sch, err := fromCollectionModel(reflect.New(tt).Elem().Interface())
+		sch, err := fromCollectionModel(reflect.New(tt).Elem().Interface(), Documents)
 		if err != nil {
 			return "", nil, err
 		}

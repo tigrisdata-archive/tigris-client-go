@@ -52,7 +52,7 @@ func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementS
 		pm(&api.RotateApplicationSecretRequest{Id: "ras_id1"})).Return(
 		&api.RotateApplicationSecretResponse{Application: nil}, nil)
 
-	_, err = c.RotateApplicationSecret(ctx, "ras_id1")
+	_, err = c.RotateClientSecret(ctx, "ras_id1")
 	require.Error(t, err)
 }
 
@@ -117,7 +117,7 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 		pm(&api.RotateApplicationSecretRequest{Id: "ras_id1"})).Return(
 		&api.RotateApplicationSecretResponse{Application: lapp2}, nil)
 
-	app, err = c.RotateApplicationSecret(ctx, "ras_id1")
+	app, err = c.RotateClientSecret(ctx, "ras_id1")
 	require.NoError(t, err)
 
 	appEqual(t, lapp2, app)
@@ -208,9 +208,9 @@ func TestGRPCDriverCredentials(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
 		TokenURLOverride = testTokenURLOverride
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{
-			URL:               test.GRPCURL(0),
-			ApplicationId:     "client_id_test",
-			ApplicationSecret: "client_secret_test",
+			URL:          test.GRPCURL(0),
+			ClientId:     "client_id_test",
+			ClientSecret: "client_secret_test",
 		})
 		defer cancel()
 
@@ -249,9 +249,9 @@ func TestHTTPDriverCredentials(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
 		TokenURLOverride = ""
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{
-			URL:               test.HTTPURL(2),
-			ApplicationId:     "client_id_test",
-			ApplicationSecret: "client_secret_test",
+			URL:          test.HTTPURL(2),
+			ClientId:     "client_id_test",
+			ClientSecret: "client_secret_test",
 		})
 		defer cancel()
 

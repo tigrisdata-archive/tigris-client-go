@@ -1009,7 +1009,7 @@ func TestNewDriver(t *testing.T) {
 	_, err = NewDriver(context.Background(), nil)
 	require.Error(t, err)
 
-	cfg1 := &config.Driver{URL: test.GRPCURL(4), ApplicationSecret: "aaaa"}
+	cfg1 := &config.Driver{URL: test.GRPCURL(4), ClientSecret: "aaaa"}
 	cfg1 = initConfig(cfg1)
 	require.NotNil(t, cfg1.TLS)
 }

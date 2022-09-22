@@ -285,7 +285,7 @@ func initConfig(cfg *config.Driver) *config.Driver {
 		cfg = &config.Driver{}
 	}
 
-	if cfg.TLS == nil && (cfg.ApplicationId != "" || cfg.ApplicationSecret != "" || cfg.Token != "") {
+	if cfg.TLS == nil && (cfg.ClientId != "" || cfg.ClientSecret != "" || cfg.Token != "") {
 		cfg.TLS = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 

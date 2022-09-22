@@ -60,14 +60,14 @@ type txWithOptions interface {
 
 //func configAuth(config *config.Driver) (*clientcredentials.Config, context.Context) {
 func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string) {
-	appID := config.ApplicationId
+	clientId := config.ClientId
 	if os.Getenv(ApplicationID) != "" {
-		appID = os.Getenv(ApplicationID)
+		clientId = os.Getenv(ApplicationID)
 	}
 
-	appSecret := config.ApplicationSecret
+	clientSecret := config.ClientSecret
 	if os.Getenv(ApplicationSecret) != "" {
-		appSecret = os.Getenv(ApplicationSecret)
+		clientSecret = os.Getenv(ApplicationSecret)
 	}
 
 	token := config.Token
@@ -101,8 +101,8 @@ func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string
 		ocfg1 := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: tokenURL}}
 		client = ocfg1.Client(ctxClient, t)
 		ts = ocfg1.TokenSource(ctxClient, t)
-	} else if appID != "" || appSecret != "" {
-		oCfg := &clientcredentials.Config{TokenURL: tokenURL, ClientID: appID, ClientSecret: appSecret, AuthStyle: oauth2.AuthStyleInParams}
+	} else if clientId != "" || clientSecret != "" {
+		oCfg := &clientcredentials.Config{TokenURL: tokenURL, ClientID: clientId, ClientSecret: clientSecret, AuthStyle: oauth2.AuthStyleInParams}
 		client = oCfg.Client(ctxClient)
 		ts = oCfg.TokenSource(ctxClient)
 	}

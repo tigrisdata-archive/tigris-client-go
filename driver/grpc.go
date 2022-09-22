@@ -464,7 +464,7 @@ func (c *grpcDriver) ListApplications(ctx context.Context) ([]*Application, erro
 	return applications, nil
 }
 
-func (c *grpcDriver) RotateApplicationSecret(ctx context.Context, id string) (*Application, error) {
+func (c *grpcDriver) RotateClientSecret(ctx context.Context, id string) (*Application, error) {
 	r, err := c.mgmt.RotateApplicationSecret(ctx, &api.RotateApplicationSecretRequest{Id: id})
 	if err != nil {
 		return nil, GRPCError(err)
@@ -477,7 +477,7 @@ func (c *grpcDriver) RotateApplicationSecret(ctx context.Context, id string) (*A
 	return (*Application)(r.Application), nil
 }
 
-func (c *grpcDriver) GetAccessToken(ctx context.Context, applicationID string, applicationSecret string, refreshToken string) (*TokenResponse, error) {
+func (c *grpcDriver) GetAccessToken(ctx context.Context, clientId string, clientSecret string, refreshToken string) (*TokenResponse, error) {
 	tp := api.GrantType_CLIENT_CREDENTIALS
 	if refreshToken != "" {
 		tp = api.GrantType_REFRESH_TOKEN
@@ -486,8 +486,8 @@ func (c *grpcDriver) GetAccessToken(ctx context.Context, applicationID string, a
 	r, err := c.auth.GetAccessToken(ctx, &api.GetAccessTokenRequest{
 		GrantType:    tp,
 		RefreshToken: refreshToken,
-		ClientId:     applicationID,
-		ClientSecret: applicationSecret,
+		ClientId:     clientId,
+		ClientSecret: clientSecret,
 	})
 	if err != nil {
 		return nil, GRPCError(err)

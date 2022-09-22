@@ -209,7 +209,7 @@ func TestGRPCDriverCredentials(t *testing.T) {
 		TokenURLOverride = testTokenURLOverride
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{
 			URL:          test.GRPCURL(0),
-			ClientId:     "client_id_test",
+			ClientID:     "client_id_test",
 			ClientSecret: "client_secret_test",
 		})
 		defer cancel()
@@ -250,7 +250,7 @@ func TestHTTPDriverCredentials(t *testing.T) {
 		TokenURLOverride = ""
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{
 			URL:          test.HTTPURL(2),
-			ClientId:     "client_id_test",
+			ClientID:     "client_id_test",
 			ClientSecret: "client_secret_test",
 		})
 		defer cancel()

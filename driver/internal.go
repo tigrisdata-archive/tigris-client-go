@@ -60,7 +60,7 @@ type txWithOptions interface {
 
 //func configAuth(config *config.Driver) (*clientcredentials.Config, context.Context) {
 func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string) {
-	clientId := config.ClientId
+	clientId := config.ClientID
 	if os.Getenv(ApplicationID) != "" {
 		clientId = os.Getenv(ApplicationID)
 	}

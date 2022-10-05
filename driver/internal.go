@@ -38,13 +38,19 @@ type driverWithOptions interface {
 }
 
 type CRUDWithOptions interface {
-	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error)
-	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error)
-	readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error)
+	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (
+		*InsertResponse, error)
+	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (
+		*ReplaceResponse, error)
+	readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (
+		Iterator, error)
 	search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error)
-	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error)
-	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error)
-	createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error
+	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (
+		*UpdateResponse, error)
+	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (
+		*DeleteResponse, error)
+	createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema,
+		options *CollectionOptions) error
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) (*DescribeCollectionResponse, error)
@@ -58,21 +64,21 @@ type txWithOptions interface {
 	Rollback(ctx context.Context) error
 }
 
-//func configAuth(config *config.Driver) (*clientcredentials.Config, context.Context) {
+// func configAuth(config *config.Driver) (*clientcredentials.Config, context.Context) {.
 func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string) {
-	clientId := config.ClientID
-	if os.Getenv(ApplicationID) != "" {
-		clientId = os.Getenv(ApplicationID)
+	clientID := config.ClientID
+	if os.Getenv(EnvClientID) != "" {
+		clientID = os.Getenv(EnvClientID)
 	}
 
 	clientSecret := config.ClientSecret
-	if os.Getenv(ApplicationSecret) != "" {
-		clientSecret = os.Getenv(ApplicationSecret)
+	if os.Getenv(EnvClientSecret) != "" {
+		clientSecret = os.Getenv(EnvClientSecret)
 	}
 
 	token := config.Token
-	if os.Getenv(Token) != "" {
-		token = os.Getenv(Token)
+	if os.Getenv(EnvToken) != "" {
+		token = os.Getenv(EnvToken)
 	}
 
 	tr := &http.Transport{
@@ -81,6 +87,7 @@ func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string
 
 	tokenURL := config.URL + "/v1/auth/token"
 	tokenURL = strings.TrimPrefix(tokenURL, "dns:")
+
 	if !strings.Contains(tokenURL, "://") {
 		tokenURL = "https://" + tokenURL
 	}
@@ -89,10 +96,13 @@ func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string
 		tokenURL = TokenURLOverride
 	}
 
-	ctxClient := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Transport: tr, Timeout: tokenRequestTimeout})
+	ctxClient := context.WithValue(context.Background(),
+		oauth2.HTTPClient, &http.Client{Transport: tr, Timeout: tokenRequestTimeout})
 
-	var ts oauth2.TokenSource
-	var client *http.Client
+	var (
+		ts     oauth2.TokenSource
+		client *http.Client
+	)
 
 	// use access-token authentication if it's set,
 	// use client_id, client_secret otherwise
@@ -101,8 +111,11 @@ func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string
 		ocfg1 := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: tokenURL}}
 		client = ocfg1.Client(ctxClient, t)
 		ts = ocfg1.TokenSource(ctxClient, t)
-	} else if clientId != "" || clientSecret != "" {
-		oCfg := &clientcredentials.Config{TokenURL: tokenURL, ClientID: clientId, ClientSecret: clientSecret, AuthStyle: oauth2.AuthStyleInParams}
+	} else if clientID != "" || clientSecret != "" {
+		oCfg := &clientcredentials.Config{
+			TokenURL: tokenURL, ClientID: clientID, ClientSecret: clientSecret,
+			AuthStyle: oauth2.AuthStyleInParams,
+		}
 		client = oCfg.Client(ctxClient)
 		ts = oCfg.TokenSource(ctxClient)
 	}

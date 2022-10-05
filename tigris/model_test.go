@@ -1,3 +1,17 @@
+// Copyright 2022 Tigris Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package tigris
 
 import (
@@ -49,7 +63,8 @@ func TestModelMetadata(t *testing.T) {
 				Metadata: &api.ResponseMetadata{
 					CreatedAt: timestamppb.New(tm),
 					UpdatedAt: timestamppb.New(tm1),
-					DeletedAt: timestamppb.New(tm2)},
+					DeletedAt: timestamppb.New(tm2),
+				},
 				Keys: [][]byte{
 					[]byte(`{"id":"` + id1 + `"}`),
 					[]byte(`{"Id":"` + id2 + `"}`),
@@ -71,7 +86,8 @@ func TestModelMetadata(t *testing.T) {
 				Metadata: &api.ResponseMetadata{
 					CreatedAt: timestamppb.New(tm),
 					UpdatedAt: timestamppb.New(tm1),
-					DeletedAt: timestamppb.New(tm2)},
+					DeletedAt: timestamppb.New(tm2),
+				},
 				Keys: [][]byte{
 					[]byte(`{"id":"` + id1 + `"}`),
 					[]byte(`{"ID":"` + id2 + `"}`),
@@ -103,7 +119,8 @@ func TestModelMetadata(t *testing.T) {
 				Metadata: &api.ResponseMetadata{
 					CreatedAt: timestamppb.New(tm),
 					UpdatedAt: timestamppb.New(tm.Add(1 * time.Second)),
-					DeletedAt: timestamppb.New(tm.Add(2 * time.Second))},
+					DeletedAt: timestamppb.New(tm.Add(2 * time.Second)),
+				},
 				Keys: [][]byte{
 					[]byte(`{"Key1":"` + id1 + `", "Key2":"` + id2 + `"}`),
 				},

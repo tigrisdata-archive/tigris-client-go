@@ -15,7 +15,8 @@
 // Package fields package provides a builder to construct update mutation of the Update API.
 //
 // Example:
-//   update.SetInt("field1", 123).Unset("field2")
+//
+//	update.SetInt("field1", 123).Unset("field2")
 package fields
 
 import (
@@ -31,7 +32,7 @@ type Update struct {
 	UnsetF map[string]interface{} `json:"$unset,omitempty"`
 }
 
-// UpdateBuilder returns and object to construct the update field of Update API
+// UpdateBuilder returns and object to construct the update field of Update API.
 func UpdateBuilder() *Update {
 	return &Update{SetF: map[string]interface{}{}, UnsetF: map[string]interface{}{}}
 }
@@ -40,10 +41,13 @@ func (u *Update) Build() (*Update, error) {
 	if len(u.SetF) == 0 && len(u.UnsetF) == 0 {
 		return nil, fmt.Errorf("empty update")
 	}
+
 	if u.built != nil {
 		return u, nil
 	}
+
 	var err error
+
 	u.built, err = json.Marshal(u)
 	return u, err
 }
@@ -54,34 +58,42 @@ func (u *Update) Built() driver.Update {
 
 // Set instructs operation to set given field to the provided value
 // The result is equivalent to
-//   field = value
+//
+//	field = value
 func (u *Update) Set(field string, value interface{}) *Update {
 	u.SetF[field] = value
+
 	return u
 }
 
 // Unset instructs operation to clear given field in the document
 // The result is equivalent to
-//   field = null
+//
+//	field = null
 func (u *Update) Unset(field string) *Update {
 	u.UnsetF[field] = nil
+
 	return u
 }
 
 // Set instructs operation to set given field to the provided value
 // The result is equivalent to
-//   field = value
+//
+//	field = value
 func Set(field string, value interface{}) *Update {
 	u := UpdateBuilder()
 	u.SetF[field] = value
+
 	return u
 }
 
 // Unset instructs operation to clear given field in the document
 // The result is equivalent to
-//   field = null
+//
+//	field = null
 func Unset(field string) *Update {
 	u := UpdateBuilder()
 	u.UnsetF[field] = nil
+
 	return u
 }

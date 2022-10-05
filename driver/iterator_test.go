@@ -34,16 +34,20 @@ func (m *mockStreamReader) read() (Document, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+
 	if m.cur >= len(m.docs) {
 		return nil, io.EOF
 	}
+
 	d := m.docs[m.cur]
 	m.cur++
+
 	return d, nil
 }
 
 func (m *mockStreamReader) close() error {
 	m.closeCalled++
+
 	return nil
 }
 

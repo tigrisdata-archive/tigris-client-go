@@ -27,8 +27,7 @@ import (
 
 func TestCollectionSchema(t *testing.T) {
 	// invalid
-	type empty struct {
-	}
+	type empty struct{}
 
 	// valid. implicit primary key
 	type noPK struct {
@@ -222,17 +221,26 @@ func TestCollectionSchema(t *testing.T) {
 		{pkInvalidTag{}, nil, fmt.Errorf("only one colon allowed in the tag")},
 		{input: noPK{}, output: &Schema{Name: "no_pks", Fields: map[string]*Field{
 			"ID":    {Type: typeString, Format: formatUUID, AutoGenerate: true},
-			"key_1": {Type: typeString}}, PrimaryKey: []string{"ID"}}},
+			"key_1": {Type: typeString},
+		}, PrimaryKey: []string{"ID"}}},
 		{input: pk{}, output: &Schema{Name: "pks", Fields: map[string]*Field{
-			"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}},
+			"key_1": {Type: typeString},
+		}, PrimaryKey: []string{"key_1"}}},
 		{pk1{}, &Schema{Name: "pk_1", Fields: map[string]*Field{
-			"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}}, nil},
-		{pk2{}, &Schema{Name: "pk_2", Fields: map[string]*Field{
-			"key_2": {Type: typeString}, "key_1": {Type: typeString}},
-			PrimaryKey: []string{"key_1", "key_2"}}, nil},
-		{pk3{}, &Schema{Name: "pk_3", Fields: map[string]*Field{
-			"key_2": {Type: typeString}, "key_1": {Type: typeString}, "key_3": {Type: typeString}},
-			PrimaryKey: []string{"key_1", "key_2", "key_3"}}, nil},
+			"key_1": {Type: typeString},
+		}, PrimaryKey: []string{"key_1"}}, nil},
+		{pk2{}, &Schema{
+			Name: "pk_2", Fields: map[string]*Field{
+				"key_2": {Type: typeString}, "key_1": {Type: typeString},
+			},
+			PrimaryKey: []string{"key_1", "key_2"},
+		}, nil},
+		{pk3{}, &Schema{
+			Name: "pk_3", Fields: map[string]*Field{
+				"key_2": {Type: typeString}, "key_1": {Type: typeString}, "key_3": {Type: typeString},
+			},
+			PrimaryKey: []string{"key_1", "key_2", "key_3"},
+		}, nil},
 		{allTypes{}, &Schema{Name: "all_types", Fields: map[string]*Field{
 			"Tm":      {Type: typeString, Format: formatDateTime},
 			"TmPtr":   {Type: typeString, Format: formatDateTime},
@@ -272,7 +280,8 @@ func TestCollectionSchema(t *testing.T) {
 			"arr_1":   {Type: typeArray, Items: &Field{Type: typeString}},
 			"map_1":   {Type: typeObject},
 
-			"slice_2": {Type: typeArray,
+			"slice_2": {
+				Type: typeArray,
 				Items: &Field{
 					Type: "object",
 					Fields: map[string]*Field{
@@ -293,53 +302,67 @@ func TestCollectionSchema(t *testing.T) {
 			"PtrStruct": {Type: typeObject, Fields: map[string]*Field{
 				"ss_field_1": {
 					Type: "string",
-				}}},
+				},
+			}},
 			//	{Name: "DataEnc", Type: typeInteger, Tags: []string{"encrypted"}},
 			//	{Name: "DataPII", Type: typeInteger, Tags: []string{"pii"}},
 		}, PrimaryKey: []string{"string_1"}}, nil},
-		{embModel{}, &Schema{Name: "emb_models", Fields: map[string]*Field{
-			"Sub": {
-				Type: "object",
-				Fields: map[string]*Field{
-					"ID": {Type: typeInteger},
-					"Tm": {
-						Type: "object",
-						Fields: map[string]*Field{
-							"ID": {Type: typeInteger},
-						}},
-				}},
-			"ID":         {Type: typeInteger, AutoGenerate: true},
-			"ss_field_1": {Type: typeString},
-			"Tm": {
-				Type: "object",
-				Fields: map[string]*Field{
-					"ID": {Type: typeInteger},
-				}},
-		},
-			PrimaryKey: []string{"ID"}}, nil},
-		{embModelPK{}, &Schema{Name: "emb_model_pks", Fields: map[string]*Field{
-			"ID":         {Type: typeInteger, AutoGenerate: true},
-			"ss_field_1": {Type: typeString},
-		},
-			PrimaryKey: []string{"ID", "ss_field_1"}}, nil},
-		{autoGen{}, &Schema{Name: "auto_gens", Fields: map[string]*Field{
-			"Field1": {Type: typeString, AutoGenerate: true},
-			"Field2": {Type: typeInteger, AutoGenerate: true},
-			"Field3": {Type: typeInteger, AutoGenerate: true},
-			"Field4": {Type: typeString, Format: formatUUID, AutoGenerate: true},
-			"Field5": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
-		},
-			PrimaryKey: []string{"Field1"}}, nil},
+		{embModel{}, &Schema{
+			Name: "emb_models", Fields: map[string]*Field{
+				"Sub": {
+					Type: "object",
+					Fields: map[string]*Field{
+						"ID": {Type: typeInteger},
+						"Tm": {
+							Type: "object",
+							Fields: map[string]*Field{
+								"ID": {Type: typeInteger},
+							},
+						},
+					},
+				},
+				"ID":         {Type: typeInteger, AutoGenerate: true},
+				"ss_field_1": {Type: typeString},
+				"Tm": {
+					Type: "object",
+					Fields: map[string]*Field{
+						"ID": {Type: typeInteger},
+					},
+				},
+			},
+			PrimaryKey: []string{"ID"},
+		}, nil},
+		{embModelPK{}, &Schema{
+			Name: "emb_model_pks", Fields: map[string]*Field{
+				"ID":         {Type: typeInteger, AutoGenerate: true},
+				"ss_field_1": {Type: typeString},
+			},
+			PrimaryKey: []string{"ID", "ss_field_1"},
+		}, nil},
+		{autoGen{}, &Schema{
+			Name: "auto_gens", Fields: map[string]*Field{
+				"Field1": {Type: typeString, AutoGenerate: true},
+				"Field2": {Type: typeInteger, AutoGenerate: true},
+				"Field3": {Type: typeInteger, AutoGenerate: true},
+				"Field4": {Type: typeString, Format: formatUUID, AutoGenerate: true},
+				"Field5": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
+			},
+			PrimaryKey: []string{"Field1"},
+		}, nil},
 		{autoGenNeg{}, nil, fmt.Errorf("type cannot be autogenerated: bool")},
-		{autoID{}, &Schema{Name: "auto_ids", Fields: map[string]*Field{
-			"ID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
-		},
-			PrimaryKey: []string{"ID"}}, nil},
-		{autoIDOverride{}, &Schema{Name: "auto_id_overrides", Fields: map[string]*Field{
-			"RealID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
-			"ID":     {Type: typeString, Format: formatDateTime},
-		},
-			PrimaryKey: []string{"RealID"}}, nil},
+		{autoID{}, &Schema{
+			Name: "auto_ids", Fields: map[string]*Field{
+				"ID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
+			},
+			PrimaryKey: []string{"ID"},
+		}, nil},
+		{autoIDOverride{}, &Schema{
+			Name: "auto_id_overrides", Fields: map[string]*Field{
+				"RealID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
+				"ID":     {Type: typeString, Format: formatDateTime},
+			},
+			PrimaryKey: []string{"RealID"},
+		}, nil},
 		{autoIDBadType{}, nil, fmt.Errorf("type is not supported for the key: array")},
 	}
 
@@ -397,25 +420,25 @@ func TestDatabaseSchema(t *testing.T) {
 		Key2 int64 `tigris:"primary_key"`
 	}
 
-	type Db1 struct {
+	type DB1 struct {
 		c1 Coll1
 		c2 *Coll2
 		c3 []Coll2
 		C4 []*Coll2 `json:"coll_4"`
 	}
 
-	_ = Db1{c1: Coll1{}, c2: &Coll2{}, c3: []Coll2{}, C4: []*Coll2{}}
+	_ = DB1{c1: Coll1{}, c2: &Coll2{}, c3: []Coll2{}, C4: []*Coll2{}}
 
-	type Db3 struct {
+	type DB3 struct {
 		Coll1
 		Coll2 `tigris:"-"`
 	}
 
-	type Db4 struct {
+	type DB4 struct {
 		int64
 	}
 
-	_ = Db4{1}
+	_ = DB4{1}
 
 	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
 	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
@@ -431,9 +454,9 @@ func TestDatabaseSchema(t *testing.T) {
 		output map[string]*Schema
 		err    error
 	}{
-		{Db1{}, "Db1", map[string]*Schema{"c1": &c1, "c2": &c2, "c3": &c3, "coll_4": &c4}, nil},
-		{&Db3{}, "Db3", map[string]*Schema{"Coll1": &coll1}, nil},
-		{Db4{}, "", nil, fmt.Errorf("model should be of struct type, not int64")},
+		{DB1{}, "DB1", map[string]*Schema{"c1": &c1, "c2": &c2, "c3": &c3, "coll_4": &c4}, nil},
+		{&DB3{}, "DB3", map[string]*Schema{"Coll1": &coll1}, nil},
+		{DB4{}, "", nil, fmt.Errorf("model should be of struct type, not int64")},
 		{i, "", nil, fmt.Errorf("database model should be of struct type containing collection models types as fields")},
 	}
 	for _, c := range cases {
@@ -461,7 +484,8 @@ func TestMessagesSchema(t *testing.T) {
 		err    error
 	}{
 		{valid{}, &Schema{Name: "valids", Fields: map[string]*Field{
-			"key_1": {Type: typeString}}, PrimaryKey: []string{}}, nil},
+			"key_1": {Type: typeString},
+		}, PrimaryKey: []string{}}, nil},
 		{invalid{}, nil, fmt.Errorf("primary key should not be defined for `messages` collection type")},
 	}
 

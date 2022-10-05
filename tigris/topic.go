@@ -30,12 +30,12 @@ type Topic[T schema.Model] struct {
 	db   driver.Database
 }
 
-// Drop drops the topic
+// Drop drops the topic.
 func (c *Topic[T]) Drop(ctx context.Context) error {
 	return getDB(ctx, c.db).DropCollection(ctx, c.name)
 }
 
-// Publish publishes messages to the topic
+// Publish publishes messages to the topic.
 func (c *Topic[T]) Publish(ctx context.Context, docs ...*T) (*PublishResponse, error) {
 	var err error
 
@@ -68,7 +68,7 @@ func (c *Topic[T]) Publish(ctx context.Context, docs ...*T) (*PublishResponse, e
 	return &PublishResponse{Keys: md.Keys}, nil
 }
 
-// Subscribe returns published messages from the topic
+// Subscribe returns published messages from the topic.
 func (c *Topic[T]) Subscribe(ctx context.Context, filter filter.Filter) (*Iterator[T], error) {
 	f, err := filter.Build()
 	if err != nil {

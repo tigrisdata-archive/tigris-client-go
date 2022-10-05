@@ -59,8 +59,9 @@ func ExampleDriver() {
 		fmt.Printf("doc: %v\n", doc)
 	}
 
-	err := it.Err()
 	var e Error
+
+	err := it.Err()
 	if errors.As(err, &e) && e.Code == api.Code_ALREADY_EXISTS {
 		// handle already exists error
 	}

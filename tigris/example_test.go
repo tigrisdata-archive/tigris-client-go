@@ -25,7 +25,6 @@ import (
 )
 
 func ExampleDatabase_Tx() {
-
 	ctx := context.TODO()
 
 	type Coll1 struct {

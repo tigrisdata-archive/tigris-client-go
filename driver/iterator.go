@@ -15,6 +15,7 @@
 package driver
 
 import (
+	"errors"
 	"io"
 )
 
@@ -41,11 +42,13 @@ func (i *readIterator) Next(d *Document) bool {
 	}
 
 	doc, err := i.read()
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		i.eof = true
 		_ = i.close()
+
 		return false
 	}
+
 	if err != nil {
 		i.eof = true
 		i.err = err
@@ -54,6 +57,7 @@ func (i *readIterator) Next(d *Document) bool {
 	}
 
 	*d = doc
+
 	return true
 }
 
@@ -65,6 +69,7 @@ func (i *readIterator) Close() {
 	if i.eof {
 		return
 	}
+
 	_ = i.close()
 	i.eof = true
 }
@@ -92,18 +97,22 @@ func (i *searchResultIterator) Next(r *SearchResponse) bool {
 	}
 
 	resp, err := i.read()
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		i.eof = true
 		_ = i.close()
 		return false
 	}
+
 	if err != nil {
 		i.eof = true
 		i.err = err
 		_ = i.close()
+
 		return false
 	}
+
 	*r = resp
+
 	return true
 }
 
@@ -115,6 +124,7 @@ func (i *searchResultIterator) Close() {
 	if i.eof {
 		return
 	}
+
 	_ = i.close()
 	i.eof = true
 }

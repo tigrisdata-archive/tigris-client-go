@@ -17,6 +17,7 @@ package driver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,11 +26,11 @@ import (
 	"time"
 	"unsafe"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
+	"golang.org/x/net/context/ctxhttp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -42,18 +43,22 @@ const (
 	scope                      = "offline_access openid"
 )
 
-type txCtxKey struct{}
-type additionalOutboundHeadersCtxKey struct{}
+type (
+	txCtxKey                        struct{}
+	additionalOutboundHeadersCtxKey struct{}
+)
 
 // HTTPError parses HTTP error into TigrisError
-// Returns nil, if HTTP status is OK
+// Returns nil, if HTTP status is OK.
 func HTTPError(err error, resp *http.Response) error {
 	if err != nil {
-		if terr, ok := err.(*api.TigrisError); ok {
+		var terr *api.TigrisError
+		if errors.As(err, &terr) {
+			//		if terr, ok := err.(*api.TigrisError); ok {
 			return &Error{TigrisError: terr}
 		}
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return err
 		}
 
@@ -114,19 +119,23 @@ type metadata struct {
 
 func newRespMetadata(m *metadata) *api.ResponseMetadata {
 	r := &api.ResponseMetadata{}
+
 	if m.CreatedAt != nil {
 		r.CreatedAt = timestamppb.New(*m.CreatedAt)
 	}
+
 	if m.UpdatedAt != nil {
 		r.UpdatedAt = timestamppb.New(*m.UpdatedAt)
 	}
+
 	if m.DeletedAt != nil {
 		r.DeletedAt = timestamppb.New(*m.DeletedAt)
 	}
+
 	return r
 }
 
-// convert timestamps from response metadata to timestamppb.Timestamp
+// convert timestamps from response metadata to timestamppb.Timestamp.
 func dmlRespDecode(body io.ReadCloser, v interface{}) error {
 	r := struct {
 		Metadata      metadata
@@ -183,17 +192,20 @@ func setHeaders(ctx context.Context, req *http.Request) error {
 }
 
 func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx, cookies []*http.Cookie) context.Context {
-	var result = ctx
+	result := ctx
+
 	if txCtx != nil && txCtx.Id != "" {
 		result = context.WithValue(result, txCtxKey{}, txCtx)
 	}
+
 	if cookies != nil {
 		result = context.WithValue(result, additionalOutboundHeadersCtxKey{}, cookies)
 	}
+
 	return result
 }
 
-// newHTTPClient return Driver interface implementation using HTTP transport protocol
+// newHTTPClient return Driver interface implementation using HTTP transport protocol.
 func newHTTPClient(_ context.Context, url string, config *config.Driver) (*httpDriver, error) {
 	if !strings.Contains(url, ":") {
 		url = fmt.Sprintf("%s:%d", url, DefaultHTTPPort)
@@ -230,7 +242,9 @@ func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
+
 	var i InfoResponse
+
 	if err := respDecode(resp.Body, &i); err != nil {
 		return nil, err
 	}
@@ -243,18 +257,23 @@ func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
+
 	var l api.ListDatabasesResponse
+
 	if err := respDecode(resp.Body, &l); err != nil {
 		return nil, err
 	}
+
 	if l.Databases == nil {
 		return nil, nil
 	}
 
-	var databases []string
+	databases := make([]string, 0, len(l.Databases))
+
 	for _, nm := range l.Databases {
 		databases = append(databases, nm.Db)
 	}
+
 	return databases, nil
 }
 
@@ -263,14 +282,18 @@ func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*Describe
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
+
 	var d apiHTTP.DescribeDatabaseResponse
+
 	if err := respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
 	var r DescribeDatabaseResponse
+
 	r.Db = PtrToString(d.Db)
 	r.Size = PtrToInt64(d.Size)
+
 	for _, v := range *d.Collections {
 		r.Collections = append(r.Collections, &api.CollectionDescription{
 			Collection: PtrToString(v.Collection),
@@ -278,6 +301,7 @@ func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*Describe
 			Size:       PtrToInt64(v.Size),
 		})
 	}
+
 	return &r, nil
 }
 
@@ -286,8 +310,7 @@ func convertDatabaseOptions(_ *DatabaseOptions) *apiHTTP.DatabaseOptions {
 }
 
 func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
-	opts := apiHTTP.CollectionOptions{}
-	return &opts
+	return &apiHTTP.CollectionOptions{}
 }
 
 func convertTransactionOptions(_ *TxOptions) *apiHTTP.TransactionOptions {
@@ -312,11 +335,12 @@ func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options 
 	resp, err := c.api.TigrisBeginTransaction(ctx, db, apiHTTP.TigrisBeginTransactionJSONRequestBody{
 		Options: convertTransactionOptions(options),
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var bTx apiHTTP.BeginTransactionResponse
+
 	if err = respDecode(resp.Body, &bTx); err != nil {
 		return nil, err
 	}
@@ -324,11 +348,10 @@ func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options 
 	if bTx.TxCtx == nil || bTx.TxCtx.Id == nil || *bTx.TxCtx.Id == "" {
 		return nil, HTTPError(fmt.Errorf("empty transaction context in response"), nil)
 	}
+
 	var outboundCookies []*http.Cookie
 
-	for _, incomingCookie := range resp.Cookies() {
-		outboundCookies = append(outboundCookies, incomingCookie)
-	}
+	outboundCookies = append(outboundCookies, resp.Cookies()...)
 	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: PtrToString(bTx.TxCtx.Id), Origin: PtrToString(bTx.TxCtx.Origin)}, cookies: outboundCookies}, nil
 }
 
@@ -336,10 +359,11 @@ func (c *httpCRUD) Commit(ctx context.Context) error {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{})
-	err = HTTPError(err, resp)
-	if err == nil {
+
+	if err = HTTPError(err, resp); err == nil {
 		c.committed = true
 	}
+
 	return err
 }
 
@@ -349,7 +373,9 @@ func (c *httpCRUD) Rollback(ctx context.Context) error {
 	if c.committed {
 		return nil
 	}
+
 	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{})
+
 	return HTTPError(err, resp)
 }
 
@@ -414,20 +440,25 @@ func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *Coll
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
+
 	var l apiHTTP.ListCollectionsResponse
+
 	if err := respDecode(resp.Body, &l); err != nil {
 		return nil, err
 	}
+
 	if l.Collections == nil {
 		return nil, nil
 	}
 
-	var collections []string
+	collections := make([]string, 0, len(*l.Collections))
+
 	for _, c := range *l.Collections {
 		if c.Collection != nil {
 			collections = append(collections, *c.Collection)
 		}
 	}
+
 	return collections, nil
 }
 
@@ -436,7 +467,9 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
+
 	var d apiHTTP.DescribeCollectionResponse
+
 	if err := respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
@@ -600,12 +633,15 @@ func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchReq
 	if req.SearchFields == nil {
 		req.SearchFields = []string{}
 	}
+
 	if req.IncludeFields == nil {
 		req.IncludeFields = []string{}
 	}
+
 	if req.ExcludeFields == nil {
 		req.ExcludeFields = []string{}
 	}
+
 	resp, err := c.api.TigrisSearch(ctx, c.db, collection, apiHTTP.TigrisSearchJSONRequestBody{
 		Q:             &req.Q,
 		SearchFields:  &req.SearchFields,
@@ -643,6 +679,7 @@ func (g *httpSearchReader) read() (SearchResponse, error) {
 		}
 		Error *api.ErrorDetails
 	}
+
 	if err := g.stream.Decode(&res); err != nil {
 		return nil, HTTPError(err, nil)
 	}
@@ -681,6 +718,7 @@ func (c *httpDriver) CreateApplication(ctx context.Context, name string, descrip
 
 func (c *httpDriver) DeleteApplication(ctx context.Context, id string) error {
 	resp, err := c.api.ManagementDeleteApplication(ctx, apiHTTP.ManagementDeleteApplicationJSONBody{Id: &id})
+
 	return HTTPError(err, resp)
 }
 
@@ -735,13 +773,13 @@ func (c *httpDriver) RotateClientSecret(ctx context.Context, id string) (*Applic
 	return &app.Application, nil
 }
 
-func (c *httpDriver) GetAccessToken(ctx context.Context, clientId string, clientSecret string, refreshToken string) (*TokenResponse, error) {
-	return getAccessToken(ctx, c.tokenURL, c.cfg, clientId, clientSecret, refreshToken)
+func (c *httpDriver) GetAccessToken(ctx context.Context, clientID string, clientSecret string, refreshToken string) (*TokenResponse, error) {
+	return getAccessToken(ctx, c.tokenURL, c.cfg, clientID, clientSecret, refreshToken)
 }
 
-func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, clientId string, clientSecret string, refreshToken string) (*TokenResponse, error) {
+func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, clientID string, clientSecret string, refreshToken string) (*TokenResponse, error) {
 	data := url.Values{
-		"client_id":     {clientId},
+		"client_id":     {clientID},
 		"client_secret": {clientSecret},
 		"grant_type":    {grantTypeClientCredentials},
 		"scope":         {scope},
@@ -749,38 +787,75 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, cl
 	if refreshToken != "" {
 		data = url.Values{
 			"refresh_token": {refreshToken},
-			"client_id":     {clientId},
+			"client_id":     {clientID},
 			"grant_type":    {grantTypeRefreshToken},
 			"scope":         {scope},
 		}
 	}
+
 	t, ok := ctx.Deadline()
 	if !ok {
 		t = time.Now().Add(tokenRequestTimeout)
 	}
-	resp, err := (&http.Client{
+
+	client := http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: cfg.TLS,
 		},
-		Timeout: t.Sub(time.Now()),
-	}).PostForm(tokenURL, data)
+		Timeout: time.Until(t),
+	}
+
+	resp, err := ctxhttp.PostForm(ctx, &client, tokenURL, data)
 	if err != nil {
 		return nil, api.Errorf(api.Code_INTERNAL, "failed to get access token: reason = %s", err.Error())
 	}
+
 	defer func() { _ = resp.Body.Close() }()
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, api.Errorf(api.Code_INTERNAL, "failed to get access token: reason = %s", err.Error())
 	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, api.Errorf(api.Code_INTERNAL, "failed to get access token: reason = %s", string(body))
 	}
+
 	var tr TokenResponse
+
 	err = json.Unmarshal(body, &tr)
 	if err != nil {
 		return nil, api.Errorf(api.Code_INTERNAL, "failed to parse external response: reason = %s", err.Error())
 	}
+
 	return &tr, nil
+}
+
+func (c *httpDriver) CreateNamespace(ctx context.Context, pid int, name string) error {
+	id := int32(pid)
+	resp, err := c.api.ManagementCreateNamespace(ctx, name, apiHTTP.ManagementCreateNamespaceJSONBody{Id: &id})
+	if err := HTTPError(err, resp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
+	resp, err := c.api.ManagementListNamespaces(ctx)
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var nss struct {
+		Namespaces []*Namespace
+	}
+
+	if err := respDecode(resp.Body, &nss); err != nil {
+		return nil, err
+	}
+
+	return nss.Namespaces, nil
 }
 
 func (c *httpCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {

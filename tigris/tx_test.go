@@ -1,3 +1,17 @@
+// Copyright 2022 Tigris Data, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package tigris
 
 import (
@@ -116,7 +130,8 @@ func TestCollectionTx(t *testing.T) {
 		_, err = c.DeleteAll(ctx)
 		require.NoError(t, err)
 
-		mtx.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`))
+		mtx.EXPECT().Delete(ctx, "coll_1",
+			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`))
 
 		_, err = c.Delete(ctx, filter.Or(
 			filter.Eq("Key1", "aaa"),
@@ -177,8 +192,10 @@ func TestCollectionTxRetry(t *testing.T) {
 				func(ctx context.Context) error {
 					i--
 					if i > 0 {
-						return &driver.Error{TigrisError: api.Errorf(code.Conflict, "error %v", i).WithRetry(time.Duration(i) * time.Millisecond)}
+						return &driver.Error{TigrisError: api.Errorf(code.Conflict, "error %v", i).
+							WithRetry(time.Duration(i) * time.Millisecond)}
 					}
+
 					return nil
 				})
 			mtx.EXPECT().Rollback(gomock.Any())
@@ -198,8 +215,10 @@ func TestCollectionTxRetry(t *testing.T) {
 				func(ctx context.Context) error {
 					i--
 					if i > 0 {
-						return &driver.Error{TigrisError: api.Errorf(code.Conflict, "error %v", i).WithRetry(time.Duration(i) * time.Millisecond)}
+						return &driver.Error{TigrisError: api.Errorf(code.Conflict, "error %v", i).
+							WithRetry(time.Duration(i) * time.Millisecond)}
 					}
+
 					return nil
 				})
 			mtx.EXPECT().Rollback(gomock.Any())
@@ -225,6 +244,7 @@ func TestCollectionTxRetry(t *testing.T) {
 					if i > 0 {
 						return &driver.Error{TigrisError: api.Errorf(code.Conflict, "error %v", i)}
 					}
+
 					return nil
 				})
 			mtx.EXPECT().Rollback(gomock.Any())

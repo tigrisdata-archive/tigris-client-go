@@ -114,7 +114,6 @@ func TestTopicBasic(t *testing.T) {
 
 	mit.EXPECT().Close()
 	it.Close()
-
 }
 
 func TestTopicNegative(t *testing.T) {

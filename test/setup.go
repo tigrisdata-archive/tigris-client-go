@@ -78,25 +78,24 @@ func (matcher *ProtoMatcher) String() string {
 }
 
 func SetupTLS(t *testing.T) *tls.Config {
+	t.Helper()
+
 	certPool := x509.NewCertPool()
 	require.True(t, certPool.AppendCertsFromPEM([]byte(CaCert)))
 
-	return &tls.Config{RootCAs: certPool, ServerName: "localhost"}
+	return &tls.Config{RootCAs: certPool, ServerName: "localhost", MinVersion: tls.VersionTLS12}
 }
 
-// copy from Tigris' server/middleware.CustomMatcher
+// copy from Tigris' server/middleware.CustomMatcher.
 func customMatcher(key string) (string, bool) {
-	switch key {
-	default:
-		if strings.HasPrefix(key, api.HeaderPrefix) {
-			return key, true
-		}
-		return runtime.DefaultHeaderMatcher(key)
+	if strings.HasPrefix(key, api.HeaderPrefix) {
+		return key, true
 	}
+	return runtime.DefaultHeaderMatcher(key)
 }
 
 type MockServers struct {
-	Api  *mock.MockTigrisServer
+	API  *mock.MockTigrisServer
 	Mgmt *mock.MockManagementServer
 	Auth *mock.MockAuthServer
 	O11y *mock.MockObservabilityServer
@@ -109,7 +108,7 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	c := gomock.NewController(t)
 
 	ms := &MockServers{
-		Api:  mock.NewMockTigrisServer(c),
+		API:  mock.NewMockTigrisServer(c),
 		Auth: mock.NewMockAuthServer(c),
 		Mgmt: mock.NewMockManagementServer(c),
 		O11y: mock.NewMockObservabilityServer(c),
@@ -134,7 +133,7 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	err = api.RegisterObservabilityHandlerClient(ctx, mux, o11yClient)
 	require.NoError(t, err)
 
-	api.RegisterTigrisServer(inproc, ms.Api)
+	api.RegisterTigrisServer(inproc, ms.API)
 	api.RegisterAuthServer(inproc, ms.Auth)
 	api.RegisterManagementServer(inproc, ms.Mgmt)
 	api.RegisterObservabilityServer(inproc, ms.O11y)
@@ -145,10 +144,11 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	tlsConfig := &tls.Config{
 		ServerName:   "localhost",
 		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS12,
 	}
 
 	s := grpc.NewServer(grpc.Creds(credentials.NewTLS(tlsConfig)))
-	api.RegisterTigrisServer(s, ms.Api)
+	api.RegisterTigrisServer(s, ms.API)
 	api.RegisterAuthServer(s, ms.Auth)
 	api.RegisterManagementServer(s, ms.Mgmt)
 	api.RegisterObservabilityServer(s, ms.O11y)
@@ -167,16 +167,20 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	require.NoError(t, err)
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
+
 		_ = s.Serve(l)
 	}()
 
-	server := &http.Server{Addr: fmt.Sprintf("localhost:%d", 33333+portShift), TLSConfig: tlsConfig, Handler: r}
+	server := &http.Server{Addr: fmt.Sprintf("localhost:%d", 33333+portShift), TLSConfig: tlsConfig, Handler: r, ReadHeaderTimeout: 5 * time.Second}
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
+
 		_ = server.ListenAndServeTLS("", "")
 	}()
 

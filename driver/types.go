@@ -118,4 +118,5 @@ func (e *Error) As(i any) bool {
 type (
 	Application   api.Application
 	TokenResponse api.GetAccessTokenResponse
+	Namespace     api.NamespaceInfo
 )

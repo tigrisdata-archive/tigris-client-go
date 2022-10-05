@@ -65,11 +65,32 @@ func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementS
 	_, err = c.UpdateApplication(ctx, "upd_id1", "upd_app1", "upd_description1")
 	require.Error(t, err)
 
+	mc.EXPECT().ListApplications(gomock.Any(),
+		pm(&api.ListApplicationsRequest{})).Return(
+		nil, fmt.Errorf("some error"))
+
+	_, err = c.ListApplications(ctx)
+	require.Error(t, err)
+
 	mc.EXPECT().RotateApplicationSecret(gomock.Any(),
 		pm(&api.RotateApplicationSecretRequest{Id: "ras_id1"})).Return(
 		&api.RotateApplicationSecretResponse{Application: nil}, nil)
 
 	_, err = c.RotateClientSecret(ctx, "ras_id1")
+	require.Error(t, err)
+
+	mc.EXPECT().CreateNamespace(gomock.Any(),
+		pm(&api.CreateNamespaceRequest{Id: 11, Name: "app1"})).Return(
+		nil, fmt.Errorf("some error"))
+
+	err = c.CreateNamespace(ctx, 11, "app1")
+	require.Error(t, err)
+
+	mc.EXPECT().ListNamespaces(gomock.Any(),
+		pm(&api.ListNamespacesRequest{})).Return(
+		nil, fmt.Errorf("some error"))
+
+	_, err = c.ListNamespaces(ctx)
 	require.Error(t, err)
 }
 
@@ -167,6 +188,32 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	require.NoError(t, err)
 	require.Equal(t, "access_token2", token.AccessToken)
 	require.Equal(t, "refresh_token2", token.RefreshToken)
+
+	nsapp1 := &api.NamespaceInfo{Id: 7, Name: "ns_list_app1"}
+	nsapp2 := &api.NamespaceInfo{Id: 8, Name: "ns_list_app2"}
+	nsapp3 := &api.NamespaceInfo{Id: 9, Name: "ns_list_app3"}
+
+	mc.EXPECT().ListNamespaces(gomock.Any(),
+		pm(&api.ListNamespacesRequest{})).Return(
+		&api.ListNamespacesResponse{Namespaces: []*api.NamespaceInfo{nsapp1, nsapp2, nsapp3}}, nil)
+
+	nsList, err := c.ListNamespaces(ctx)
+	require.NoError(t, err)
+
+	require.Equal(t, 3, len(nsList))
+	assert.Equal(t, nsapp1.Id, nsList[0].Id)
+	assert.Equal(t, nsapp1.Name, nsList[0].Name)
+	assert.Equal(t, nsapp2.Id, nsList[1].Id)
+	assert.Equal(t, nsapp2.Name, nsList[1].Name)
+	assert.Equal(t, nsapp3.Id, nsList[2].Id)
+	assert.Equal(t, nsapp3.Name, nsList[2].Name)
+
+	mc.EXPECT().CreateNamespace(gomock.Any(),
+		pm(&api.CreateNamespaceRequest{Id: 10, Name: "nsapp1"})).Return(
+		&api.CreateNamespaceResponse{}, nil)
+
+	err = c.CreateNamespace(ctx, 10, "nsapp1")
+	require.NoError(t, err)
 }
 
 func TestGRPCAuthDriver(t *testing.T) {

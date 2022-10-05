@@ -511,6 +511,29 @@ func (c *grpcDriver) GetAccessToken(ctx context.Context, clientID string, client
 	return (*TokenResponse)(r), nil
 }
 
+func (c *grpcDriver) CreateNamespace(ctx context.Context, id int, name string) error {
+	_, err := c.mgmt.CreateNamespace(ctx, &api.CreateNamespaceRequest{Name: name, Id: int32(id)})
+	if err != nil {
+		return GRPCError(err)
+	}
+
+	return nil
+}
+
+func (c *grpcDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
+	r, err := c.mgmt.ListNamespaces(ctx, &api.ListNamespacesRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	ns := make([]*Namespace, 0, len(r.Namespaces))
+	for _, a := range r.GetNamespaces() {
+		ns = append(ns, (*Namespace)(a))
+	}
+
+	return ns, nil
+}
+
 func (c *grpcCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 

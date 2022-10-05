@@ -831,6 +831,33 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, cl
 	return &tr, nil
 }
 
+func (c *httpDriver) CreateNamespace(ctx context.Context, pid int, name string) error {
+	id := int32(pid)
+	resp, err := c.api.ManagementCreateNamespace(ctx, name, apiHTTP.ManagementCreateNamespaceJSONBody{Id: &id})
+	if err := HTTPError(err, resp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
+	resp, err := c.api.ManagementListNamespaces(ctx)
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var nss struct {
+		Namespaces []*Namespace
+	}
+
+	if err := respDecode(resp.Body, &nss); err != nil {
+		return nil, err
+	}
+
+	return nss.Namespaces, nil
+}
+
 func (c *httpCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 

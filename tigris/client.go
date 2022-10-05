@@ -46,12 +46,12 @@ func (c *Client) Close() error {
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
-func (c *Client) OpenDatabase(ctx context.Context, dbName string, model schema.Model, models ...schema.Model) (*Database, error) {
+func (c *Client) OpenDatabase(ctx context.Context, dbName string, models ...schema.Model) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
 	}
 
-	return openDatabaseFromModels(ctx, c.driver, c.config, dbName, model, models...)
+	return openDatabaseFromModels(ctx, c.driver, c.config, dbName, models...)
 }
 
 // DropDatabase deletes the database and all collections in it.

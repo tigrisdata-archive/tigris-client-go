@@ -112,7 +112,7 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 
 // openDatabaseFromModels creates Database and collections from the provided collection models.
 func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Database, dbName string,
-	model schema.Model, models ...schema.Model,
+	models ...schema.Model,
 ) (*Database, error) {
 	// optionally creates database if it's allowed
 	if !cfg.MustExist {
@@ -126,9 +126,11 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Da
 
 	db := newDatabase(dbName, d)
 
-	err := db.CreateCollections(ctx, model, models...)
-	if err != nil {
-		return nil, err
+	if len(models) > 0 {
+		err := db.CreateCollections(ctx, models[0], models[1:]...)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil
@@ -137,8 +139,7 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Da
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
-func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, model schema.Model,
-	models ...schema.Model,
+func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, models ...schema.Model,
 ) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
@@ -149,7 +150,7 @@ func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, mode
 		return nil, err
 	}
 
-	return openDatabaseFromModels(ctx, d, cfg, dbName, model, models...)
+	return openDatabaseFromModels(ctx, d, cfg, dbName, models...)
 }
 
 // DropDatabase deletes the database and all collections in it.

@@ -2575,7 +2575,7 @@ type CreateOrUpdateCollectionRequest struct {
 	Collection string `protobuf:"bytes,2,opt,name=collection,proto3" json:"collection,omitempty"`
 	// The schema specifications are same as
 	// JSON schema specification defined <a href="https://json-schema.org/specification.html" title="here">here</a>.
-	// The schema of the `documents` collection differs from the schema of `messages` collection as `messages` collection does not
+	// The schema of the `documents` collection differs from the schema of `topic` collection as `topic` collection does not
 	// have any concept of `primary_key`. The server recognizes type of the collection by the `collection_type` set in
 	// the schema.
 	//<p></p>
@@ -2601,7 +2601,7 @@ type CreateOrUpdateCollectionRequest struct {
 	//  "primary_key": ["id"]
 	// }`
 	// <p></p>*Note: The `collection_type` is not set as default is documents.*
-	// <p></p>Schema example of `messages`:
+	// <p></p>Schema example of `topic`:
 	// `{
 	//  "title": "user_events",
 	//  "description": "Topic for user events",
@@ -2620,9 +2620,9 @@ type CreateOrUpdateCollectionRequest struct {
 	//      "type": "string"
 	//    }
 	//  },
-	//  "collection_type": "messages"
+	//  "collection_type": "topic"
 	// }`
-	// <p></p> *Note: The `collection_type` is set as "messages".*
+	// <p></p> *Note: The `collection_type` is set as "topic".*
 	Schema []byte `protobuf:"bytes,3,opt,name=schema,proto3" json:"schema,omitempty"`
 	// If set to `true` then the update schema request to the collection will fail by returning a conflict with HTTP Status
 	// code 409. The default is false.

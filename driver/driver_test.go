@@ -41,9 +41,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func SetupMgmtGRPCTests(t *testing.T, config *config.Driver) (Driver, Management, *test.MockServers, func()) {
-	t.Helper()
-
+func setupGRPCTests(t *testing.T, config *config.Driver) (Driver, *grpcDriver, *test.MockServers, func()) {
 	mockServers, cancel := test.SetupTests(t, 0)
 	config.TLS = test.SetupTLS(t)
 	client, err := newGRPCClient(context.Background(), test.GRPCURL(0), config)
@@ -52,9 +50,7 @@ func SetupMgmtGRPCTests(t *testing.T, config *config.Driver) (Driver, Management
 	return &driver{driverWithOptions: client}, client, mockServers, func() { cancel(); _ = client.Close() }
 }
 
-func SetupMgmtHTTPTests(t *testing.T, config *config.Driver) (Driver, Management, *test.MockServers, func()) {
-	t.Helper()
-
+func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *test.MockServers, func()) {
 	mockServers, cancel := test.SetupTests(t, 2)
 	url := test.HTTPURL(2)
 	config.URL = url
@@ -68,30 +64,30 @@ func SetupMgmtHTTPTests(t *testing.T, config *config.Driver) (Driver, Management
 	return &driver{driverWithOptions: client}, client, mockServers, func() { cancel(); _ = client.Close() }
 }
 
+func SetupO11yGRPCTests(t *testing.T, config *config.Driver) (Driver, Observability, *test.MockServers, func()) {
+	return setupGRPCTests(t, config)
+}
+
+func SetupO11yHTTPTests(t *testing.T, config *config.Driver) (Driver, Observability, *test.MockServers, func()) {
+	return setupHTTPTests(t, config)
+}
+
+func SetupMgmtGRPCTests(t *testing.T, config *config.Driver) (Driver, Management, *test.MockServers, func()) {
+	return setupGRPCTests(t, config)
+}
+
+func SetupMgmtHTTPTests(t *testing.T, config *config.Driver) (Driver, Management, *test.MockServers, func()) {
+	return setupHTTPTests(t, config)
+}
+
 func SetupGRPCTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
-	t.Helper()
-
-	mockServers, cancel := test.SetupTests(t, 0)
-	config.TLS = test.SetupTLS(t)
-	client, err := newGRPCClient(context.Background(), test.GRPCURL(0), config)
-	require.NoError(t, err)
-
-	return &driver{driverWithOptions: client}, mockServers.API, func() { cancel(); _ = client.Close() }
+	d, _, s, f := setupGRPCTests(t, config)
+	return d, s.API, f
 }
 
 func SetupHTTPTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
-	t.Helper()
-
-	mockServers, cancel := test.SetupTests(t, 2)
-	url := test.HTTPURL(2)
-	config.TLS = test.SetupTLS(t)
-	client, err := newHTTPClient(context.Background(), url, config)
-	require.NoError(t, err)
-
-	// FIXME: implement proper wait for HTTP server to start
-	time.Sleep(10 * time.Millisecond)
-
-	return &driver{driverWithOptions: client}, mockServers.API, func() { cancel(); _ = client.Close() }
+	d, _, s, f := setupHTTPTests(t, config)
+	return d, s.API, f
 }
 
 func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp error, rd time.Duration) {

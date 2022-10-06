@@ -594,3 +594,33 @@ func (mr *MockObservabilityServerMockRecorder) QueryTimeSeriesMetrics(arg0, arg1
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryTimeSeriesMetrics", reflect.TypeOf((*MockObservabilityServer)(nil).QueryTimeSeriesMetrics), arg0, arg1)
 }
+
+// QuotaLimits mocks base method.
+func (m *MockObservabilityServer) QuotaLimits(arg0 context.Context, arg1 *api.QuotaLimitsRequest) (*api.QuotaLimitsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QuotaLimits", arg0, arg1)
+	ret0, _ := ret[0].(*api.QuotaLimitsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QuotaLimits indicates an expected call of QuotaLimits.
+func (mr *MockObservabilityServerMockRecorder) QuotaLimits(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QuotaLimits", reflect.TypeOf((*MockObservabilityServer)(nil).QuotaLimits), arg0, arg1)
+}
+
+// QuotaUsage mocks base method.
+func (m *MockObservabilityServer) QuotaUsage(arg0 context.Context, arg1 *api.QuotaUsageRequest) (*api.QuotaUsageResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QuotaUsage", arg0, arg1)
+	ret0, _ := ret[0].(*api.QuotaUsageResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QuotaUsage indicates an expected call of QuotaUsage.
+func (mr *MockObservabilityServerMockRecorder) QuotaUsage(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QuotaUsage", reflect.TypeOf((*MockObservabilityServer)(nil).QuotaUsage), arg0, arg1)
+}

@@ -843,7 +843,7 @@ func (c *httpDriver) CreateNamespace(ctx context.Context, pid int, name string) 
 
 func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
 	resp, err := c.api.ManagementListNamespaces(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -851,11 +851,39 @@ func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
 		Namespaces []*Namespace
 	}
 
-	if err := respDecode(resp.Body, &nss); err != nil {
+	if err = respDecode(resp.Body, &nss); err != nil {
 		return nil, err
 	}
 
 	return nss.Namespaces, nil
+}
+
+func (c *httpDriver) QuotaLimits(ctx context.Context) (*QuotaLimits, error) {
+	resp, err := c.api.ObservabilityQuotaLimits(ctx, apiHTTP.ObservabilityQuotaLimitsJSONRequestBody{})
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var limits QuotaLimits
+	if err = respDecode(resp.Body, &limits); err != nil {
+		return nil, err
+	}
+
+	return &limits, nil
+}
+
+func (c *httpDriver) QuotaUsage(ctx context.Context) (*QuotaUsage, error) {
+	resp, err := c.api.ObservabilityQuotaUsage(ctx, apiHTTP.ObservabilityQuotaUsageJSONRequestBody{})
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var usage QuotaUsage
+	if err = respDecode(resp.Body, &usage); err != nil {
+		return nil, err
+	}
+
+	return &usage, nil
 }
 
 func (c *httpCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {

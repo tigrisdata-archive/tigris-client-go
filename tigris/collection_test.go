@@ -793,3 +793,17 @@ func TestCollection(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestOpenDatabase(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	ctrl := gomock.NewController(t)
+	m := mock.NewMockDriver(ctrl)
+
+	m.EXPECT().CreateDatabase(gomock.Any(), "db1")
+
+	db, err := openDatabaseFromModels(ctx, m, &config.Database{}, "db1")
+	require.NoError(t, err)
+	require.NotNil(t, db)
+}

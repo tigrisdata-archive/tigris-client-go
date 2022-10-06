@@ -534,6 +534,24 @@ func (c *grpcDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
 	return ns, nil
 }
 
+func (c *grpcDriver) QuotaLimits(ctx context.Context) (*QuotaLimits, error) {
+	r, err := c.o11y.QuotaLimits(ctx, &api.QuotaLimitsRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*QuotaLimits)(r), nil
+}
+
+func (c *grpcDriver) QuotaUsage(ctx context.Context) (*QuotaUsage, error) {
+	r, err := c.o11y.QuotaUsage(ctx, &api.QuotaUsageRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*QuotaUsage)(r), nil
+}
+
 func (c *grpcCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 

@@ -119,4 +119,7 @@ type (
 	Application   api.Application
 	TokenResponse api.GetAccessTokenResponse
 	Namespace     api.NamespaceInfo
+
+	QuotaLimits api.QuotaLimitsResponse
+	QuotaUsage  api.QuotaUsageResponse
 )

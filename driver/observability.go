@@ -17,8 +17,6 @@ package driver
 import (
 	"context"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 )
@@ -33,19 +31,17 @@ type Observability interface {
 
 // NewObservability instantiates observability API client.
 func NewObservability(ctx context.Context, cfg *config.Driver) (Observability, error) {
-	cfg = initConfig(cfg)
-
-	protocol := DefaultProtocol
-	if os.Getenv(EnvProtocol) != "" {
-		protocol = strings.ToUpper(os.Getenv(EnvProtocol))
-	}
-
 	var (
 		o11y Observability
 		err  error
 	)
 
-	switch protocol {
+	cfg, err = initConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	switch cfg.Protocol {
 	case GRPC:
 		o11y, err = newGRPCClient(ctx, cfg.URL, cfg)
 	case HTTP:

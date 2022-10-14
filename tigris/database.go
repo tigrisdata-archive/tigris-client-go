@@ -111,7 +111,7 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 }
 
 // openDatabaseFromModels creates Database and collections from the provided collection models.
-func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Database, dbName string,
+func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Client, dbName string,
 	models ...schema.Model,
 ) (*Database, error) {
 	// optionally creates database if it's allowed
@@ -139,7 +139,7 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Da
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
-func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, models ...schema.Model,
+func OpenDatabase(ctx context.Context, cfg *config.Client, dbName string, models ...schema.Model,
 ) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
@@ -154,7 +154,7 @@ func OpenDatabase(ctx context.Context, cfg *config.Database, dbName string, mode
 }
 
 // DropDatabase deletes the database and all collections in it.
-func DropDatabase(ctx context.Context, cfg *config.Database, dbName string) error {
+func DropDatabase(ctx context.Context, cfg *config.Client, dbName string) error {
 	if getTxCtx(ctx) != nil {
 		return ErrNotTransactional
 	}

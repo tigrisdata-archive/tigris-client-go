@@ -302,9 +302,10 @@ func TestGRPCDriverCredentials(t *testing.T) {
 		t.Setenv(EnvClientID, "client_id_test")
 		t.Setenv(EnvClientSecret, "client_secret_test")
 
-		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{
-			URL: test.GRPCURL(0),
-		})
+		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0)})
+		require.NoError(t, err)
+
+		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, cfg)
 		defer cancel()
 
 		testDriverToken(t, client, mockServers.API, mockServers.Auth, "token_config_123", true)
@@ -332,9 +333,10 @@ func TestHTTPDriverCredentials(t *testing.T) {
 		t.Setenv(EnvClientID, "client_id_test")
 		t.Setenv(EnvClientSecret, "client_secret_test")
 
-		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{
-			URL: test.HTTPURL(2),
-		})
+		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2)})
+		require.NoError(t, err)
+
+		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, cfg)
 		defer cancel()
 
 		testDriverToken(t, client, mockServers.API, mockServers.Auth, "token_config_123", true)
@@ -361,9 +363,10 @@ func TestGRPCDriverToken(t *testing.T) {
 
 		t.Setenv(EnvToken, "token_grpc_env_1")
 
-		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{
-			URL: test.GRPCURL(0),
-		})
+		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0)})
+		require.NoError(t, err)
+
+		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, cfg)
 		defer cancel()
 
 		testDriverToken(t, client, mockServers.API, mockServers.Auth, "token_grpc_env_1", false)
@@ -387,9 +390,10 @@ func TestHTTPDriverToken(t *testing.T) {
 
 		t.Setenv(EnvToken, "token_http_env_1")
 
-		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{
-			URL: test.HTTPURL(2),
-		})
+		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2)})
+		require.NoError(t, err)
+
+		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, cfg)
 		defer cancel()
 
 		testDriverToken(t, client, mockServers.API, mockServers.Auth, "token_http_env_1", false)

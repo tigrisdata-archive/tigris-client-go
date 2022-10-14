@@ -17,7 +17,6 @@ package driver
 import (
 	"context"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/tigrisdata/tigris-client-go/config"
@@ -65,27 +64,12 @@ type txWithOptions interface {
 }
 
 // func configAuth(config *config.Driver) (*clientcredentials.Config, context.Context) {.
-func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string) {
-	clientID := config.ClientID
-	if os.Getenv(EnvClientID) != "" {
-		clientID = os.Getenv(EnvClientID)
-	}
-
-	clientSecret := config.ClientSecret
-	if os.Getenv(EnvClientSecret) != "" {
-		clientSecret = os.Getenv(EnvClientSecret)
-	}
-
-	token := config.Token
-	if os.Getenv(EnvToken) != "" {
-		token = os.Getenv(EnvToken)
-	}
-
+func configAuth(cfg *config.Driver) (oauth2.TokenSource, *http.Client, string) {
 	tr := &http.Transport{
-		TLSClientConfig: config.TLS,
+		TLSClientConfig: cfg.TLS,
 	}
 
-	tokenURL := config.URL + "/v1/auth/token"
+	tokenURL := cfg.URL + "/v1/auth/token"
 	tokenURL = strings.TrimPrefix(tokenURL, "dns:")
 
 	if !strings.Contains(tokenURL, "://") {
@@ -106,14 +90,14 @@ func configAuth(config *config.Driver) (oauth2.TokenSource, *http.Client, string
 
 	// use access-token authentication if it's set,
 	// use client_id, client_secret otherwise
-	if token != "" {
-		t := &oauth2.Token{AccessToken: token}
+	if cfg.Token != "" {
+		t := &oauth2.Token{AccessToken: cfg.Token}
 		ocfg1 := &oauth2.Config{Endpoint: oauth2.Endpoint{TokenURL: tokenURL}}
 		client = ocfg1.Client(ctxClient, t)
 		ts = ocfg1.TokenSource(ctxClient, t)
-	} else if clientID != "" || clientSecret != "" {
+	} else if cfg.ClientID != "" || cfg.ClientSecret != "" {
 		oCfg := &clientcredentials.Config{
-			TokenURL: tokenURL, ClientID: clientID, ClientSecret: clientSecret,
+			TokenURL: tokenURL, ClientID: cfg.ClientID, ClientSecret: cfg.ClientSecret,
 			AuthStyle: oauth2.AuthStyleInParams,
 		}
 		client = oCfg.Client(ctxClient)
@@ -130,20 +114,6 @@ func PtrToString(s *string) string {
 		return ""
 	}
 	return *s
-}
-
-func PtrToBytes(b *[]byte) []byte {
-	if b == nil {
-		return nil
-	}
-	return *b
-}
-
-func PtrToBool(b *bool) bool {
-	if b == nil {
-		return false
-	}
-	return *b
 }
 
 func PtrToInt64(b *int64) int64 {

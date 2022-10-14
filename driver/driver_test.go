@@ -1115,8 +1115,10 @@ func TestNewDriver(t *testing.T) {
 	_, err = NewDriver(context.Background(), nil)
 	require.Error(t, err)
 
+	DefaultProtocol = GRPC
 	cfg1 := &config.Driver{URL: test.GRPCURL(4), ClientSecret: "aaaa"}
-	cfg1 = initConfig(cfg1)
+	cfg1, err = initConfig(cfg1)
+	require.NoError(t, err)
 	require.NotNil(t, cfg1.TLS)
 }
 

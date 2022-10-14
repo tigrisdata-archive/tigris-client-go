@@ -16,6 +16,7 @@ package tigris
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -25,17 +26,26 @@ import (
 // Client responsible for connecting to the server and opening a database.
 type Client struct {
 	driver driver.Driver
-	config *config.Database
+	config *config.Client
 }
 
 // NewClient creates a connection to the Tigris server.
-func NewClient(ctx context.Context, cfg *config.Database) (*Client, error) {
-	d, err := driver.NewDriver(ctx, &cfg.Driver)
+func NewClient(ctx context.Context, cfg ...*config.Client) (*Client, error) {
+	var pCfg config.Client
+
+	if len(cfg) > 0 {
+		if len(cfg) != 1 {
+			return nil, fmt.Errorf("only one config structure allowed")
+		}
+		pCfg = *cfg[0]
+	}
+
+	d, err := driver.NewDriver(ctx, &pCfg.Driver)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{driver: d, config: cfg}, nil
+	return &Client{driver: d, config: &pCfg}, nil
 }
 
 // Close terminates client connections and release resources.

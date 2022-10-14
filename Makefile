@@ -48,7 +48,7 @@ mock: mock/api/grpc.go mock/driver.go
 lint:
 	yq --exit-status 'tag == "!!map" or tag== "!!seq"' .github/workflows/*.yaml
 	shellcheck scripts/*
-	golangci-lint run
+	golangci-lint run --fix
 
 go.sum: go.mod generate mock
 	go mod download

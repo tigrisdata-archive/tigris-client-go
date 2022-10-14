@@ -35,7 +35,7 @@ func TestClient(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &config.Database{Driver: config.Driver{URL: test.GRPCURL(8)}}
+	cfg := &config.Client{Driver: config.Driver{URL: test.GRPCURL(8)}}
 	cfg.TLS = test.SetupTLS(t)
 
 	type Coll1 struct {
@@ -94,7 +94,11 @@ func TestClient(t *testing.T) {
 	err = c.Close()
 	require.NoError(t, err)
 
-	cfg.URL = "http://invalid"
+	cfg.URL = "http:++//invalid"
 	_, err = NewClient(ctx, cfg)
+	require.Error(t, err)
+
+	cfg.URL = ""
+	_, err = NewClient(ctx, cfg, cfg)
 	require.Error(t, err)
 }

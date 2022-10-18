@@ -511,8 +511,8 @@ func (c *grpcDriver) GetAccessToken(ctx context.Context, clientID string, client
 	return (*TokenResponse)(r), nil
 }
 
-func (c *grpcDriver) CreateNamespace(ctx context.Context, id int, name string) error {
-	_, err := c.mgmt.CreateNamespace(ctx, &api.CreateNamespaceRequest{Name: name, Id: int32(id)})
+func (c *grpcDriver) CreateNamespace(ctx context.Context, name string) error {
+	_, err := c.mgmt.CreateNamespace(ctx, &api.CreateNamespaceRequest{Name: name})
 	if err != nil {
 		return GRPCError(err)
 	}

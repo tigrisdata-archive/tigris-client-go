@@ -831,9 +831,8 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, cl
 	return &tr, nil
 }
 
-func (c *httpDriver) CreateNamespace(ctx context.Context, pid int, name string) error {
-	id := int32(pid)
-	resp, err := c.api.ManagementCreateNamespace(ctx, name, apiHTTP.ManagementCreateNamespaceJSONBody{Id: &id})
+func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
+	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONBody{Name: &name})
 	if err := HTTPError(err, resp); err != nil {
 		return err
 	}

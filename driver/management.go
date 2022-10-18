@@ -30,7 +30,7 @@ type Management interface {
 	RotateClientSecret(ctx context.Context, id string) (*Application, error)
 	GetAccessToken(ctx context.Context, clientID string, clientSecret string, refreshToken string) (*TokenResponse, error)
 
-	CreateNamespace(ctx context.Context, id int, name string) error
+	CreateNamespace(ctx context.Context, name string) error
 	ListNamespaces(ctx context.Context) ([]*Namespace, error)
 
 	Close() error

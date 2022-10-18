@@ -80,10 +80,10 @@ func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementS
 	require.Error(t, err)
 
 	mc.EXPECT().CreateNamespace(gomock.Any(),
-		pm(&api.CreateNamespaceRequest{Id: 11, Name: "app1"})).Return(
+		pm(&api.CreateNamespaceRequest{Name: "app1"})).Return(
 		nil, fmt.Errorf("some error"))
 
-	err = c.CreateNamespace(ctx, 11, "app1")
+	err = c.CreateNamespace(ctx, "app1")
 	require.Error(t, err)
 
 	mc.EXPECT().ListNamespaces(gomock.Any(),
@@ -189,9 +189,9 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	require.Equal(t, "access_token2", token.AccessToken)
 	require.Equal(t, "refresh_token2", token.RefreshToken)
 
-	nsapp1 := &api.NamespaceInfo{Id: 7, Name: "ns_list_app1"}
-	nsapp2 := &api.NamespaceInfo{Id: 8, Name: "ns_list_app2"}
-	nsapp3 := &api.NamespaceInfo{Id: 9, Name: "ns_list_app3"}
+	nsapp1 := &api.NamespaceInfo{Name: "ns_list_app1"}
+	nsapp2 := &api.NamespaceInfo{Name: "ns_list_app2"}
+	nsapp3 := &api.NamespaceInfo{Name: "ns_list_app3"}
 
 	mc.EXPECT().ListNamespaces(gomock.Any(),
 		pm(&api.ListNamespacesRequest{})).Return(
@@ -209,10 +209,10 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	assert.Equal(t, nsapp3.Name, nsList[2].Name)
 
 	mc.EXPECT().CreateNamespace(gomock.Any(),
-		pm(&api.CreateNamespaceRequest{Id: 10, Name: "nsapp1"})).Return(
+		pm(&api.CreateNamespaceRequest{Name: "nsapp1"})).Return(
 		&api.CreateNamespaceResponse{}, nil)
 
-	err = c.CreateNamespace(ctx, 10, "nsapp1")
+	err = c.CreateNamespace(ctx, "nsapp1")
 	require.NoError(t, err)
 }
 

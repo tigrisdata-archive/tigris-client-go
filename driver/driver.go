@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -305,34 +306,136 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 	return v.Index(0).Interface(), nil
 }
 
-func initConfig(cfg *config.Driver) *config.Driver {
-	if cfg == nil {
-		cfg = &config.Driver{}
+func initProto(scheme string, cfg *config.Driver) (bool, error) {
+	proto := os.Getenv(EnvProtocol)
+
+	if cfg.Protocol != "" {
+		proto = cfg.Protocol
 	}
 
-	if cfg.TLS == nil && (cfg.ClientID != "" || cfg.ClientSecret != "" || cfg.Token != "") {
+	if scheme != "" {
+		proto = scheme
+	}
+
+	if proto == "" {
+		proto = DefaultProtocol
+	}
+
+	s := false
+	proto = strings.ToUpper(proto)
+	switch proto {
+	case HTTP, HTTPS:
+		if proto == HTTPS {
+			s = true
+		}
+		cfg.Protocol = HTTP
+	case "DNS", GRPC:
+		cfg.Protocol = GRPC
+	default:
+		return false, fmt.Errorf("unsupported protocol")
+	}
+
+	return s, nil
+}
+
+func initSecrets(u *url.URL, cfg *config.Driver) {
+	// Initialize from environment if not set explicitly in the config
+	if cfg.ClientID == "" {
+		cfg.ClientID = os.Getenv(EnvClientID)
+	}
+
+	if cfg.ClientSecret == "" {
+		cfg.ClientSecret = os.Getenv(EnvClientSecret)
+	}
+
+	if cfg.Token == "" {
+		cfg.Token = os.Getenv(EnvToken)
+	}
+
+	// In URL config takes precedence over environment and config struct
+	// http://{usr}:{pwd}@host...
+	if usr := u.User.Username(); usr != "" {
+		cfg.ClientID = usr
+	}
+
+	if pwd, _ := u.User.Password(); pwd != "" {
+		cfg.ClientSecret = pwd
+	}
+
+	// http://host/path?client_id={usr}&client_secret={pwd}
+	if usr := u.Query().Get("client_id"); usr != "" {
+		cfg.ClientID = usr
+	}
+
+	if pwd := u.Query().Get("client_secret"); pwd != "" {
+		cfg.ClientSecret = pwd
+	}
+
+	if tkn := u.Query().Get("token"); tkn != "" {
+		cfg.Token = tkn
+	}
+}
+
+func initConfig(lCfg *config.Driver) (*config.Driver, error) {
+	cfg := config.Driver{}
+	if lCfg != nil {
+		cfg = *lCfg
+	}
+
+	if cfg.URL == "" {
+		cfg.URL = os.Getenv(EnvURL)
+	}
+
+	if cfg.URL == "" {
+		cfg.URL = DefaultURL
+	}
+
+	URL := cfg.URL
+	noScheme := !strings.Contains(URL, "://")
+	if noScheme {
+		URL = strings.ToLower(DefaultProtocol) + "://" + URL
+	}
+
+	u, err := url.Parse(URL)
+	if err != nil {
+		return nil, err
+	}
+
+	if noScheme {
+		u.Scheme = ""
+	}
+
+	var sec bool
+	if sec, err = initProto(u.Scheme, &cfg); err != nil {
+		return nil, err
+	}
+
+	initSecrets(u, &cfg)
+
+	// Retain only host:port for connection
+	cfg.URL = u.Host
+
+	if cfg.TLS == nil && (cfg.ClientID != "" || cfg.ClientSecret != "" || cfg.Token != "" || u.Scheme == "https" || sec) {
 		cfg.TLS = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 
-	return cfg
+	return &cfg, nil
 }
 
 // NewDriver connect to the Tigris instance at the specified URL.
 // URL should be in the form: {hostname}:{port}.
 func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
-	cfg = initConfig(cfg)
-
-	protocol := DefaultProtocol
-	if os.Getenv(EnvProtocol) != "" {
-		protocol = strings.ToUpper(os.Getenv(EnvProtocol))
-	}
-
 	var (
 		drv driverWithOptions
 		err error
 	)
 
-	switch protocol {
+	cfg, err = initConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	switch cfg.Protocol {
 	case GRPC:
 		drv, err = newGRPCClient(ctx, cfg.URL, cfg)
 	case HTTP:

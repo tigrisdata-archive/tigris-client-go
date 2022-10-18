@@ -57,7 +57,7 @@ func GRPCError(err error) error {
 }
 
 // newGRPCClient return Driver interface implementation using GRPC transport protocol.
-func newGRPCClient(_ context.Context, url string, config *config.Driver) (*grpcDriver, error) {
+func newGRPCClient(ctx context.Context, url string, config *config.Driver) (*grpcDriver, error) {
 	if !strings.Contains(url, ":") {
 		url = fmt.Sprintf("%s:%d", url, DefaultGRPCPort)
 	}
@@ -81,7 +81,7 @@ func newGRPCClient(_ context.Context, url string, config *config.Driver) (*grpcD
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
-	conn, err := grpc.Dial(url, opts...)
+	conn, err := grpc.DialContext(ctx, url, opts...)
 	if err != nil {
 		return nil, GRPCError(err)
 	}

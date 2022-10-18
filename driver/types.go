@@ -30,6 +30,7 @@ const (
 	EnvClientSecret = "TIGRIS_CLIENT_SECRET" //nolint:golint,gosec
 	EnvToken        = "TIGRIS_TOKEN"         //nolint:golint,gosec
 	EnvProtocol     = "TIGRIS_PROTOCOL"
+	EnvURL          = "TIGRIS_URL"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version
@@ -39,6 +40,7 @@ const (
 
 var (
 	DefaultProtocol = GRPC
+	DefaultURL      = "api.preview.tigrisdata.cloud"
 
 	// TokenURLOverride Only used in tests to point auth to proper HTTP port in GRPC tests.
 	TokenURLOverride string

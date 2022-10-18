@@ -24,10 +24,11 @@ type Driver struct {
 	ClientSecret string      `json:"client_secret,omitempty"`
 	Token        string      `json:"token,omitempty"`
 	URL          string      `json:"url,omitempty"`
+	Protocol     string      `json:"protocol,omitempty"`
 }
 
-// Database contains database and connection config.
-type Database struct {
+// Client contains database and connection config.
+type Client struct {
 	Driver
 	// MustExist if set skips implicit database creation
 	MustExist bool

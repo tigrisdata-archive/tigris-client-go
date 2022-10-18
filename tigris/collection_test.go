@@ -174,7 +174,7 @@ func TestCollectionBasic(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &config.Database{}, "db1", &Coll1{}, &Coll2{})
+	db, err := openDatabaseFromModels(ctx, m, &config.Client{}, "db1", &Coll1{}, &Coll2{})
 	require.NoError(t, err)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb)
@@ -296,7 +296,7 @@ func TestCollection_Search(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &config.Database{}, "db1", &Coll1{})
+	db, err := openDatabaseFromModels(ctx, m, &config.Client{}, "db1", &Coll1{})
 	require.NoError(t, err)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb)
@@ -553,7 +553,7 @@ func TestClientSchemaMigration(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &config.Database{Driver: config.Driver{URL: test.GRPCURL(6)}}
+	cfg := &config.Client{Driver: config.Driver{URL: test.GRPCURL(6)}}
 	cfg.TLS = test.SetupTLS(t)
 
 	driver.DefaultProtocol = driver.GRPC
@@ -602,7 +602,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = openDatabaseFromModels(ctx, drv, &config.Database{}, "db1", &testSchema1{})
+	_, err = openDatabaseFromModels(ctx, drv, &config.Client{}, "db1", &testSchema1{})
 	require.NoError(t, err)
 
 	mc.EXPECT().CreateDatabase(gomock.Any(),
@@ -648,7 +648,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = openDatabaseFromModels(ctx, drv, &config.Database{}, "db1", &testSchema1{}, &testSchema2{})
+	_, err = openDatabaseFromModels(ctx, drv, &config.Client{}, "db1", &testSchema1{}, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string
@@ -803,7 +803,7 @@ func TestOpenDatabase(t *testing.T) {
 
 	m.EXPECT().CreateDatabase(gomock.Any(), "db1")
 
-	db, err := openDatabaseFromModels(ctx, m, &config.Database{}, "db1")
+	db, err := openDatabaseFromModels(ctx, m, &config.Client{}, "db1")
 	require.NoError(t, err)
 	require.NotNil(t, db)
 }

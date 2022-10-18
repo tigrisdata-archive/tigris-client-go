@@ -17,8 +17,6 @@ package driver
 import (
 	"context"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 )
@@ -40,19 +38,17 @@ type Management interface {
 
 // NewManagement instantiates authentication API client.
 func NewManagement(ctx context.Context, cfg *config.Driver) (Management, error) {
-	cfg = initConfig(cfg)
-
-	protocol := DefaultProtocol
-	if os.Getenv(EnvProtocol) != "" {
-		protocol = strings.ToUpper(os.Getenv(EnvProtocol))
-	}
-
 	var (
 		mgmt Management
 		err  error
 	)
 
-	switch protocol {
+	cfg, err = initConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	switch cfg.Protocol {
 	case GRPC:
 		mgmt, err = newGRPCClient(ctx, cfg.URL, cfg)
 	case HTTP:
@@ -61,9 +57,5 @@ func NewManagement(ctx context.Context, cfg *config.Driver) (Management, error) 
 		err = fmt.Errorf("unsupported protocol")
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	return mgmt, nil
+	return mgmt, err
 }

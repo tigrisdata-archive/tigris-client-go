@@ -34,7 +34,8 @@ import (
 )
 
 const (
-	DefaultHTTPPort    = 443
+	DefaultHTTPSPort   = 443
+	DefaultHTTPPort    = 80
 	SetCookieHeaderKey = "Set-Cookie"
 	CookieHeaderKey    = "Cookie"
 
@@ -206,13 +207,19 @@ func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx, cookies []*htt
 }
 
 // newHTTPClient return Driver interface implementation using HTTP transport protocol.
-func newHTTPClient(_ context.Context, url string, config *config.Driver) (*httpDriver, error) {
-	if !strings.Contains(url, ":") {
-		url = fmt.Sprintf("%s:%d", url, DefaultHTTPPort)
+func newHTTPClient(_ context.Context, config *config.Driver) (*httpDriver, error) {
+	if !strings.Contains(config.URL, ":") {
+		if config.TLS != nil {
+			config.URL = fmt.Sprintf("%s:%d", config.URL, DefaultHTTPSPort)
+		} else {
+			config.URL = fmt.Sprintf("%s:%d", config.URL, DefaultHTTPPort)
+		}
 	}
 
-	if !strings.Contains(url, "://") {
-		url = "https://" + url
+	if config.TLS != nil {
+		config.URL = "https://" + config.URL
+	} else {
+		config.URL = "http://" + config.URL
 	}
 
 	_, httpClient, tokenURL := configAuth(config)
@@ -221,7 +228,7 @@ func newHTTPClient(_ context.Context, url string, config *config.Driver) (*httpD
 		httpClient = &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
 	}
 
-	c, err := apiHTTP.NewClientWithResponses(url, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(setHeaders))
+	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(setHeaders))
 	if err != nil {
 		return nil, err
 	}

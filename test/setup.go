@@ -53,11 +53,11 @@ var (
 )
 
 func GRPCURL(shift int) string {
-	return fmt.Sprintf("dns:localhost:%d", 33334+shift)
+	return fmt.Sprintf("localhost:%d", 33334+shift)
 }
 
 func HTTPURL(shift int) string {
-	return fmt.Sprintf("https://localhost:%d", 33333+shift)
+	return fmt.Sprintf("localhost:%d", 33333+shift)
 }
 
 type ProtoMatcher struct {

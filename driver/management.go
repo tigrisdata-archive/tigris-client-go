@@ -50,9 +50,9 @@ func NewManagement(ctx context.Context, cfg *config.Driver) (Management, error) 
 
 	switch cfg.Protocol {
 	case GRPC:
-		mgmt, err = newGRPCClient(ctx, cfg.URL, cfg)
+		mgmt, err = newGRPCClient(ctx, cfg)
 	case HTTP:
-		mgmt, err = newHTTPClient(ctx, cfg.URL, cfg)
+		mgmt, err = newHTTPClient(ctx, cfg)
 	default:
 		err = fmt.Errorf("unsupported protocol")
 	}

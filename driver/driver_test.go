@@ -44,7 +44,8 @@ import (
 func setupGRPCTests(t *testing.T, config *config.Driver) (Driver, *grpcDriver, *test.MockServers, func()) {
 	mockServers, cancel := test.SetupTests(t, 0)
 	config.TLS = test.SetupTLS(t)
-	client, err := newGRPCClient(context.Background(), test.GRPCURL(0), config)
+	config.URL = test.GRPCURL(0)
+	client, err := newGRPCClient(context.Background(), config)
 	require.NoError(t, err)
 
 	return &driver{driverWithOptions: client}, client, mockServers, func() { cancel(); _ = client.Close() }
@@ -55,7 +56,7 @@ func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *
 	url := test.HTTPURL(2)
 	config.URL = url
 	config.TLS = test.SetupTLS(t)
-	client, err := newHTTPClient(context.Background(), url, config)
+	client, err := newHTTPClient(context.Background(), config)
 	require.NoError(t, err)
 
 	// FIXME: implement proper wait for HTTP server to start

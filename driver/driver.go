@@ -437,9 +437,9 @@ func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 
 	switch cfg.Protocol {
 	case GRPC:
-		drv, err = newGRPCClient(ctx, cfg.URL, cfg)
+		drv, err = newGRPCClient(ctx, cfg)
 	case HTTP:
-		drv, err = newHTTPClient(ctx, cfg.URL, cfg)
+		drv, err = newHTTPClient(ctx, cfg)
 	default:
 		err = fmt.Errorf("unsupported protocol")
 	}

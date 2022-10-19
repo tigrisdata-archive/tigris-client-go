@@ -43,9 +43,9 @@ func NewObservability(ctx context.Context, cfg *config.Driver) (Observability, e
 
 	switch cfg.Protocol {
 	case GRPC:
-		o11y, err = newGRPCClient(ctx, cfg.URL, cfg)
+		o11y, err = newGRPCClient(ctx, cfg)
 	case HTTP:
-		o11y, err = newHTTPClient(ctx, cfg.URL, cfg)
+		o11y, err = newHTTPClient(ctx, cfg)
 	default:
 		err = fmt.Errorf("unsupported protocol")
 	}

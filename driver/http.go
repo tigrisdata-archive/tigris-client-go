@@ -707,7 +707,7 @@ func (g *httpSearchReader) close() error {
 }
 
 func (c *httpDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONBody{Name: &name, Description: &description})
+	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONRequestBody{Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -724,13 +724,13 @@ func (c *httpDriver) CreateApplication(ctx context.Context, name string, descrip
 }
 
 func (c *httpDriver) DeleteApplication(ctx context.Context, id string) error {
-	resp, err := c.api.ManagementDeleteApplication(ctx, apiHTTP.ManagementDeleteApplicationJSONBody{Id: &id})
+	resp, err := c.api.ManagementDeleteApplication(ctx, apiHTTP.ManagementDeleteApplicationJSONRequestBody{Id: &id})
 
 	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
-	resp, err := c.api.ManagementUpdateApplication(ctx, apiHTTP.ManagementUpdateApplicationJSONBody{Id: &id, Name: &name, Description: &description})
+	resp, err := c.api.ManagementUpdateApplication(ctx, apiHTTP.ManagementUpdateApplicationJSONRequestBody{Id: &id, Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -747,7 +747,7 @@ func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name stri
 }
 
 func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONBody{})
+	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONRequestBody{})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -764,7 +764,7 @@ func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, erro
 }
 
 func (c *httpDriver) RotateClientSecret(ctx context.Context, id string) (*Application, error) {
-	resp, err := c.api.ManagementRotateApplicationSecret(ctx, apiHTTP.ManagementRotateApplicationSecretJSONBody{Id: &id})
+	resp, err := c.api.ManagementRotateApplicationSecret(ctx, apiHTTP.ManagementRotateApplicationSecretJSONRequestBody{Id: &id})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -839,7 +839,7 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, cl
 }
 
 func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
-	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONBody{Name: &name})
+	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONRequestBody{Name: &name})
 	if err := HTTPError(err, resp); err != nil {
 		return err
 	}
@@ -941,7 +941,7 @@ func (g *subscribeStreamReader) close() error {
 func (c *httpCRUD) subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
-	resp, err := c.api.TigrisSubscribe(ctx, c.db, collection, apiHTTP.TigrisSubscribeJSONBody{
+	resp, err := c.api.TigrisSubscribe(ctx, c.db, collection, apiHTTP.TigrisSubscribeJSONRequestBody{
 		Filter:  json.RawMessage(filter),
 		Options: c.convertSubscribeOptions(options),
 	})

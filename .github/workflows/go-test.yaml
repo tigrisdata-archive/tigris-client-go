@@ -21,6 +21,13 @@ jobs:
           /bin/bash scripts/install_build_deps.sh
           /bin/bash scripts/install_test_deps.sh
 
+      - name: Golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          skip-pkg-cache: true
+          skip-build-cache: true
+
       - name: Run tests
         run: TEST_PARAM="-coverprofile=coverage.out -covermode=atomic" make test
 

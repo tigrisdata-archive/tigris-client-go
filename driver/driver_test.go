@@ -614,11 +614,12 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DescribeCollection(gomock.Any(),
 		pm(&api.DescribeCollectionRequest{
-			Db:         "db1",
-			Collection: "coll1",
+			Db:           "db1",
+			Collection:   "coll1",
+			SchemaFormat: "fmt1",
 		})).Return(&descExp, nil)
 
-	desc, err := db.DescribeCollection(ctx, "coll1")
+	desc, err := db.DescribeCollection(ctx, "coll1", &DescribeCollectionOptions{SchemaFormat: "fmt1"})
 	require.NoError(t, err)
 	require.Equal(t, descExp.Collection, desc.Collection)
 	require.Equal(t, descExp.Schema, desc.Schema)
@@ -643,10 +644,11 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DescribeDatabase(gomock.Any(),
 		pm(&api.DescribeDatabaseRequest{
-			Db: "db1",
+			Db:           "db1",
+			SchemaFormat: "fmt2",
 		})).Return(&descDBExp, nil)
 
-	descDB, err := c.DescribeDatabase(ctx, "db1")
+	descDB, err := c.DescribeDatabase(ctx, "db1", &DescribeDatabaseOptions{SchemaFormat: "fmt2"})
 	require.NoError(t, err)
 	require.Equal(t, "db1", descDB.Db)
 	require.Equal(t, int64(314159), descDB.Size)

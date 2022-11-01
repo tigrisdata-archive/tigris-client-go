@@ -129,9 +129,10 @@ func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	return databases, nil
 }
 
-func (c *grpcDriver) DescribeDatabase(ctx context.Context, db string) (*DescribeDatabaseResponse, error) {
+func (c *grpcDriver) describeDatabaseWithOptions(ctx context.Context, db string, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
 	r, err := c.api.DescribeDatabase(ctx, &api.DescribeDatabaseRequest{
-		Db: db,
+		Db:           db,
+		SchemaFormat: options.SchemaFormat,
 	})
 	if err != nil {
 		return nil, GRPCError(err)
@@ -252,10 +253,11 @@ func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *Coll
 	return collections, nil
 }
 
-func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, collection string, _ *CollectionOptions) (*DescribeCollectionResponse, error) {
+func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error) {
 	r, err := c.api.DescribeCollection(ctx, &api.DescribeCollectionRequest{
-		Db:         c.db,
-		Collection: collection,
+		Db:           c.db,
+		Collection:   collection,
+		SchemaFormat: options.SchemaFormat,
 	})
 	if err != nil {
 		return nil, GRPCError(err)

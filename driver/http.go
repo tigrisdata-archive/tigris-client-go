@@ -284,8 +284,10 @@ func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
 	return databases, nil
 }
 
-func (c *httpDriver) DescribeDatabase(ctx context.Context, db string) (*DescribeDatabaseResponse, error) {
-	resp, err := c.api.TigrisDescribeDatabase(ctx, db, apiHTTP.TigrisDescribeDatabaseJSONRequestBody{})
+func (c *httpDriver) describeDatabaseWithOptions(ctx context.Context, db string, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
+	resp, err := c.api.TigrisDescribeDatabase(ctx, db, apiHTTP.TigrisDescribeDatabaseJSONRequestBody{
+		SchemaFormat: &options.SchemaFormat,
+	})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -469,8 +471,10 @@ func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *Coll
 	return collections, nil
 }
 
-func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection string, _ *CollectionOptions) (*DescribeCollectionResponse, error) {
-	resp, err := c.api.TigrisDescribeCollection(ctx, c.db, collection, apiHTTP.TigrisDescribeCollectionJSONRequestBody{})
+func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error) {
+	resp, err := c.api.TigrisDescribeCollection(ctx, c.db, collection, apiHTTP.TigrisDescribeCollectionJSONRequestBody{
+		SchemaFormat: &options.SchemaFormat,
+	})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}

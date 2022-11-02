@@ -32,10 +32,3 @@ type Driver struct {
 	DisablePing  bool          `json:"disable_ping,omitempty"`
 	PingInterval time.Duration `json:"ping_interval_ms,omitempty"`
 }
-
-// Client contains database and connection config.
-type Client struct {
-	Driver
-	// MustExist if set skips implicit database creation
-	MustExist bool
-}

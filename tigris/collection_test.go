@@ -27,7 +27,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -174,7 +173,7 @@ func TestCollectionBasic(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &config.Client{}, "db1", &Coll1{}, &Coll2{})
+	db, err := openDatabaseFromModels(ctx, m, &Config{}, "db1", &Coll1{}, &Coll2{})
 	require.NoError(t, err)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb)
@@ -296,7 +295,7 @@ func TestCollection_Search(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &config.Client{}, "db1", &Coll1{})
+	db, err := openDatabaseFromModels(ctx, m, &Config{}, "db1", &Coll1{})
 	require.NoError(t, err)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb)
@@ -553,11 +552,11 @@ func TestClientSchemaMigration(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &config.Client{Driver: config.Driver{URL: test.GRPCURL(6)}}
+	cfg := &Config{URL: test.GRPCURL(6)}
 	cfg.TLS = test.SetupTLS(t)
 
 	driver.DefaultProtocol = driver.GRPC
-	drv, err := driver.NewDriver(ctx, &cfg.Driver)
+	drv, err := driver.NewDriver(ctx, driverConfig(cfg))
 	require.NoError(t, err)
 
 	type testSchema1 struct {
@@ -602,7 +601,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = openDatabaseFromModels(ctx, drv, &config.Client{}, "db1", &testSchema1{})
+	_, err = openDatabaseFromModels(ctx, drv, &Config{}, "db1", &testSchema1{})
 	require.NoError(t, err)
 
 	mc.EXPECT().CreateDatabase(gomock.Any(),
@@ -648,7 +647,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = openDatabaseFromModels(ctx, drv, &config.Client{}, "db1", &testSchema1{}, &testSchema2{})
+	_, err = openDatabaseFromModels(ctx, drv, &Config{}, "db1", &testSchema1{}, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string
@@ -803,7 +802,7 @@ func TestOpenDatabase(t *testing.T) {
 
 	m.EXPECT().CreateDatabase(gomock.Any(), "db1")
 
-	db, err := openDatabaseFromModels(ctx, m, &config.Client{}, "db1")
+	db, err := openDatabaseFromModels(ctx, m, &Config{}, "db1")
 	require.NoError(t, err)
 	require.NotNil(t, db)
 }

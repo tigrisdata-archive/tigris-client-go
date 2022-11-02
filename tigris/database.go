@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
@@ -111,7 +110,7 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 }
 
 // openDatabaseFromModels creates Database and collections from the provided collection models.
-func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Client, dbName string,
+func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *Config, dbName string,
 	models ...schema.Model,
 ) (*Database, error) {
 	// optionally creates database if it's allowed
@@ -139,13 +138,13 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *config.Cl
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
-func OpenDatabase(ctx context.Context, cfg *config.Client, dbName string, models ...schema.Model,
+func OpenDatabase(ctx context.Context, cfg *Config, dbName string, models ...schema.Model,
 ) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
 	}
 
-	d, err := driver.NewDriver(ctx, &cfg.Driver)
+	d, err := driver.NewDriver(ctx, driverConfig(cfg))
 	if err != nil {
 		return nil, err
 	}
@@ -154,12 +153,12 @@ func OpenDatabase(ctx context.Context, cfg *config.Client, dbName string, models
 }
 
 // DropDatabase deletes the database and all collections in it.
-func DropDatabase(ctx context.Context, cfg *config.Client, dbName string) error {
+func DropDatabase(ctx context.Context, cfg *Config, dbName string) error {
 	if getTxCtx(ctx) != nil {
 		return ErrNotTransactional
 	}
 
-	d, err := driver.NewDriver(ctx, &cfg.Driver)
+	d, err := driver.NewDriver(ctx, driverConfig(cfg))
 	if err != nil {
 		return err
 	}

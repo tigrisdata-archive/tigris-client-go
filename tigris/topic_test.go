@@ -23,7 +23,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/mock"
@@ -63,7 +62,7 @@ func TestTopicBasic(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &config.Client{}, "db1", &Coll1{})
+	db, err := openDatabaseFromModels(ctx, m, &Config{}, "db1", &Coll1{})
 	require.NoError(t, err)
 
 	m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)

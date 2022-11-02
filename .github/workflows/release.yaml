@@ -9,11 +9,9 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/go-test.yaml
-  lint:
-    uses: ./.github/workflows/go-lint.yaml
   release:
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3

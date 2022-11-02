@@ -437,6 +437,21 @@ func (mr *MockManagementServerMockRecorder) DeleteApplication(arg0, arg1 interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockManagementServer)(nil).DeleteApplication), arg0, arg1)
 }
 
+// DescribeNamespaces mocks base method.
+func (m *MockManagementServer) DescribeNamespaces(arg0 context.Context, arg1 *api.DescribeNamespacesRequest) (*api.DescribeNamespacesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DescribeNamespaces", arg0, arg1)
+	ret0, _ := ret[0].(*api.DescribeNamespacesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeNamespaces indicates an expected call of DescribeNamespaces.
+func (mr *MockManagementServerMockRecorder) DescribeNamespaces(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeNamespaces", reflect.TypeOf((*MockManagementServer)(nil).DescribeNamespaces), arg0, arg1)
+}
+
 // GetUserMetadata mocks base method.
 func (m *MockManagementServer) GetUserMetadata(arg0 context.Context, arg1 *api.GetUserMetadataRequest) (*api.GetUserMetadataResponse, error) {
 	m.ctrl.T.Helper()

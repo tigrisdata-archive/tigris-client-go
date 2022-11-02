@@ -74,6 +74,14 @@ type (
 	CollectionOptions api.CollectionOptions
 	DatabaseOptions   api.DatabaseOptions
 	TxOptions         api.TransactionOptions
+
+	DescribeDatabaseOptions struct {
+		SchemaFormat string
+	}
+
+	DescribeCollectionOptions struct {
+		SchemaFormat string
+	}
 )
 
 type (

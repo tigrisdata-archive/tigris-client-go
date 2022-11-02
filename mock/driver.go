@@ -89,18 +89,23 @@ func (mr *MockDriverMockRecorder) CreateDatabase(arg0, arg1 interface{}, arg2 ..
 }
 
 // DescribeDatabase mocks base method.
-func (m *MockDriver) DescribeDatabase(arg0 context.Context, arg1 string) (*driver.DescribeDatabaseResponse, error) {
+func (m *MockDriver) DescribeDatabase(arg0 context.Context, arg1 string, arg2 ...*driver.DescribeDatabaseOptions) (*driver.DescribeDatabaseResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DescribeDatabase", arg0, arg1)
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DescribeDatabase", varargs...)
 	ret0, _ := ret[0].(*driver.DescribeDatabaseResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // DescribeDatabase indicates an expected call of DescribeDatabase.
-func (mr *MockDriverMockRecorder) DescribeDatabase(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockDriverMockRecorder) DescribeDatabase(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeDatabase", reflect.TypeOf((*MockDriver)(nil).DescribeDatabase), arg0, arg1)
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeDatabase", reflect.TypeOf((*MockDriver)(nil).DescribeDatabase), varargs...)
 }
 
 // DropDatabase mocks base method.
@@ -243,7 +248,7 @@ func (mr *MockTxMockRecorder) Delete(arg0, arg1, arg2 interface{}, arg3 ...inter
 }
 
 // DescribeCollection mocks base method.
-func (m *MockTx) DescribeCollection(arg0 context.Context, arg1 string, arg2 ...*driver.CollectionOptions) (*driver.DescribeCollectionResponse, error) {
+func (m *MockTx) DescribeCollection(arg0 context.Context, arg1 string, arg2 ...*driver.DescribeCollectionOptions) (*driver.DescribeCollectionResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -513,7 +518,7 @@ func (mr *MockDatabaseMockRecorder) Delete(arg0, arg1, arg2 interface{}, arg3 ..
 }
 
 // DescribeCollection mocks base method.
-func (m *MockDatabase) DescribeCollection(arg0 context.Context, arg1 string, arg2 ...*driver.CollectionOptions) (*driver.DescribeCollectionResponse, error) {
+func (m *MockDatabase) DescribeCollection(arg0 context.Context, arg1 string, arg2 ...*driver.DescribeCollectionOptions) (*driver.DescribeCollectionResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {

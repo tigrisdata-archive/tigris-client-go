@@ -40,7 +40,7 @@ type Driver interface {
 	// ListDatabases in the current namespace
 	ListDatabases(ctx context.Context) ([]string, error)
 	// DescribeDatabase returns database metadata
-	DescribeDatabase(ctx context.Context, db string) (*DescribeDatabaseResponse, error)
+	DescribeDatabase(ctx context.Context, db string, options ...*DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
 
 	// CreateDatabase creates new database
 	CreateDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error
@@ -117,7 +117,7 @@ type Database interface {
 	ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error)
 
 	// DescribeCollection returns metadata of the collection in the database
-	DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (
+	DescribeCollection(ctx context.Context, collection string, options ...*DescribeCollectionOptions) (
 		*DescribeCollectionResponse, error)
 
 	Publish(ctx context.Context, collection string, docs []Message, options ...*PublishOptions) (*PublishResponse, error)
@@ -145,6 +145,15 @@ func (c *driver) DropDatabase(ctx context.Context, db string, options ...*Databa
 	}
 
 	return c.dropDatabaseWithOptions(ctx, db, opts.(*DatabaseOptions))
+}
+
+func (c *driver) DescribeDatabase(ctx context.Context, db string, options ...*DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
+	opts, err := validateOptionsParam(options, &DescribeDatabaseOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return c.describeDatabaseWithOptions(ctx, db, opts.(*DescribeDatabaseOptions))
 }
 
 func (c *driver) BeginTx(ctx context.Context, db string, options ...*TxOptions) (Tx, error) {
@@ -263,15 +272,15 @@ func (c *driverCRUD) ListCollections(ctx context.Context, options ...*Collection
 	return c.listCollectionsWithOptions(ctx, opts.(*CollectionOptions))
 }
 
-func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, options ...*CollectionOptions) (
+func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, options ...*DescribeCollectionOptions) (
 	*DescribeCollectionResponse, error,
 ) {
-	opts, err := validateOptionsParam(options, &CollectionOptions{})
+	opts, err := validateOptionsParam(options, &DescribeCollectionOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.describeCollectionWithOptions(ctx, collection, opts.(*CollectionOptions))
+	return c.describeCollectionWithOptions(ctx, collection, opts.(*DescribeCollectionOptions))
 }
 
 func (c *driverCRUD) Publish(ctx context.Context, collection string, msgs []Message, options ...*PublishOptions) (*PublishResponse, error) {

@@ -36,12 +36,12 @@ const (
 )
 
 type grpcDriver struct {
-	api  api.TigrisClient
-	mgmt api.ManagementClient
-	auth api.AuthClient
-	o11y api.ObservabilityClient
-
-	conn *grpc.ClientConn
+	api    api.TigrisClient
+	mgmt   api.ManagementClient
+	auth   api.AuthClient
+	o11y   api.ObservabilityClient
+	health api.HealthAPIClient
+	conn   *grpc.ClientConn
 }
 
 func GRPCError(err error) error {
@@ -87,11 +87,12 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (*grpcDriver, err
 	}
 
 	return &grpcDriver{
-		conn: conn,
-		api:  api.NewTigrisClient(conn),
-		mgmt: api.NewManagementClient(conn),
-		auth: api.NewAuthClient(conn),
-		o11y: api.NewObservabilityClient(conn),
+		conn:   conn,
+		api:    api.NewTigrisClient(conn),
+		mgmt:   api.NewManagementClient(conn),
+		auth:   api.NewAuthClient(conn),
+		o11y:   api.NewObservabilityClient(conn),
+		health: api.NewHealthAPIClient(conn),
 	}, nil
 }
 
@@ -113,6 +114,14 @@ func (c *grpcDriver) Info(ctx context.Context) (*InfoResponse, error) {
 	}
 
 	return (*InfoResponse)(r), nil
+}
+
+func (c *grpcDriver) Health(ctx context.Context) (*HealthResponse, error) {
+	r, err := c.health.Health(ctx, &api.HealthCheckInput{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+	return (*HealthResponse)(r), nil
 }
 
 func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {

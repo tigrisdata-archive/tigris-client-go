@@ -452,6 +452,21 @@ func (mr *MockManagementServerMockRecorder) DescribeNamespaces(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeNamespaces", reflect.TypeOf((*MockManagementServer)(nil).DescribeNamespaces), arg0, arg1)
 }
 
+// GetNamespaceMetadata mocks base method.
+func (m *MockManagementServer) GetNamespaceMetadata(arg0 context.Context, arg1 *api.GetNamespaceMetadataRequest) (*api.GetNamespaceMetadataResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNamespaceMetadata", arg0, arg1)
+	ret0, _ := ret[0].(*api.GetNamespaceMetadataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNamespaceMetadata indicates an expected call of GetNamespaceMetadata.
+func (mr *MockManagementServerMockRecorder) GetNamespaceMetadata(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespaceMetadata", reflect.TypeOf((*MockManagementServer)(nil).GetNamespaceMetadata), arg0, arg1)
+}
+
 // GetUserMetadata mocks base method.
 func (m *MockManagementServer) GetUserMetadata(arg0 context.Context, arg1 *api.GetUserMetadataRequest) (*api.GetUserMetadataResponse, error) {
 	m.ctrl.T.Helper()
@@ -465,6 +480,21 @@ func (m *MockManagementServer) GetUserMetadata(arg0 context.Context, arg1 *api.G
 func (mr *MockManagementServerMockRecorder) GetUserMetadata(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserMetadata", reflect.TypeOf((*MockManagementServer)(nil).GetUserMetadata), arg0, arg1)
+}
+
+// InsertNamespaceMetadata mocks base method.
+func (m *MockManagementServer) InsertNamespaceMetadata(arg0 context.Context, arg1 *api.InsertNamespaceMetadataRequest) (*api.InsertNamespaceMetadataResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertNamespaceMetadata", arg0, arg1)
+	ret0, _ := ret[0].(*api.InsertNamespaceMetadataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertNamespaceMetadata indicates an expected call of InsertNamespaceMetadata.
+func (mr *MockManagementServerMockRecorder) InsertNamespaceMetadata(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertNamespaceMetadata", reflect.TypeOf((*MockManagementServer)(nil).InsertNamespaceMetadata), arg0, arg1)
 }
 
 // InsertUserMetadata mocks base method.
@@ -540,6 +570,21 @@ func (m *MockManagementServer) UpdateApplication(arg0 context.Context, arg1 *api
 func (mr *MockManagementServerMockRecorder) UpdateApplication(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockManagementServer)(nil).UpdateApplication), arg0, arg1)
+}
+
+// UpdateNamespaceMetadata mocks base method.
+func (m *MockManagementServer) UpdateNamespaceMetadata(arg0 context.Context, arg1 *api.UpdateNamespaceMetadataRequest) (*api.UpdateNamespaceMetadataResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNamespaceMetadata", arg0, arg1)
+	ret0, _ := ret[0].(*api.UpdateNamespaceMetadataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateNamespaceMetadata indicates an expected call of UpdateNamespaceMetadata.
+func (mr *MockManagementServerMockRecorder) UpdateNamespaceMetadata(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNamespaceMetadata", reflect.TypeOf((*MockManagementServer)(nil).UpdateNamespaceMetadata), arg0, arg1)
 }
 
 // UpdateUserMetadata mocks base method.

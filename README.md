@@ -32,7 +32,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/tigris"
@@ -49,7 +48,7 @@ func main() {
 	defer cancel()
 	
 	// Connect to the Tigris server
-	client, err := tigris.NewClient(ctx, &config.Database{Driver: config.Driver{URL: "localhost:8081"}})
+	client, err := tigris.NewClient(ctx, &tigris.Config{URL: "localhost:8081"})
 	if err != nil {
 		panic(err)
 	}

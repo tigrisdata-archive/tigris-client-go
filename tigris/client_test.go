@@ -22,7 +22,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/test"
 )
 
@@ -35,7 +34,7 @@ func TestClient(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &config.Client{Driver: config.Driver{URL: test.GRPCURL(8)}}
+	cfg := &Config{URL: test.GRPCURL(8)}
 	cfg.TLS = test.SetupTLS(t)
 
 	type Coll1 struct {

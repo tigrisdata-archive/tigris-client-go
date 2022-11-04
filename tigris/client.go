@@ -16,6 +16,7 @@ package tigris
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 
 	"github.com/tigrisdata/tigris-client-go/config"
@@ -23,15 +24,38 @@ import (
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
+type Config struct {
+	TLS          *tls.Config `json:"tls,omitempty"`
+	ClientID     string      `json:"client_id,omitempty"`
+	ClientSecret string      `json:"client_secret,omitempty"`
+	Token        string      `json:"token,omitempty"`
+	URL          string      `json:"url,omitempty"`
+	Protocol     string      `json:"protocol,omitempty"`
+
+	// MustExist if set skips implicit database creation
+	MustExist bool
+}
+
 // Client responsible for connecting to the server and opening a database.
 type Client struct {
 	driver driver.Driver
-	config *config.Client
+	config *Config
+}
+
+func driverConfig(cfg *Config) *config.Driver {
+	return &config.Driver{
+		TLS:          cfg.TLS,
+		URL:          cfg.URL,
+		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
+		Token:        cfg.Token,
+		Protocol:     cfg.Protocol,
+	}
 }
 
 // NewClient creates a connection to the Tigris server.
-func NewClient(ctx context.Context, cfg ...*config.Client) (*Client, error) {
-	var pCfg config.Client
+func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
+	var pCfg Config
 
 	if len(cfg) > 0 {
 		if len(cfg) != 1 {
@@ -40,7 +64,7 @@ func NewClient(ctx context.Context, cfg ...*config.Client) (*Client, error) {
 		pCfg = *cfg[0]
 	}
 
-	d, err := driver.NewDriver(ctx, &pCfg.Driver)
+	d, err := driver.NewDriver(ctx, driverConfig(&pCfg))
 	if err != nil {
 		return nil, err
 	}

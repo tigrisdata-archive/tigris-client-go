@@ -361,6 +361,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 					return err
 				}
 			} else {
+				// FIXME: Support multidimensional arrays
 				tp, fm, err := translateType(tp.Elem())
 				if err != nil {
 					return err

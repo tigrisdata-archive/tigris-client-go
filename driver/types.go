@@ -98,7 +98,10 @@ type (
 	DescribeCollectionResponse api.DescribeCollectionResponse
 )
 
-type InfoResponse api.GetInfoResponse
+type (
+	InfoResponse   api.GetInfoResponse
+	HealthResponse api.HealthCheckResponse
+)
 
 type SearchRequest struct {
 	Q             string

@@ -127,6 +127,21 @@ func (mr *MockDriverMockRecorder) DropDatabase(arg0, arg1 interface{}, arg2 ...i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropDatabase", reflect.TypeOf((*MockDriver)(nil).DropDatabase), varargs...)
 }
 
+// Health mocks base method.
+func (m *MockDriver) Health(arg0 context.Context) (*driver.HealthResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Health", arg0)
+	ret0, _ := ret[0].(*driver.HealthResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Health indicates an expected call of Health.
+func (mr *MockDriverMockRecorder) Health(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Health", reflect.TypeOf((*MockDriver)(nil).Health), arg0)
+}
+
 // Info mocks base method.
 func (m *MockDriver) Info(arg0 context.Context) (*driver.InfoResponse, error) {
 	m.ctrl.T.Helper()

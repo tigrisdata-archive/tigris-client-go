@@ -24,6 +24,8 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 )
@@ -32,6 +34,8 @@ import (
 type Driver interface {
 	// Info returns server information
 	Info(ctx context.Context) (*InfoResponse, error)
+	// Health returns server health
+	Health(ctx context.Context) (*HealthResponse, error)
 
 	// UseDatabase returns and interface for collections and documents management
 	// of the database
@@ -127,6 +131,8 @@ type Database interface {
 
 type driver struct {
 	driverWithOptions
+	closeWg *sync.WaitGroup
+	closeCh chan struct{}
 }
 
 func (c *driver) CreateDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error {
@@ -457,5 +463,43 @@ func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 		return nil, err
 	}
 
-	return &driver{driverWithOptions: drv}, nil
+	wg, ch := startHealthPingLoop(cfg.PingInterval, drv)
+	return &driver{driverWithOptions: drv, closeCh: ch, closeWg: wg}, nil
+}
+
+func startHealthPingLoop(cfgInterval time.Duration, drv driverWithOptions) (*sync.WaitGroup, chan struct{}) {
+	var wg sync.WaitGroup
+	ch := make(chan struct{})
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		interval := cfgInterval
+		if interval == 0 {
+			interval = time.Duration(5) * time.Minute
+		}
+
+		t := time.NewTicker(interval)
+		defer t.Stop()
+
+		for {
+			select {
+			case <-t.C:
+			case <-ch:
+				return
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			_, _ = drv.Health(ctx)
+			cancel()
+		}
+	}()
+	return &wg, ch
+}
+
+func (c *driver) Close() error {
+	close(c.closeCh)
+	c.closeWg.Wait()
+
+	return c.driverWithOptions.Close()
 }

@@ -232,7 +232,6 @@ func newHTTPClient(_ context.Context, config *config.Driver) (*httpDriver, error
 	if err != nil {
 		return nil, err
 	}
-
 	return &httpDriver{api: c, tokenURL: tokenURL, cfg: config}, nil
 }
 
@@ -251,6 +250,21 @@ func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
 	}
 
 	var i InfoResponse
+
+	if err := respDecode(resp.Body, &i); err != nil {
+		return nil, err
+	}
+
+	return &i, nil
+}
+
+func (c *httpDriver) Health(ctx context.Context) (*HealthResponse, error) {
+	resp, err := c.api.HealthAPIHealth(ctx)
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var i HealthResponse
 
 	if err := respDecode(resp.Body, &i); err != nil {
 		return nil, err

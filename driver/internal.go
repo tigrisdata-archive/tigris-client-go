@@ -31,6 +31,7 @@ type driverWithOptions interface {
 	describeDatabaseWithOptions(ctx context.Context, db string, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
 
 	Info(ctx context.Context) (*InfoResponse, error)
+	Health(ctx context.Context) (*HealthResponse, error)
 	UseDatabase(name string) Database
 	ListDatabases(ctx context.Context) ([]string, error)
 	Close() error

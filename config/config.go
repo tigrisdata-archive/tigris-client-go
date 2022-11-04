@@ -15,7 +15,10 @@
 // Package config contains configuration related structures and functions
 package config
 
-import "crypto/tls"
+import (
+	"crypto/tls"
+	"time"
+)
 
 // Driver contains connection and transport configuration.
 type Driver struct {
@@ -25,6 +28,9 @@ type Driver struct {
 	Token        string      `json:"token,omitempty"`
 	URL          string      `json:"url,omitempty"`
 	Protocol     string      `json:"protocol,omitempty"`
+
+	DisablePing  bool          `json:"disable_ping,omitempty"`
+	PingInterval time.Duration `json:"ping_interval_ms,omitempty"`
 }
 
 // Client contains database and connection config.

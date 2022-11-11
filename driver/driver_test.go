@@ -684,10 +684,11 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Db:         "db1",
 			Collection: "c1",
 			Schema:     []byte(sch),
+			OnlyCreate: true,
 			Options:    &api.CollectionOptions{},
 		})).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
 
-	err = db.CreateOrUpdateCollection(ctx, "c1", Schema(sch), &CollectionOptions{})
+	err = db.CreateOrUpdateCollection(ctx, "c1", Schema(sch), &CreateCollectionOptions{OnlyCreate: true})
 	require.NoError(t, err)
 
 	mc.EXPECT().DropCollection(gomock.Any(),
@@ -1146,7 +1147,7 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	require.Error(t, err)
 	_, err = c.BeginTx(ctx, "db1", &TxOptions{}, &TxOptions{})
 	require.Error(t, err)
-	err = db.CreateOrUpdateCollection(ctx, "coll1", nil, &CollectionOptions{}, &CollectionOptions{})
+	err = db.CreateOrUpdateCollection(ctx, "coll1", nil, &CreateCollectionOptions{}, &CreateCollectionOptions{})
 	require.Error(t, err)
 	err = db.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
@@ -1181,7 +1182,7 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	require.Error(t, err)
 	_, err = tx.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
 	require.Error(t, err)
-	err = tx.CreateOrUpdateCollection(ctx, "coll1", nil, &CollectionOptions{}, &CollectionOptions{})
+	err = tx.CreateOrUpdateCollection(ctx, "coll1", nil, &CreateCollectionOptions{}, &CreateCollectionOptions{})
 	require.Error(t, err)
 	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)

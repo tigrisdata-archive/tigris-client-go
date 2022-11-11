@@ -112,7 +112,7 @@ type Database interface {
 	//   }
 	// More detailed information here: https://docs.tigrisdata.com/datamodels/types
 	CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema,
-		options ...*CollectionOptions) error
+		options ...*CreateCollectionOptions) error
 
 	// DropCollection deletes the collection and all documents it contains.
 	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
@@ -251,14 +251,14 @@ func (c *driverCRUD) Search(ctx context.Context, collection string, request *Sea
 }
 
 func (c *driverCRUD) CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema,
-	options ...*CollectionOptions,
+	options ...*CreateCollectionOptions,
 ) error {
-	opts, err := validateOptionsParam(options, &CollectionOptions{})
+	opts, err := validateOptionsParam(options, &CreateCollectionOptions{})
 	if err != nil {
 		return err
 	}
 
-	return c.createOrUpdateCollectionWithOptions(ctx, collection, schema, opts.(*CollectionOptions))
+	return c.createOrUpdateCollectionWithOptions(ctx, collection, schema, opts.(*CreateCollectionOptions))
 }
 
 func (c *driverCRUD) DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error {

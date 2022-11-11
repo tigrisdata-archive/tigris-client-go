@@ -50,7 +50,7 @@ type CRUDWithOptions interface {
 	deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (
 		*DeleteResponse, error)
 	createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema,
-		options *CollectionOptions) error
+		options *CreateCollectionOptions) error
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error)

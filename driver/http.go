@@ -508,12 +508,13 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 	return r, nil
 }
 
-func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CreateCollectionOptions) error {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisCreateOrUpdateCollection(ctx, c.db, collection, apiHTTP.TigrisCreateOrUpdateCollectionJSONRequestBody{
-		Schema:  json.RawMessage(schema),
-		Options: c.convertCollectionOptions(options),
+		Schema:     json.RawMessage(schema),
+		OnlyCreate: &options.OnlyCreate,
+		Options:    c.convertCollectionOptions(nil),
 	})
 	return HTTPError(err, resp)
 }

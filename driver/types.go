@@ -71,6 +71,10 @@ type (
 )
 
 type (
+	CreateCollectionOptions struct {
+		OnlyCreate bool
+	}
+
 	CollectionOptions api.CollectionOptions
 	DatabaseOptions   api.DatabaseOptions
 	TxOptions         api.TransactionOptions

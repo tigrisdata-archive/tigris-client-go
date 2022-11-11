@@ -224,7 +224,7 @@ func (mr *MockTxMockRecorder) Commit(arg0 interface{}) *gomock.Call {
 }
 
 // CreateOrUpdateCollection mocks base method.
-func (m *MockTx) CreateOrUpdateCollection(arg0 context.Context, arg1 string, arg2 driver.Schema, arg3 ...*driver.CollectionOptions) error {
+func (m *MockTx) CreateOrUpdateCollection(arg0 context.Context, arg1 string, arg2 driver.Schema, arg3 ...*driver.CreateCollectionOptions) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1, arg2}
 	for _, a := range arg3 {
@@ -494,7 +494,7 @@ func (m *MockDatabase) EXPECT() *MockDatabaseMockRecorder {
 }
 
 // CreateOrUpdateCollection mocks base method.
-func (m *MockDatabase) CreateOrUpdateCollection(arg0 context.Context, arg1 string, arg2 driver.Schema, arg3 ...*driver.CollectionOptions) error {
+func (m *MockDatabase) CreateOrUpdateCollection(arg0 context.Context, arg1 string, arg2 driver.Schema, arg3 ...*driver.CreateCollectionOptions) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1, arg2}
 	for _, a := range arg3 {

@@ -275,14 +275,15 @@ func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, collection
 	return (*DescribeCollectionResponse)(r), nil
 }
 
-func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CollectionOptions) error {
+func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CreateCollectionOptions) error {
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	_, err := c.api.CreateOrUpdateCollection(ctx, &api.CreateOrUpdateCollectionRequest{
 		Db:         c.db,
 		Collection: collection,
 		Schema:     schema,
-		Options:    (*api.CollectionOptions)(options),
+		OnlyCreate: options.OnlyCreate,
+		Options:    &api.CollectionOptions{},
 	})
 	return GRPCError(err)
 }

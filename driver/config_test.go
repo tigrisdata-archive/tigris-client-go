@@ -103,6 +103,12 @@ func TestDriverConfigPrecedence(t *testing.T) {
 
 	cfg := config.Driver{}
 
+	t.Setenv(EnvToken, "")
+	t.Setenv(EnvClientID, "")
+	t.Setenv(EnvClientSecret, "")
+	t.Setenv(EnvURL, "")
+	t.Setenv(EnvProtocol, "")
+
 	res, err := initConfig(&cfg)
 	assert.NoError(t, err)
 

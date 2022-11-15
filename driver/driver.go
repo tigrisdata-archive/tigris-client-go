@@ -314,7 +314,7 @@ func validateOptionsParam(options interface{}, out interface{}) (interface{}, er
 		return nil, fmt.Errorf("API accepts no more then one options parameter")
 	}
 
-	if v.Len() < 1 {
+	if v.Len() < 1 || v.Index(0).IsNil() {
 		return out, nil
 	}
 

@@ -838,7 +838,7 @@ func TestTxHTTPDriver(t *testing.T) {
 func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	t.Helper()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
@@ -963,6 +963,31 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	_, err = c.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.Error(t, err)
+
+	mc.EXPECT().Read(
+		pm(&api.ReadRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":"value"}`),
+			Options:    &api.ReadRequestOptions{},
+		}), gomock.Any()).Return(nil)
+
+	_, err = c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`), nil)
+	require.NoError(t, err)
+
+	mc.EXPECT().Read(
+		pm(&api.ReadRequest{
+			Db:         "db1",
+			Collection: "c1",
+			Filter:     []byte(`{"filter":"value"}`),
+			Fields:     []byte(`{"fields":"value"}`),
+			Options:    &api.ReadRequestOptions{},
+		}), gomock.Any()).Return(nil)
+
+	var ro *ReadOptions
+	_, err = c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`), ro)
+	require.NoError(t, err)
 
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{

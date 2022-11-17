@@ -317,6 +317,10 @@ func (c *httpDriver) describeDatabaseWithOptions(ctx context.Context, db string,
 	r.Db = PtrToString(d.Db)
 	r.Size = PtrToInt64(d.Size)
 
+	if d.Collections == nil {
+		return &r, nil
+	}
+
 	for _, v := range *d.Collections {
 		r.Collections = append(r.Collections, &api.CollectionDescription{
 			Collection: PtrToString(v.Collection),

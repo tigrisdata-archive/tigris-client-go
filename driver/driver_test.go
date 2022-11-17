@@ -1101,6 +1101,14 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	err = tx.Rollback(ctx)
 	require.Error(t, err)
+
+	mc.EXPECT().DescribeDatabase(gomock.Any(),
+		pm(&api.DescribeDatabaseRequest{
+			Db: "db1",
+		})).Return(&api.DescribeDatabaseResponse{}, nil)
+
+	_, err = c.DescribeDatabase(ctx, "db1", nil)
+	require.NoError(t, err)
 }
 
 func TestTxGRPCDriverNegative(t *testing.T) {

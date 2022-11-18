@@ -729,8 +729,8 @@ func (g *httpSearchReader) close() error {
 	return g.closer.Close()
 }
 
-func (c *httpDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONRequestBody{Name: &name, Description: &description})
+func (c *httpDriver) CreateApplication(ctx context.Context, project string, name string, description string) (*Application, error) {
+	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONRequestBody{Name: &name, Description: &description, Project: &project})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -769,8 +769,8 @@ func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name stri
 	return &app.UpdatedApplication, nil
 }
 
-func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONRequestBody{})
+func (c *httpDriver) ListApplications(ctx context.Context, project string) ([]*Application, error) {
+	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONRequestBody{Project: &project})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}

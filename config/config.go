@@ -22,13 +22,13 @@ import (
 
 // Driver contains connection and transport configuration.
 type Driver struct {
-	TLS          *tls.Config `json:"tls,omitempty"`
-	ClientID     string      `json:"client_id,omitempty"`
-	ClientSecret string      `json:"client_secret,omitempty"`
-	Token        string      `json:"token,omitempty"`
-	URL          string      `json:"url,omitempty"`
-	Protocol     string      `json:"protocol,omitempty"`
-
+	TLS          *tls.Config   `json:"tls,omitempty"`
+	ClientID     string        `json:"client_id,omitempty"`
+	ClientSecret string        `json:"client_secret,omitempty"`
+	Token        string        `json:"token,omitempty"`
+	URL          string        `json:"url,omitempty"`
+	Protocol     string        `json:"protocol,omitempty"`
+	Project      string        `json:"project,omitempty"`
 	DisablePing  bool          `json:"disable_ping,omitempty"`
 	PingInterval time.Duration `json:"ping_interval_ms,omitempty"`
 }

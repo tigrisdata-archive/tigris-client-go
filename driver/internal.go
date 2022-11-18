@@ -25,15 +25,12 @@ import (
 )
 
 type driverWithOptions interface {
-	createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
-	dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
 	beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error)
-	describeDatabaseWithOptions(ctx context.Context, db string, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
+	describeDatabaseWithOptions(ctx context.Context, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
 
 	Info(ctx context.Context) (*InfoResponse, error)
 	Health(ctx context.Context) (*HealthResponse, error)
-	UseDatabase(name string) Database
-	ListDatabases(ctx context.Context) ([]string, error)
+	UseDatabase() Database
 	Close() error
 }
 
@@ -54,8 +51,6 @@ type CRUDWithOptions interface {
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error)
-	publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error)
-	subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error)
 }
 
 type txWithOptions interface {

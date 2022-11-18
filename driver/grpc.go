@@ -42,6 +42,7 @@ type grpcDriver struct {
 	o11y   api.ObservabilityClient
 	health api.HealthAPIClient
 	conn   *grpc.ClientConn
+	cfg    *config.Driver
 }
 
 func GRPCError(err error) error {
@@ -93,6 +94,7 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (*grpcDriver, err
 		auth:   api.NewAuthClient(conn),
 		o11y:   api.NewObservabilityClient(conn),
 		health: api.NewHealthAPIClient(conn),
+		cfg:    config,
 	}, nil
 }
 
@@ -103,8 +105,8 @@ func (c *grpcDriver) Close() error {
 	return GRPCError(c.conn.Close())
 }
 
-func (c *grpcDriver) UseDatabase(name string) Database {
-	return &driverCRUD{&grpcCRUD{db: name, api: c.api}}
+func (c *grpcDriver) UseDatabase() Database {
+	return &driverCRUD{&grpcCRUD{db: c.cfg.Project, api: c.api}}
 }
 
 func (c *grpcDriver) Info(ctx context.Context) (*InfoResponse, error) {
@@ -124,23 +126,9 @@ func (c *grpcDriver) Health(ctx context.Context) (*HealthResponse, error) {
 	return (*HealthResponse)(r), nil
 }
 
-func (c *grpcDriver) ListDatabases(ctx context.Context) ([]string, error) {
-	r, err := c.api.ListDatabases(ctx, &api.ListDatabasesRequest{})
-	if err != nil {
-		return nil, GRPCError(err)
-	}
-
-	databases := make([]string, 0, len(r.GetDatabases()))
-	for _, c := range r.GetDatabases() {
-		databases = append(databases, c.GetDb())
-	}
-
-	return databases, nil
-}
-
-func (c *grpcDriver) describeDatabaseWithOptions(ctx context.Context, db string, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
+func (c *grpcDriver) describeDatabaseWithOptions(ctx context.Context, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
 	r, err := c.api.DescribeDatabase(ctx, &api.DescribeDatabaseRequest{
-		Db:           db,
+		Db:           c.cfg.Project,
 		SchemaFormat: options.SchemaFormat,
 	})
 	if err != nil {
@@ -148,22 +136,6 @@ func (c *grpcDriver) describeDatabaseWithOptions(ctx context.Context, db string,
 	}
 
 	return (*DescribeDatabaseResponse)(r), nil
-}
-
-func (c *grpcDriver) createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
-	_, err := c.api.CreateDatabase(ctx, &api.CreateDatabaseRequest{
-		Db:      db,
-		Options: (*api.DatabaseOptions)(options),
-	})
-	return GRPCError(err)
-}
-
-func (c *grpcDriver) dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
-	_, err := c.api.DropDatabase(ctx, &api.DropDatabaseRequest{
-		Db:      db,
-		Options: (*api.DatabaseOptions)(options),
-	})
-	return GRPCError(err)
 }
 
 func (c *grpcDriver) beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error) {
@@ -562,61 +534,4 @@ func (c *grpcDriver) QuotaUsage(ctx context.Context) (*QuotaUsage, error) {
 	}
 
 	return (*QuotaUsage)(r), nil
-}
-
-func (c *grpcCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
-
-	resp, err := c.api.Publish(ctx, &api.PublishRequest{
-		Db:         c.db,
-		Collection: collection,
-		Messages:   *(*[][]byte)(unsafe.Pointer(&msgs)),
-		Options:    (*api.PublishRequestOptions)(options),
-	})
-	if err != nil {
-		return nil, GRPCError(err)
-	}
-
-	return (*PublishResponse)(resp), nil
-}
-
-type grpcSubscribeStreamReader struct {
-	stream api.Tigris_SubscribeClient
-	cancel context.CancelFunc
-}
-
-func (g *grpcSubscribeStreamReader) read() (Document, error) {
-	resp, err := g.stream.Recv()
-	if err != nil {
-		return nil, GRPCError(err)
-	}
-
-	return resp.Message, nil
-}
-
-func (g *grpcSubscribeStreamReader) close() error {
-	g.cancel()
-
-	return nil
-}
-
-func (c *grpcCRUD) subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error) {
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithCancel(ctx)
-
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
-
-	resp, err := c.api.Subscribe(ctx, &api.SubscribeRequest{
-		Db:         c.db,
-		Collection: collection,
-		Filter:     filter,
-		Options:    (*api.SubscribeRequestOptions)(options),
-	})
-	if err != nil {
-		cancel()
-
-		return nil, GRPCError(err)
-	}
-
-	return &readIterator{streamReader: &grpcSubscribeStreamReader{stream: resp, cancel: cancel}}, nil
 }

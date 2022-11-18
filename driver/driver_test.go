@@ -48,7 +48,7 @@ func setupGRPCTests(t *testing.T, config *config.Driver) (Driver, *grpcDriver, *
 	client, err := newGRPCClient(context.Background(), config)
 	require.NoError(t, err)
 
-	return &driver{driverWithOptions: client}, client, mockServers, func() { cancel(); _ = client.Close() }
+	return &driver{driverWithOptions: client, cfg: config}, client, mockServers, func() { cancel(); _ = client.Close() }
 }
 
 func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *test.MockServers, func()) {
@@ -62,7 +62,7 @@ func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *
 	// FIXME: implement proper wait for HTTP server to start
 	time.Sleep(10 * time.Millisecond)
 
-	return &driver{driverWithOptions: client}, client, mockServers, func() { cancel(); _ = client.Close() }
+	return &driver{driverWithOptions: client, cfg: config}, client, mockServers, func() { cancel(); _ = client.Close() }
 }
 
 func SetupO11yGRPCTests(t *testing.T, config *config.Driver) (Driver, Observability, *test.MockServers, func()) {
@@ -110,7 +110,7 @@ func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp 
 			Options:    &api.DeleteRequestOptions{},
 		})).Return(r, in)
 
-	_, err := d.UseDatabase("db1").Delete(ctx, "c1", Filter(`{"filter":"value"}`))
+	_, err := d.UseDatabase().Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 
 	require.Equal(t, exp, err)
 
@@ -140,7 +140,7 @@ func testReadStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 		return &api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}
 	})
 
-	it, err := d.UseDatabase("db1").Read(ctx, "c1", Filter(`{"filter":"value"}`),
+	it, err := d.UseDatabase().Read(ctx, "c1", Filter(`{"filter":"value"}`),
 		Projection(`{"fields":"value"}`))
 	require.NoError(t, err)
 
@@ -179,7 +179,7 @@ func testSearchStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 		return &api.TigrisError{Code: api.Code_ABORTED, Message: "error_stream"}
 	})
 
-	it, err := d.UseDatabase("db1").Search(ctx, "c1", &SearchRequest{Q: "search text"})
+	it, err := d.UseDatabase().Search(ctx, "c1", &SearchRequest{Q: "search text"})
 	require.NoError(t, err)
 
 	var doc SearchResponse
@@ -241,7 +241,7 @@ func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 }
 
 func TestGRPCError(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testErrors(t, client, mockServer)
 	t.Run("read_stream_error", func(t *testing.T) {
@@ -253,7 +253,7 @@ func TestGRPCError(t *testing.T) {
 }
 
 func TestHTTPError(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testErrors(t, client, mockServer)
 	t.Run("read_stream_error", func(t *testing.T) {
@@ -440,7 +440,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	db := c.UseDatabase("db1")
+	db := c.UseDatabase()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
 
@@ -563,24 +563,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Test empty list response
-	mc.EXPECT().ListDatabases(gomock.Any(),
-		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Databases: nil}, nil)
-
-	dbs, err := c.ListDatabases(ctx)
-	require.NoError(t, err)
-	require.Equal(t, []string{}, dbs)
-
-	mc.EXPECT().ListDatabases(gomock.Any(),
-		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{
-		Databases: []*api.DatabaseInfo{{Db: "ldb1"}, {Db: "ldb2"}},
-	}, nil)
-
-	dbs, err = c.ListDatabases(ctx)
-	require.NoError(t, err)
-	require.Equal(t, []string{"ldb1", "ldb2"}, dbs)
-
-	db := c.UseDatabase("db1")
+	db := c.UseDatabase()
 
 	// Test empty list response
 	mc.EXPECT().ListCollections(gomock.Any(),
@@ -648,7 +631,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			SchemaFormat: "fmt2",
 		})).Return(&descDBExp, nil)
 
-	descDB, err := c.DescribeDatabase(ctx, "db1", &DescribeDatabaseOptions{SchemaFormat: "fmt2"})
+	descDB, err := c.DescribeDatabase(ctx, &DescribeDatabaseOptions{SchemaFormat: "fmt2"})
 	require.NoError(t, err)
 	require.Equal(t, "db1", descDB.Db)
 	require.Equal(t, int64(314159), descDB.Size)
@@ -658,24 +641,6 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, descDBExp.Collections[1].Collection, descDB.Collections[1].Collection)
 	require.Equal(t, descDBExp.Collections[1].Schema, descDB.Collections[1].Schema)
 	require.Equal(t, descDBExp.Collections[1].Size, descDB.Collections[1].Size)
-
-	mc.EXPECT().CreateDatabase(gomock.Any(),
-		pm(&api.CreateDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.CreateDatabaseResponse{}, nil)
-
-	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
-	require.NoError(t, err)
-
-	mc.EXPECT().DropDatabase(gomock.Any(),
-		pm(&api.DropDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.DropDatabaseResponse{}, nil)
-
-	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{})
-	require.NoError(t, err)
 
 	sch := `{"schema":"field"}`
 
@@ -718,7 +683,7 @@ func testTxBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	tx, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	tx, err := c.BeginTx(ctx, &TxOptions{})
 	require.NoError(t, err)
 
 	testTxCRUDBasic(t, tx, mc)
@@ -741,7 +706,7 @@ func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	db := c.UseDatabase("db1")
+	db := c.UseDatabase()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
 
@@ -810,27 +775,27 @@ func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 }
 
 func TestGRPCDriver(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
 	testResponseMetadata(t, client, mockServer)
 }
 
 func TestHTTPDriver(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testDriverBasic(t, client, mockServer)
 	testResponseMetadata(t, client, mockServer)
 }
 
 func TestTxGRPCDriver(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testTxBasic(t, client, mockServer)
 }
 
 func TestTxHTTPDriver(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testTxBasic(t, client, mockServer)
 }
@@ -1052,7 +1017,7 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options: &api.TransactionOptions{},
 		})).Return(nil, fmt.Errorf("error"))
 
-	_, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	_, err := c.BeginTx(ctx, &TxOptions{})
 	require.Error(t, err)
 
 	// Empty tx context
@@ -1062,7 +1027,7 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{}, nil)
 
-	_, err = c.BeginTx(ctx, "db1", &TxOptions{})
+	_, err = c.BeginTx(ctx, &TxOptions{})
 	require.Error(t, err)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
@@ -1071,7 +1036,7 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	tx, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	tx, err := c.BeginTx(ctx, &TxOptions{})
 	require.NoError(t, err)
 
 	testTxCRUDBasicNegative(t, tx, mc)
@@ -1107,18 +1072,18 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Db: "db1",
 		})).Return(&api.DescribeDatabaseResponse{}, nil)
 
-	_, err = c.DescribeDatabase(ctx, "db1", nil)
+	_, err = c.DescribeDatabase(ctx, nil)
 	require.NoError(t, err)
 }
 
 func TestTxGRPCDriverNegative(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testTxBasicNegative(t, client, mockServer)
 }
 
 func TestTxHTTPDriverNegative(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
+	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 	testTxBasicNegative(t, client, mockServer)
 }
@@ -1128,7 +1093,7 @@ func TestNewDriver(t *testing.T) {
 	defer cancel()
 
 	DefaultProtocol = HTTP
-	cfg := config.Driver{URL: test.HTTPURL(4)}
+	cfg := config.Driver{URL: test.HTTPURL(4), Project: "test-project"}
 	client, err := NewDriver(context.Background(), &cfg)
 	require.NoError(t, err)
 
@@ -1142,7 +1107,7 @@ func TestNewDriver(t *testing.T) {
 	cfg = config.Driver{URL: test.GRPCURL(4), TLS: &tls.Config{
 		RootCAs: certPool, ServerName: "localhost",
 		MinVersion: tls.VersionTLS12,
-	}}
+	}, Project: "test-project"}
 	client, err = NewDriver(context.Background(), &cfg)
 	require.NoError(t, err)
 
@@ -1153,20 +1118,20 @@ func TestNewDriver(t *testing.T) {
 	require.Error(t, err)
 
 	DefaultProtocol = GRPC
-	cfg1 := &config.Driver{URL: test.GRPCURL(4), ClientSecret: "aaaa"}
+	cfg1 := &config.Driver{URL: test.GRPCURL(4), ClientSecret: "aaaa", Project: "test-project"}
 	cfg1, err = initConfig(cfg1)
 	require.NoError(t, err)
 	require.NotNil(t, cfg1.TLS)
 }
 
 func TestInvalidDriverAPIOptions(t *testing.T) {
-	c, mc, cancel := SetupGRPCTests(t, &config.Driver{})
+	c, mc, cancel := SetupGRPCTests(t, &config.Driver{Project: "db1"})
 	defer cancel()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	db := c.UseDatabase("db1")
+	db := c.UseDatabase()
 
 	_, err := db.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
@@ -1178,15 +1143,11 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	require.Error(t, err)
 	_, err = db.Delete(ctx, "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
 	require.Error(t, err)
-	_, err = c.BeginTx(ctx, "db1", &TxOptions{}, &TxOptions{})
+	_, err = c.BeginTx(ctx, &TxOptions{}, &TxOptions{})
 	require.Error(t, err)
 	err = db.CreateOrUpdateCollection(ctx, "coll1", nil, &CreateCollectionOptions{}, &CreateCollectionOptions{})
 	require.Error(t, err)
 	err = db.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
-	require.Error(t, err)
-	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
-	require.Error(t, err)
-	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
 	require.Error(t, err)
 	_, err = db.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
 	require.Error(t, err)
@@ -1201,7 +1162,7 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	tx, err := c.BeginTx(ctx, "db1")
+	tx, err := c.BeginTx(ctx)
 	require.NoError(t, err)
 	_, err = tx.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
@@ -1219,91 +1180,4 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	require.Error(t, err)
 	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
-}
-
-func testDriverPublishSubscribe(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
-	t.Helper()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	db := c.UseDatabase("db1")
-
-	doc1 := []Message{Message(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
-
-	mc.EXPECT().Publish(gomock.Any(),
-		pm(&api.PublishRequest{
-			Db:         "db1",
-			Collection: "c1",
-			Messages:   *(*[][]byte)(unsafe.Pointer(&doc1)),
-			Options:    &api.PublishRequestOptions{},
-		})).Return(&api.PublishResponse{Status: "published"}, nil)
-
-	_, err := db.Publish(ctx, "c1", doc1)
-	require.NoError(t, err)
-
-	mc.EXPECT().Subscribe(
-		pm(&api.SubscribeRequest{
-			Db:         "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Options:    &api.SubscribeRequestOptions{},
-		}), gomock.Any()).DoAndReturn(func(r *api.SubscribeRequest, srv api.Tigris_SubscribeServer) error {
-		err := srv.Send(&api.SubscribeResponse{Message: Document(`{"aaa":"bbbb"}`)})
-		require.NoError(t, err)
-		err = srv.Send(&api.SubscribeResponse{Message: Document(`{"aaa":"cccc"}`)})
-		require.NoError(t, err)
-		return &api.TigrisError{Code: api.Code_DATA_LOSS, Message: "subscribe error"}
-	})
-
-	it, err := db.Subscribe(ctx, "c1", Filter(`{"filter":"value"}`))
-	require.NoError(t, err)
-
-	var doc Document
-
-	require.True(t, it.Next(&doc))
-	require.Equal(t, Document(`{"aaa":"bbbb"}`), doc)
-	require.True(t, it.Next(&doc))
-	require.Equal(t, Document(`{"aaa":"cccc"}`), doc)
-	require.False(t, it.Next(&doc))
-	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "subscribe error"}}, it.Err())
-
-	var p int32 = 0
-
-	mc.EXPECT().Publish(gomock.Any(),
-		pm(&api.PublishRequest{
-			Db:         "db1",
-			Collection: "c1",
-			Messages:   *(*[][]byte)(unsafe.Pointer(&doc1)),
-			Options:    &api.PublishRequestOptions{Partition: &p},
-		})).Return(&api.PublishResponse{Status: "published"}, nil)
-
-	_, err = db.Publish(ctx, "c1", doc1, &PublishOptions{Partition: &p})
-	require.NoError(t, err)
-
-	// FIXME: fails periodically for no apparent reason
-	/*
-		mc.EXPECT().Subscribe(
-			pm(&api.SubscribeRequest{
-				Db:         "db1",
-				Collection: "c1",
-				Filter:     []byte(`{"filter":"value"}`),
-				Options:    &api.SubscribeRequestOptions{Partitions: []int32{1, 5}},
-			}), gomock.Any())
-
-		_, err = db.Subscribe(ctx, "c1", Filter(`{"filter":"value"}`), &SubscribeOptions{Partitions: []int32{1, 5}})
-		require.NoError(t, err)
-	*/
-}
-
-func TestGRPCPubSub(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testDriverPublishSubscribe(t, client, mockServer)
-}
-
-func TestHTTPPubSub(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testDriverPublishSubscribe(t, client, mockServer)
 }

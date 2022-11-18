@@ -31,7 +31,7 @@ type Config struct {
 	Token        string      `json:"token,omitempty"`
 	URL          string      `json:"url,omitempty"`
 	Protocol     string      `json:"protocol,omitempty"`
-
+	Project      string      `json:"project,omitempty"`
 	// MustExist if set skips implicit database creation
 	MustExist bool
 }
@@ -50,6 +50,7 @@ func driverConfig(cfg *Config) *config.Driver {
 		ClientSecret: cfg.ClientSecret,
 		Token:        cfg.Token,
 		Protocol:     cfg.Protocol,
+		Project:      cfg.Project,
 	}
 }
 
@@ -80,19 +81,10 @@ func (c *Client) Close() error {
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
-func (c *Client) OpenDatabase(ctx context.Context, dbName string, models ...schema.Model) (*Database, error) {
+func (c *Client) OpenDatabase(ctx context.Context, models ...schema.Model) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
 	}
 
-	return openDatabaseFromModels(ctx, c.driver, c.config, dbName, models...)
-}
-
-// DropDatabase deletes the database and all collections in it.
-func (c *Client) DropDatabase(ctx context.Context, dbName string) error {
-	if getTxCtx(ctx) != nil {
-		return ErrNotTransactional
-	}
-
-	return c.driver.DropDatabase(ctx, dbName)
+	return openDatabaseFromModels(ctx, c.driver, c.config, models...)
 }

@@ -256,7 +256,7 @@ func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *moc
 		assert.True(t, strings.Contains(metautils.ExtractIncoming(ctx).Get(ua), UserAgent))
 	}).Return(&api.DeleteResponse{}, nil)
 
-	db := d.UseDatabase("db1")
+	db := d.UseDatabase()
 
 	_, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
@@ -288,6 +288,7 @@ func TestGRPCDriverCredentials(t *testing.T) {
 			URL:          test.GRPCURL(0),
 			ClientID:     "client_id_test",
 			ClientSecret: "client_secret_test",
+			Project:      "db1",
 		})
 		defer cancel()
 
@@ -304,7 +305,7 @@ func TestGRPCDriverCredentials(t *testing.T) {
 		t.Setenv(EnvClientID, "client_id_test")
 		t.Setenv(EnvClientSecret, "client_secret_test")
 
-		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0)})
+		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0), Project: "db1"})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, cfg)
@@ -321,6 +322,7 @@ func TestHTTPDriverCredentials(t *testing.T) {
 			URL:          test.HTTPURL(2),
 			ClientID:     "client_id_test",
 			ClientSecret: "client_secret_test",
+			Project:      "db1",
 		})
 		defer cancel()
 
@@ -335,7 +337,7 @@ func TestHTTPDriverCredentials(t *testing.T) {
 		t.Setenv(EnvClientID, "client_id_test")
 		t.Setenv(EnvClientSecret, "client_secret_test")
 
-		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2)})
+		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2), Project: "db1"})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, cfg)
@@ -352,8 +354,9 @@ func TestGRPCDriverToken(t *testing.T) {
 		TokenURLOverride = testTokenURLOverride
 
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{
-			URL:   test.GRPCURL(0),
-			Token: "token_grpc_config_1",
+			URL:     test.GRPCURL(0),
+			Token:   "token_grpc_config_1",
+			Project: "db1",
 		})
 		defer cancel()
 
@@ -365,7 +368,7 @@ func TestGRPCDriverToken(t *testing.T) {
 
 		t.Setenv(EnvToken, "token_grpc_env_1")
 
-		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0)})
+		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0), Project: "db1"})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, cfg)
@@ -379,8 +382,9 @@ func TestHTTPDriverToken(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
 		TokenURLOverride = ""
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{
-			URL:   test.HTTPURL(2),
-			Token: "token_http_config_1",
+			URL:     test.HTTPURL(2),
+			Token:   "token_http_config_1",
+			Project: "db1",
 		})
 		defer cancel()
 
@@ -392,7 +396,7 @@ func TestHTTPDriverToken(t *testing.T) {
 
 		t.Setenv(EnvToken, "token_http_env_1")
 
-		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2)})
+		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2), Project: "db1"})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, cfg)
@@ -407,7 +411,7 @@ func TestNewAuth(t *testing.T) {
 	defer cancel()
 
 	DefaultProtocol = HTTP
-	cfg := config.Driver{URL: test.HTTPURL(4)}
+	cfg := config.Driver{URL: test.HTTPURL(4), Project: "test-project"}
 	client, err := NewManagement(context.Background(), &cfg)
 	require.NoError(t, err)
 
@@ -417,7 +421,7 @@ func TestNewAuth(t *testing.T) {
 	certPool := x509.NewCertPool()
 	require.True(t, certPool.AppendCertsFromPEM([]byte(test.CaCert)))
 
-	cfg = config.Driver{URL: test.GRPCURL(4), TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost", MinVersion: tls.VersionTLS12}}
+	cfg = config.Driver{URL: test.GRPCURL(4), TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost", MinVersion: tls.VersionTLS12}, Project: "test-project"}
 	client, err = NewManagement(context.Background(), &cfg)
 	require.NoError(t, err)
 

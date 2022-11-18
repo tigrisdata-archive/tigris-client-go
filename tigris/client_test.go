@@ -34,7 +34,7 @@ func TestClient(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &Config{URL: test.GRPCURL(8)}
+	cfg := &Config{URL: test.GRPCURL(8), Project: "db1"}
 	cfg.TLS = test.SetupTLS(t)
 
 	type Coll1 struct {
@@ -42,12 +42,6 @@ func TestClient(t *testing.T) {
 	}
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-
-	mc.EXPECT().CreateDatabase(gomock.Any(),
-		pm(&api.CreateDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.CreateDatabaseResponse{}, nil)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
@@ -71,23 +65,11 @@ func TestClient(t *testing.T) {
 	c, err := NewClient(ctx, cfg)
 	require.NoError(t, err)
 
-	db, err := c.OpenDatabase(ctx, "db1", &Coll1{})
+	db, err := c.OpenDatabase(ctx, &Coll1{})
 	require.NoError(t, err)
 	require.NotNil(t, db)
 
-	_, err = c.OpenDatabase(setTxCtx(ctx, &Tx{}), "db1", &Coll1{})
-	require.Error(t, err)
-
-	mc.EXPECT().DropDatabase(gomock.Any(),
-		pm(&api.DropDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.DropDatabaseResponse{}, nil)
-
-	err = c.DropDatabase(ctx, "db1")
-	require.NoError(t, err)
-
-	err = c.DropDatabase(setTxCtx(ctx, &Tx{}), "db1")
+	_, err = c.OpenDatabase(setTxCtx(ctx, &Tx{}), &Coll1{})
 	require.Error(t, err)
 
 	err = c.Close()

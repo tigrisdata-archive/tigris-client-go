@@ -55,7 +55,6 @@ const (
 // Collection types.
 const (
 	Documents = "documents" // Regular collection containing documents
-	Messages  = "messages"  // Publish/subscribe collection containing messages
 )
 
 // Model represents types supported as collection models.
@@ -444,10 +443,6 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 		p.AutoGenerate = true
 
 		sch.PrimaryKey = append(sch.PrimaryKey, name)
-	}
-
-	if len(pk) != 0 && typ == Messages {
-		return nil, fmt.Errorf("primary key should not be defined for `messages` collection type")
 	}
 
 	sch.CollectionType = typ

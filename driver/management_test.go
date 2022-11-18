@@ -51,11 +51,12 @@ func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementS
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	project1 := "project1"
 	mc.EXPECT().CreateApplication(gomock.Any(),
-		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1"})).Return(
+		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: &project1})).Return(
 		&api.CreateApplicationResponse{CreatedApplication: nil}, nil)
 
-	_, err := c.CreateApplication(ctx, "app1", "description1")
+	_, err := c.CreateApplication(ctx, project1, "app1", "description1")
 	require.Error(t, err)
 
 	mc.EXPECT().UpdateApplication(gomock.Any(),
@@ -66,10 +67,10 @@ func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementS
 	require.Error(t, err)
 
 	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{})).Return(
+		pm(&api.ListApplicationsRequest{Project: &project1})).Return(
 		nil, fmt.Errorf("some error"))
 
-	_, err = c.ListApplications(ctx)
+	_, err = c.ListApplications(ctx, project1)
 	require.Error(t, err)
 
 	mc.EXPECT().RotateApplicationSecret(gomock.Any(),
@@ -102,11 +103,12 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 
 	capp := &api.Application{Id: "id1", Name: "app1", Description: "desc1", CreatedAt: 111, CreatedBy: "cby", Secret: "secret"}
 
+	project1 := "project1"
 	mc.EXPECT().CreateApplication(gomock.Any(),
-		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1"})).Return(
+		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: &project1})).Return(
 		&api.CreateApplicationResponse{CreatedApplication: capp}, nil)
 
-	app, err := c.CreateApplication(ctx, "app1", "description1")
+	app, err := c.CreateApplication(ctx, project1, "app1", "description1")
 	require.NoError(t, err)
 
 	appEqual(t, capp, app)
@@ -143,10 +145,10 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	}
 
 	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{})).Return(
+		pm(&api.ListApplicationsRequest{Project: &project1})).Return(
 		&api.ListApplicationsResponse{Applications: []*api.Application{lapp1, lapp2, lapp3}}, nil)
 
-	list, err := c.ListApplications(ctx)
+	list, err := c.ListApplications(ctx, "project1")
 	require.NoError(t, err)
 
 	require.Equal(t, 3, len(list))
@@ -155,10 +157,10 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	appEqual(t, lapp3, list[2])
 
 	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{})).Return(
+		pm(&api.ListApplicationsRequest{Project: &project1})).Return(
 		&api.ListApplicationsResponse{}, nil)
 
-	list, err = c.ListApplications(ctx)
+	list, err = c.ListApplications(ctx, "project1")
 	require.NoError(t, err)
 	require.Equal(t, 0, len(list))
 

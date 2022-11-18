@@ -444,8 +444,8 @@ func (g *grpcSearchReader) close() error {
 	return nil
 }
 
-func (c *grpcDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	r, err := c.mgmt.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description})
+func (c *grpcDriver) CreateApplication(ctx context.Context, project string, name string, description string) (*Application, error) {
+	r, err := c.mgmt.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description, Project: &project})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -476,8 +476,8 @@ func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name stri
 	return (*Application)(r.UpdatedApplication), nil
 }
 
-func (c *grpcDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	r, err := c.mgmt.ListApplications(ctx, &api.ListApplicationsRequest{})
+func (c *grpcDriver) ListApplications(ctx context.Context, project string) ([]*Application, error) {
+	r, err := c.mgmt.ListApplications(ctx, &api.ListApplicationsRequest{Project: &project})
 	if err != nil {
 		return nil, GRPCError(err)
 	}

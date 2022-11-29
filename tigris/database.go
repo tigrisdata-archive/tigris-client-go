@@ -19,7 +19,6 @@ package tigris
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
@@ -53,17 +52,7 @@ func (db *Database) CreateCollections(ctx context.Context, model schema.Model, m
 		return fmt.Errorf("error parsing model schema: %w", err)
 	}
 
-	return db.createCollectionsFromSchemas(ctx, db.name, schemas)
-}
-
-// CreateTopics creates message type collections.
-func (db *Database) CreateTopics(ctx context.Context, model schema.Model, models ...schema.Model) error {
-	schemas, err := schema.FromCollectionModels(schema.Messages, model, models...)
-	if err != nil {
-		return fmt.Errorf("error parsing model schema: %w", err)
-	}
-
-	return db.createCollectionsFromSchemas(ctx, db.name, schemas)
+	return db.createCollectionsFromSchemas(ctx, schemas)
 }
 
 func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driver.Tx, schemas map[string]*schema.Schema) error {
@@ -82,8 +71,7 @@ func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driv
 }
 
 // createCollectionsFromSchemas transactionally creates collections from the provided schema map.
-func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName string,
-	schemas map[string]*schema.Schema,
+func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas map[string]*schema.Schema,
 ) error {
 	// Run in existing transaction
 	if tx := getTxCtx(ctx); tx != nil {
@@ -91,7 +79,7 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 	}
 
 	// Run in new implicit transaction
-	tx, err := db.driver.BeginTx(ctx, dbName)
+	tx, err := db.driver.BeginTx(ctx)
 	if err != nil {
 		return err
 	}
@@ -110,20 +98,10 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, dbName str
 }
 
 // openDatabaseFromModels creates Database and collections from the provided collection models.
-func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *Config, dbName string,
+func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *Config,
 	models ...schema.Model,
 ) (*Database, error) {
-	// optionally creates database if it's allowed
-	if !cfg.MustExist {
-		err := d.CreateDatabase(ctx, dbName)
-		if err != nil {
-			if !strings.Contains(err.Error(), "already exist") {
-				return nil, err
-			}
-		}
-	}
-
-	db := newDatabase(dbName, d)
+	db := newDatabase(cfg.Project, d)
 
 	if len(models) > 0 {
 		err := db.CreateCollections(ctx, models[0], models[1:]...)
@@ -149,23 +127,7 @@ func OpenDatabase(ctx context.Context, cfg *Config, dbName string, models ...sch
 		return nil, err
 	}
 
-	return openDatabaseFromModels(ctx, d, cfg, dbName, models...)
-}
-
-// DropDatabase deletes the database and all collections in it.
-func DropDatabase(ctx context.Context, cfg *Config, dbName string) error {
-	if getTxCtx(ctx) != nil {
-		return ErrNotTransactional
-	}
-
-	d, err := driver.NewDriver(ctx, driverConfig(cfg))
-	if err != nil {
-		return err
-	}
-
-	defer func() { _ = d.Close() }()
-
-	return d.DropDatabase(ctx, dbName)
+	return openDatabaseFromModels(ctx, d, cfg, models...)
 }
 
 // GetCollection returns collection object corresponding to collection model T.
@@ -176,16 +138,5 @@ func GetCollection[T schema.Model](db *Database) *Collection[T] {
 }
 
 func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {
-	return &Collection[T]{name: name, db: db.driver.UseDatabase(db.name)}
-}
-
-// GetTopic returns topic object corresponding to topic model T.
-func GetTopic[T schema.Model](db *Database) *Topic[T] {
-	var m T
-	name := schema.ModelName(&m)
-	return getNamedTopic[T](db, name)
-}
-
-func getNamedTopic[T schema.Model](db *Database, name string) *Topic[T] {
-	return &Topic[T]{name: name, db: db.driver.UseDatabase(db.name)}
+	return &Collection[T]{name: name, db: db.driver.UseDatabase()}
 }

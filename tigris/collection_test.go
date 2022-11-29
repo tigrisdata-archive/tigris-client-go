@@ -151,8 +151,6 @@ func TestCollectionBasic(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
 
-	m.EXPECT().CreateDatabase(gomock.Any(), "db1")
-
 	type Coll1 struct {
 		Key1   string `tigris:"primary_key"`
 		Field1 int64
@@ -166,17 +164,17 @@ func TestCollectionBasic(t *testing.T) {
 	mdb := mock.NewMockDatabase(ctrl)
 	mtx := mock.NewMockTx(ctrl)
 
-	m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
+	m.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
 	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
 	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_2", jm(t, `{"title":"coll_2","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &Config{}, "db1", &Coll1{}, &Coll2{})
+	db, err := openDatabaseFromModels(ctx, m, &Config{Project: "db1"}, &Coll1{}, &Coll2{})
 	require.NoError(t, err)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseDatabase().Return(mdb)
 
 	c := GetCollection[Coll1](db)
 
@@ -279,8 +277,6 @@ func TestCollection_Search(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
 
-	m.EXPECT().CreateDatabase(gomock.Any(), "db1")
-
 	type Coll1 struct {
 		Key1   string `tigris:"primary_key"`
 		Field1 int64
@@ -289,16 +285,16 @@ func TestCollection_Search(t *testing.T) {
 	mdb := mock.NewMockDatabase(ctrl)
 	mtx := mock.NewMockTx(ctrl)
 
-	m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
+	m.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
 	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := openDatabaseFromModels(ctx, m, &Config{}, "db1", &Coll1{})
+	db, err := openDatabaseFromModels(ctx, m, &Config{Project: "db1"}, &Coll1{})
 	require.NoError(t, err)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseDatabase().Return(mdb)
 
 	c := GetCollection[Coll1](db)
 
@@ -401,7 +397,7 @@ func TestCollectionNegative(t *testing.T) {
 	mdb := mock.NewMockDatabase(ctrl)
 	mit := mock.NewMockIterator(ctrl)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseDatabase().Return(mdb)
 
 	db := newDatabase("db1", m)
 
@@ -501,7 +497,7 @@ func TestCollectionReadOmitEmpty(t *testing.T) {
 
 	mdb := mock.NewMockDatabase(ctrl)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseDatabase().Return(mdb)
 
 	c := GetCollection[Coll1](db)
 
@@ -552,7 +548,7 @@ func TestClientSchemaMigration(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &Config{URL: test.GRPCURL(6)}
+	cfg := &Config{URL: test.GRPCURL(6), Project: "db1"}
 	cfg.TLS = test.SetupTLS(t)
 
 	driver.DefaultProtocol = driver.GRPC
@@ -568,12 +564,6 @@ func TestClientSchemaMigration(t *testing.T) {
 	}
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-
-	mc.EXPECT().CreateDatabase(gomock.Any(),
-		pm(&api.CreateDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.CreateDatabaseResponse{}, nil)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
@@ -601,14 +591,8 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = openDatabaseFromModels(ctx, drv, &Config{}, "db1", &testSchema1{})
+	_, err = openDatabaseFromModels(ctx, drv, &Config{Project: "db1"}, &testSchema1{})
 	require.NoError(t, err)
-
-	mc.EXPECT().CreateDatabase(gomock.Any(),
-		pm(&api.CreateDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.CreateDatabaseResponse{}, nil)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
@@ -647,7 +631,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = openDatabaseFromModels(ctx, drv, &Config{}, "db1", &testSchema1{}, &testSchema2{})
+	_, err = openDatabaseFromModels(ctx, drv, &Config{Project: "db1"}, &testSchema1{}, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string
@@ -665,12 +649,6 @@ func TestClientSchemaMigration(t *testing.T) {
 	type Coll1 struct {
 		Key1 string `tigris:"primary_key"`
 	}
-
-	mc.EXPECT().CreateDatabase(gomock.Any(),
-		pm(&api.CreateDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.CreateDatabaseResponse{}, nil)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
@@ -694,15 +672,6 @@ func TestClientSchemaMigration(t *testing.T) {
 	db, err := OpenDatabase(ctx, cfg, "db1", &Coll1{})
 	require.NoError(t, err)
 	require.NotNil(t, db)
-
-	mc.EXPECT().DropDatabase(gomock.Any(),
-		pm(&api.DropDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.DropDatabaseResponse{}, nil)
-
-	err = DropDatabase(ctx, cfg, "db1")
-	require.NoError(t, err)
 }
 
 func TestCollection(t *testing.T) {
@@ -722,7 +691,7 @@ func TestCollection(t *testing.T) {
 		Field1 int64
 	}
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseDatabase().Return(mdb)
 
 	c := GetCollection[Coll1](db)
 
@@ -800,9 +769,7 @@ func TestOpenDatabase(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
 
-	m.EXPECT().CreateDatabase(gomock.Any(), "db1")
-
-	db, err := openDatabaseFromModels(ctx, m, &Config{}, "db1")
+	db, err := openDatabaseFromModels(ctx, m, &Config{Project: "db1"})
 	require.NoError(t, err)
 	require.NotNil(t, db)
 }

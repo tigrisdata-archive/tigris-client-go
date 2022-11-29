@@ -31,6 +31,7 @@ const (
 	EnvToken        = "TIGRIS_TOKEN"         //nolint:golint,gosec
 	EnvProtocol     = "TIGRIS_PROTOCOL"
 	EnvURL          = "TIGRIS_URL"
+	EnvProject      = "TIGRIS_PROJECT"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version
@@ -58,16 +59,14 @@ type (
 )
 
 type (
-	InsertOptions    api.InsertRequestOptions
-	ReplaceOptions   api.ReplaceRequestOptions
-	UpdateOptions    api.UpdateRequestOptions
-	DeleteOptions    api.DeleteRequestOptions
-	ReadOptions      api.ReadRequestOptions
-	EventsOptions    api.EventsRequestOptions
-	WriteOptions     api.WriteOptions
-	Collation        api.Collation
-	PublishOptions   api.PublishRequestOptions
-	SubscribeOptions api.SubscribeRequestOptions
+	InsertOptions  api.InsertRequestOptions
+	ReplaceOptions api.ReplaceRequestOptions
+	UpdateOptions  api.UpdateRequestOptions
+	DeleteOptions  api.DeleteRequestOptions
+	ReadOptions    api.ReadRequestOptions
+	EventsOptions  api.EventsRequestOptions
+	WriteOptions   api.WriteOptions
+	Collation      api.Collation
 )
 
 type (
@@ -89,12 +88,10 @@ type (
 )
 
 type (
-	InsertResponse    api.InsertResponse
-	ReplaceResponse   api.ReplaceResponse
-	UpdateResponse    api.UpdateResponse
-	DeleteResponse    api.DeleteResponse
-	SubscribeResponse api.SubscribeResponse
-	PublishResponse   api.PublishResponse
+	InsertResponse  api.InsertResponse
+	ReplaceResponse api.ReplaceResponse
+	UpdateResponse  api.UpdateResponse
+	DeleteResponse  api.DeleteResponse
 )
 
 type (

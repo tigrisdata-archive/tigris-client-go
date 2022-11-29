@@ -61,7 +61,7 @@ func getDB(ctx context.Context, crud driver.Database) driver.Database {
 
 // low level with no retries.
 func (db *Database) tx(ctx context.Context, fn func(ctx context.Context) error) error {
-	dtx, err := db.driver.BeginTx(ctx, db.name)
+	dtx, err := db.driver.BeginTx(ctx)
 	if err != nil {
 		return err
 	}

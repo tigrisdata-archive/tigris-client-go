@@ -69,7 +69,7 @@ func TestCollectionSchema(t *testing.T) {
 		Key1 string `json:"key_1" tigris:"primary_key:1"`
 	}
 
-	// invalid. promary key index greater then number of fields
+	// invalid. primary key index greater than number of fields
 	type pkOutOfBound struct {
 		Key3 string `json:"key_3" tigris:"primary_key:3"`
 		Key1 string `json:"key_1" tigris:"primary_key:1"`
@@ -464,39 +464,6 @@ func TestDatabaseSchema(t *testing.T) {
 			name, schema, err := FromDatabaseModel(c.input)
 			assert.Equal(t, c.name, name)
 			assert.Equal(t, c.err, err)
-			assert.Equal(t, c.output, schema)
-		})
-	}
-}
-
-func TestMessagesSchema(t *testing.T) {
-	type valid struct {
-		Key1 string `json:"key_1"`
-	}
-
-	type invalid struct {
-		Key1 string `json:"key_1" tigris:"primary_key:1"`
-	}
-
-	cases := []struct {
-		input  interface{}
-		output *Schema
-		err    error
-	}{
-		{valid{}, &Schema{Name: "valids", Fields: map[string]*Field{
-			"key_1": {Type: typeString},
-		}, PrimaryKey: []string{}}, nil},
-		{invalid{}, nil, fmt.Errorf("primary key should not be defined for `messages` collection type")},
-	}
-
-	for _, c := range cases {
-		t.Run(reflect.TypeOf(c.input).Name(), func(t *testing.T) {
-			schema, err := fromCollectionModel(c.input, Messages)
-			assert.Equal(t, c.err, err)
-			if schema != nil {
-				assert.Equal(t, Messages, schema.CollectionType)
-				c.output.CollectionType = Messages
-			}
 			assert.Equal(t, c.output, schema)
 		})
 	}

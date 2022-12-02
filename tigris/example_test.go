@@ -30,7 +30,7 @@ func ExampleDatabase_Tx() {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, "db1", &Coll1{})
+	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +63,7 @@ func ExampleOpenDatabase() {
 	// Connects to the Tigris server. Creates or opens database "db1".
 	// Creates or migrate &Coll1{}. Returns a "db" object, which provides
 	// access to the collections of the database, Coll1 in this example.
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, "db1", &Coll1{})
+	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +82,7 @@ func ExampleIterator() {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, "db1", &Coll1{})
+	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}
@@ -113,7 +113,7 @@ func ExampleError() {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, "db1", &Coll1{})
+	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}

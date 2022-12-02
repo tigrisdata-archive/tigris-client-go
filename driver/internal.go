@@ -25,16 +25,21 @@ import (
 )
 
 type driverWithOptions interface {
-	beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error)
-	describeDatabaseWithOptions(ctx context.Context, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
+	createProjectWithOptions(ctx context.Context, project string, options *CreateProjectOptions) (*CreateProjectResponse, error)
+	describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions) (*DescribeDatabaseResponse, error)
+	deleteProjectWithOptions(ctx context.Context, project string, options *DeleteProjectOptions) (*DeleteProjectResponse, error)
 
+	UseDatabase(project string) Database
+
+	ListProjects(ctx context.Context) ([]string, error)
 	Info(ctx context.Context) (*InfoResponse, error)
 	Health(ctx context.Context) (*HealthResponse, error)
-	UseDatabase() Database
+
 	Close() error
 }
 
 type CRUDWithOptions interface {
+	beginTxWithOptions(ctx context.Context, options *TxOptions) (txWithOptions, error)
 	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (
 		*InsertResponse, error)
 	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (

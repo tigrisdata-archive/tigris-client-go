@@ -53,7 +53,7 @@ func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementS
 
 	project1 := "project1"
 	mc.EXPECT().CreateApplication(gomock.Any(),
-		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: &project1})).Return(
+		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: project1})).Return(
 		&api.CreateApplicationResponse{CreatedApplication: nil}, nil)
 
 	_, err := c.CreateApplication(ctx, project1, "app1", "description1")
@@ -67,7 +67,7 @@ func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementS
 	require.Error(t, err)
 
 	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{Project: &project1})).Return(
+		pm(&api.ListApplicationsRequest{Project: project1})).Return(
 		nil, fmt.Errorf("some error"))
 
 	_, err = c.ListApplications(ctx, project1)
@@ -105,7 +105,7 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 
 	project1 := "project1"
 	mc.EXPECT().CreateApplication(gomock.Any(),
-		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: &project1})).Return(
+		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: project1})).Return(
 		&api.CreateApplicationResponse{CreatedApplication: capp}, nil)
 
 	app, err := c.CreateApplication(ctx, project1, "app1", "description1")
@@ -145,7 +145,7 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	}
 
 	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{Project: &project1})).Return(
+		pm(&api.ListApplicationsRequest{Project: project1})).Return(
 		&api.ListApplicationsResponse{Applications: []*api.Application{lapp1, lapp2, lapp3}}, nil)
 
 	list, err := c.ListApplications(ctx, "project1")
@@ -157,7 +157,7 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	appEqual(t, lapp3, list[2])
 
 	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{Project: &project1})).Return(
+		pm(&api.ListApplicationsRequest{Project: project1})).Return(
 		&api.ListApplicationsResponse{}, nil)
 
 	list, err = c.ListApplications(ctx, "project1")
@@ -243,7 +243,7 @@ func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *moc
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{},
@@ -256,7 +256,7 @@ func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *moc
 		assert.True(t, strings.Contains(metautils.ExtractIncoming(ctx).Get(ua), UserAgent))
 	}).Return(&api.DeleteResponse{}, nil)
 
-	db := d.UseDatabase()
+	db := d.UseDatabase("db1")
 
 	_, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
@@ -264,7 +264,7 @@ func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *moc
 	// Should reuse the token for subsequent API calls
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{},
@@ -288,7 +288,6 @@ func TestGRPCDriverCredentials(t *testing.T) {
 			URL:          test.GRPCURL(0),
 			ClientID:     "client_id_test",
 			ClientSecret: "client_secret_test",
-			Project:      "db1",
 		})
 		defer cancel()
 
@@ -305,7 +304,7 @@ func TestGRPCDriverCredentials(t *testing.T) {
 		t.Setenv(EnvClientID, "client_id_test")
 		t.Setenv(EnvClientSecret, "client_secret_test")
 
-		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0), Project: "db1"})
+		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0)})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, cfg)
@@ -322,7 +321,6 @@ func TestHTTPDriverCredentials(t *testing.T) {
 			URL:          test.HTTPURL(2),
 			ClientID:     "client_id_test",
 			ClientSecret: "client_secret_test",
-			Project:      "db1",
 		})
 		defer cancel()
 
@@ -337,7 +335,7 @@ func TestHTTPDriverCredentials(t *testing.T) {
 		t.Setenv(EnvClientID, "client_id_test")
 		t.Setenv(EnvClientSecret, "client_secret_test")
 
-		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2), Project: "db1"})
+		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2)})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, cfg)
@@ -354,9 +352,8 @@ func TestGRPCDriverToken(t *testing.T) {
 		TokenURLOverride = testTokenURLOverride
 
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{
-			URL:     test.GRPCURL(0),
-			Token:   "token_grpc_config_1",
-			Project: "db1",
+			URL:   test.GRPCURL(0),
+			Token: "token_grpc_config_1",
 		})
 		defer cancel()
 
@@ -368,7 +365,7 @@ func TestGRPCDriverToken(t *testing.T) {
 
 		t.Setenv(EnvToken, "token_grpc_env_1")
 
-		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0), Project: "db1"})
+		cfg, err := initConfig(&config.Driver{URL: test.GRPCURL(0)})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtGRPCTests(t, cfg)
@@ -382,9 +379,8 @@ func TestHTTPDriverToken(t *testing.T) {
 	t.Run("config", func(t *testing.T) {
 		TokenURLOverride = ""
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{
-			URL:     test.HTTPURL(2),
-			Token:   "token_http_config_1",
-			Project: "db1",
+			URL:   test.HTTPURL(2),
+			Token: "token_http_config_1",
 		})
 		defer cancel()
 
@@ -396,7 +392,7 @@ func TestHTTPDriverToken(t *testing.T) {
 
 		t.Setenv(EnvToken, "token_http_env_1")
 
-		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2), Project: "db1"})
+		cfg, err := initConfig(&config.Driver{URL: test.HTTPURL(2)})
 		require.NoError(t, err)
 
 		client, _, mockServers, cancel := SetupMgmtHTTPTests(t, cfg)
@@ -411,7 +407,7 @@ func TestNewAuth(t *testing.T) {
 	defer cancel()
 
 	DefaultProtocol = HTTP
-	cfg := config.Driver{URL: test.HTTPURL(4), Project: "test-project"}
+	cfg := config.Driver{URL: test.HTTPURL(4)}
 	client, err := NewManagement(context.Background(), &cfg)
 	require.NoError(t, err)
 
@@ -421,7 +417,7 @@ func TestNewAuth(t *testing.T) {
 	certPool := x509.NewCertPool()
 	require.True(t, certPool.AppendCertsFromPEM([]byte(test.CaCert)))
 
-	cfg = config.Driver{URL: test.GRPCURL(4), TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost", MinVersion: tls.VersionTLS12}, Project: "test-project"}
+	cfg = config.Driver{URL: test.GRPCURL(4), TLS: &tls.Config{RootCAs: certPool, ServerName: "localhost", MinVersion: tls.VersionTLS12}}
 	client, err = NewManagement(context.Background(), &cfg)
 	require.NoError(t, err)
 

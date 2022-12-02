@@ -45,13 +45,13 @@ func TestClient(t *testing.T) {
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
-			Db: "db1", Collection: "coll_1",
+			Project: "db1", Collection: "coll_1",
 			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
 			Options: &api.CollectionOptions{},
 		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
@@ -59,7 +59,7 @@ func TestClient(t *testing.T) {
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
-			Db: "db1",
+			Project: "db1",
 		})).Return(&api.CommitTransactionResponse{}, nil)
 
 	c, err := NewClient(ctx, cfg)

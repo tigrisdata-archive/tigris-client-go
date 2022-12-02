@@ -28,7 +28,7 @@ func ExampleDriver() {
 
 	c, _ := NewDriver(ctx, &config.Driver{URL: "localhost"})
 
-	db := c.UseDatabase()
+	db := c.UseDatabase("db1")
 
 	_ = db.CreateOrUpdateCollection(ctx, "coll1",
 		Schema(`{ "properties": { "F1": { "type": "string" }, "F2": { "type": "string" } }, "primary_key": ["F1"] }`))
@@ -46,7 +46,7 @@ func ExampleDriver() {
 
 	_, _ = db.Delete(ctx, "c1", Filter(`{"F1":"V1"}`))
 
-	tx, _ := c.BeginTx(ctx, nil)
+	tx, _ := c.UseDatabase("db1").BeginTx(ctx)
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	_, _ = tx.Insert(ctx, "c1", []Document{Document(`{"F1":"V1"}`)})

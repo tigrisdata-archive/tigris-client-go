@@ -40,13 +40,19 @@ type Driver interface {
 
 	// UseDatabase returns and interface for collections and documents management
 	// of the database
-	UseDatabase() Database
+	UseDatabase(project string) Database
 
-	// DescribeDatabase returns database metadata
-	DescribeDatabase(ctx context.Context, options ...*DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
+	// CreateProject creates the project
+	CreateProject(ctx context.Context, project string, options ...*CreateProjectOptions) (*CreateProjectResponse, error)
 
-	// BeginTx starts new transaction
-	BeginTx(ctx context.Context, options ...*TxOptions) (Tx, error)
+	// DescribeDatabase returns project description metadata
+	DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions) (*DescribeDatabaseResponse, error)
+
+	// ListProjects returns all projects
+	ListProjects(ctx context.Context) ([]string, error)
+
+	// DeleteProject deletes the project
+	DeleteProject(ctx context.Context, project string, options ...*DeleteProjectOptions) (*DeleteProjectResponse, error)
 
 	// Close releases resources of the driver
 	Close() error
@@ -66,6 +72,8 @@ type Tx interface {
 
 // Database is the interface that encapsulates the CRUD portions of the transaction API.
 type Database interface {
+	// BeginTx starts new transaction
+	BeginTx(ctx context.Context, options ...*TxOptions) (Tx, error)
 	// Insert array of documents into specified database and collection.
 	Insert(ctx context.Context, collection string, docs []Document,
 		options ...*InsertOptions) (*InsertResponse, error)
@@ -129,27 +137,31 @@ type driver struct {
 	cfg     *config.Driver
 }
 
-func (c *driver) DescribeDatabase(ctx context.Context, options ...*DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
-	opts, err := validateOptionsParam(options, &DescribeDatabaseOptions{})
+func (c *driver) CreateProject(ctx context.Context, project string, options ...*CreateProjectOptions) (*CreateProjectResponse, error) {
+	opts, err := validateOptionsParam(options, &CreateProjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.describeDatabaseWithOptions(ctx, opts.(*DescribeDatabaseOptions))
+	return c.createProjectWithOptions(ctx, project, opts.(*CreateProjectOptions))
 }
 
-func (c *driver) BeginTx(ctx context.Context, options ...*TxOptions) (Tx, error) {
-	opts, err := validateOptionsParam(options, &TxOptions{})
+func (c *driver) DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
+	opts, err := validateOptionsParam(options, &DescribeProjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := c.beginTxWithOptions(ctx, c.cfg.Project, opts.(*TxOptions))
+	return c.describeProjectWithOptions(ctx, project, opts.(*DescribeProjectOptions))
+}
+
+func (c *driver) DeleteProject(ctx context.Context, project string, options ...*DeleteProjectOptions) (*DeleteProjectResponse, error) {
+	opts, err := validateOptionsParam(options, &DeleteProjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &driverCRUDTx{driverCRUD: &driverCRUD{tx}, txWithOptions: tx}, nil
+	return c.deleteProjectWithOptions(ctx, project, opts.(*DeleteProjectOptions))
 }
 
 type driverCRUDTx struct {
@@ -159,6 +171,20 @@ type driverCRUDTx struct {
 
 type driverCRUD struct {
 	CRUDWithOptions
+}
+
+func (c *driverCRUD) BeginTx(ctx context.Context, options ...*TxOptions) (Tx, error) {
+	opts, err := validateOptionsParam(options, &TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := c.beginTxWithOptions(ctx, opts.(*TxOptions))
+	if err != nil {
+		return nil, err
+	}
+
+	return &driverCRUDTx{driverCRUD: &driverCRUD{tx}, txWithOptions: tx}, nil
 }
 
 func (c *driverCRUD) Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (
@@ -374,13 +400,6 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	}
 	if cfg.URL == "" {
 		cfg.URL = DefaultURL
-	}
-
-	if cfg.Project == "" {
-		cfg.Project = os.Getenv(EnvProject)
-	}
-	if cfg.Project == "" {
-		return nil, errors.New("failed to configure tigris project")
 	}
 
 	URL := cfg.URL

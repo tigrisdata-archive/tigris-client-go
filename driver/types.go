@@ -64,7 +64,6 @@ type (
 	UpdateOptions  api.UpdateRequestOptions
 	DeleteOptions  api.DeleteRequestOptions
 	ReadOptions    api.ReadRequestOptions
-	EventsOptions  api.EventsRequestOptions
 	WriteOptions   api.WriteOptions
 	Collation      api.Collation
 )
@@ -75,11 +74,18 @@ type (
 	}
 
 	CollectionOptions api.CollectionOptions
-	DatabaseOptions   api.DatabaseOptions
 	TxOptions         api.TransactionOptions
 
-	DescribeDatabaseOptions struct {
+	DescribeProjectOptions struct {
 		SchemaFormat string
+		Branch       string
+	}
+
+	DeleteProjectOptions struct {
+		Branch string
+	}
+	CreateProjectOptions struct {
+		Branch string
 	}
 
 	DescribeCollectionOptions struct {
@@ -96,6 +102,9 @@ type (
 
 type (
 	DescribeDatabaseResponse   api.DescribeDatabaseResponse
+	ListProjectsResponse       api.ListProjectsResponse
+	CreateProjectResponse      api.CreateProjectResponse
+	DeleteProjectResponse      api.DeleteProjectResponse
 	DescribeCollectionResponse api.DescribeCollectionResponse
 )
 

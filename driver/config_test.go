@@ -32,65 +32,65 @@ func TestDriverConfig(t *testing.T) {
 		cfg  *config.Driver
 		err  error
 	}{
-		{name: "host", url: "host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC, Project: "db1"}},
-		{name: "host_with_port", url: "host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC, Project: "db1"}},
-		{name: "localhost", url: "localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC, Project: "db1"}},
-		{name: "localhost_with_port", url: "localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: GRPC, Project: "db1"}},
-		{name: "ip", url: "127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: GRPC, Project: "db1"}},
-		{name: "ip_with_port", url: "127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC, Project: "db1"}},
-		{name: "https_ipv6", url: "https://[::1]", cfg: &config.Driver{URL: "[::1]", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "https_ipv6_with_port", url: "https://[::1]:777", cfg: &config.Driver{URL: "[::1]:777", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "ipv6", url: "::1", cfg: &config.Driver{URL: "::1", Protocol: GRPC, Project: "db1"}},
-		{name: "ipv6_with_port", url: "[::1]:777", cfg: &config.Driver{URL: "[::1]:777", Protocol: GRPC, Project: "db1"}},
-		{name: "http_host", url: "http://host1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, Project: "db1"}},
-		{name: "http_host_with_port", url: "http://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, Project: "db1"}},
-		{name: "http_localhost", url: "http://localhost", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, Project: "db1"}},
-		{name: "http_localhost_with_port", url: "http://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, Project: "db1"}},
-		{name: "http_ip", url: "http://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, Project: "db1"}},
-		{name: "http_ip_with_port", url: "http://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, Project: "db1"}},
-		{name: "https_host", url: "https://host1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "https_host_with_port", url: "https://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "https_localhost", url: "https://localhost", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "https_localhost_with_port", url: "https://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "https_ip", url: "https://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "https_ip_with_port", url: "https://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, Project: "db1"}},
-		{name: "grpc_host", url: "grpc://host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC, Project: "db1"}},
-		{name: "grpc_host_with_port", url: "grpc://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC, Project: "db1"}},
-		{name: "grpc_localhost", url: "grpc://localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC, Project: "db1"}},
-		{name: "grpc_localhost_with_port", url: "grpc://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: GRPC, Project: "db1"}},
-		{name: "grpc_ip", url: "grpc://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: GRPC, Project: "db1"}},
-		{name: "grpc_ip_with_port", url: "grpc://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC, Project: "db1"}},
-		{name: "https_host_query", url: "https://host1?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_host_with_port_query", url: "https://host1:333?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_localhost_query", url: "https://localhost?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_localhost_with_port_query", url: "https://localhost:555?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_ip_query", url: "https://127.0.0.1?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_ip_with_port_query", url: "https://127.0.0.1:777?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_host_userinfo", url: "https://usr1:pwd1@host1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_host_with_port_userinfo", url: "https://usr1:pwd1@host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_localhost_userinfo", url: "https://usr1:pwd1@localhost", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_localhost_with_port_userinfo", url: "https://usr1:pwd1@localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_ip_userinfo", url: "https://usr1:pwd1@127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "https_ip_with_port_userinfo", url: "https://usr1:pwd1@127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "ip_with_port_userinfo", url: "usr1:pwd1@127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1", Project: "db1"}},
-		{name: "dns_host", url: "dns://host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC, Project: "db1"}},
-		{name: "dns_host_with_port", url: "dns://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC, Project: "db1"}},
-		{name: "dns_localhost", url: "dns://localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC, Project: "db1"}},
-		{name: "dns_localhost_with_port", url: "dns://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: GRPC, Project: "db1"}},
-		{name: "dns_ip", url: "dns://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: GRPC, Project: "db1"}},
-		{name: "dns_ip_with_port", url: "dns://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC, Project: "db1"}},
+		{name: "host", url: "host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC}},
+		{name: "host_with_port", url: "host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC}},
+		{name: "localhost", url: "localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC}},
+		{name: "localhost_with_port", url: "localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: GRPC}},
+		{name: "ip", url: "127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: GRPC}},
+		{name: "ip_with_port", url: "127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC}},
+		{name: "https_ipv6", url: "https://[::1]", cfg: &config.Driver{URL: "[::1]", Protocol: HTTP, TLS: TLS}},
+		{name: "https_ipv6_with_port", url: "https://[::1]:777", cfg: &config.Driver{URL: "[::1]:777", Protocol: HTTP, TLS: TLS}},
+		{name: "ipv6", url: "::1", cfg: &config.Driver{URL: "::1", Protocol: GRPC}},
+		{name: "ipv6_with_port", url: "[::1]:777", cfg: &config.Driver{URL: "[::1]:777", Protocol: GRPC}},
+		{name: "http_host", url: "http://host1", cfg: &config.Driver{URL: "host1", Protocol: HTTP}},
+		{name: "http_host_with_port", url: "http://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP}},
+		{name: "http_localhost", url: "http://localhost", cfg: &config.Driver{URL: "localhost", Protocol: HTTP}},
+		{name: "http_localhost_with_port", url: "http://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP}},
+		{name: "http_ip", url: "http://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP}},
+		{name: "http_ip_with_port", url: "http://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP}},
+		{name: "https_host", url: "https://host1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS}},
+		{name: "https_host_with_port", url: "https://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS}},
+		{name: "https_localhost", url: "https://localhost", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS}},
+		{name: "https_localhost_with_port", url: "https://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS}},
+		{name: "https_ip", url: "https://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS}},
+		{name: "https_ip_with_port", url: "https://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS}},
+		{name: "grpc_host", url: "grpc://host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC}},
+		{name: "grpc_host_with_port", url: "grpc://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC}},
+		{name: "grpc_localhost", url: "grpc://localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC}},
+		{name: "grpc_localhost_with_port", url: "grpc://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: GRPC}},
+		{name: "grpc_ip", url: "grpc://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: GRPC}},
+		{name: "grpc_ip_with_port", url: "grpc://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC}},
+		{name: "https_host_query", url: "https://host1?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_host_with_port_query", url: "https://host1:333?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_localhost_query", url: "https://localhost?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_localhost_with_port_query", url: "https://localhost:555?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_ip_query", url: "https://127.0.0.1?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_ip_with_port_query", url: "https://127.0.0.1:777?client_id=usr1&client_secret=pwd1", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_host_userinfo", url: "https://usr1:pwd1@host1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_host_with_port_userinfo", url: "https://usr1:pwd1@host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_localhost_userinfo", url: "https://usr1:pwd1@localhost", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_localhost_with_port_userinfo", url: "https://usr1:pwd1@localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_ip_userinfo", url: "https://usr1:pwd1@127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "https_ip_with_port_userinfo", url: "https://usr1:pwd1@127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "ip_with_port_userinfo", url: "usr1:pwd1@127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "dns_host", url: "dns://host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC}},
+		{name: "dns_host_with_port", url: "dns://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC}},
+		{name: "dns_localhost", url: "dns://localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC}},
+		{name: "dns_localhost_with_port", url: "dns://localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: GRPC}},
+		{name: "dns_ip", url: "dns://127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: GRPC}},
+		{name: "dns_ip_with_port", url: "dns://127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC}},
 
-		{name: "https_host_token", url: "https://host1?token=tkn1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS, Token: "tkn1", Project: "db1"}},
-		{name: "https_host_with_port_token", url: "https://host1:333?token=tkn1", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS, Token: "tkn1", Project: "db1"}},
-		{name: "https_localhost_token", url: "https://localhost?token=tkn1", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS, Token: "tkn1", Project: "db1"}},
-		{name: "https_localhost_with_port_token", url: "https://localhost:555?token=tkn1", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, Token: "tkn1", Project: "db1"}},
-		{name: "https_ip_token", url: "https://127.0.0.1?token=tkn1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, Token: "tkn1", Project: "db1"}},
-		{name: "https_ip_with_port_token", url: "https://127.0.0.1:777?token=tkn1", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, Token: "tkn1", Project: "db1"}},
+		{name: "https_host_token", url: "https://host1?token=tkn1", cfg: &config.Driver{URL: "host1", Protocol: HTTP, TLS: TLS, Token: "tkn1"}},
+		{name: "https_host_with_port_token", url: "https://host1:333?token=tkn1", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP, TLS: TLS, Token: "tkn1"}},
+		{name: "https_localhost_token", url: "https://localhost?token=tkn1", cfg: &config.Driver{URL: "localhost", Protocol: HTTP, TLS: TLS, Token: "tkn1"}},
+		{name: "https_localhost_with_port_token", url: "https://localhost:555?token=tkn1", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, Token: "tkn1"}},
+		{name: "https_ip_token", url: "https://127.0.0.1?token=tkn1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, Token: "tkn1"}},
+		{name: "https_ip_with_port_token", url: "https://127.0.0.1:777?token=tkn1", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, Token: "tkn1"}},
 	}
 
 	for _, v := range cases {
 		t.Run(v.name, func(t *testing.T) {
-			cfg := config.Driver{URL: v.url, Project: v.cfg.Project}
+			cfg := config.Driver{URL: v.url}
 			rcfg, err := initConfig(&cfg)
 			assert.Equal(t, v.err, err)
 			assert.Equal(t, v.cfg, rcfg)
@@ -101,7 +101,7 @@ func TestDriverConfig(t *testing.T) {
 func TestDriverConfigPrecedence(t *testing.T) {
 	TLS := &tls.Config{MinVersion: tls.VersionTLS12}
 
-	cfg := config.Driver{Project: "test-project"}
+	cfg := config.Driver{}
 
 	t.Setenv(EnvToken, "")
 	t.Setenv(EnvClientID, "")
@@ -113,7 +113,7 @@ func TestDriverConfigPrecedence(t *testing.T) {
 	assert.NoError(t, err)
 
 	// default
-	assert.Equal(t, config.Driver{URL: "api.preview.tigrisdata.cloud", Protocol: GRPC, Project: "test-project"}, *res)
+	assert.Equal(t, config.Driver{URL: "api.preview.tigrisdata.cloud", Protocol: GRPC}, *res)
 
 	// env have precedence over default
 	t.Setenv(EnvToken, "token1")
@@ -131,7 +131,6 @@ func TestDriverConfigPrecedence(t *testing.T) {
 		Token:        "token1",
 		Protocol:     HTTP,
 		TLS:          TLS,
-		Project:      "test-project",
 	}, *res)
 
 	// config have precedence over config
@@ -150,7 +149,6 @@ func TestDriverConfigPrecedence(t *testing.T) {
 		Token:        "token2",
 		Protocol:     GRPC,
 		TLS:          TLS,
-		Project:      "test-project",
 	}, *res)
 
 	// URL params have precedence over config
@@ -165,7 +163,6 @@ func TestDriverConfigPrecedence(t *testing.T) {
 		Token:        "token3",
 		Protocol:     HTTP,
 		TLS:          TLS,
-		Project:      "test-project",
 	}, *res)
 }
 

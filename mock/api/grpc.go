@@ -65,21 +65,6 @@ func (mr *MockTigrisServerMockRecorder) CommitTransaction(arg0, arg1 interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitTransaction", reflect.TypeOf((*MockTigrisServer)(nil).CommitTransaction), arg0, arg1)
 }
 
-// CreateDatabase mocks base method.
-func (m *MockTigrisServer) CreateDatabase(arg0 context.Context, arg1 *api.CreateDatabaseRequest) (*api.CreateDatabaseResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateDatabase", arg0, arg1)
-	ret0, _ := ret[0].(*api.CreateDatabaseResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateDatabase indicates an expected call of CreateDatabase.
-func (mr *MockTigrisServerMockRecorder) CreateDatabase(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDatabase", reflect.TypeOf((*MockTigrisServer)(nil).CreateDatabase), arg0, arg1)
-}
-
 // CreateOrUpdateCollection mocks base method.
 func (m *MockTigrisServer) CreateOrUpdateCollection(arg0 context.Context, arg1 *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
 	m.ctrl.T.Helper()
@@ -95,6 +80,21 @@ func (mr *MockTigrisServerMockRecorder) CreateOrUpdateCollection(arg0, arg1 inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCollection", reflect.TypeOf((*MockTigrisServer)(nil).CreateOrUpdateCollection), arg0, arg1)
 }
 
+// CreateProject mocks base method.
+func (m *MockTigrisServer) CreateProject(arg0 context.Context, arg1 *api.CreateProjectRequest) (*api.CreateProjectResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateProject", arg0, arg1)
+	ret0, _ := ret[0].(*api.CreateProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateProject indicates an expected call of CreateProject.
+func (mr *MockTigrisServerMockRecorder) CreateProject(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProject", reflect.TypeOf((*MockTigrisServer)(nil).CreateProject), arg0, arg1)
+}
+
 // Delete mocks base method.
 func (m *MockTigrisServer) Delete(arg0 context.Context, arg1 *api.DeleteRequest) (*api.DeleteResponse, error) {
 	m.ctrl.T.Helper()
@@ -108,6 +108,21 @@ func (m *MockTigrisServer) Delete(arg0 context.Context, arg1 *api.DeleteRequest)
 func (mr *MockTigrisServerMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTigrisServer)(nil).Delete), arg0, arg1)
+}
+
+// DeleteProject mocks base method.
+func (m *MockTigrisServer) DeleteProject(arg0 context.Context, arg1 *api.DeleteProjectRequest) (*api.DeleteProjectResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProject", arg0, arg1)
+	ret0, _ := ret[0].(*api.DeleteProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteProject indicates an expected call of DeleteProject.
+func (mr *MockTigrisServerMockRecorder) DeleteProject(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProject", reflect.TypeOf((*MockTigrisServer)(nil).DeleteProject), arg0, arg1)
 }
 
 // DescribeCollection mocks base method.
@@ -155,35 +170,6 @@ func (mr *MockTigrisServerMockRecorder) DropCollection(arg0, arg1 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropCollection", reflect.TypeOf((*MockTigrisServer)(nil).DropCollection), arg0, arg1)
 }
 
-// DropDatabase mocks base method.
-func (m *MockTigrisServer) DropDatabase(arg0 context.Context, arg1 *api.DropDatabaseRequest) (*api.DropDatabaseResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DropDatabase", arg0, arg1)
-	ret0, _ := ret[0].(*api.DropDatabaseResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DropDatabase indicates an expected call of DropDatabase.
-func (mr *MockTigrisServerMockRecorder) DropDatabase(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropDatabase", reflect.TypeOf((*MockTigrisServer)(nil).DropDatabase), arg0, arg1)
-}
-
-// Events mocks base method.
-func (m *MockTigrisServer) Events(arg0 *api.EventsRequest, arg1 api.Tigris_EventsServer) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Events", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Events indicates an expected call of Events.
-func (mr *MockTigrisServerMockRecorder) Events(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Events", reflect.TypeOf((*MockTigrisServer)(nil).Events), arg0, arg1)
-}
-
 // Insert mocks base method.
 func (m *MockTigrisServer) Insert(arg0 context.Context, arg1 *api.InsertRequest) (*api.InsertResponse, error) {
 	m.ctrl.T.Helper()
@@ -214,34 +200,19 @@ func (mr *MockTigrisServerMockRecorder) ListCollections(arg0, arg1 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCollections", reflect.TypeOf((*MockTigrisServer)(nil).ListCollections), arg0, arg1)
 }
 
-// ListDatabases mocks base method.
-func (m *MockTigrisServer) ListDatabases(arg0 context.Context, arg1 *api.ListDatabasesRequest) (*api.ListDatabasesResponse, error) {
+// ListProjects mocks base method.
+func (m *MockTigrisServer) ListProjects(arg0 context.Context, arg1 *api.ListProjectsRequest) (*api.ListProjectsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListDatabases", arg0, arg1)
-	ret0, _ := ret[0].(*api.ListDatabasesResponse)
+	ret := m.ctrl.Call(m, "ListProjects", arg0, arg1)
+	ret0, _ := ret[0].(*api.ListProjectsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListDatabases indicates an expected call of ListDatabases.
-func (mr *MockTigrisServerMockRecorder) ListDatabases(arg0, arg1 interface{}) *gomock.Call {
+// ListProjects indicates an expected call of ListProjects.
+func (mr *MockTigrisServerMockRecorder) ListProjects(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDatabases", reflect.TypeOf((*MockTigrisServer)(nil).ListDatabases), arg0, arg1)
-}
-
-// Publish mocks base method.
-func (m *MockTigrisServer) Publish(arg0 context.Context, arg1 *api.PublishRequest) (*api.PublishResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Publish", arg0, arg1)
-	ret0, _ := ret[0].(*api.PublishResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Publish indicates an expected call of Publish.
-func (mr *MockTigrisServerMockRecorder) Publish(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockTigrisServer)(nil).Publish), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProjects", reflect.TypeOf((*MockTigrisServer)(nil).ListProjects), arg0, arg1)
 }
 
 // Read mocks base method.
@@ -300,20 +271,6 @@ func (m *MockTigrisServer) Search(arg0 *api.SearchRequest, arg1 api.Tigris_Searc
 func (mr *MockTigrisServerMockRecorder) Search(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockTigrisServer)(nil).Search), arg0, arg1)
-}
-
-// Subscribe mocks base method.
-func (m *MockTigrisServer) Subscribe(arg0 *api.SubscribeRequest, arg1 api.Tigris_SubscribeServer) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Subscribe", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Subscribe indicates an expected call of Subscribe.
-func (mr *MockTigrisServerMockRecorder) Subscribe(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockTigrisServer)(nil).Subscribe), arg0, arg1)
 }
 
 // Update mocks base method.

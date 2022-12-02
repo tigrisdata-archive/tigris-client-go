@@ -47,7 +47,6 @@ func setTxCtx(ctx context.Context, tx *Tx) context.Context {
 
 func getTxCtx(ctx context.Context) *Tx {
 	tx, _ := ctx.Value(txCtxKey).(*Tx)
-
 	return tx
 }
 
@@ -61,7 +60,7 @@ func getDB(ctx context.Context, crud driver.Database) driver.Database {
 
 // low level with no retries.
 func (db *Database) tx(ctx context.Context, fn func(ctx context.Context) error) error {
-	dtx, err := db.driver.BeginTx(ctx)
+	dtx, err := db.driver.UseDatabase(db.name).BeginTx(ctx)
 	if err != nil {
 		return err
 	}

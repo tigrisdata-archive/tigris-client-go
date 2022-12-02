@@ -79,7 +79,7 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 	}
 
 	// Run in new implicit transaction
-	tx, err := db.driver.BeginTx(ctx)
+	tx, err := db.driver.UseDatabase(db.name).BeginTx(ctx)
 	if err != nil {
 		return err
 	}
@@ -98,10 +98,10 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 }
 
 // openDatabaseFromModels creates Database and collections from the provided collection models.
-func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *Config,
-	models ...schema.Model,
+func openDatabaseFromModels(ctx context.Context, d driver.Driver,
+	project string, models ...schema.Model,
 ) (*Database, error) {
-	db := newDatabase(cfg.Project, d)
+	db := newDatabase(project, d)
 
 	if len(models) > 0 {
 		err := db.CreateCollections(ctx, models[0], models[1:]...)
@@ -116,7 +116,7 @@ func openDatabaseFromModels(ctx context.Context, d driver.Driver, cfg *Config,
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
-func OpenDatabase(ctx context.Context, cfg *Config, dbName string, models ...schema.Model,
+func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 ) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
@@ -127,7 +127,7 @@ func OpenDatabase(ctx context.Context, cfg *Config, dbName string, models ...sch
 		return nil, err
 	}
 
-	return openDatabaseFromModels(ctx, d, cfg, models...)
+	return openDatabaseFromModels(ctx, d, cfg.Project, models...)
 }
 
 // GetCollection returns collection object corresponding to collection model T.
@@ -138,5 +138,5 @@ func GetCollection[T schema.Model](db *Database) *Collection[T] {
 }
 
 func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {
-	return &Collection[T]{name: name, db: db.driver.UseDatabase()}
+	return &Collection[T]{name: name, db: db.driver.UseDatabase(db.name)}
 }

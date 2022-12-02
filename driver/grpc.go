@@ -105,8 +105,22 @@ func (c *grpcDriver) Close() error {
 	return GRPCError(c.conn.Close())
 }
 
-func (c *grpcDriver) UseDatabase() Database {
-	return &driverCRUD{&grpcCRUD{db: c.cfg.Project, api: c.api}}
+func (c *grpcDriver) UseDatabase(project string) Database {
+	return &driverCRUD{&grpcCRUD{db: project, api: c.api}}
+}
+
+func (c *grpcDriver) ListProjects(ctx context.Context) ([]string, error) {
+	r, err := c.api.ListProjects(ctx, &api.ListProjectsRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	projects := make([]string, 0, len(r.GetProjects()))
+	for _, c := range r.GetProjects() {
+		projects = append(projects, c.GetProject())
+	}
+
+	return projects, nil
 }
 
 func (c *grpcDriver) Info(ctx context.Context) (*InfoResponse, error) {
@@ -126,9 +140,20 @@ func (c *grpcDriver) Health(ctx context.Context) (*HealthResponse, error) {
 	return (*HealthResponse)(r), nil
 }
 
-func (c *grpcDriver) describeDatabaseWithOptions(ctx context.Context, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
+func (c *grpcDriver) createProjectWithOptions(ctx context.Context, project string, _ *CreateProjectOptions) (*CreateProjectResponse, error) {
+	r, err := c.api.CreateProject(ctx, &api.CreateProjectRequest{
+		Project: project,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*CreateProjectResponse)(r), nil
+}
+
+func (c *grpcDriver) describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
 	r, err := c.api.DescribeDatabase(ctx, &api.DescribeDatabaseRequest{
-		Db:           c.cfg.Project,
+		Project:      project,
 		SchemaFormat: options.SchemaFormat,
 	})
 	if err != nil {
@@ -138,30 +163,15 @@ func (c *grpcDriver) describeDatabaseWithOptions(ctx context.Context, options *D
 	return (*DescribeDatabaseResponse)(r), nil
 }
 
-func (c *grpcDriver) beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error) {
-	var respHeaders meta.MD // variable to store header and trailer
-
-	resp, err := c.api.BeginTransaction(ctx, &api.BeginTransactionRequest{
-		Db:      db,
-		Options: (*api.TransactionOptions)(options),
-	}, grpc.Header(&respHeaders))
+func (c *grpcDriver) deleteProjectWithOptions(ctx context.Context, project string, options *DeleteProjectOptions) (*DeleteProjectResponse, error) {
+	r, err := c.api.DeleteProject(ctx, &api.DeleteProjectRequest{
+		Project: project,
+	})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
 
-	if resp.GetTxCtx() == nil {
-		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
-	}
-
-	additionalHeaders := meta.New(map[string]string{})
-
-	if respHeaders.Get(SetCookieHeaderKey) != nil {
-		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
-			additionalHeaders = meta.Join(additionalHeaders, meta.Pairs(CookieHeaderKey, incomingCookie))
-		}
-	}
-
-	return &grpcCRUD{db: db, api: c.api, txCtx: resp.GetTxCtx(), additionalMetadata: additionalHeaders}, nil
+	return (*DeleteProjectResponse)(r), nil
 }
 
 func setGRPCTxCtx(ctx context.Context, txCtx *api.TransactionCtx, additionalMetadata meta.MD) context.Context {
@@ -182,7 +192,7 @@ func (c *grpcCRUD) Commit(ctx context.Context) error {
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	_, err := c.api.CommitTransaction(ctx, &api.CommitTransactionRequest{
-		Db: c.db,
+		Project: c.db,
 	})
 
 	if err = GRPCError(err); err == nil {
@@ -200,7 +210,7 @@ func (c *grpcCRUD) Rollback(ctx context.Context) error {
 	}
 
 	_, err := c.api.RollbackTransaction(ctx, &api.RollbackTransactionRequest{
-		Db: c.db,
+		Project: c.db,
 	})
 
 	return GRPCError(err)
@@ -215,11 +225,37 @@ type grpcCRUD struct {
 	committed bool
 }
 
+func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (txWithOptions, error) {
+	var respHeaders meta.MD // variable to store header and trailer
+
+	resp, err := c.api.BeginTransaction(ctx, &api.BeginTransactionRequest{
+		Project: c.db,
+		Options: (*api.TransactionOptions)(options),
+	}, grpc.Header(&respHeaders))
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	if resp.GetTxCtx() == nil {
+		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
+	}
+
+	additionalHeaders := meta.New(map[string]string{})
+
+	if respHeaders.Get(SetCookieHeaderKey) != nil {
+		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
+			additionalHeaders = meta.Join(additionalHeaders, meta.Pairs(CookieHeaderKey, incomingCookie))
+		}
+	}
+
+	return &grpcCRUD{db: c.db, api: c.api, txCtx: resp.GetTxCtx(), additionalMetadata: additionalHeaders}, nil
+}
+
 func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	r, err := c.api.ListCollections(ctx, &api.ListCollectionsRequest{
-		Db:      c.db,
+		Project: c.db,
 		Options: (*api.CollectionOptions)(options),
 	})
 	if err != nil {
@@ -236,7 +272,7 @@ func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *Coll
 
 func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error) {
 	r, err := c.api.DescribeCollection(ctx, &api.DescribeCollectionRequest{
-		Db:           c.db,
+		Project:      c.db,
 		Collection:   collection,
 		SchemaFormat: options.SchemaFormat,
 	})
@@ -251,7 +287,7 @@ func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	_, err := c.api.CreateOrUpdateCollection(ctx, &api.CreateOrUpdateCollectionRequest{
-		Db:         c.db,
+		Project:    c.db,
 		Collection: collection,
 		Schema:     schema,
 		OnlyCreate: options.OnlyCreate,
@@ -263,7 +299,7 @@ func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 	_, err := c.api.DropCollection(ctx, &api.DropCollectionRequest{
-		Db:         c.db,
+		Project:    c.db,
 		Collection: collection,
 		Options:    (*api.CollectionOptions)(options),
 	})
@@ -274,7 +310,7 @@ func (c *grpcCRUD) insertWithOptions(ctx context.Context, collection string, doc
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	resp, err := c.api.Insert(ctx, &api.InsertRequest{
-		Db:         c.db,
+		Project:    c.db,
 		Collection: collection,
 		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
 		Options:    (*api.InsertRequestOptions)(options),
@@ -290,7 +326,7 @@ func (c *grpcCRUD) replaceWithOptions(ctx context.Context, collection string, do
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	resp, err := c.api.Replace(ctx, &api.ReplaceRequest{
-		Db:         c.db,
+		Project:    c.db,
 		Collection: collection,
 		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
 		Options:    (*api.ReplaceRequestOptions)(options),
@@ -306,7 +342,7 @@ func (c *grpcCRUD) updateWithOptions(ctx context.Context, collection string, fil
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	resp, err := c.api.Update(ctx, &api.UpdateRequest{
-		Db:         c.db,
+		Project:    c.db,
 		Collection: collection,
 		Filter:     filter,
 		Fields:     fields,
@@ -320,7 +356,7 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	resp, err := c.api.Delete(ctx, &api.DeleteRequest{
-		Db:         c.db,
+		Project:    c.db,
 		Collection: collection,
 		Filter:     filter,
 		Options:    (*api.DeleteRequestOptions)(options),
@@ -334,7 +370,7 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filte
 	ctx, cancel = context.WithCancel(setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata))
 
 	resp, err := c.api.Read(ctx, &api.ReadRequest{
-		Db:         c.db,
+		Project:    c.db,
 		Collection: collection,
 		Filter:     filter,
 		Fields:     fields,
@@ -374,7 +410,7 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 	ctx, cancel = context.WithCancel(ctx)
 
 	resp, err := c.api.Search(ctx, &api.SearchRequest{
-		Db:            c.db,
+		Project:       c.db,
 		Collection:    collection,
 		Q:             req.Q,
 		SearchFields:  req.SearchFields,
@@ -417,7 +453,7 @@ func (g *grpcSearchReader) close() error {
 }
 
 func (c *grpcDriver) CreateApplication(ctx context.Context, project string, name string, description string) (*Application, error) {
-	r, err := c.mgmt.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description, Project: &project})
+	r, err := c.mgmt.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description, Project: project})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
@@ -449,7 +485,7 @@ func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name stri
 }
 
 func (c *grpcDriver) ListApplications(ctx context.Context, project string) ([]*Application, error) {
-	r, err := c.mgmt.ListApplications(ctx, &api.ListApplicationsRequest{Project: &project})
+	r, err := c.mgmt.ListApplications(ctx, &api.ListApplicationsRequest{Project: project})
 	if err != nil {
 		return nil, GRPCError(err)
 	}

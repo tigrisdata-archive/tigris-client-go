@@ -65,6 +65,21 @@ func (mr *MockTigrisServerMockRecorder) CommitTransaction(arg0, arg1 interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitTransaction", reflect.TypeOf((*MockTigrisServer)(nil).CommitTransaction), arg0, arg1)
 }
 
+// CreateBranch mocks base method.
+func (m *MockTigrisServer) CreateBranch(arg0 context.Context, arg1 *api.CreateBranchRequest) (*api.CreateBranchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateBranch", arg0, arg1)
+	ret0, _ := ret[0].(*api.CreateBranchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBranch indicates an expected call of CreateBranch.
+func (mr *MockTigrisServerMockRecorder) CreateBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBranch", reflect.TypeOf((*MockTigrisServer)(nil).CreateBranch), arg0, arg1)
+}
+
 // CreateOrUpdateCollection mocks base method.
 func (m *MockTigrisServer) CreateOrUpdateCollection(arg0 context.Context, arg1 *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
 	m.ctrl.T.Helper()
@@ -108,6 +123,21 @@ func (m *MockTigrisServer) Delete(arg0 context.Context, arg1 *api.DeleteRequest)
 func (mr *MockTigrisServerMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTigrisServer)(nil).Delete), arg0, arg1)
+}
+
+// DeleteBranch mocks base method.
+func (m *MockTigrisServer) DeleteBranch(arg0 context.Context, arg1 *api.DeleteBranchRequest) (*api.DeleteBranchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBranch", arg0, arg1)
+	ret0, _ := ret[0].(*api.DeleteBranchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteBranch indicates an expected call of DeleteBranch.
+func (mr *MockTigrisServerMockRecorder) DeleteBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBranch", reflect.TypeOf((*MockTigrisServer)(nil).DeleteBranch), arg0, arg1)
 }
 
 // DeleteProject mocks base method.

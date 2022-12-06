@@ -17,7 +17,9 @@ package tigris
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -50,7 +52,6 @@ func driverConfig(cfg *Config) *config.Driver {
 		ClientSecret: cfg.ClientSecret,
 		Token:        cfg.Token,
 		Protocol:     cfg.Protocol,
-		Project:      cfg.Project,
 	}
 }
 
@@ -63,6 +64,13 @@ func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
 			return nil, fmt.Errorf("only one config structure allowed")
 		}
 		pCfg = *cfg[0]
+	}
+
+	if pCfg.Project == "" {
+		pCfg.Project = os.Getenv(driver.EnvProject)
+		if pCfg.Project == "" {
+			return nil, errors.New("failed to configure tigris project")
+		}
 	}
 
 	d, err := driver.NewDriver(ctx, driverConfig(&pCfg))
@@ -86,5 +94,10 @@ func (c *Client) OpenDatabase(ctx context.Context, models ...schema.Model) (*Dat
 		return nil, ErrNotTransactional
 	}
 
-	return openDatabaseFromModels(ctx, c.driver, c.config, models...)
+	return openDatabaseFromModels(ctx, c.driver, c.config.Project, models...)
+}
+
+// GetDatabase gets the Database for this project.
+func (c *Client) GetDatabase() *Database {
+	return newDatabase(c.config.Project, c.driver)
 }

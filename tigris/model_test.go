@@ -50,7 +50,7 @@ func TestModelMetadata(t *testing.T) {
 			Model
 		}
 
-		m.EXPECT().UseDatabase().Return(mdb)
+		m.EXPECT().UseDatabase("db1").Return(mdb)
 
 		c := GetCollection[Coll1](db)
 
@@ -109,7 +109,7 @@ func TestModelMetadata(t *testing.T) {
 
 		d3 := &Coll2{}
 
-		m.EXPECT().UseDatabase().Return(mdb)
+		m.EXPECT().UseDatabase("db1").Return(mdb)
 
 		c2 := GetCollection[Coll2](db)
 
@@ -144,7 +144,7 @@ func TestModelMetadata(t *testing.T) {
 
 		d3 := &Coll2{}
 
-		m.EXPECT().UseDatabase().Return(mdb)
+		m.EXPECT().UseDatabase("db1").Return(mdb)
 
 		c2 := GetCollection[Coll2](db)
 
@@ -173,7 +173,7 @@ func TestModelMetadata(t *testing.T) {
 
 		d3 := &Coll2{}
 
-		m.EXPECT().UseDatabase().Return(mdb)
+		m.EXPECT().UseDatabase("db1").Return(mdb)
 
 		c2 := GetCollection[Coll2](db)
 
@@ -210,7 +210,7 @@ func TestModelMetadata(t *testing.T) {
 
 		d3 := &Coll2{}
 
-		m.EXPECT().UseDatabase().Return(mdb)
+		m.EXPECT().UseDatabase("db1").Return(mdb)
 
 		c2 := GetCollection[Coll2](db)
 

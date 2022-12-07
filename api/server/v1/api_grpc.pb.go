@@ -71,8 +71,13 @@ type TigrisClient interface {
 	// Delete Project deletes all the collections in this project along with all of the documents, and associated metadata for these collections.
 	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error)
 	// This API returns information related to the project along with all the collections inside the project.
-	// This can be used to retrieve the size of the project or to retrieve schemas and the size of all the collections present in this project.
+	// This can be used to retrieve the size of the project or to retrieve schemas, branches and the size of all the collections present in this project.
 	DescribeDatabase(ctx context.Context, in *DescribeDatabaseRequest, opts ...grpc.CallOption) (*DescribeDatabaseResponse, error)
+	// Creates a new database branch, if not already existing.
+	CreateBranch(ctx context.Context, in *CreateBranchRequest, opts ...grpc.CallOption) (*CreateBranchResponse, error)
+	// Deletes a database branch, if exists.
+	// Throws 400 Bad Request if "main" branch is being deleted
+	DeleteBranch(ctx context.Context, in *DeleteBranchRequest, opts ...grpc.CallOption) (*DeleteBranchResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
 }
@@ -275,6 +280,24 @@ func (c *tigrisClient) DescribeDatabase(ctx context.Context, in *DescribeDatabas
 	return out, nil
 }
 
+func (c *tigrisClient) CreateBranch(ctx context.Context, in *CreateBranchRequest, opts ...grpc.CallOption) (*CreateBranchResponse, error) {
+	out := new(CreateBranchResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/CreateBranch", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) DeleteBranch(ctx context.Context, in *DeleteBranchRequest, opts ...grpc.CallOption) (*DeleteBranchResponse, error) {
+	out := new(DeleteBranchResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DeleteBranch", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error) {
 	out := new(DescribeCollectionResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DescribeCollection", in, out, opts...)
@@ -337,8 +360,13 @@ type TigrisServer interface {
 	// Delete Project deletes all the collections in this project along with all of the documents, and associated metadata for these collections.
 	DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error)
 	// This API returns information related to the project along with all the collections inside the project.
-	// This can be used to retrieve the size of the project or to retrieve schemas and the size of all the collections present in this project.
+	// This can be used to retrieve the size of the project or to retrieve schemas, branches and the size of all the collections present in this project.
 	DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error)
+	// Creates a new database branch, if not already existing.
+	CreateBranch(context.Context, *CreateBranchRequest) (*CreateBranchResponse, error)
+	// Deletes a database branch, if exists.
+	// Throws 400 Bad Request if "main" branch is being deleted
+	DeleteBranch(context.Context, *DeleteBranchRequest) (*DeleteBranchResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
 }
@@ -394,6 +422,12 @@ func (UnimplementedTigrisServer) DeleteProject(context.Context, *DeleteProjectRe
 }
 func (UnimplementedTigrisServer) DescribeDatabase(context.Context, *DescribeDatabaseRequest) (*DescribeDatabaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeDatabase not implemented")
+}
+func (UnimplementedTigrisServer) CreateBranch(context.Context, *CreateBranchRequest) (*CreateBranchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBranch not implemented")
+}
+func (UnimplementedTigrisServer) DeleteBranch(context.Context, *DeleteBranchRequest) (*DeleteBranchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBranch not implemented")
 }
 func (UnimplementedTigrisServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeCollection not implemented")
@@ -704,6 +738,42 @@ func _Tigris_DescribeDatabase_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Tigris_CreateBranch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBranchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).CreateBranch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/CreateBranch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).CreateBranch(ctx, req.(*CreateBranchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_DeleteBranch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBranchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).DeleteBranch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/DeleteBranch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).DeleteBranch(ctx, req.(*DeleteBranchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Tigris_DescribeCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DescribeCollectionRequest)
 	if err := dec(in); err != nil {
@@ -784,6 +854,14 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DescribeDatabase",
 			Handler:    _Tigris_DescribeDatabase_Handler,
+		},
+		{
+			MethodName: "CreateBranch",
+			Handler:    _Tigris_CreateBranch_Handler,
+		},
+		{
+			MethodName: "DeleteBranch",
+			Handler:    _Tigris_DeleteBranch_Handler,
 		},
 		{
 			MethodName: "DescribeCollection",

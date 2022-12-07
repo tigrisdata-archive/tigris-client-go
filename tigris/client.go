@@ -17,7 +17,9 @@ package tigris
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -31,7 +33,7 @@ type Config struct {
 	Token        string      `json:"token,omitempty"`
 	URL          string      `json:"url,omitempty"`
 	Protocol     string      `json:"protocol,omitempty"`
-
+	Project      string      `json:"project,omitempty"`
 	// MustExist if set skips implicit database creation
 	MustExist bool
 }
@@ -64,6 +66,13 @@ func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
 		pCfg = *cfg[0]
 	}
 
+	if pCfg.Project == "" {
+		pCfg.Project = os.Getenv(driver.EnvProject)
+		if pCfg.Project == "" {
+			return nil, errors.New("failed to configure tigris project")
+		}
+	}
+
 	d, err := driver.NewDriver(ctx, driverConfig(&pCfg))
 	if err != nil {
 		return nil, err
@@ -80,19 +89,15 @@ func (c *Client) Close() error {
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
-func (c *Client) OpenDatabase(ctx context.Context, dbName string, models ...schema.Model) (*Database, error) {
+func (c *Client) OpenDatabase(ctx context.Context, models ...schema.Model) (*Database, error) {
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
 	}
 
-	return openDatabaseFromModels(ctx, c.driver, c.config, dbName, models...)
+	return openDatabaseFromModels(ctx, c.driver, c.config.Project, models...)
 }
 
-// DropDatabase deletes the database and all collections in it.
-func (c *Client) DropDatabase(ctx context.Context, dbName string) error {
-	if getTxCtx(ctx) != nil {
-		return ErrNotTransactional
-	}
-
-	return c.driver.DropDatabase(ctx, dbName)
+// GetDatabase gets the Database for this project.
+func (c *Client) GetDatabase() *Database {
+	return newDatabase(c.config.Project, c.driver)
 }

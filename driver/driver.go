@@ -19,6 +19,7 @@ package driver
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -39,20 +40,19 @@ type Driver interface {
 
 	// UseDatabase returns and interface for collections and documents management
 	// of the database
-	UseDatabase(name string) Database
+	UseDatabase(project string) Database
 
-	// ListDatabases in the current namespace
-	ListDatabases(ctx context.Context) ([]string, error)
-	// DescribeDatabase returns database metadata
-	DescribeDatabase(ctx context.Context, db string, options ...*DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
+	// CreateProject creates the project
+	CreateProject(ctx context.Context, project string, options ...*CreateProjectOptions) (*CreateProjectResponse, error)
 
-	// CreateDatabase creates new database
-	CreateDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error
-	// DropDatabase deletes the database and all collections it contains
-	DropDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error
+	// DescribeDatabase returns project description metadata
+	DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions) (*DescribeDatabaseResponse, error)
 
-	// BeginTx starts new transaction
-	BeginTx(ctx context.Context, db string, options ...*TxOptions) (Tx, error)
+	// ListProjects returns all projects
+	ListProjects(ctx context.Context) ([]string, error)
+
+	// DeleteProject deletes the project
+	DeleteProject(ctx context.Context, project string, options ...*DeleteProjectOptions) (*DeleteProjectResponse, error)
 
 	// Close releases resources of the driver
 	Close() error
@@ -72,6 +72,8 @@ type Tx interface {
 
 // Database is the interface that encapsulates the CRUD portions of the transaction API.
 type Database interface {
+	// BeginTx starts new transaction
+	BeginTx(ctx context.Context, options ...*TxOptions) (Tx, error)
 	// Insert array of documents into specified database and collection.
 	Insert(ctx context.Context, collection string, docs []Document,
 		options ...*InsertOptions) (*InsertResponse, error)
@@ -117,63 +119,49 @@ type Database interface {
 	// DropCollection deletes the collection and all documents it contains.
 	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
 
+	// DropAllCollections deletes all the collections and all documents it contains.
+	DropAllCollections(ctx context.Context, options ...*CollectionOptions) error
+
 	// ListCollections lists collections in the database.
 	ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error)
 
 	// DescribeCollection returns metadata of the collection in the database
 	DescribeCollection(ctx context.Context, collection string, options ...*DescribeCollectionOptions) (
 		*DescribeCollectionResponse, error)
-
-	Publish(ctx context.Context, collection string, docs []Message, options ...*PublishOptions) (*PublishResponse, error)
-
-	Subscribe(ctx context.Context, collection string, filter Filter, options ...*SubscribeOptions) (Iterator, error)
 }
 
 type driver struct {
 	driverWithOptions
 	closeWg *sync.WaitGroup
 	closeCh chan struct{}
+	cfg     *config.Driver
 }
 
-func (c *driver) CreateDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error {
-	opts, err := validateOptionsParam(options, &DatabaseOptions{})
-	if err != nil {
-		return err
-	}
-
-	return c.createDatabaseWithOptions(ctx, db, opts.(*DatabaseOptions))
-}
-
-func (c *driver) DropDatabase(ctx context.Context, db string, options ...*DatabaseOptions) error {
-	opts, err := validateOptionsParam(options, &DatabaseOptions{})
-	if err != nil {
-		return err
-	}
-
-	return c.dropDatabaseWithOptions(ctx, db, opts.(*DatabaseOptions))
-}
-
-func (c *driver) DescribeDatabase(ctx context.Context, db string, options ...*DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
-	opts, err := validateOptionsParam(options, &DescribeDatabaseOptions{})
+func (c *driver) CreateProject(ctx context.Context, project string, options ...*CreateProjectOptions) (*CreateProjectResponse, error) {
+	opts, err := validateOptionsParam(options, &CreateProjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return c.describeDatabaseWithOptions(ctx, db, opts.(*DescribeDatabaseOptions))
+	return c.createProjectWithOptions(ctx, project, opts.(*CreateProjectOptions))
 }
 
-func (c *driver) BeginTx(ctx context.Context, db string, options ...*TxOptions) (Tx, error) {
-	opts, err := validateOptionsParam(options, &TxOptions{})
+func (c *driver) DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
+	opts, err := validateOptionsParam(options, &DescribeProjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := c.beginTxWithOptions(ctx, db, opts.(*TxOptions))
+	return c.describeProjectWithOptions(ctx, project, opts.(*DescribeProjectOptions))
+}
+
+func (c *driver) DeleteProject(ctx context.Context, project string, options ...*DeleteProjectOptions) (*DeleteProjectResponse, error) {
+	opts, err := validateOptionsParam(options, &DeleteProjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &driverCRUDTx{driverCRUD: &driverCRUD{tx}, txWithOptions: tx}, nil
+	return c.deleteProjectWithOptions(ctx, project, opts.(*DeleteProjectOptions))
 }
 
 type driverCRUDTx struct {
@@ -183,6 +171,20 @@ type driverCRUDTx struct {
 
 type driverCRUD struct {
 	CRUDWithOptions
+}
+
+func (c *driverCRUD) BeginTx(ctx context.Context, options ...*TxOptions) (Tx, error) {
+	opts, err := validateOptionsParam(options, &TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := c.beginTxWithOptions(ctx, opts.(*TxOptions))
+	if err != nil {
+		return nil, err
+	}
+
+	return &driverCRUDTx{driverCRUD: &driverCRUD{tx}, txWithOptions: tx}, nil
 }
 
 func (c *driverCRUD) Insert(ctx context.Context, collection string, docs []Document, options ...*InsertOptions) (
@@ -270,6 +272,20 @@ func (c *driverCRUD) DropCollection(ctx context.Context, collection string, opti
 	return c.dropCollectionWithOptions(ctx, collection, opts.(*CollectionOptions))
 }
 
+func (c *driverCRUD) DropAllCollections(ctx context.Context, _ ...*CollectionOptions) error {
+	collections, err := c.ListCollections(ctx)
+	if err != nil {
+		return errors.New("failed to drop all collections")
+	}
+	for _, collection := range collections {
+		err = c.DropCollection(ctx, collection)
+		if err != nil {
+			return errors.New("failed to drop all collections")
+		}
+	}
+	return nil
+}
+
 func (c *driverCRUD) ListCollections(ctx context.Context, options ...*CollectionOptions) ([]string, error) {
 	opts, err := validateOptionsParam(options, &CollectionOptions{})
 	if err != nil {
@@ -287,24 +303,6 @@ func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, 
 	}
 
 	return c.describeCollectionWithOptions(ctx, collection, opts.(*DescribeCollectionOptions))
-}
-
-func (c *driverCRUD) Publish(ctx context.Context, collection string, msgs []Message, options ...*PublishOptions) (*PublishResponse, error) {
-	opts, err := validateOptionsParam(options, &PublishOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return c.publishWithOptions(ctx, collection, msgs, opts.(*PublishOptions))
-}
-
-func (c *driverCRUD) Subscribe(ctx context.Context, collection string, filter Filter, options ...*SubscribeOptions) (Iterator, error) {
-	opts, err := validateOptionsParam(options, &SubscribeOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return c.subscribeWithOptions(ctx, collection, filter, opts.(*SubscribeOptions))
 }
 
 func validateOptionsParam(options interface{}, out interface{}) (interface{}, error) {
@@ -400,7 +398,6 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	if cfg.URL == "" {
 		cfg.URL = os.Getenv(EnvURL)
 	}
-
 	if cfg.URL == "" {
 		cfg.URL = DefaultURL
 	}
@@ -464,7 +461,7 @@ func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	}
 
 	wg, ch := startHealthPingLoop(cfg.PingInterval, drv)
-	return &driver{driverWithOptions: drv, closeCh: ch, closeWg: wg}, nil
+	return &driver{driverWithOptions: drv, closeCh: ch, closeWg: wg, cfg: cfg}, nil
 }
 
 func startHealthPingLoop(cfgInterval time.Duration, drv driverWithOptions) (*sync.WaitGroup, chan struct{}) {

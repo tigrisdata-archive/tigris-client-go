@@ -25,19 +25,21 @@ import (
 )
 
 type driverWithOptions interface {
-	createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
-	dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error
-	beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error)
-	describeDatabaseWithOptions(ctx context.Context, db string, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error)
+	createProjectWithOptions(ctx context.Context, project string, options *CreateProjectOptions) (*CreateProjectResponse, error)
+	describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions) (*DescribeDatabaseResponse, error)
+	deleteProjectWithOptions(ctx context.Context, project string, options *DeleteProjectOptions) (*DeleteProjectResponse, error)
 
+	UseDatabase(project string) Database
+
+	ListProjects(ctx context.Context) ([]string, error)
 	Info(ctx context.Context) (*InfoResponse, error)
 	Health(ctx context.Context) (*HealthResponse, error)
-	UseDatabase(name string) Database
-	ListDatabases(ctx context.Context) ([]string, error)
+
 	Close() error
 }
 
 type CRUDWithOptions interface {
+	beginTxWithOptions(ctx context.Context, options *TxOptions) (txWithOptions, error)
 	insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (
 		*InsertResponse, error)
 	replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (
@@ -54,8 +56,6 @@ type CRUDWithOptions interface {
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error)
-	publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error)
-	subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error)
 }
 
 type txWithOptions interface {

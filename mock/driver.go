@@ -35,26 +35,6 @@ func (m *MockDriver) EXPECT() *MockDriverMockRecorder {
 	return m.recorder
 }
 
-// BeginTx mocks base method.
-func (m *MockDriver) BeginTx(arg0 context.Context, arg1 string, arg2 ...*driver.TxOptions) (driver.Tx, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "BeginTx", varargs...)
-	ret0, _ := ret[0].(driver.Tx)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// BeginTx indicates an expected call of BeginTx.
-func (mr *MockDriverMockRecorder) BeginTx(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockDriver)(nil).BeginTx), varargs...)
-}
-
 // Close mocks base method.
 func (m *MockDriver) Close() error {
 	m.ctrl.T.Helper()
@@ -69,27 +49,48 @@ func (mr *MockDriverMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockDriver)(nil).Close))
 }
 
-// CreateDatabase mocks base method.
-func (m *MockDriver) CreateDatabase(arg0 context.Context, arg1 string, arg2 ...*driver.DatabaseOptions) error {
+// CreateProject mocks base method.
+func (m *MockDriver) CreateProject(arg0 context.Context, arg1 string, arg2 ...*driver.CreateProjectOptions) (*driver.CreateProjectResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "CreateDatabase", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "CreateProject", varargs...)
+	ret0, _ := ret[0].(*driver.CreateProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// CreateDatabase indicates an expected call of CreateDatabase.
-func (mr *MockDriverMockRecorder) CreateDatabase(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+// CreateProject indicates an expected call of CreateProject.
+func (mr *MockDriverMockRecorder) CreateProject(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDatabase", reflect.TypeOf((*MockDriver)(nil).CreateDatabase), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProject", reflect.TypeOf((*MockDriver)(nil).CreateProject), varargs...)
+}
+
+// DeleteProject mocks base method.
+func (m *MockDriver) DeleteProject(arg0 context.Context, arg1 string, arg2 ...*driver.DeleteProjectOptions) (*driver.DeleteProjectResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteProject", varargs...)
+	ret0, _ := ret[0].(*driver.DeleteProjectResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteProject indicates an expected call of DeleteProject.
+func (mr *MockDriverMockRecorder) DeleteProject(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProject", reflect.TypeOf((*MockDriver)(nil).DeleteProject), varargs...)
 }
 
 // DescribeDatabase mocks base method.
-func (m *MockDriver) DescribeDatabase(arg0 context.Context, arg1 string, arg2 ...*driver.DescribeDatabaseOptions) (*driver.DescribeDatabaseResponse, error) {
+func (m *MockDriver) DescribeDatabase(arg0 context.Context, arg1 string, arg2 ...*driver.DescribeProjectOptions) (*driver.DescribeDatabaseResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -106,25 +107,6 @@ func (mr *MockDriverMockRecorder) DescribeDatabase(arg0, arg1 interface{}, arg2 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeDatabase", reflect.TypeOf((*MockDriver)(nil).DescribeDatabase), varargs...)
-}
-
-// DropDatabase mocks base method.
-func (m *MockDriver) DropDatabase(arg0 context.Context, arg1 string, arg2 ...*driver.DatabaseOptions) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "DropDatabase", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DropDatabase indicates an expected call of DropDatabase.
-func (mr *MockDriverMockRecorder) DropDatabase(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropDatabase", reflect.TypeOf((*MockDriver)(nil).DropDatabase), varargs...)
 }
 
 // Health mocks base method.
@@ -157,19 +139,19 @@ func (mr *MockDriverMockRecorder) Info(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockDriver)(nil).Info), arg0)
 }
 
-// ListDatabases mocks base method.
-func (m *MockDriver) ListDatabases(arg0 context.Context) ([]string, error) {
+// ListProjects mocks base method.
+func (m *MockDriver) ListProjects(arg0 context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListDatabases", arg0)
+	ret := m.ctrl.Call(m, "ListProjects", arg0)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListDatabases indicates an expected call of ListDatabases.
-func (mr *MockDriverMockRecorder) ListDatabases(arg0 interface{}) *gomock.Call {
+// ListProjects indicates an expected call of ListProjects.
+func (mr *MockDriverMockRecorder) ListProjects(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDatabases", reflect.TypeOf((*MockDriver)(nil).ListDatabases), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProjects", reflect.TypeOf((*MockDriver)(nil).ListProjects), arg0)
 }
 
 // UseDatabase mocks base method.
@@ -207,6 +189,26 @@ func NewMockTx(ctrl *gomock.Controller) *MockTx {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTx) EXPECT() *MockTxMockRecorder {
 	return m.recorder
+}
+
+// BeginTx mocks base method.
+func (m *MockTx) BeginTx(arg0 context.Context, arg1 ...*driver.TxOptions) (driver.Tx, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BeginTx", varargs...)
+	ret0, _ := ret[0].(driver.Tx)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BeginTx indicates an expected call of BeginTx.
+func (mr *MockTxMockRecorder) BeginTx(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockTx)(nil).BeginTx), varargs...)
 }
 
 // Commit mocks base method.
@@ -282,6 +284,25 @@ func (mr *MockTxMockRecorder) DescribeCollection(arg0, arg1 interface{}, arg2 ..
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeCollection", reflect.TypeOf((*MockTx)(nil).DescribeCollection), varargs...)
 }
 
+// DropAllCollections mocks base method.
+func (m *MockTx) DropAllCollections(arg0 context.Context, arg1 ...*driver.CollectionOptions) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DropAllCollections", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DropAllCollections indicates an expected call of DropAllCollections.
+func (mr *MockTxMockRecorder) DropAllCollections(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropAllCollections", reflect.TypeOf((*MockTx)(nil).DropAllCollections), varargs...)
+}
+
 // DropCollection mocks base method.
 func (m *MockTx) DropCollection(arg0 context.Context, arg1 string, arg2 ...*driver.CollectionOptions) error {
 	m.ctrl.T.Helper()
@@ -339,26 +360,6 @@ func (mr *MockTxMockRecorder) ListCollections(arg0 interface{}, arg1 ...interfac
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCollections", reflect.TypeOf((*MockTx)(nil).ListCollections), varargs...)
-}
-
-// Publish mocks base method.
-func (m *MockTx) Publish(arg0 context.Context, arg1 string, arg2 []driver.Message, arg3 ...*driver.PublishOptions) (*driver.PublishResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1, arg2}
-	for _, a := range arg3 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Publish", varargs...)
-	ret0, _ := ret[0].(*driver.PublishResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Publish indicates an expected call of Publish.
-func (mr *MockTxMockRecorder) Publish(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockTx)(nil).Publish), varargs...)
 }
 
 // Read mocks base method.
@@ -430,26 +431,6 @@ func (mr *MockTxMockRecorder) Search(arg0, arg1, arg2 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockTx)(nil).Search), arg0, arg1, arg2)
 }
 
-// Subscribe mocks base method.
-func (m *MockTx) Subscribe(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 ...*driver.SubscribeOptions) (driver.Iterator, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1, arg2}
-	for _, a := range arg3 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Subscribe", varargs...)
-	ret0, _ := ret[0].(driver.Iterator)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Subscribe indicates an expected call of Subscribe.
-func (mr *MockTxMockRecorder) Subscribe(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockTx)(nil).Subscribe), varargs...)
-}
-
 // Update mocks base method.
 func (m *MockTx) Update(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 driver.Update, arg4 ...*driver.UpdateOptions) (*driver.UpdateResponse, error) {
 	m.ctrl.T.Helper()
@@ -491,6 +472,26 @@ func NewMockDatabase(ctrl *gomock.Controller) *MockDatabase {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockDatabase) EXPECT() *MockDatabaseMockRecorder {
 	return m.recorder
+}
+
+// BeginTx mocks base method.
+func (m *MockDatabase) BeginTx(arg0 context.Context, arg1 ...*driver.TxOptions) (driver.Tx, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BeginTx", varargs...)
+	ret0, _ := ret[0].(driver.Tx)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BeginTx indicates an expected call of BeginTx.
+func (mr *MockDatabaseMockRecorder) BeginTx(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockDatabase)(nil).BeginTx), varargs...)
 }
 
 // CreateOrUpdateCollection mocks base method.
@@ -552,6 +553,25 @@ func (mr *MockDatabaseMockRecorder) DescribeCollection(arg0, arg1 interface{}, a
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeCollection", reflect.TypeOf((*MockDatabase)(nil).DescribeCollection), varargs...)
 }
 
+// DropAllCollections mocks base method.
+func (m *MockDatabase) DropAllCollections(arg0 context.Context, arg1 ...*driver.CollectionOptions) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DropAllCollections", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DropAllCollections indicates an expected call of DropAllCollections.
+func (mr *MockDatabaseMockRecorder) DropAllCollections(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropAllCollections", reflect.TypeOf((*MockDatabase)(nil).DropAllCollections), varargs...)
+}
+
 // DropCollection mocks base method.
 func (m *MockDatabase) DropCollection(arg0 context.Context, arg1 string, arg2 ...*driver.CollectionOptions) error {
 	m.ctrl.T.Helper()
@@ -611,26 +631,6 @@ func (mr *MockDatabaseMockRecorder) ListCollections(arg0 interface{}, arg1 ...in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCollections", reflect.TypeOf((*MockDatabase)(nil).ListCollections), varargs...)
 }
 
-// Publish mocks base method.
-func (m *MockDatabase) Publish(arg0 context.Context, arg1 string, arg2 []driver.Message, arg3 ...*driver.PublishOptions) (*driver.PublishResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1, arg2}
-	for _, a := range arg3 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Publish", varargs...)
-	ret0, _ := ret[0].(*driver.PublishResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Publish indicates an expected call of Publish.
-func (mr *MockDatabaseMockRecorder) Publish(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockDatabase)(nil).Publish), varargs...)
-}
-
 // Read mocks base method.
 func (m *MockDatabase) Read(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 driver.Projection, arg4 ...*driver.ReadOptions) (driver.Iterator, error) {
 	m.ctrl.T.Helper()
@@ -684,26 +684,6 @@ func (m *MockDatabase) Search(arg0 context.Context, arg1 string, arg2 *driver.Se
 func (mr *MockDatabaseMockRecorder) Search(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockDatabase)(nil).Search), arg0, arg1, arg2)
-}
-
-// Subscribe mocks base method.
-func (m *MockDatabase) Subscribe(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 ...*driver.SubscribeOptions) (driver.Iterator, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1, arg2}
-	for _, a := range arg3 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Subscribe", varargs...)
-	ret0, _ := ret[0].(driver.Iterator)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Subscribe indicates an expected call of Subscribe.
-func (mr *MockDatabaseMockRecorder) Subscribe(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockDatabase)(nil).Subscribe), varargs...)
 }
 
 // Update mocks base method.

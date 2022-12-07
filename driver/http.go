@@ -162,9 +162,6 @@ func dmlRespDecode(body io.ReadCloser, v interface{}) error {
 	case *DeleteResponse:
 		v.Status = r.Status
 		v.Metadata = newRespMetadata(&r.Metadata)
-	case *PublishResponse:
-		v.Status = r.Status
-		v.Metadata = newRespMetadata(&r.Metadata)
 	default:
 		return fmt.Errorf("unkknown response type")
 	}
@@ -239,8 +236,33 @@ func (c *httpDriver) Close() error {
 	return nil
 }
 
-func (c *httpDriver) UseDatabase(name string) Database {
-	return &driverCRUD{&httpCRUD{db: name, api: c.api}}
+func (c *httpDriver) UseDatabase(project string) Database {
+	return &driverCRUD{&httpCRUD{db: project, api: c.api}}
+}
+
+func (c *httpDriver) ListProjects(ctx context.Context) ([]string, error) {
+	resp, err := c.api.TigrisListProjects(ctx)
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var l api.ListProjectsResponse
+
+	if err := respDecode(resp.Body, &l); err != nil {
+		return nil, err
+	}
+
+	if l.Projects == nil {
+		return nil, nil
+	}
+
+	projects := make([]string, 0, len(l.Projects))
+
+	for _, nm := range l.Projects {
+		projects = append(projects, nm.Project)
+	}
+
+	return projects, nil
 }
 
 func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
@@ -273,33 +295,8 @@ func (c *httpDriver) Health(ctx context.Context) (*HealthResponse, error) {
 	return &i, nil
 }
 
-func (c *httpDriver) ListDatabases(ctx context.Context) ([]string, error) {
-	resp, err := c.api.TigrisListDatabases(ctx)
-	if err := HTTPError(err, resp); err != nil {
-		return nil, err
-	}
-
-	var l api.ListDatabasesResponse
-
-	if err := respDecode(resp.Body, &l); err != nil {
-		return nil, err
-	}
-
-	if l.Databases == nil {
-		return nil, nil
-	}
-
-	databases := make([]string, 0, len(l.Databases))
-
-	for _, nm := range l.Databases {
-		databases = append(databases, nm.Db)
-	}
-
-	return databases, nil
-}
-
-func (c *httpDriver) describeDatabaseWithOptions(ctx context.Context, db string, options *DescribeDatabaseOptions) (*DescribeDatabaseResponse, error) {
-	resp, err := c.api.TigrisDescribeDatabase(ctx, db, apiHTTP.TigrisDescribeDatabaseJSONRequestBody{
+func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
+	resp, err := c.api.TigrisDescribeDatabase(ctx, project, apiHTTP.TigrisDescribeDatabaseJSONRequestBody{
 		SchemaFormat: &options.SchemaFormat,
 	})
 	if err := HTTPError(err, resp); err != nil {
@@ -314,7 +311,6 @@ func (c *httpDriver) describeDatabaseWithOptions(ctx context.Context, db string,
 
 	var r DescribeDatabaseResponse
 
-	r.Db = PtrToString(d.Db)
 	r.Size = PtrToInt64(d.Size)
 
 	if d.Collections == nil {
@@ -332,8 +328,42 @@ func (c *httpDriver) describeDatabaseWithOptions(ctx context.Context, db string,
 	return &r, nil
 }
 
-func convertDatabaseOptions(_ *DatabaseOptions) *apiHTTP.DatabaseOptions {
-	return &apiHTTP.DatabaseOptions{}
+func (c *httpDriver) createProjectWithOptions(ctx context.Context, project string, _ *CreateProjectOptions) (*CreateProjectResponse, error) {
+	resp, err := c.api.TigrisCreateProject(ctx, project, apiHTTP.TigrisCreateProjectJSONRequestBody{})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var d apiHTTP.CreateProjectResponse
+
+	if err := respDecode(resp.Body, &d); err != nil {
+		return nil, err
+	}
+
+	var r CreateProjectResponse
+	r.Status = PtrToString(d.Status)
+	r.Message = PtrToString(d.Message)
+
+	return &r, nil
+}
+
+func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project string, _ *DeleteProjectOptions) (*DeleteProjectResponse, error) {
+	resp, err := c.api.TigrisDeleteProject(ctx, project, apiHTTP.TigrisDeleteProjectJSONRequestBody{})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var d apiHTTP.DeleteProjectResponse
+
+	if err := respDecode(resp.Body, &d); err != nil {
+		return nil, err
+	}
+
+	var r DeleteProjectResponse
+	r.Status = PtrToString(d.Status)
+	r.Message = PtrToString(d.Message)
+
+	return &r, nil
 }
 
 func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
@@ -342,44 +372,6 @@ func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.Colle
 
 func convertTransactionOptions(_ *TxOptions) *apiHTTP.TransactionOptions {
 	return &apiHTTP.TransactionOptions{}
-}
-
-func (c *httpDriver) createDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
-	resp, err := c.api.TigrisCreateDatabase(ctx, db, apiHTTP.TigrisCreateDatabaseJSONRequestBody{
-		Options: convertDatabaseOptions(options),
-	})
-	return HTTPError(err, resp)
-}
-
-func (c *httpDriver) dropDatabaseWithOptions(ctx context.Context, db string, options *DatabaseOptions) error {
-	resp, err := c.api.TigrisDropDatabase(ctx, db, apiHTTP.TigrisDropDatabaseJSONRequestBody{
-		Options: convertDatabaseOptions(options),
-	})
-	return HTTPError(err, resp)
-}
-
-func (c *httpDriver) beginTxWithOptions(ctx context.Context, db string, options *TxOptions) (txWithOptions, error) {
-	resp, err := c.api.TigrisBeginTransaction(ctx, db, apiHTTP.TigrisBeginTransactionJSONRequestBody{
-		Options: convertTransactionOptions(options),
-	})
-	if err = HTTPError(err, resp); err != nil {
-		return nil, err
-	}
-
-	var bTx apiHTTP.BeginTransactionResponse
-
-	if err = respDecode(resp.Body, &bTx); err != nil {
-		return nil, err
-	}
-
-	if bTx.TxCtx == nil || bTx.TxCtx.Id == nil || *bTx.TxCtx.Id == "" {
-		return nil, HTTPError(fmt.Errorf("empty transaction context in response"), nil)
-	}
-
-	var outboundCookies []*http.Cookie
-
-	outboundCookies = append(outboundCookies, resp.Cookies()...)
-	return &httpCRUD{db: db, api: c.api, txCtx: &api.TransactionCtx{Id: PtrToString(bTx.TxCtx.Id), Origin: PtrToString(bTx.TxCtx.Origin)}, cookies: outboundCookies}, nil
 }
 
 func (c *httpCRUD) Commit(ctx context.Context) error {
@@ -415,6 +407,30 @@ type httpCRUD struct {
 	committed bool
 }
 
+func (c *httpCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (txWithOptions, error) {
+	resp, err := c.api.TigrisBeginTransaction(ctx, c.db, apiHTTP.TigrisBeginTransactionJSONRequestBody{
+		Options: convertTransactionOptions(options),
+	})
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var bTx apiHTTP.BeginTransactionResponse
+
+	if err = respDecode(resp.Body, &bTx); err != nil {
+		return nil, err
+	}
+
+	if bTx.TxCtx == nil || bTx.TxCtx.Id == nil || *bTx.TxCtx.Id == "" {
+		return nil, HTTPError(fmt.Errorf("empty transaction context in response"), nil)
+	}
+
+	var outboundCookies []*http.Cookie
+
+	outboundCookies = append(outboundCookies, resp.Cookies()...)
+	return &httpCRUD{db: c.db, api: c.api, txCtx: &api.TransactionCtx{Id: PtrToString(bTx.TxCtx.Id), Origin: PtrToString(bTx.TxCtx.Origin)}, cookies: outboundCookies}, nil
+}
+
 func (c *httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
 	if o != nil {
 		return &apiHTTP.WriteOptions{}
@@ -448,14 +464,6 @@ func (c *httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOption
 		opts.Collation = &apiHTTP.Collation{Case: &i.Collation.Case}
 	}
 	return &opts
-}
-
-func (c *httpCRUD) convertPublishOptions(o *PublishOptions) *apiHTTP.PublishRequestOptions {
-	return &apiHTTP.PublishRequestOptions{Partition: o.Partition}
-}
-
-func (c *httpCRUD) convertSubscribeOptions(o *SubscribeOptions) *apiHTTP.SubscribeRequestOptions {
-	return &apiHTTP.SubscribeRequestOptions{Partitions: &o.Partitions}
 }
 
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
@@ -729,8 +737,8 @@ func (g *httpSearchReader) close() error {
 	return g.closer.Close()
 }
 
-func (c *httpDriver) CreateApplication(ctx context.Context, name string, description string) (*Application, error) {
-	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONRequestBody{Name: &name, Description: &description})
+func (c *httpDriver) CreateApplication(ctx context.Context, project string, name string, description string) (*Application, error) {
+	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONRequestBody{Name: &name, Description: &description, Project: &project})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -769,8 +777,8 @@ func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name stri
 	return &app.UpdatedApplication, nil
 }
 
-func (c *httpDriver) ListApplications(ctx context.Context) ([]*Application, error) {
-	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONRequestBody{})
+func (c *httpDriver) ListApplications(ctx context.Context, project string) ([]*Application, error) {
+	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONRequestBody{Project: &project})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -913,69 +921,4 @@ func (c *httpDriver) QuotaUsage(ctx context.Context) (*QuotaUsage, error) {
 	}
 
 	return &usage, nil
-}
-
-func (c *httpCRUD) publishWithOptions(ctx context.Context, collection string, msgs []Message, options *PublishOptions) (*PublishResponse, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
-
-	resp, err := c.api.TigrisPublish(ctx, c.db, collection, apiHTTP.TigrisPublishJSONRequestBody{
-		Messages: (*[]json.RawMessage)(unsafe.Pointer(&msgs)),
-		Options:  c.convertPublishOptions(options),
-	})
-
-	if err = HTTPError(err, resp); err != nil {
-		return nil, err
-	}
-
-	var d PublishResponse
-	if err := dmlRespDecode(resp.Body, &d); err != nil {
-		return nil, err
-	}
-
-	return &d, nil
-}
-
-type subscribeStreamReader struct {
-	closer io.Closer
-	stream *json.Decoder
-}
-
-func (g *subscribeStreamReader) read() (Document, error) {
-	var res struct {
-		Result *apiHTTP.SubscribeResponse
-		Error  *api.ErrorDetails
-	}
-
-	if err := g.stream.Decode(&res); err != nil {
-		return nil, HTTPError(err, nil)
-	}
-
-	if res.Error != nil {
-		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
-	}
-
-	return Document(res.Result.Message), nil
-}
-
-func (g *subscribeStreamReader) close() error {
-	return g.closer.Close()
-}
-
-func (c *httpCRUD) subscribeWithOptions(ctx context.Context, collection string, filter Filter, options *SubscribeOptions) (Iterator, error) {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
-
-	resp, err := c.api.TigrisSubscribe(ctx, c.db, collection, apiHTTP.TigrisSubscribeJSONRequestBody{
-		Filter:  json.RawMessage(filter),
-		Options: c.convertSubscribeOptions(options),
-	})
-
-	err = HTTPError(err, resp)
-
-	e := &readIterator{err: err, eof: err != nil}
-
-	if err == nil {
-		e.streamReader = &subscribeStreamReader{stream: json.NewDecoder(resp.Body), closer: resp.Body}
-	}
-
-	return e, nil
 }

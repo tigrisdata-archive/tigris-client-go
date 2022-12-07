@@ -48,7 +48,7 @@ func setupGRPCTests(t *testing.T, config *config.Driver) (Driver, *grpcDriver, *
 	client, err := newGRPCClient(context.Background(), config)
 	require.NoError(t, err)
 
-	return &driver{driverWithOptions: client}, client, mockServers, func() { cancel(); _ = client.Close() }
+	return &driver{driverWithOptions: client, cfg: config}, client, mockServers, func() { cancel(); _ = client.Close() }
 }
 
 func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *test.MockServers, func()) {
@@ -62,7 +62,7 @@ func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *
 	// FIXME: implement proper wait for HTTP server to start
 	time.Sleep(10 * time.Millisecond)
 
-	return &driver{driverWithOptions: client}, client, mockServers, func() { cancel(); _ = client.Close() }
+	return &driver{driverWithOptions: client, cfg: config}, client, mockServers, func() { cancel(); _ = client.Close() }
 }
 
 func SetupO11yGRPCTests(t *testing.T, config *config.Driver) (Driver, Observability, *test.MockServers, func()) {
@@ -104,7 +104,7 @@ func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp 
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{},
@@ -128,7 +128,7 @@ func testReadStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Read(
 		pm(&api.ReadRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":"value"}`),
@@ -169,7 +169,7 @@ func testSearchStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Search(
 		pm(&api.SearchRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Q:          "search text",
 		}), gomock.Any()).DoAndReturn(func(r *api.SearchRequest, srv api.Tigris_SearchServer) error {
@@ -282,7 +282,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.InsertRequestOptions{},
@@ -303,7 +303,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
 			Options:    &api.InsertRequestOptions{},
@@ -319,7 +319,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Replace(gomock.Any(),
 		pm(&api.ReplaceRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
 			Options:    &api.ReplaceRequestOptions{},
@@ -335,7 +335,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Update(gomock.Any(),
 		pm(&api.UpdateRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":1}`),
@@ -352,7 +352,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Read(
 		pm(&api.ReadRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":"value"}`),
@@ -366,7 +366,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{},
@@ -382,7 +382,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.CollectionOptions{},
 		})).DoAndReturn(
 		func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
@@ -402,7 +402,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Schema:     []byte(sch),
 			Options:    &api.CollectionOptions{},
@@ -420,7 +420,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DropCollection(gomock.Any(),
 		pm(&api.DropCollectionRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Options:    &api.CollectionOptions{},
 		})).DoAndReturn(
@@ -448,7 +448,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.InsertRequestOptions{WriteOptions: options},
@@ -460,7 +460,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Replace(gomock.Any(),
 		pm(&api.ReplaceRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
@@ -477,7 +477,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
 			Options:    &api.InsertRequestOptions{},
@@ -488,7 +488,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Update(gomock.Any(),
 		pm(&api.UpdateRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":1}`),
@@ -503,7 +503,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Read(
 		pm(&api.ReadRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":"value"}`),
@@ -519,7 +519,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Search(
 		pm(&api.SearchRequest{
-			Db:            "db1",
+			Project:       "db1",
 			Collection:    "c1",
 			Q:             "search text",
 			SearchFields:  []string{"field_1"},
@@ -546,7 +546,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{},
@@ -563,29 +563,12 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Test empty list response
-	mc.EXPECT().ListDatabases(gomock.Any(),
-		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{Databases: nil}, nil)
-
-	dbs, err := c.ListDatabases(ctx)
-	require.NoError(t, err)
-	require.Equal(t, []string{}, dbs)
-
-	mc.EXPECT().ListDatabases(gomock.Any(),
-		pm(&api.ListDatabasesRequest{})).Return(&api.ListDatabasesResponse{
-		Databases: []*api.DatabaseInfo{{Db: "ldb1"}, {Db: "ldb2"}},
-	}, nil)
-
-	dbs, err = c.ListDatabases(ctx)
-	require.NoError(t, err)
-	require.Equal(t, []string{"ldb1", "ldb2"}, dbs)
-
 	db := c.UseDatabase("db1")
 
 	// Test empty list response
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: nil}, nil)
 
@@ -595,7 +578,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{
 		{Collection: "lc1"},
@@ -614,7 +597,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DescribeCollection(gomock.Any(),
 		pm(&api.DescribeCollectionRequest{
-			Db:           "db1",
+			Project:      "db1",
 			Collection:   "coll1",
 			SchemaFormat: "fmt1",
 		})).Return(&descExp, nil)
@@ -626,7 +609,6 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, descExp.Size, desc.Size)
 
 	descDBExp := api.DescribeDatabaseResponse{
-		Db:   "db1",
 		Size: 314159,
 		Collections: []*api.CollectionDescription{
 			{
@@ -644,13 +626,12 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DescribeDatabase(gomock.Any(),
 		pm(&api.DescribeDatabaseRequest{
-			Db:           "db1",
+			Project:      "db1",
 			SchemaFormat: "fmt2",
 		})).Return(&descDBExp, nil)
 
-	descDB, err := c.DescribeDatabase(ctx, "db1", &DescribeDatabaseOptions{SchemaFormat: "fmt2"})
+	descDB, err := c.DescribeDatabase(ctx, "db1", &DescribeProjectOptions{SchemaFormat: "fmt2"})
 	require.NoError(t, err)
-	require.Equal(t, "db1", descDB.Db)
 	require.Equal(t, int64(314159), descDB.Size)
 	require.Equal(t, descDBExp.Collections[0].Collection, descDB.Collections[0].Collection)
 	require.Equal(t, descDBExp.Collections[0].Schema, descDB.Collections[0].Schema)
@@ -659,29 +640,11 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, descDBExp.Collections[1].Schema, descDB.Collections[1].Schema)
 	require.Equal(t, descDBExp.Collections[1].Size, descDB.Collections[1].Size)
 
-	mc.EXPECT().CreateDatabase(gomock.Any(),
-		pm(&api.CreateDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.CreateDatabaseResponse{}, nil)
-
-	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{})
-	require.NoError(t, err)
-
-	mc.EXPECT().DropDatabase(gomock.Any(),
-		pm(&api.DropDatabaseRequest{
-			Db:      "db1",
-			Options: &api.DatabaseOptions{},
-		})).Return(&api.DropDatabaseResponse{}, nil)
-
-	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{})
-	require.NoError(t, err)
-
 	sch := `{"schema":"field"}`
 
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Schema:     []byte(sch),
 			OnlyCreate: true,
@@ -693,7 +656,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DropCollection(gomock.Any(),
 		pm(&api.DropCollectionRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Options:    &api.CollectionOptions{},
 		})).Return(&api.DropCollectionResponse{}, nil)
@@ -714,18 +677,18 @@ func testTxBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	tx, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	tx, err := c.UseDatabase("db1").BeginTx(ctx, &TxOptions{})
 	require.NoError(t, err)
 
 	testTxCRUDBasic(t, tx, mc)
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
-			Db: "db1",
+			Project: "db1",
 		})).Return(&api.CommitTransactionResponse{}, nil)
 
 	err = tx.Commit(ctx)
@@ -756,7 +719,7 @@ func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.InsertRequestOptions{},
@@ -769,7 +732,7 @@ func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Replace(gomock.Any(),
 		pm(&api.ReplaceRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
@@ -782,7 +745,7 @@ func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Update(gomock.Any(),
 		pm(&api.UpdateRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":1}`),
@@ -797,7 +760,7 @@ func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{WriteOptions: options},
@@ -848,7 +811,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
 			Options:    &api.InsertRequestOptions{},
@@ -869,7 +832,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
 			Options:    &api.InsertRequestOptions{},
@@ -885,7 +848,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Replace(gomock.Any(),
 		pm(&api.ReplaceRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
 			Options:    &api.ReplaceRequestOptions{},
@@ -901,7 +864,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Update(gomock.Any(),
 		pm(&api.UpdateRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":1}`),
@@ -918,7 +881,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Read(
 		pm(&api.ReadRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":"value"}`),
@@ -935,7 +898,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Search(
 		pm(&api.SearchRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Q:          "search query",
 		}), gomock.Any()).Return(&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "search error"})
@@ -950,7 +913,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Delete(gomock.Any(),
 		pm(&api.DeleteRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Options:    &api.DeleteRequestOptions{},
@@ -966,7 +929,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Read(
 		pm(&api.ReadRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":"value"}`),
@@ -978,7 +941,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().Read(
 		pm(&api.ReadRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Filter:     []byte(`{"filter":"value"}`),
 			Fields:     []byte(`{"fields":"value"}`),
@@ -991,7 +954,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.CollectionOptions{},
 		})).DoAndReturn(
 		func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
@@ -1006,7 +969,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Schema:     []byte(sch),
 			Options:    &api.CollectionOptions{},
@@ -1024,7 +987,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DropCollection(gomock.Any(),
 		pm(&api.DropCollectionRequest{
-			Db:         "db1",
+			Project:    "db1",
 			Collection: "c1",
 			Options:    &api.CollectionOptions{},
 		})).DoAndReturn(
@@ -1048,37 +1011,37 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.TransactionOptions{},
 		})).Return(nil, fmt.Errorf("error"))
 
-	_, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	_, err := c.UseDatabase("db1").BeginTx(ctx, &TxOptions{})
 	require.Error(t, err)
 
 	// Empty tx context
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{}, nil)
 
-	_, err = c.BeginTx(ctx, "db1", &TxOptions{})
+	_, err = c.UseDatabase("db1").BeginTx(ctx, &TxOptions{})
 	require.Error(t, err)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	tx, err := c.BeginTx(ctx, "db1", &TxOptions{})
+	tx, err := c.UseDatabase("db1").BeginTx(ctx, &TxOptions{})
 	require.NoError(t, err)
 
 	testTxCRUDBasicNegative(t, tx, mc)
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
-			Db: "db1",
+			Project: "db1",
 		})).DoAndReturn(
 		func(ctx context.Context, r *api.CommitTransactionRequest) (*api.CommitTransactionResponse, error) {
 			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
@@ -1091,7 +1054,7 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().RollbackTransaction(gomock.Any(),
 		pm(&api.RollbackTransactionRequest{
-			Db: "db1",
+			Project: "db1",
 		})).DoAndReturn(
 		func(ctx context.Context, r *api.RollbackTransactionRequest) (*api.RollbackTransactionResponse, error) {
 			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
@@ -1104,7 +1067,7 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	mc.EXPECT().DescribeDatabase(gomock.Any(),
 		pm(&api.DescribeDatabaseRequest{
-			Db: "db1",
+			Project: "db1",
 		})).Return(&api.DescribeDatabaseResponse{}, nil)
 
 	_, err = c.DescribeDatabase(ctx, "db1", nil)
@@ -1178,15 +1141,11 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	require.Error(t, err)
 	_, err = db.Delete(ctx, "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
 	require.Error(t, err)
-	_, err = c.BeginTx(ctx, "db1", &TxOptions{}, &TxOptions{})
+	_, err = c.UseDatabase("db1").BeginTx(ctx, &TxOptions{}, &TxOptions{})
 	require.Error(t, err)
 	err = db.CreateOrUpdateCollection(ctx, "coll1", nil, &CreateCollectionOptions{}, &CreateCollectionOptions{})
 	require.Error(t, err)
 	err = db.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
-	require.Error(t, err)
-	err = c.CreateDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
-	require.Error(t, err)
-	err = c.DropDatabase(ctx, "db1", &DatabaseOptions{}, &DatabaseOptions{})
 	require.Error(t, err)
 	_, err = db.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
 	require.Error(t, err)
@@ -1197,11 +1156,11 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
-			Db:      "db1",
+			Project: "db1",
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	tx, err := c.BeginTx(ctx, "db1")
+	tx, err := c.UseDatabase("db1").BeginTx(ctx)
 	require.NoError(t, err)
 	_, err = tx.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
@@ -1219,91 +1178,4 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	require.Error(t, err)
 	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
-}
-
-func testDriverPublishSubscribe(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
-	t.Helper()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	db := c.UseDatabase("db1")
-
-	doc1 := []Message{Message(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
-
-	mc.EXPECT().Publish(gomock.Any(),
-		pm(&api.PublishRequest{
-			Db:         "db1",
-			Collection: "c1",
-			Messages:   *(*[][]byte)(unsafe.Pointer(&doc1)),
-			Options:    &api.PublishRequestOptions{},
-		})).Return(&api.PublishResponse{Status: "published"}, nil)
-
-	_, err := db.Publish(ctx, "c1", doc1)
-	require.NoError(t, err)
-
-	mc.EXPECT().Subscribe(
-		pm(&api.SubscribeRequest{
-			Db:         "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Options:    &api.SubscribeRequestOptions{},
-		}), gomock.Any()).DoAndReturn(func(r *api.SubscribeRequest, srv api.Tigris_SubscribeServer) error {
-		err := srv.Send(&api.SubscribeResponse{Message: Document(`{"aaa":"bbbb"}`)})
-		require.NoError(t, err)
-		err = srv.Send(&api.SubscribeResponse{Message: Document(`{"aaa":"cccc"}`)})
-		require.NoError(t, err)
-		return &api.TigrisError{Code: api.Code_DATA_LOSS, Message: "subscribe error"}
-	})
-
-	it, err := db.Subscribe(ctx, "c1", Filter(`{"filter":"value"}`))
-	require.NoError(t, err)
-
-	var doc Document
-
-	require.True(t, it.Next(&doc))
-	require.Equal(t, Document(`{"aaa":"bbbb"}`), doc)
-	require.True(t, it.Next(&doc))
-	require.Equal(t, Document(`{"aaa":"cccc"}`), doc)
-	require.False(t, it.Next(&doc))
-	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "subscribe error"}}, it.Err())
-
-	var p int32 = 0
-
-	mc.EXPECT().Publish(gomock.Any(),
-		pm(&api.PublishRequest{
-			Db:         "db1",
-			Collection: "c1",
-			Messages:   *(*[][]byte)(unsafe.Pointer(&doc1)),
-			Options:    &api.PublishRequestOptions{Partition: &p},
-		})).Return(&api.PublishResponse{Status: "published"}, nil)
-
-	_, err = db.Publish(ctx, "c1", doc1, &PublishOptions{Partition: &p})
-	require.NoError(t, err)
-
-	// FIXME: fails periodically for no apparent reason
-	/*
-		mc.EXPECT().Subscribe(
-			pm(&api.SubscribeRequest{
-				Db:         "db1",
-				Collection: "c1",
-				Filter:     []byte(`{"filter":"value"}`),
-				Options:    &api.SubscribeRequestOptions{Partitions: []int32{1, 5}},
-			}), gomock.Any())
-
-		_, err = db.Subscribe(ctx, "c1", Filter(`{"filter":"value"}`), &SubscribeOptions{Partitions: []int32{1, 5}})
-		require.NoError(t, err)
-	*/
-}
-
-func TestGRPCPubSub(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testDriverPublishSubscribe(t, client, mockServer)
-}
-
-func TestHTTPPubSub(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testDriverPublishSubscribe(t, client, mockServer)
 }

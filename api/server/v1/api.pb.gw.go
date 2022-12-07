@@ -50,14 +50,14 @@ func request_Tigris_BeginTransaction_0(ctx context.Context, marshaler runtime.Ma
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := client.BeginTransaction(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -84,14 +84,14 @@ func local_request_Tigris_BeginTransaction_0(ctx context.Context, marshaler runt
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := server.BeginTransaction(ctx, &protoReq)
@@ -118,14 +118,14 @@ func request_Tigris_CommitTransaction_0(ctx context.Context, marshaler runtime.M
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := client.CommitTransaction(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -152,14 +152,14 @@ func local_request_Tigris_CommitTransaction_0(ctx context.Context, marshaler run
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := server.CommitTransaction(ctx, &protoReq)
@@ -186,14 +186,14 @@ func request_Tigris_RollbackTransaction_0(ctx context.Context, marshaler runtime
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := client.RollbackTransaction(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -220,14 +220,14 @@ func local_request_Tigris_RollbackTransaction_0(ctx context.Context, marshaler r
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := server.RollbackTransaction(ctx, &protoReq)
@@ -254,14 +254,14 @@ func request_Tigris_Insert_0(ctx context.Context, marshaler runtime.Marshaler, c
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -298,14 +298,14 @@ func local_request_Tigris_Insert_0(ctx context.Context, marshaler runtime.Marsha
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -342,14 +342,14 @@ func request_Tigris_Replace_0(ctx context.Context, marshaler runtime.Marshaler, 
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -386,14 +386,14 @@ func local_request_Tigris_Replace_0(ctx context.Context, marshaler runtime.Marsh
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -430,14 +430,14 @@ func request_Tigris_Delete_0(ctx context.Context, marshaler runtime.Marshaler, c
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -474,14 +474,14 @@ func local_request_Tigris_Delete_0(ctx context.Context, marshaler runtime.Marsha
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -518,14 +518,14 @@ func request_Tigris_Update_0(ctx context.Context, marshaler runtime.Marshaler, c
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -562,14 +562,14 @@ func local_request_Tigris_Update_0(ctx context.Context, marshaler runtime.Marsha
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -606,66 +606,14 @@ func request_Tigris_Read_0(ctx context.Context, marshaler runtime.Marshaler, cli
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
-	}
-
-	val, ok = pathParams["collection"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
-	}
-
-	protoReq.Collection, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
-	}
-
-	stream, err := client.Read(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
-
-}
-
-func request_Tigris_Read_1(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_ReadClient, runtime.ServerMetadata, error) {
-	var protoReq ReadRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["db"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
-	}
-
-	protoReq.Db, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -710,66 +658,14 @@ func request_Tigris_Search_0(ctx context.Context, marshaler runtime.Marshaler, c
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
-	}
-
-	val, ok = pathParams["collection"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
-	}
-
-	protoReq.Collection, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
-	}
-
-	stream, err := client.Search(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
-
-}
-
-func request_Tigris_Search_1(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_SearchClient, runtime.ServerMetadata, error) {
-	var protoReq SearchRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["db"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
-	}
-
-	protoReq.Db, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -814,14 +710,14 @@ func request_Tigris_CreateOrUpdateCollection_0(ctx context.Context, marshaler ru
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -858,14 +754,14 @@ func local_request_Tigris_CreateOrUpdateCollection_0(ctx context.Context, marsha
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -902,14 +798,14 @@ func request_Tigris_DropCollection_0(ctx context.Context, marshaler runtime.Mars
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -946,14 +842,14 @@ func local_request_Tigris_DropCollection_0(ctx context.Context, marshaler runtim
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -971,20 +867,20 @@ func local_request_Tigris_DropCollection_0(ctx context.Context, marshaler runtim
 
 }
 
-func request_Tigris_ListDatabases_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListDatabasesRequest
+func request_Tigris_ListProjects_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListProjectsRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.ListDatabases(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListProjects(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Tigris_ListDatabases_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListDatabasesRequest
+func local_request_Tigris_ListProjects_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListProjectsRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.ListDatabases(ctx, &protoReq)
+	msg, err := server.ListProjects(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -1008,14 +904,14 @@ func request_Tigris_ListCollections_0(ctx context.Context, marshaler runtime.Mar
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := client.ListCollections(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -1042,14 +938,14 @@ func local_request_Tigris_ListCollections_0(ctx context.Context, marshaler runti
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := server.ListCollections(ctx, &protoReq)
@@ -1057,8 +953,8 @@ func local_request_Tigris_ListCollections_0(ctx context.Context, marshaler runti
 
 }
 
-func request_Tigris_CreateDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateDatabaseRequest
+func request_Tigris_CreateProject_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateProjectRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -1076,23 +972,23 @@ func request_Tigris_CreateDatabase_0(ctx context.Context, marshaler runtime.Mars
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
-	msg, err := client.CreateDatabase(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.CreateProject(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Tigris_CreateDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateDatabaseRequest
+func local_request_Tigris_CreateProject_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateProjectRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -1110,23 +1006,23 @@ func local_request_Tigris_CreateDatabase_0(ctx context.Context, marshaler runtim
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
-	msg, err := server.CreateDatabase(ctx, &protoReq)
+	msg, err := server.CreateProject(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
-func request_Tigris_DropDatabase_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DropDatabaseRequest
+func request_Tigris_DeleteProject_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq DeleteProjectRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -1144,23 +1040,23 @@ func request_Tigris_DropDatabase_0(ctx context.Context, marshaler runtime.Marsha
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
-	msg, err := client.DropDatabase(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.DeleteProject(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Tigris_DropDatabase_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DropDatabaseRequest
+func local_request_Tigris_DeleteProject_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq DeleteProjectRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -1178,17 +1074,17 @@ func local_request_Tigris_DropDatabase_0(ctx context.Context, marshaler runtime.
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
-	msg, err := server.DropDatabase(ctx, &protoReq)
+	msg, err := server.DeleteProject(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -1212,14 +1108,14 @@ func request_Tigris_DescribeDatabase_0(ctx context.Context, marshaler runtime.Ma
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := client.DescribeDatabase(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -1246,17 +1142,193 @@ func local_request_Tigris_DescribeDatabase_0(ctx context.Context, marshaler runt
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	msg, err := server.DescribeDatabase(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_Tigris_CreateBranch_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateBranchRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["project"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
+	}
+
+	protoReq.Project, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
+	}
+
+	val, ok = pathParams["branch"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "branch")
+	}
+
+	protoReq.Branch, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "branch", err)
+	}
+
+	msg, err := client.CreateBranch(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Tigris_CreateBranch_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateBranchRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["project"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
+	}
+
+	protoReq.Project, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
+	}
+
+	val, ok = pathParams["branch"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "branch")
+	}
+
+	protoReq.Branch, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "branch", err)
+	}
+
+	msg, err := server.CreateBranch(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_Tigris_DeleteBranch_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq DeleteBranchRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["project"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
+	}
+
+	protoReq.Project, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
+	}
+
+	val, ok = pathParams["branch"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "branch")
+	}
+
+	protoReq.Branch, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "branch", err)
+	}
+
+	msg, err := client.DeleteBranch(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Tigris_DeleteBranch_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq DeleteBranchRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["project"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
+	}
+
+	protoReq.Project, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
+	}
+
+	val, ok = pathParams["branch"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "branch")
+	}
+
+	protoReq.Branch, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "branch", err)
+	}
+
+	msg, err := server.DeleteBranch(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -1280,14 +1352,14 @@ func request_Tigris_DescribeCollection_0(ctx context.Context, marshaler runtime.
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -1324,14 +1396,14 @@ func local_request_Tigris_DescribeCollection_0(ctx context.Context, marshaler ru
 		_   = err
 	)
 
-	val, ok = pathParams["db"]
+	val, ok = pathParams["project"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "project")
 	}
 
-	protoReq.Db, err = runtime.String(val)
+	protoReq.Project, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "project", err)
 	}
 
 	val, ok = pathParams["collection"]
@@ -1349,198 +1421,6 @@ func local_request_Tigris_DescribeCollection_0(ctx context.Context, marshaler ru
 
 }
 
-func request_Tigris_Events_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_EventsClient, runtime.ServerMetadata, error) {
-	var protoReq EventsRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["db"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
-	}
-
-	protoReq.Db, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
-	}
-
-	val, ok = pathParams["collection"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
-	}
-
-	protoReq.Collection, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
-	}
-
-	stream, err := client.Events(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
-
-}
-
-func request_Tigris_Publish_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq PublishRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["db"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
-	}
-
-	protoReq.Db, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
-	}
-
-	val, ok = pathParams["collection"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
-	}
-
-	protoReq.Collection, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
-	}
-
-	msg, err := client.Publish(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Tigris_Publish_0(ctx context.Context, marshaler runtime.Marshaler, server TigrisServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq PublishRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["db"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
-	}
-
-	protoReq.Db, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
-	}
-
-	val, ok = pathParams["collection"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
-	}
-
-	protoReq.Collection, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
-	}
-
-	msg, err := server.Publish(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_Tigris_Subscribe_0(ctx context.Context, marshaler runtime.Marshaler, client TigrisClient, req *http.Request, pathParams map[string]string) (Tigris_SubscribeClient, runtime.ServerMetadata, error) {
-	var protoReq SubscribeRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["db"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "db")
-	}
-
-	protoReq.Db, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "db", err)
-	}
-
-	val, ok = pathParams["collection"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "collection")
-	}
-
-	protoReq.Collection, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "collection", err)
-	}
-
-	stream, err := client.Subscribe(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
-
-}
-
 // RegisterTigrisHandlerServer registers the http handlers for service Tigris to "mux".
 // UnaryRPC     :call TigrisServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -1554,7 +1434,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/begin"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/transactions/begin"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1578,7 +1458,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/commit"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/transactions/commit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1602,7 +1482,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/rollback"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/transactions/rollback"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1626,7 +1506,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/insert"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1650,7 +1530,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/replace"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/replace"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1674,7 +1554,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/delete"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1698,7 +1578,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/update"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1722,21 +1602,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		return
 	})
 
-	mux.Handle("POST", pattern_Tigris_Read_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
-	})
-
 	mux.Handle("POST", pattern_Tigris_Search_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
-	})
-
-	mux.Handle("POST", pattern_Tigris_Search_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1750,7 +1616,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/createOrUpdate"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/createOrUpdate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1774,7 +1640,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/drop"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1791,19 +1657,19 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Tigris_ListDatabases_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_ListProjects_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/v1/databases/list"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListProjects", runtime.WithHTTPPathPattern("/v1/projects/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_ListDatabases_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_ListProjects_0(ctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1811,7 +1677,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Tigris_ListDatabases_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_ListProjects_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1822,7 +1688,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/list"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1839,19 +1705,19 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Tigris_CreateDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CreateProject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/create"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateProject", runtime.WithHTTPPathPattern("/v1/projects/{project}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_CreateDatabase_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_CreateProject_0(ctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1859,23 +1725,23 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Tigris_CreateDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CreateProject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_Tigris_DropDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_DeleteProject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/drop"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DeleteProject", runtime.WithHTTPPathPattern("/v1/projects/{project}/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Tigris_DropDatabase_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Tigris_DeleteProject_0(ctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1883,7 +1749,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Tigris_DropDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DeleteProject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1894,7 +1760,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/describe"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1911,6 +1777,54 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
+	mux.Handle("POST", pattern_Tigris_CreateBranch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateBranch", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/branches/{branch}/create"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Tigris_CreateBranch_0(ctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Tigris_CreateBranch_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("DELETE", pattern_Tigris_DeleteBranch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DeleteBranch", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/branches/{branch}/delete"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Tigris_DeleteBranch_0(ctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Tigris_DeleteBranch_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("POST", pattern_Tigris_DescribeCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1918,7 +1832,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/describe"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1933,44 +1847,6 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 		forward_Tigris_DescribeCollection_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
-	})
-
-	mux.Handle("POST", pattern_Tigris_Events_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
-	})
-
-	mux.Handle("POST", pattern_Tigris_Publish_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/publish"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Tigris_Publish_0(ctx, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Tigris_Publish_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("POST", pattern_Tigris_Subscribe_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
 	})
 
 	return nil
@@ -2019,7 +1895,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/begin"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/BeginTransaction", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/transactions/begin"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2040,7 +1916,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/commit"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CommitTransaction", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/transactions/commit"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2061,7 +1937,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/databases/{db}/transactions/rollback"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/RollbackTransaction", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/transactions/rollback"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2082,7 +1958,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/insert"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Insert", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/insert"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2103,7 +1979,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/replace"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Replace", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/replace"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2124,7 +2000,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/delete"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Delete", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2145,7 +2021,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/update"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Update", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2166,7 +2042,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/read"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/read"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2182,33 +2058,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Tigris_Read_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Read", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/read"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Tigris_Read_1(ctx, inboundMarshaler, client, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Tigris_Read_1(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
-
-	})
-
 	mux.Handle("POST", pattern_Tigris_Search_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/documents/search"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/documents/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2224,33 +2079,12 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Tigris_Search_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Search", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/search"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Tigris_Search_1(ctx, inboundMarshaler, client, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Tigris_Search_1(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
-
-	})
-
 	mux.Handle("POST", pattern_Tigris_CreateOrUpdateCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/createOrUpdate"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/createOrUpdate"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2271,7 +2105,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/drop"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropCollection", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/drop"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2287,24 +2121,24 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Tigris_ListDatabases_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_ListProjects_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListDatabases", runtime.WithHTTPPathPattern("/v1/databases/list"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListProjects", runtime.WithHTTPPathPattern("/v1/projects/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_ListDatabases_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_ListProjects_0(ctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Tigris_ListDatabases_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_ListProjects_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2313,7 +2147,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/list"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/ListCollections", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2329,45 +2163,45 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Tigris_CreateDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Tigris_CreateProject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/create"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateProject", runtime.WithHTTPPathPattern("/v1/projects/{project}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_CreateDatabase_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_CreateProject_0(ctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Tigris_CreateDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_CreateProject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_Tigris_DropDatabase_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Tigris_DeleteProject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DropDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/drop"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DeleteProject", runtime.WithHTTPPathPattern("/v1/projects/{project}/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Tigris_DropDatabase_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Tigris_DeleteProject_0(ctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Tigris_DropDatabase_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Tigris_DeleteProject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2376,7 +2210,7 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/databases/{db}/describe"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeDatabase", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2392,12 +2226,54 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
+	mux.Handle("POST", pattern_Tigris_CreateBranch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/CreateBranch", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/branches/{branch}/create"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Tigris_CreateBranch_0(ctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Tigris_CreateBranch_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("DELETE", pattern_Tigris_DeleteBranch_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DeleteBranch", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/branches/{branch}/delete"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Tigris_DeleteBranch_0(ctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Tigris_DeleteBranch_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("POST", pattern_Tigris_DescribeCollection_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/describe"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/DescribeCollection", runtime.WithHTTPPathPattern("/v1/projects/{project}/database/collections/{collection}/describe"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2413,116 +2289,47 @@ func RegisterTigrisHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Tigris_Events_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Events", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/events"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Tigris_Events_0(ctx, inboundMarshaler, client, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Tigris_Events_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("POST", pattern_Tigris_Publish_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Publish", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/publish"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Tigris_Publish_0(ctx, inboundMarshaler, client, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Tigris_Publish_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("POST", pattern_Tigris_Subscribe_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.v1.Tigris/Subscribe", runtime.WithHTTPPathPattern("/v1/databases/{db}/collections/{collection}/messages/subscribe"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Tigris_Subscribe_0(ctx, inboundMarshaler, client, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Tigris_Subscribe_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
-
-	})
-
 	return nil
 }
 
 var (
-	pattern_Tigris_BeginTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "databases", "db", "transactions", "begin"}, ""))
+	pattern_Tigris_BeginTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 2, 5}, []string{"v1", "projects", "project", "database", "transactions", "begin"}, ""))
 
-	pattern_Tigris_CommitTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "databases", "db", "transactions", "commit"}, ""))
+	pattern_Tigris_CommitTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 2, 5}, []string{"v1", "projects", "project", "database", "transactions", "commit"}, ""))
 
-	pattern_Tigris_RollbackTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "databases", "db", "transactions", "rollback"}, ""))
+	pattern_Tigris_RollbackTransaction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 2, 5}, []string{"v1", "projects", "project", "database", "transactions", "rollback"}, ""))
 
-	pattern_Tigris_Insert_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "documents", "insert"}, ""))
+	pattern_Tigris_Insert_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"v1", "projects", "project", "database", "collections", "collection", "documents", "insert"}, ""))
 
-	pattern_Tigris_Replace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "documents", "replace"}, ""))
+	pattern_Tigris_Replace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"v1", "projects", "project", "database", "collections", "collection", "documents", "replace"}, ""))
 
-	pattern_Tigris_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "documents", "delete"}, ""))
+	pattern_Tigris_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"v1", "projects", "project", "database", "collections", "collection", "documents", "delete"}, ""))
 
-	pattern_Tigris_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "documents", "update"}, ""))
+	pattern_Tigris_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"v1", "projects", "project", "database", "collections", "collection", "documents", "update"}, ""))
 
-	pattern_Tigris_Read_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "documents", "read"}, ""))
+	pattern_Tigris_Read_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"v1", "projects", "project", "database", "collections", "collection", "documents", "read"}, ""))
 
-	pattern_Tigris_Read_1 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "messages", "read"}, ""))
+	pattern_Tigris_Search_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"v1", "projects", "project", "database", "collections", "collection", "documents", "search"}, ""))
 
-	pattern_Tigris_Search_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "documents", "search"}, ""))
+	pattern_Tigris_CreateOrUpdateCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"v1", "projects", "project", "database", "collections", "collection", "createOrUpdate"}, ""))
 
-	pattern_Tigris_Search_1 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "messages", "search"}, ""))
+	pattern_Tigris_DropCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"v1", "projects", "project", "database", "collections", "collection", "drop"}, ""))
 
-	pattern_Tigris_CreateOrUpdateCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "databases", "db", "collections", "collection", "createOrUpdate"}, ""))
+	pattern_Tigris_ListProjects_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "projects", "list"}, ""))
 
-	pattern_Tigris_DropCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "databases", "db", "collections", "collection", "drop"}, ""))
+	pattern_Tigris_ListCollections_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 2, 5}, []string{"v1", "projects", "project", "database", "collections", "list"}, ""))
 
-	pattern_Tigris_ListDatabases_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "databases", "list"}, ""))
+	pattern_Tigris_CreateProject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "projects", "project", "create"}, ""))
 
-	pattern_Tigris_ListCollections_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "databases", "db", "collections", "list"}, ""))
+	pattern_Tigris_DeleteProject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "projects", "project", "delete"}, ""))
 
-	pattern_Tigris_CreateDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "databases", "db", "create"}, ""))
+	pattern_Tigris_DescribeDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "projects", "project", "database", "describe"}, ""))
 
-	pattern_Tigris_DropDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "databases", "db", "drop"}, ""))
+	pattern_Tigris_CreateBranch_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"v1", "projects", "project", "database", "branches", "branch", "create"}, ""))
 
-	pattern_Tigris_DescribeDatabase_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "databases", "db", "describe"}, ""))
+	pattern_Tigris_DeleteBranch_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"v1", "projects", "project", "database", "branches", "branch", "delete"}, ""))
 
-	pattern_Tigris_DescribeCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "databases", "db", "collections", "collection", "describe"}, ""))
-
-	pattern_Tigris_Events_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "databases", "db", "collections", "collection", "events"}, ""))
-
-	pattern_Tigris_Publish_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "messages", "publish"}, ""))
-
-	pattern_Tigris_Subscribe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "databases", "db", "collections", "collection", "messages", "subscribe"}, ""))
+	pattern_Tigris_DescribeCollection_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"v1", "projects", "project", "database", "collections", "collection", "describe"}, ""))
 )
 
 var (
@@ -2542,31 +2349,25 @@ var (
 
 	forward_Tigris_Read_0 = runtime.ForwardResponseStream
 
-	forward_Tigris_Read_1 = runtime.ForwardResponseStream
-
 	forward_Tigris_Search_0 = runtime.ForwardResponseStream
-
-	forward_Tigris_Search_1 = runtime.ForwardResponseStream
 
 	forward_Tigris_CreateOrUpdateCollection_0 = runtime.ForwardResponseMessage
 
 	forward_Tigris_DropCollection_0 = runtime.ForwardResponseMessage
 
-	forward_Tigris_ListDatabases_0 = runtime.ForwardResponseMessage
+	forward_Tigris_ListProjects_0 = runtime.ForwardResponseMessage
 
 	forward_Tigris_ListCollections_0 = runtime.ForwardResponseMessage
 
-	forward_Tigris_CreateDatabase_0 = runtime.ForwardResponseMessage
+	forward_Tigris_CreateProject_0 = runtime.ForwardResponseMessage
 
-	forward_Tigris_DropDatabase_0 = runtime.ForwardResponseMessage
+	forward_Tigris_DeleteProject_0 = runtime.ForwardResponseMessage
 
 	forward_Tigris_DescribeDatabase_0 = runtime.ForwardResponseMessage
 
+	forward_Tigris_CreateBranch_0 = runtime.ForwardResponseMessage
+
+	forward_Tigris_DeleteBranch_0 = runtime.ForwardResponseMessage
+
 	forward_Tigris_DescribeCollection_0 = runtime.ForwardResponseMessage
-
-	forward_Tigris_Events_0 = runtime.ForwardResponseStream
-
-	forward_Tigris_Publish_0 = runtime.ForwardResponseMessage
-
-	forward_Tigris_Subscribe_0 = runtime.ForwardResponseStream
 )

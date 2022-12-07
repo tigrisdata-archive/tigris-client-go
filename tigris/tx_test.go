@@ -47,8 +47,9 @@ func TestCollectionTx(t *testing.T) {
 	}
 
 	db := newDatabase("db1", m)
+	m.EXPECT().UseDatabase("db1").Return(mdb)
 
-	m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
+	mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
 	err := db.Tx(ctx, func(ctx context.Context) error {
 		m.EXPECT().UseDatabase("db1").Return(mdb)
@@ -180,11 +181,12 @@ func TestCollectionTxRetry(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
 	mtx := mock.NewMockTx(ctrl)
-
+	mdb := mock.NewMockDatabase(ctrl)
 	db := newDatabase("db1", m)
 
 	t.Run("retry", func(t *testing.T) {
-		m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil).Times(7)
+		m.EXPECT().UseDatabase("db1").Return(mdb).Times(7)
+		mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil).Times(7)
 
 		i := 7
 		err := db.Tx(ctx, func(ctx context.Context) error {
@@ -207,7 +209,8 @@ func TestCollectionTxRetry(t *testing.T) {
 	})
 
 	t.Run("no_retry", func(t *testing.T) {
-		m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
+		m.EXPECT().UseDatabase("db1").Return(mdb)
+		mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
 		i := 7
 		err := db.Tx(ctx, func(ctx context.Context) error {
@@ -234,7 +237,8 @@ func TestCollectionTxRetry(t *testing.T) {
 	})
 
 	t.Run("not_retryable_tigris_error", func(t *testing.T) {
-		m.EXPECT().BeginTx(gomock.Any(), "db1").Return(mtx, nil)
+		m.EXPECT().UseDatabase("db1").Return(mdb)
+		mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
 		i := 7
 		err := db.Tx(ctx, func(ctx context.Context) error {

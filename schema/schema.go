@@ -41,7 +41,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
-// Tags supported by Tigris.
+// Tags supported by the Tigris.
 const (
 	tagName = "tigris"
 

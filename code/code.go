@@ -22,7 +22,7 @@ const (
 	Unknown            = api.Code_UNKNOWN
 	InvalidArgument    = api.Code_INVALID_ARGUMENT
 	DeadlineExceeded   = api.Code_DEADLINE_EXCEEDED
-	NotFound           = api.Code_DEADLINE_EXCEEDED
+	NotFound           = api.Code_NOT_FOUND
 	AlreadyExists      = api.Code_ALREADY_EXISTS
 	PermissionDenied   = api.Code_PERMISSION_DENIED
 	ResourceExhausted  = api.Code_RESOURCE_EXHAUSTED

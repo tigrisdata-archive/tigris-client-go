@@ -97,8 +97,8 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 	return nil
 }
 
-// openDatabaseFromModels creates Database and collections from the provided collection models.
-func openDatabaseFromModels(ctx context.Context, d driver.Driver,
+// OpenDatabaseFromModels creates Database and collections from the provided collection models.
+func OpenDatabaseFromModels(ctx context.Context, d driver.Driver,
 	project string, models ...schema.Model,
 ) (*Database, error) {
 	db := newDatabase(project, d)
@@ -127,7 +127,7 @@ func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 		return nil, err
 	}
 
-	return openDatabaseFromModels(ctx, d, cfg.Project, models...)
+	return OpenDatabaseFromModels(ctx, d, cfg.Project, models...)
 }
 
 // GetCollection returns collection object corresponding to collection model T.

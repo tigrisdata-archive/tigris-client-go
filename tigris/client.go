@@ -94,7 +94,7 @@ func (c *Client) OpenDatabase(ctx context.Context, models ...schema.Model) (*Dat
 		return nil, ErrNotTransactional
 	}
 
-	return openDatabaseFromModels(ctx, c.driver, c.config.Project, models...)
+	return OpenDatabaseFromModels(ctx, c.driver, c.config.Project, models...)
 }
 
 // GetDatabase gets the Database for this project.

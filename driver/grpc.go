@@ -464,13 +464,13 @@ func (c *grpcDriver) CreateAppKey(ctx context.Context, project string, name stri
 	return (*AppKey)(r.CreatedAppKey), nil
 }
 
-func (c *grpcDriver) DeleteAppKey(ctx context.Context, id string, project string) error {
+func (c *grpcDriver) DeleteAppKey(ctx context.Context, project string, id string) error {
 	_, err := c.api.DeleteAppKey(ctx, &api.DeleteAppKeyRequest{Id: id, Project: project})
 
 	return GRPCError(err)
 }
 
-func (c *grpcDriver) UpdateAppKey(ctx context.Context, id string, name string, description string, project string) (*AppKey, error) {
+func (c *grpcDriver) UpdateAppKey(ctx context.Context, project string, id string, name string, description string) (*AppKey, error) {
 	r, err := c.api.UpdateAppKey(ctx, &api.UpdateAppKeyRequest{Id: id, Project: project, Name: name, Description: description})
 	if err != nil {
 		return nil, GRPCError(err)
@@ -496,7 +496,7 @@ func (c *grpcDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey
 	return applications, nil
 }
 
-func (c *grpcDriver) RotateAppKeySecret(ctx context.Context, id string, project string) (*AppKey, error) {
+func (c *grpcDriver) RotateAppKeySecret(ctx context.Context, project string, id string) (*AppKey, error) {
 	r, err := c.api.RotateAppKeySecret(ctx, &api.RotateAppKeyRequest{Id: id, Project: project})
 	if err != nil {
 		return nil, GRPCError(err)

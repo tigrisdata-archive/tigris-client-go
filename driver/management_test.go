@@ -35,7 +35,7 @@ import (
 
 var testTokenURLOverride = "https://localhost:33333/v1/auth/token" //nolint:golint,gosec
 
-func appEqual(t *testing.T, exp *api.Application, act *Application) {
+func appEqual(t *testing.T, exp *api.AppKey, act *AppKey) {
 	t.Helper()
 
 	require.Equal(t, exp.Id, act.Id)
@@ -45,110 +45,110 @@ func appEqual(t *testing.T, exp *api.Application, act *Application) {
 	require.Equal(t, exp.Description, act.Description)
 }
 
-func testDriverAuthNegative(t *testing.T, c Management, mc *mock.MockManagementServer) {
+func testDriverAuthNegative(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisServer, mc *mock.MockManagementServer) {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	project1 := "project1"
-	mc.EXPECT().CreateApplication(gomock.Any(),
-		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: project1})).Return(
-		&api.CreateApplicationResponse{CreatedApplication: nil}, nil)
+	mt.EXPECT().CreateAppKey(gomock.Any(),
+		pm(&api.CreateAppKeyRequest{Name: "app1", Description: "description1", Project: project1})).Return(
+		&api.CreateAppKeyResponse{CreatedAppKey: nil}, nil)
 
-	_, err := c.CreateApplication(ctx, project1, "app1", "description1")
+	_, err := drv.CreateAppKey(ctx, project1, "app1", "description1")
 	require.Error(t, err)
 
-	mc.EXPECT().UpdateApplication(gomock.Any(),
-		pm(&api.UpdateApplicationRequest{Id: "upd_id1", Name: "upd_app1", Description: "upd_description1"})).Return(
-		&api.UpdateApplicationResponse{UpdatedApplication: nil}, nil)
+	mt.EXPECT().UpdateAppKey(gomock.Any(),
+		pm(&api.UpdateAppKeyRequest{Id: "upd_id1", Project: project1, Name: "upd_app1", Description: "upd_description1"})).Return(
+		&api.UpdateAppKeyResponse{UpdatedAppKey: nil}, nil)
 
-	_, err = c.UpdateApplication(ctx, "upd_id1", "upd_app1", "upd_description1")
+	_, err = drv.UpdateAppKey(ctx, "upd_id1", "upd_app1", "upd_description1", project1)
 	require.Error(t, err)
 
-	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{Project: project1})).Return(
+	mt.EXPECT().ListAppKeys(gomock.Any(),
+		pm(&api.ListAppKeysRequest{Project: project1})).Return(
 		nil, fmt.Errorf("some error"))
 
-	_, err = c.ListApplications(ctx, project1)
+	_, err = drv.ListAppKeys(ctx, project1)
 	require.Error(t, err)
 
-	mc.EXPECT().RotateApplicationSecret(gomock.Any(),
-		pm(&api.RotateApplicationSecretRequest{Id: "ras_id1"})).Return(
-		&api.RotateApplicationSecretResponse{Application: nil}, nil)
+	mt.EXPECT().RotateAppKeySecret(gomock.Any(),
+		pm(&api.RotateAppKeyRequest{Id: "ras_id1", Project: project1})).Return(
+		&api.RotateAppKeyResponse{AppKey: nil}, nil)
 
-	_, err = c.RotateClientSecret(ctx, "ras_id1")
+	_, err = drv.RotateAppKeySecret(ctx, "ras_id1", project1)
 	require.Error(t, err)
 
 	mc.EXPECT().CreateNamespace(gomock.Any(),
 		pm(&api.CreateNamespaceRequest{Name: "app1"})).Return(
 		nil, fmt.Errorf("some error"))
 
-	err = c.CreateNamespace(ctx, "app1")
+	err = m.CreateNamespace(ctx, "app1")
 	require.Error(t, err)
 
 	mc.EXPECT().ListNamespaces(gomock.Any(),
 		pm(&api.ListNamespacesRequest{})).Return(
 		nil, fmt.Errorf("some error"))
 
-	_, err = c.ListNamespaces(ctx)
+	_, err = m.ListNamespaces(ctx)
 	require.Error(t, err)
 }
 
-func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, ma *mock.MockAuthServer) {
+func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisServer, ma *mock.MockAuthServer, mc *mock.MockManagementServer) {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	capp := &api.Application{Id: "id1", Name: "app1", Description: "desc1", CreatedAt: 111, CreatedBy: "cby", Secret: "secret"}
+	capp := &api.AppKey{Id: "id1", Name: "app1", Description: "desc1", CreatedAt: 111, CreatedBy: "cby", Secret: "secret"}
 
 	project1 := "project1"
-	mc.EXPECT().CreateApplication(gomock.Any(),
-		pm(&api.CreateApplicationRequest{Name: "app1", Description: "description1", Project: project1})).Return(
-		&api.CreateApplicationResponse{CreatedApplication: capp}, nil)
+	mt.EXPECT().CreateAppKey(gomock.Any(),
+		pm(&api.CreateAppKeyRequest{Name: "app1", Description: "description1", Project: project1})).Return(
+		&api.CreateAppKeyResponse{CreatedAppKey: capp}, nil)
 
-	app, err := c.CreateApplication(ctx, project1, "app1", "description1")
+	app, err := drv.CreateAppKey(ctx, project1, "app1", "description1")
 	require.NoError(t, err)
 
 	appEqual(t, capp, app)
 
-	mc.EXPECT().DeleteApplication(gomock.Any(),
-		pm(&api.DeleteApplicationsRequest{Id: "del_id1"})).Return(
-		&api.DeleteApplicationResponse{Deleted: true}, nil)
+	mt.EXPECT().DeleteAppKey(gomock.Any(),
+		pm(&api.DeleteAppKeyRequest{Id: "del_id1", Project: project1})).Return(
+		&api.DeleteAppKeyResponse{Deleted: true}, nil)
 
-	err = c.DeleteApplication(ctx, "del_id1")
+	err = drv.DeleteAppKey(ctx, "del_id1", project1)
 	require.NoError(t, err)
 
-	uapp := &api.Application{Id: "upd_id1", Name: "upd_app1", Description: "upd_desc1", UpdatedAt: 222, UpdatedBy: "uby"}
+	uapp := &api.AppKey{Id: "upd_id1", Name: "upd_app1", Description: "upd_desc1", UpdatedAt: 222, UpdatedBy: "uby"}
 
-	mc.EXPECT().UpdateApplication(gomock.Any(),
-		pm(&api.UpdateApplicationRequest{Id: "upd_id1", Name: "upd_app1", Description: "upd_description1"})).Return(
-		&api.UpdateApplicationResponse{UpdatedApplication: uapp}, nil)
+	mt.EXPECT().UpdateAppKey(gomock.Any(),
+		pm(&api.UpdateAppKeyRequest{Id: "upd_id1", Project: project1, Name: "upd_app1", Description: "upd_description1"})).Return(
+		&api.UpdateAppKeyResponse{UpdatedAppKey: uapp}, nil)
 
-	app, err = c.UpdateApplication(ctx, "upd_id1", "upd_app1", "upd_description1")
+	app, err = drv.UpdateAppKey(ctx, "upd_id1", "upd_app1", "upd_description1", project1)
 	require.NoError(t, err)
 
 	appEqual(t, uapp, app)
 
-	lapp1 := &api.Application{
+	lapp1 := &api.AppKey{
 		Id: "list_id1", Name: "list_app1", Description: "list_desc1", UpdatedAt: 222,
 		UpdatedBy: "uby", CreatedAt: 111, CreatedBy: "cby",
 	}
-	lapp2 := &api.Application{
+	lapp2 := &api.AppKey{
 		Id: "list_id2", Name: "list_app2", Description: "list_desc2", UpdatedAt: 222222,
 		UpdatedBy: "uby2", CreatedAt: 111222, CreatedBy: "cby2",
 	}
-	lapp3 := &api.Application{
+	lapp3 := &api.AppKey{
 		Id: "list_id3", Name: "list_app3", Description: "list_desc3", UpdatedAt: 222333,
 		UpdatedBy: "uby3", CreatedAt: 111333, CreatedBy: "cby3",
 	}
 
-	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{Project: project1})).Return(
-		&api.ListApplicationsResponse{Applications: []*api.Application{lapp1, lapp2, lapp3}}, nil)
+	mt.EXPECT().ListAppKeys(gomock.Any(),
+		pm(&api.ListAppKeysRequest{Project: project1})).Return(
+		&api.ListAppKeysResponse{AppKeys: []*api.AppKey{lapp1, lapp2, lapp3}}, nil)
 
-	list, err := c.ListApplications(ctx, "project1")
+	list, err := drv.ListAppKeys(ctx, project1)
 	require.NoError(t, err)
 
 	require.Equal(t, 3, len(list))
@@ -156,19 +156,19 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 	appEqual(t, lapp2, list[1])
 	appEqual(t, lapp3, list[2])
 
-	mc.EXPECT().ListApplications(gomock.Any(),
-		pm(&api.ListApplicationsRequest{Project: project1})).Return(
-		&api.ListApplicationsResponse{}, nil)
+	mt.EXPECT().ListAppKeys(gomock.Any(),
+		pm(&api.ListAppKeysRequest{Project: project1})).Return(
+		&api.ListAppKeysResponse{}, nil)
 
-	list, err = c.ListApplications(ctx, "project1")
+	list, err = drv.ListAppKeys(ctx, project1)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(list))
 
-	mc.EXPECT().RotateApplicationSecret(gomock.Any(),
-		pm(&api.RotateApplicationSecretRequest{Id: "ras_id1"})).Return(
-		&api.RotateApplicationSecretResponse{Application: lapp2}, nil)
+	mt.EXPECT().RotateAppKeySecret(gomock.Any(),
+		pm(&api.RotateAppKeyRequest{Id: "ras_id1", Project: project1})).Return(
+		&api.RotateAppKeyResponse{AppKey: lapp2}, nil)
 
-	app, err = c.RotateClientSecret(ctx, "ras_id1")
+	app, err = drv.RotateAppKeySecret(ctx, "ras_id1", project1)
 	require.NoError(t, err)
 
 	appEqual(t, lapp2, app)
@@ -177,7 +177,7 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 		pm(&api.GetAccessTokenRequest{ClientId: "client_id1", ClientSecret: "secret1", GrantType: api.GrantType_CLIENT_CREDENTIALS})).Return(
 		&api.GetAccessTokenResponse{AccessToken: "access_token1", RefreshToken: "refresh_token1"}, nil)
 
-	token, err := c.GetAccessToken(ctx, "client_id1", "secret1", "")
+	token, err := m.GetAccessToken(ctx, "client_id1", "secret1", "")
 	require.NoError(t, err)
 	require.Equal(t, "access_token1", token.AccessToken)
 	require.Equal(t, "refresh_token1", token.RefreshToken)
@@ -186,7 +186,7 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 		pm(&api.GetAccessTokenRequest{ClientId: "", ClientSecret: "", RefreshToken: "refresh_token_req", GrantType: api.GrantType_REFRESH_TOKEN})).Return(
 		&api.GetAccessTokenResponse{AccessToken: "access_token2", RefreshToken: "refresh_token2"}, nil)
 
-	token, err = c.GetAccessToken(ctx, "", "", "refresh_token_req")
+	token, err = m.GetAccessToken(ctx, "", "", "refresh_token_req")
 	require.NoError(t, err)
 	require.Equal(t, "access_token2", token.AccessToken)
 	require.Equal(t, "refresh_token2", token.RefreshToken)
@@ -199,7 +199,7 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 		pm(&api.ListNamespacesRequest{})).Return(
 		&api.ListNamespacesResponse{Namespaces: []*api.NamespaceInfo{nsapp1, nsapp2, nsapp3}}, nil)
 
-	nsList, err := c.ListNamespaces(ctx)
+	nsList, err := m.ListNamespaces(ctx)
 	require.NoError(t, err)
 
 	require.Equal(t, 3, len(nsList))
@@ -214,21 +214,21 @@ func testDriverAuth(t *testing.T, c Management, mc *mock.MockManagementServer, m
 		pm(&api.CreateNamespaceRequest{Name: "nsapp1"})).Return(
 		&api.CreateNamespaceResponse{}, nil)
 
-	err = c.CreateNamespace(ctx, "nsapp1")
+	err = m.CreateNamespace(ctx, "nsapp1")
 	require.NoError(t, err)
 }
 
 func TestGRPCAuthDriver(t *testing.T) {
-	_, client, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{})
+	drv, managementClient, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{})
 	defer cancel()
-	testDriverAuth(t, client, mockServers.Mgmt, mockServers.Auth)
-	testDriverAuthNegative(t, client, mockServers.Mgmt)
+	testDriverAuth(t, drv, managementClient, mockServers.API, mockServers.Auth, mockServers.Mgmt)
+	testDriverAuthNegative(t, drv, managementClient, mockServers.API, mockServers.Mgmt)
 }
 
 func TestHTTPAuthDriver(t *testing.T) {
-	_, client, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{})
+	drv, managementClient, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{})
 	defer cancel()
-	testDriverAuth(t, client, mockServers.Mgmt, mockServers.Auth)
+	testDriverAuth(t, drv, managementClient, mockServers.API, mockServers.Auth, mockServers.Mgmt)
 }
 
 func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *mock.MockAuthServer, token string, getToken bool) {

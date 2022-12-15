@@ -53,6 +53,13 @@ type TigrisClient interface {
 	// You can also perform a faceted search by passing the fields in the facet parameter.
 	// You can find more detailed documentation of the Search API with multiple examples <a href="https://docs.tigrisdata.com/overview/search" title="here">here</a>.
 	Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (Tigris_SearchClient, error)
+	// Imports documents into the collection.
+	//
+	// It automatically:
+	//  * Detects the schema of the documents in the batch
+	//  * Evolves the schema as soon as it's backward compatible
+	//  * Creates collection with inferred schema (if requested)
+	Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
 	// Tigris Offers two types of collections: <p></p>
@@ -80,6 +87,16 @@ type TigrisClient interface {
 	DeleteBranch(ctx context.Context, in *DeleteBranchRequest, opts ...grpc.CallOption) (*DeleteBranchResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
+	// Create an app key.
+	CreateAppKey(ctx context.Context, in *CreateAppKeyRequest, opts ...grpc.CallOption) (*CreateAppKeyResponse, error)
+	// Update the description of an app key.
+	UpdateAppKey(ctx context.Context, in *UpdateAppKeyRequest, opts ...grpc.CallOption) (*UpdateAppKeyResponse, error)
+	// Delete an app key.
+	DeleteAppKey(ctx context.Context, in *DeleteAppKeyRequest, opts ...grpc.CallOption) (*DeleteAppKeyResponse, error)
+	// Lists all app keys visible to requesting actor.
+	ListAppKeys(ctx context.Context, in *ListAppKeysRequest, opts ...grpc.CallOption) (*ListAppKeysResponse, error)
+	// Endpoint is used to rotate the secret for the app key.
+	RotateAppKeySecret(ctx context.Context, in *RotateAppKeyRequest, opts ...grpc.CallOption) (*RotateAppKeyResponse, error)
 }
 
 type tigrisClient struct {
@@ -217,6 +234,15 @@ func (x *tigrisSearchClient) Recv() (*SearchResponse, error) {
 	return m, nil
 }
 
+func (c *tigrisClient) Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error) {
+	out := new(ImportResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Import", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tigrisClient) CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error) {
 	out := new(CreateOrUpdateCollectionResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/CreateOrUpdateCollection", in, out, opts...)
@@ -307,6 +333,51 @@ func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeColle
 	return out, nil
 }
 
+func (c *tigrisClient) CreateAppKey(ctx context.Context, in *CreateAppKeyRequest, opts ...grpc.CallOption) (*CreateAppKeyResponse, error) {
+	out := new(CreateAppKeyResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/CreateAppKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) UpdateAppKey(ctx context.Context, in *UpdateAppKeyRequest, opts ...grpc.CallOption) (*UpdateAppKeyResponse, error) {
+	out := new(UpdateAppKeyResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/UpdateAppKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) DeleteAppKey(ctx context.Context, in *DeleteAppKeyRequest, opts ...grpc.CallOption) (*DeleteAppKeyResponse, error) {
+	out := new(DeleteAppKeyResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DeleteAppKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) ListAppKeys(ctx context.Context, in *ListAppKeysRequest, opts ...grpc.CallOption) (*ListAppKeysResponse, error) {
+	out := new(ListAppKeysResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/ListAppKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) RotateAppKeySecret(ctx context.Context, in *RotateAppKeyRequest, opts ...grpc.CallOption) (*RotateAppKeyResponse, error) {
+	out := new(RotateAppKeyResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/RotateAppKeySecret", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TigrisServer is the server API for Tigris service.
 // All implementations should embed UnimplementedTigrisServer
 // for forward compatibility
@@ -342,6 +413,13 @@ type TigrisServer interface {
 	// You can also perform a faceted search by passing the fields in the facet parameter.
 	// You can find more detailed documentation of the Search API with multiple examples <a href="https://docs.tigrisdata.com/overview/search" title="here">here</a>.
 	Search(*SearchRequest, Tigris_SearchServer) error
+	// Imports documents into the collection.
+	//
+	// It automatically:
+	//  * Detects the schema of the documents in the batch
+	//  * Evolves the schema as soon as it's backward compatible
+	//  * Creates collection with inferred schema (if requested)
+	Import(context.Context, *ImportRequest) (*ImportResponse, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
 	// Tigris Offers two types of collections: <p></p>
@@ -369,6 +447,16 @@ type TigrisServer interface {
 	DeleteBranch(context.Context, *DeleteBranchRequest) (*DeleteBranchResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
+	// Create an app key.
+	CreateAppKey(context.Context, *CreateAppKeyRequest) (*CreateAppKeyResponse, error)
+	// Update the description of an app key.
+	UpdateAppKey(context.Context, *UpdateAppKeyRequest) (*UpdateAppKeyResponse, error)
+	// Delete an app key.
+	DeleteAppKey(context.Context, *DeleteAppKeyRequest) (*DeleteAppKeyResponse, error)
+	// Lists all app keys visible to requesting actor.
+	ListAppKeys(context.Context, *ListAppKeysRequest) (*ListAppKeysResponse, error)
+	// Endpoint is used to rotate the secret for the app key.
+	RotateAppKeySecret(context.Context, *RotateAppKeyRequest) (*RotateAppKeyResponse, error)
 }
 
 // UnimplementedTigrisServer should be embedded to have forward compatible implementations.
@@ -402,6 +490,9 @@ func (UnimplementedTigrisServer) Read(*ReadRequest, Tigris_ReadServer) error {
 func (UnimplementedTigrisServer) Search(*SearchRequest, Tigris_SearchServer) error {
 	return status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
+func (UnimplementedTigrisServer) Import(context.Context, *ImportRequest) (*ImportResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Import not implemented")
+}
 func (UnimplementedTigrisServer) CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrUpdateCollection not implemented")
 }
@@ -431,6 +522,21 @@ func (UnimplementedTigrisServer) DeleteBranch(context.Context, *DeleteBranchRequ
 }
 func (UnimplementedTigrisServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeCollection not implemented")
+}
+func (UnimplementedTigrisServer) CreateAppKey(context.Context, *CreateAppKeyRequest) (*CreateAppKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAppKey not implemented")
+}
+func (UnimplementedTigrisServer) UpdateAppKey(context.Context, *UpdateAppKeyRequest) (*UpdateAppKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAppKey not implemented")
+}
+func (UnimplementedTigrisServer) DeleteAppKey(context.Context, *DeleteAppKeyRequest) (*DeleteAppKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAppKey not implemented")
+}
+func (UnimplementedTigrisServer) ListAppKeys(context.Context, *ListAppKeysRequest) (*ListAppKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAppKeys not implemented")
+}
+func (UnimplementedTigrisServer) RotateAppKeySecret(context.Context, *RotateAppKeyRequest) (*RotateAppKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RotateAppKeySecret not implemented")
 }
 
 // UnsafeTigrisServer may be embedded to opt out of forward compatibility for this service.
@@ -610,6 +716,24 @@ type tigrisSearchServer struct {
 
 func (x *tigrisSearchServer) Send(m *SearchResponse) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func _Tigris_Import_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).Import(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/Import",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).Import(ctx, req.(*ImportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Tigris_CreateOrUpdateCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -792,6 +916,96 @@ func _Tigris_DescribeCollection_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Tigris_CreateAppKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAppKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).CreateAppKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/CreateAppKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).CreateAppKey(ctx, req.(*CreateAppKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_UpdateAppKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAppKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).UpdateAppKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/UpdateAppKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).UpdateAppKey(ctx, req.(*UpdateAppKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_DeleteAppKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAppKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).DeleteAppKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/DeleteAppKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).DeleteAppKey(ctx, req.(*DeleteAppKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_ListAppKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAppKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).ListAppKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/ListAppKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).ListAppKeys(ctx, req.(*ListAppKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_RotateAppKeySecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RotateAppKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).RotateAppKeySecret(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/RotateAppKeySecret",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).RotateAppKeySecret(ctx, req.(*RotateAppKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Tigris_ServiceDesc is the grpc.ServiceDesc for Tigris service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -826,6 +1040,10 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _Tigris_Update_Handler,
+		},
+		{
+			MethodName: "Import",
+			Handler:    _Tigris_Import_Handler,
 		},
 		{
 			MethodName: "CreateOrUpdateCollection",
@@ -866,6 +1084,26 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DescribeCollection",
 			Handler:    _Tigris_DescribeCollection_Handler,
+		},
+		{
+			MethodName: "CreateAppKey",
+			Handler:    _Tigris_CreateAppKey_Handler,
+		},
+		{
+			MethodName: "UpdateAppKey",
+			Handler:    _Tigris_UpdateAppKey_Handler,
+		},
+		{
+			MethodName: "DeleteAppKey",
+			Handler:    _Tigris_DeleteAppKey_Handler,
+		},
+		{
+			MethodName: "ListAppKeys",
+			Handler:    _Tigris_ListAppKeys_Handler,
+		},
+		{
+			MethodName: "RotateAppKeySecret",
+			Handler:    _Tigris_RotateAppKeySecret_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

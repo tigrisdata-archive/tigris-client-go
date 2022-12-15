@@ -35,6 +35,12 @@ type driverWithOptions interface {
 	Info(ctx context.Context) (*InfoResponse, error)
 	Health(ctx context.Context) (*HealthResponse, error)
 
+	CreateAppKey(ctx context.Context, project string, name string, description string) (*AppKey, error)
+	DeleteAppKey(ctx context.Context, id string, project string) error
+	UpdateAppKey(ctx context.Context, id string, name string, description string, project string) (*AppKey, error)
+	ListAppKeys(ctx context.Context, project string) ([]*AppKey, error)
+	RotateAppKeySecret(ctx context.Context, id string, project string) (*AppKey, error)
+
 	Close() error
 }
 

@@ -466,12 +466,11 @@ func (c *httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOption
 	return &opts
 }
 
-func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
+func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, _ *CollectionOptions) ([]string, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
-	resp, err := c.api.TigrisListCollections(ctx, c.db, apiHTTP.TigrisListCollectionsJSONRequestBody{
-		Options: c.convertCollectionOptions(options),
-	})
+	// TODO wire branch once implemented
+	resp, err := c.api.TigrisListCollections(ctx, c.db, &apiHTTP.TigrisListCollectionsParams{})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -737,78 +736,78 @@ func (g *httpSearchReader) close() error {
 	return g.closer.Close()
 }
 
-func (c *httpDriver) CreateApplication(ctx context.Context, project string, name string, description string) (*Application, error) {
-	resp, err := c.api.ManagementCreateApplication(ctx, apiHTTP.ManagementCreateApplicationJSONRequestBody{Name: &name, Description: &description, Project: &project})
+func (c *httpDriver) CreateAppKey(ctx context.Context, project string, name string, description string) (*AppKey, error) {
+	resp, err := c.api.TigrisCreateAppKey(ctx, project, apiHTTP.TigrisCreateAppKeyJSONRequestBody{Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var app struct {
-		CreatedApplication Application `json:"created_application"`
+		CreatedAppKey AppKey `json:"created_app_key"`
 	}
 
 	if err := respDecode(resp.Body, &app); err != nil {
 		return nil, err
 	}
 
-	return &app.CreatedApplication, nil
+	return &app.CreatedAppKey, nil
 }
 
-func (c *httpDriver) DeleteApplication(ctx context.Context, id string) error {
-	resp, err := c.api.ManagementDeleteApplication(ctx, apiHTTP.ManagementDeleteApplicationJSONRequestBody{Id: &id})
+func (c *httpDriver) DeleteAppKey(ctx context.Context, id string, project string) error {
+	resp, err := c.api.TigrisDeleteAppKey(ctx, project, apiHTTP.TigrisDeleteAppKeyJSONRequestBody{Id: &id})
 
 	return HTTPError(err, resp)
 }
 
-func (c *httpDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
-	resp, err := c.api.ManagementUpdateApplication(ctx, apiHTTP.ManagementUpdateApplicationJSONRequestBody{Id: &id, Name: &name, Description: &description})
+func (c *httpDriver) UpdateAppKey(ctx context.Context, id string, name string, description string, project string) (*AppKey, error) {
+	resp, err := c.api.TigrisUpdateAppKey(ctx, project, apiHTTP.TigrisUpdateAppKeyJSONRequestBody{Id: &id, Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var app struct {
-		UpdatedApplication Application `json:"updated_application"`
+		UpdatedAppKey AppKey `json:"updated_app_key"`
 	}
 
 	if err := respDecode(resp.Body, &app); err != nil {
 		return nil, err
 	}
 
-	return &app.UpdatedApplication, nil
+	return &app.UpdatedAppKey, nil
 }
 
-func (c *httpDriver) ListApplications(ctx context.Context, project string) ([]*Application, error) {
-	resp, err := c.api.ManagementListApplications(ctx, apiHTTP.ManagementListApplicationsJSONRequestBody{Project: &project})
+func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey, error) {
+	resp, err := c.api.TigrisListAppKeys(ctx, project)
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var apps struct {
-		Applications []*Application
+		AppKeys []*AppKey `json:"app_keys"`
 	}
 
 	if err := respDecode(resp.Body, &apps); err != nil {
 		return nil, err
 	}
 
-	return apps.Applications, nil
+	return apps.AppKeys, nil
 }
 
-func (c *httpDriver) RotateClientSecret(ctx context.Context, id string) (*Application, error) {
-	resp, err := c.api.ManagementRotateApplicationSecret(ctx, apiHTTP.ManagementRotateApplicationSecretJSONRequestBody{Id: &id})
+func (c *httpDriver) RotateAppKeySecret(ctx context.Context, id string, project string) (*AppKey, error) {
+	resp, err := c.api.TigrisRotateAppKeySecret(ctx, project, apiHTTP.TigrisRotateAppKeySecretJSONRequestBody{Id: &id})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var app struct {
-		Application Application
+		AppKey AppKey `json:"app_key"`
 	}
 
 	if err := respDecode(resp.Body, &app); err != nil {
 		return nil, err
 	}
 
-	return &app.Application, nil
+	return &app.AppKey, nil
 }
 
 func (c *httpDriver) GetAccessToken(ctx context.Context, clientID string, clientSecret string, refreshToken string) (*TokenResponse, error) {

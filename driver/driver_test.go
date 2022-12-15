@@ -383,7 +383,6 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
 			Project: "db1",
-			Options: &api.CollectionOptions{},
 		})).DoAndReturn(
 		func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
 			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
@@ -569,7 +568,6 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
 			Project: "db1",
-			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: nil}, nil)
 
 	colls, err := db.ListCollections(ctx, &CollectionOptions{})
@@ -579,7 +577,6 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
 			Project: "db1",
-			Options: &api.CollectionOptions{},
 		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{
 		{Collection: "lc1"},
 		{Collection: "lc2"},
@@ -955,7 +952,6 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	mc.EXPECT().ListCollections(gomock.Any(),
 		pm(&api.ListCollectionsRequest{
 			Project: "db1",
-			Options: &api.CollectionOptions{},
 		})).DoAndReturn(
 		func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
 			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))

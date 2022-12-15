@@ -16,9 +16,9 @@ package timeseries_test
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/tigris"
 	"github.com/tigrisdata/tigris-client-go/timeseries"
@@ -65,17 +65,18 @@ func Example() {
 
 	// Lookup events in the time range
 	it, err := coll.FindInRange(ctx,
-		time.Now().Add(-1*time.Second), // from one second ago
-		time.Now(),                     // till now
-		filter.Eq("level", "error"),    // return only error level events
+		time.Now().Add(-10*time.Second), // from ten seconds ago
+		time.Now(),                      // till now
+		filter.Eq("level", "error"),     // return only error level events
 	)
 	if err != nil {
 		panic(err)
 	}
+	defer it.Close()
 
 	var ev LogEvent
 
 	for it.Next(&ev) {
-		spew.Dump(ev)
+		fmt.Printf("event: %+v\n", ev)
 	}
 }

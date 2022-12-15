@@ -251,12 +251,11 @@ func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 	return &grpcCRUD{db: c.db, api: c.api, txCtx: resp.GetTxCtx(), additionalMetadata: additionalHeaders}, nil
 }
 
-func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error) {
+func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, _ *CollectionOptions) ([]string, error) {
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 
 	r, err := c.api.ListCollections(ctx, &api.ListCollectionsRequest{
 		Project: c.db,
-		Options: (*api.CollectionOptions)(options),
 	})
 	if err != nil {
 		return nil, GRPCError(err)
@@ -452,62 +451,62 @@ func (g *grpcSearchReader) close() error {
 	return nil
 }
 
-func (c *grpcDriver) CreateApplication(ctx context.Context, project string, name string, description string) (*Application, error) {
-	r, err := c.mgmt.CreateApplication(ctx, &api.CreateApplicationRequest{Name: name, Description: description, Project: project})
+func (c *grpcDriver) CreateAppKey(ctx context.Context, project string, name string, description string) (*AppKey, error) {
+	r, err := c.api.CreateAppKey(ctx, &api.CreateAppKeyRequest{Project: project, Name: name, Description: description})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
 
-	if r.CreatedApplication == nil {
+	if r.CreatedAppKey == nil {
 		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
 	}
 
-	return (*Application)(r.CreatedApplication), nil
+	return (*AppKey)(r.CreatedAppKey), nil
 }
 
-func (c *grpcDriver) DeleteApplication(ctx context.Context, id string) error {
-	_, err := c.mgmt.DeleteApplication(ctx, &api.DeleteApplicationsRequest{Id: id})
+func (c *grpcDriver) DeleteAppKey(ctx context.Context, id string, project string) error {
+	_, err := c.api.DeleteAppKey(ctx, &api.DeleteAppKeyRequest{Id: id, Project: project})
 
 	return GRPCError(err)
 }
 
-func (c *grpcDriver) UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error) {
-	r, err := c.mgmt.UpdateApplication(ctx, &api.UpdateApplicationRequest{Id: id, Name: name, Description: description})
+func (c *grpcDriver) UpdateAppKey(ctx context.Context, id string, name string, description string, project string) (*AppKey, error) {
+	r, err := c.api.UpdateAppKey(ctx, &api.UpdateAppKeyRequest{Id: id, Project: project, Name: name, Description: description})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
 
-	if r.UpdatedApplication == nil {
+	if r.UpdatedAppKey == nil {
 		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
 	}
 
-	return (*Application)(r.UpdatedApplication), nil
+	return (*AppKey)(r.UpdatedAppKey), nil
 }
 
-func (c *grpcDriver) ListApplications(ctx context.Context, project string) ([]*Application, error) {
-	r, err := c.mgmt.ListApplications(ctx, &api.ListApplicationsRequest{Project: project})
+func (c *grpcDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey, error) {
+	r, err := c.api.ListAppKeys(ctx, &api.ListAppKeysRequest{Project: project})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
 
-	applications := make([]*Application, 0, len(r.Applications))
-	for _, a := range r.GetApplications() {
-		applications = append(applications, (*Application)(a))
+	applications := make([]*AppKey, 0, len(r.AppKeys))
+	for _, a := range r.GetAppKeys() {
+		applications = append(applications, (*AppKey)(a))
 	}
 	return applications, nil
 }
 
-func (c *grpcDriver) RotateClientSecret(ctx context.Context, id string) (*Application, error) {
-	r, err := c.mgmt.RotateApplicationSecret(ctx, &api.RotateApplicationSecretRequest{Id: id})
+func (c *grpcDriver) RotateAppKeySecret(ctx context.Context, id string, project string) (*AppKey, error) {
+	r, err := c.api.RotateAppKeySecret(ctx, &api.RotateAppKeyRequest{Id: id, Project: project})
 	if err != nil {
 		return nil, GRPCError(err)
 	}
 
-	if r.Application == nil {
+	if r.AppKey == nil {
 		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
 	}
 
-	return (*Application)(r.Application), nil
+	return (*AppKey)(r.AppKey), nil
 }
 
 func (c *grpcDriver) GetAccessToken(ctx context.Context, clientID string, clientSecret string,

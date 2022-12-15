@@ -65,6 +65,21 @@ func (mr *MockTigrisServerMockRecorder) CommitTransaction(arg0, arg1 interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitTransaction", reflect.TypeOf((*MockTigrisServer)(nil).CommitTransaction), arg0, arg1)
 }
 
+// CreateAppKey mocks base method.
+func (m *MockTigrisServer) CreateAppKey(arg0 context.Context, arg1 *api.CreateAppKeyRequest) (*api.CreateAppKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAppKey", arg0, arg1)
+	ret0, _ := ret[0].(*api.CreateAppKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAppKey indicates an expected call of CreateAppKey.
+func (mr *MockTigrisServerMockRecorder) CreateAppKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAppKey", reflect.TypeOf((*MockTigrisServer)(nil).CreateAppKey), arg0, arg1)
+}
+
 // CreateBranch mocks base method.
 func (m *MockTigrisServer) CreateBranch(arg0 context.Context, arg1 *api.CreateBranchRequest) (*api.CreateBranchResponse, error) {
 	m.ctrl.T.Helper()
@@ -123,6 +138,21 @@ func (m *MockTigrisServer) Delete(arg0 context.Context, arg1 *api.DeleteRequest)
 func (mr *MockTigrisServerMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTigrisServer)(nil).Delete), arg0, arg1)
+}
+
+// DeleteAppKey mocks base method.
+func (m *MockTigrisServer) DeleteAppKey(arg0 context.Context, arg1 *api.DeleteAppKeyRequest) (*api.DeleteAppKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAppKey", arg0, arg1)
+	ret0, _ := ret[0].(*api.DeleteAppKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAppKey indicates an expected call of DeleteAppKey.
+func (mr *MockTigrisServerMockRecorder) DeleteAppKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAppKey", reflect.TypeOf((*MockTigrisServer)(nil).DeleteAppKey), arg0, arg1)
 }
 
 // DeleteBranch mocks base method.
@@ -200,6 +230,21 @@ func (mr *MockTigrisServerMockRecorder) DropCollection(arg0, arg1 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropCollection", reflect.TypeOf((*MockTigrisServer)(nil).DropCollection), arg0, arg1)
 }
 
+// Import mocks base method.
+func (m *MockTigrisServer) Import(arg0 context.Context, arg1 *api.ImportRequest) (*api.ImportResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Import", arg0, arg1)
+	ret0, _ := ret[0].(*api.ImportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Import indicates an expected call of Import.
+func (mr *MockTigrisServerMockRecorder) Import(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Import", reflect.TypeOf((*MockTigrisServer)(nil).Import), arg0, arg1)
+}
+
 // Insert mocks base method.
 func (m *MockTigrisServer) Insert(arg0 context.Context, arg1 *api.InsertRequest) (*api.InsertResponse, error) {
 	m.ctrl.T.Helper()
@@ -213,6 +258,21 @@ func (m *MockTigrisServer) Insert(arg0 context.Context, arg1 *api.InsertRequest)
 func (mr *MockTigrisServerMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockTigrisServer)(nil).Insert), arg0, arg1)
+}
+
+// ListAppKeys mocks base method.
+func (m *MockTigrisServer) ListAppKeys(arg0 context.Context, arg1 *api.ListAppKeysRequest) (*api.ListAppKeysResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAppKeys", arg0, arg1)
+	ret0, _ := ret[0].(*api.ListAppKeysResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAppKeys indicates an expected call of ListAppKeys.
+func (mr *MockTigrisServerMockRecorder) ListAppKeys(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppKeys", reflect.TypeOf((*MockTigrisServer)(nil).ListAppKeys), arg0, arg1)
 }
 
 // ListCollections mocks base method.
@@ -289,6 +349,21 @@ func (mr *MockTigrisServerMockRecorder) RollbackTransaction(arg0, arg1 interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackTransaction", reflect.TypeOf((*MockTigrisServer)(nil).RollbackTransaction), arg0, arg1)
 }
 
+// RotateAppKeySecret mocks base method.
+func (m *MockTigrisServer) RotateAppKeySecret(arg0 context.Context, arg1 *api.RotateAppKeyRequest) (*api.RotateAppKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RotateAppKeySecret", arg0, arg1)
+	ret0, _ := ret[0].(*api.RotateAppKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RotateAppKeySecret indicates an expected call of RotateAppKeySecret.
+func (mr *MockTigrisServerMockRecorder) RotateAppKeySecret(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RotateAppKeySecret", reflect.TypeOf((*MockTigrisServer)(nil).RotateAppKeySecret), arg0, arg1)
+}
+
 // Search mocks base method.
 func (m *MockTigrisServer) Search(arg0 *api.SearchRequest, arg1 api.Tigris_SearchServer) error {
 	m.ctrl.T.Helper()
@@ -316,6 +391,21 @@ func (m *MockTigrisServer) Update(arg0 context.Context, arg1 *api.UpdateRequest)
 func (mr *MockTigrisServerMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTigrisServer)(nil).Update), arg0, arg1)
+}
+
+// UpdateAppKey mocks base method.
+func (m *MockTigrisServer) UpdateAppKey(arg0 context.Context, arg1 *api.UpdateAppKeyRequest) (*api.UpdateAppKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAppKey", arg0, arg1)
+	ret0, _ := ret[0].(*api.UpdateAppKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAppKey indicates an expected call of UpdateAppKey.
+func (mr *MockTigrisServerMockRecorder) UpdateAppKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAppKey", reflect.TypeOf((*MockTigrisServer)(nil).UpdateAppKey), arg0, arg1)
 }
 
 // MockAuthServer is a mock of AuthServer interface.
@@ -379,21 +469,6 @@ func (m *MockManagementServer) EXPECT() *MockManagementServerMockRecorder {
 	return m.recorder
 }
 
-// CreateApplication mocks base method.
-func (m *MockManagementServer) CreateApplication(arg0 context.Context, arg1 *api.CreateApplicationRequest) (*api.CreateApplicationResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateApplication", arg0, arg1)
-	ret0, _ := ret[0].(*api.CreateApplicationResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateApplication indicates an expected call of CreateApplication.
-func (mr *MockManagementServerMockRecorder) CreateApplication(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplication", reflect.TypeOf((*MockManagementServer)(nil).CreateApplication), arg0, arg1)
-}
-
 // CreateNamespace mocks base method.
 func (m *MockManagementServer) CreateNamespace(arg0 context.Context, arg1 *api.CreateNamespaceRequest) (*api.CreateNamespaceResponse, error) {
 	m.ctrl.T.Helper()
@@ -407,21 +482,6 @@ func (m *MockManagementServer) CreateNamespace(arg0 context.Context, arg1 *api.C
 func (mr *MockManagementServerMockRecorder) CreateNamespace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockManagementServer)(nil).CreateNamespace), arg0, arg1)
-}
-
-// DeleteApplication mocks base method.
-func (m *MockManagementServer) DeleteApplication(arg0 context.Context, arg1 *api.DeleteApplicationsRequest) (*api.DeleteApplicationResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteApplication", arg0, arg1)
-	ret0, _ := ret[0].(*api.DeleteApplicationResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DeleteApplication indicates an expected call of DeleteApplication.
-func (mr *MockManagementServerMockRecorder) DeleteApplication(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockManagementServer)(nil).DeleteApplication), arg0, arg1)
 }
 
 // DescribeNamespaces mocks base method.
@@ -499,21 +559,6 @@ func (mr *MockManagementServerMockRecorder) InsertUserMetadata(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertUserMetadata", reflect.TypeOf((*MockManagementServer)(nil).InsertUserMetadata), arg0, arg1)
 }
 
-// ListApplications mocks base method.
-func (m *MockManagementServer) ListApplications(arg0 context.Context, arg1 *api.ListApplicationsRequest) (*api.ListApplicationsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListApplications", arg0, arg1)
-	ret0, _ := ret[0].(*api.ListApplicationsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListApplications indicates an expected call of ListApplications.
-func (mr *MockManagementServerMockRecorder) ListApplications(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplications", reflect.TypeOf((*MockManagementServer)(nil).ListApplications), arg0, arg1)
-}
-
 // ListNamespaces mocks base method.
 func (m *MockManagementServer) ListNamespaces(arg0 context.Context, arg1 *api.ListNamespacesRequest) (*api.ListNamespacesResponse, error) {
 	m.ctrl.T.Helper()
@@ -527,36 +572,6 @@ func (m *MockManagementServer) ListNamespaces(arg0 context.Context, arg1 *api.Li
 func (mr *MockManagementServerMockRecorder) ListNamespaces(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNamespaces", reflect.TypeOf((*MockManagementServer)(nil).ListNamespaces), arg0, arg1)
-}
-
-// RotateApplicationSecret mocks base method.
-func (m *MockManagementServer) RotateApplicationSecret(arg0 context.Context, arg1 *api.RotateApplicationSecretRequest) (*api.RotateApplicationSecretResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RotateApplicationSecret", arg0, arg1)
-	ret0, _ := ret[0].(*api.RotateApplicationSecretResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// RotateApplicationSecret indicates an expected call of RotateApplicationSecret.
-func (mr *MockManagementServerMockRecorder) RotateApplicationSecret(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RotateApplicationSecret", reflect.TypeOf((*MockManagementServer)(nil).RotateApplicationSecret), arg0, arg1)
-}
-
-// UpdateApplication mocks base method.
-func (m *MockManagementServer) UpdateApplication(arg0 context.Context, arg1 *api.UpdateApplicationRequest) (*api.UpdateApplicationResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateApplication", arg0, arg1)
-	ret0, _ := ret[0].(*api.UpdateApplicationResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateApplication indicates an expected call of UpdateApplication.
-func (mr *MockManagementServerMockRecorder) UpdateApplication(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockManagementServer)(nil).UpdateApplication), arg0, arg1)
 }
 
 // UpdateNamespaceMetadata mocks base method.

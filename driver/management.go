@@ -23,11 +23,6 @@ import (
 
 // Management declares Tigris Management APIs.
 type Management interface {
-	CreateApplication(ctx context.Context, project string, name string, description string) (*Application, error)
-	DeleteApplication(ctx context.Context, id string) error
-	UpdateApplication(ctx context.Context, id string, name string, description string) (*Application, error)
-	ListApplications(ctx context.Context, project string) ([]*Application, error)
-	RotateClientSecret(ctx context.Context, id string) (*Application, error)
 	GetAccessToken(ctx context.Context, clientID string, clientSecret string, refreshToken string) (*TokenResponse, error)
 
 	CreateNamespace(ctx context.Context, name string) error

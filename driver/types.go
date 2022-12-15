@@ -139,7 +139,7 @@ func (e *Error) As(i any) bool {
 }
 
 type (
-	Application   api.Application
+	AppKey        api.AppKey
 	TokenResponse api.GetAccessTokenResponse
 	Namespace     api.NamespaceInfo
 

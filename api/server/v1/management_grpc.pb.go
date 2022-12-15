@@ -28,16 +28,6 @@ type ManagementClient interface {
 	DescribeNamespaces(ctx context.Context, in *DescribeNamespacesRequest, opts ...grpc.CallOption) (*DescribeNamespacesResponse, error)
 	// List all namespace
 	ListNamespaces(ctx context.Context, in *ListNamespacesRequest, opts ...grpc.CallOption) (*ListNamespacesResponse, error)
-	// Create an application.
-	CreateApplication(ctx context.Context, in *CreateApplicationRequest, opts ...grpc.CallOption) (*CreateApplicationResponse, error)
-	// Update an application.
-	UpdateApplication(ctx context.Context, in *UpdateApplicationRequest, opts ...grpc.CallOption) (*UpdateApplicationResponse, error)
-	// Delete an application.
-	DeleteApplication(ctx context.Context, in *DeleteApplicationsRequest, opts ...grpc.CallOption) (*DeleteApplicationResponse, error)
-	// Lists all application visible to requesting actor.
-	ListApplications(ctx context.Context, in *ListApplicationsRequest, opts ...grpc.CallOption) (*ListApplicationsResponse, error)
-	// Endpoint is used to rotate the secret for the application.
-	RotateApplicationSecret(ctx context.Context, in *RotateApplicationSecretRequest, opts ...grpc.CallOption) (*RotateApplicationSecretResponse, error)
 	// insertUserMetadata inserts the user metadata object
 	InsertUserMetadata(ctx context.Context, in *InsertUserMetadataRequest, opts ...grpc.CallOption) (*InsertUserMetadataResponse, error)
 	// GetUserMetadata inserts the user metadata object
@@ -81,51 +71,6 @@ func (c *managementClient) DescribeNamespaces(ctx context.Context, in *DescribeN
 func (c *managementClient) ListNamespaces(ctx context.Context, in *ListNamespacesRequest, opts ...grpc.CallOption) (*ListNamespacesResponse, error) {
 	out := new(ListNamespacesResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/ListNamespaces", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *managementClient) CreateApplication(ctx context.Context, in *CreateApplicationRequest, opts ...grpc.CallOption) (*CreateApplicationResponse, error) {
-	out := new(CreateApplicationResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/CreateApplication", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *managementClient) UpdateApplication(ctx context.Context, in *UpdateApplicationRequest, opts ...grpc.CallOption) (*UpdateApplicationResponse, error) {
-	out := new(UpdateApplicationResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/UpdateApplication", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *managementClient) DeleteApplication(ctx context.Context, in *DeleteApplicationsRequest, opts ...grpc.CallOption) (*DeleteApplicationResponse, error) {
-	out := new(DeleteApplicationResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/DeleteApplication", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *managementClient) ListApplications(ctx context.Context, in *ListApplicationsRequest, opts ...grpc.CallOption) (*ListApplicationsResponse, error) {
-	out := new(ListApplicationsResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/ListApplications", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *managementClient) RotateApplicationSecret(ctx context.Context, in *RotateApplicationSecretRequest, opts ...grpc.CallOption) (*RotateApplicationSecretResponse, error) {
-	out := new(RotateApplicationSecretResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/RotateApplicationSecret", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,16 +141,6 @@ type ManagementServer interface {
 	DescribeNamespaces(context.Context, *DescribeNamespacesRequest) (*DescribeNamespacesResponse, error)
 	// List all namespace
 	ListNamespaces(context.Context, *ListNamespacesRequest) (*ListNamespacesResponse, error)
-	// Create an application.
-	CreateApplication(context.Context, *CreateApplicationRequest) (*CreateApplicationResponse, error)
-	// Update an application.
-	UpdateApplication(context.Context, *UpdateApplicationRequest) (*UpdateApplicationResponse, error)
-	// Delete an application.
-	DeleteApplication(context.Context, *DeleteApplicationsRequest) (*DeleteApplicationResponse, error)
-	// Lists all application visible to requesting actor.
-	ListApplications(context.Context, *ListApplicationsRequest) (*ListApplicationsResponse, error)
-	// Endpoint is used to rotate the secret for the application.
-	RotateApplicationSecret(context.Context, *RotateApplicationSecretRequest) (*RotateApplicationSecretResponse, error)
 	// insertUserMetadata inserts the user metadata object
 	InsertUserMetadata(context.Context, *InsertUserMetadataRequest) (*InsertUserMetadataResponse, error)
 	// GetUserMetadata inserts the user metadata object
@@ -232,21 +167,6 @@ func (UnimplementedManagementServer) DescribeNamespaces(context.Context, *Descri
 }
 func (UnimplementedManagementServer) ListNamespaces(context.Context, *ListNamespacesRequest) (*ListNamespacesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListNamespaces not implemented")
-}
-func (UnimplementedManagementServer) CreateApplication(context.Context, *CreateApplicationRequest) (*CreateApplicationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateApplication not implemented")
-}
-func (UnimplementedManagementServer) UpdateApplication(context.Context, *UpdateApplicationRequest) (*UpdateApplicationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateApplication not implemented")
-}
-func (UnimplementedManagementServer) DeleteApplication(context.Context, *DeleteApplicationsRequest) (*DeleteApplicationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteApplication not implemented")
-}
-func (UnimplementedManagementServer) ListApplications(context.Context, *ListApplicationsRequest) (*ListApplicationsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListApplications not implemented")
-}
-func (UnimplementedManagementServer) RotateApplicationSecret(context.Context, *RotateApplicationSecretRequest) (*RotateApplicationSecretResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RotateApplicationSecret not implemented")
 }
 func (UnimplementedManagementServer) InsertUserMetadata(context.Context, *InsertUserMetadataRequest) (*InsertUserMetadataResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InsertUserMetadata not implemented")
@@ -328,96 +248,6 @@ func _Management_ListNamespaces_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ManagementServer).ListNamespaces(ctx, req.(*ListNamespacesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Management_CreateApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateApplicationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ManagementServer).CreateApplication(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.management.v1.Management/CreateApplication",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagementServer).CreateApplication(ctx, req.(*CreateApplicationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Management_UpdateApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateApplicationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ManagementServer).UpdateApplication(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.management.v1.Management/UpdateApplication",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagementServer).UpdateApplication(ctx, req.(*UpdateApplicationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Management_DeleteApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteApplicationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ManagementServer).DeleteApplication(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.management.v1.Management/DeleteApplication",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagementServer).DeleteApplication(ctx, req.(*DeleteApplicationsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Management_ListApplications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListApplicationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ManagementServer).ListApplications(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.management.v1.Management/ListApplications",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagementServer).ListApplications(ctx, req.(*ListApplicationsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Management_RotateApplicationSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RotateApplicationSecretRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ManagementServer).RotateApplicationSecret(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.management.v1.Management/RotateApplicationSecret",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagementServer).RotateApplicationSecret(ctx, req.(*RotateApplicationSecretRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -548,26 +378,6 @@ var Management_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListNamespaces",
 			Handler:    _Management_ListNamespaces_Handler,
-		},
-		{
-			MethodName: "CreateApplication",
-			Handler:    _Management_CreateApplication_Handler,
-		},
-		{
-			MethodName: "UpdateApplication",
-			Handler:    _Management_UpdateApplication_Handler,
-		},
-		{
-			MethodName: "DeleteApplication",
-			Handler:    _Management_DeleteApplication_Handler,
-		},
-		{
-			MethodName: "ListApplications",
-			Handler:    _Management_ListApplications_Handler,
-		},
-		{
-			MethodName: "RotateApplicationSecret",
-			Handler:    _Management_RotateApplicationSecret_Handler,
 		},
 		{
 			MethodName: "InsertUserMetadata",

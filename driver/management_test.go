@@ -63,7 +63,7 @@ func testDriverAuthNegative(t *testing.T, drv Driver, m Management, mt *mock.Moc
 		pm(&api.UpdateAppKeyRequest{Id: "upd_id1", Project: project1, Name: "upd_app1", Description: "upd_description1"})).Return(
 		&api.UpdateAppKeyResponse{UpdatedAppKey: nil}, nil)
 
-	_, err = drv.UpdateAppKey(ctx, "upd_id1", "upd_app1", "upd_description1", project1)
+	_, err = drv.UpdateAppKey(ctx, project1, "upd_id1", "upd_app1", "upd_description1")
 	require.Error(t, err)
 
 	mt.EXPECT().ListAppKeys(gomock.Any(),
@@ -77,7 +77,7 @@ func testDriverAuthNegative(t *testing.T, drv Driver, m Management, mt *mock.Moc
 		pm(&api.RotateAppKeyRequest{Id: "ras_id1", Project: project1})).Return(
 		&api.RotateAppKeyResponse{AppKey: nil}, nil)
 
-	_, err = drv.RotateAppKeySecret(ctx, "ras_id1", project1)
+	_, err = drv.RotateAppKeySecret(ctx, project1, "ras_id1")
 	require.Error(t, err)
 
 	mc.EXPECT().CreateNamespace(gomock.Any(),
@@ -117,7 +117,7 @@ func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisS
 		pm(&api.DeleteAppKeyRequest{Id: "del_id1", Project: project1})).Return(
 		&api.DeleteAppKeyResponse{Deleted: true}, nil)
 
-	err = drv.DeleteAppKey(ctx, "del_id1", project1)
+	err = drv.DeleteAppKey(ctx, project1, "del_id1")
 	require.NoError(t, err)
 
 	uapp := &api.AppKey{Id: "upd_id1", Name: "upd_app1", Description: "upd_desc1", UpdatedAt: 222, UpdatedBy: "uby"}
@@ -126,7 +126,7 @@ func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisS
 		pm(&api.UpdateAppKeyRequest{Id: "upd_id1", Project: project1, Name: "upd_app1", Description: "upd_description1"})).Return(
 		&api.UpdateAppKeyResponse{UpdatedAppKey: uapp}, nil)
 
-	app, err = drv.UpdateAppKey(ctx, "upd_id1", "upd_app1", "upd_description1", project1)
+	app, err = drv.UpdateAppKey(ctx, project1, "upd_id1", "upd_app1", "upd_description1")
 	require.NoError(t, err)
 
 	appEqual(t, uapp, app)
@@ -168,7 +168,7 @@ func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisS
 		pm(&api.RotateAppKeyRequest{Id: "ras_id1", Project: project1})).Return(
 		&api.RotateAppKeyResponse{AppKey: lapp2}, nil)
 
-	app, err = drv.RotateAppKeySecret(ctx, "ras_id1", project1)
+	app, err = drv.RotateAppKeySecret(ctx, project1, "ras_id1")
 	require.NoError(t, err)
 
 	appEqual(t, lapp2, app)

@@ -753,13 +753,13 @@ func (c *httpDriver) CreateAppKey(ctx context.Context, project string, name stri
 	return &app.CreatedAppKey, nil
 }
 
-func (c *httpDriver) DeleteAppKey(ctx context.Context, id string, project string) error {
+func (c *httpDriver) DeleteAppKey(ctx context.Context, project string, id string) error {
 	resp, err := c.api.TigrisDeleteAppKey(ctx, project, apiHTTP.TigrisDeleteAppKeyJSONRequestBody{Id: &id})
 
 	return HTTPError(err, resp)
 }
 
-func (c *httpDriver) UpdateAppKey(ctx context.Context, id string, name string, description string, project string) (*AppKey, error) {
+func (c *httpDriver) UpdateAppKey(ctx context.Context, project string, id string, name string, description string) (*AppKey, error) {
 	resp, err := c.api.TigrisUpdateAppKey(ctx, project, apiHTTP.TigrisUpdateAppKeyJSONRequestBody{Id: &id, Name: &name, Description: &description})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
@@ -793,7 +793,7 @@ func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey
 	return apps.AppKeys, nil
 }
 
-func (c *httpDriver) RotateAppKeySecret(ctx context.Context, id string, project string) (*AppKey, error) {
+func (c *httpDriver) RotateAppKeySecret(ctx context.Context, project string, id string) (*AppKey, error) {
 	resp, err := c.api.TigrisRotateAppKeySecret(ctx, project, apiHTTP.TigrisRotateAppKeySecretJSONRequestBody{Id: &id})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err

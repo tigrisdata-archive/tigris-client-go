@@ -23,7 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TigrisClient interface {
 	// Starts a new transaction and returns a transactional object. All reads/writes performed
-	// within a transaction will run with serializable isolation.
+	// within a transaction will run with serializable isolation. Tigris offers global transactions,
+	// with ACID properties and strict serializability.
 	BeginTransaction(ctx context.Context, in *BeginTransactionRequest, opts ...grpc.CallOption) (*BeginTransactionResponse, error)
 	// Atomically commit all the changes performed in the context of the transaction. Commit provides all
 	// or nothing semantics by ensuring no partial updates are in the project due to a transaction failure.
@@ -56,15 +57,16 @@ type TigrisClient interface {
 	// Imports documents into the collection.
 	//
 	// It automatically:
-	//  * Detects the schema of the documents in the batch
-	//  * Evolves the schema as soon as it's backward compatible
-	//  * Creates collection with inferred schema (if requested)
+	//   - Detects the schema of the documents in the batch
+	//   - Evolves the schema as soon as it's backward compatible
+	//   - Creates collection with inferred schema (if requested)
 	Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
 	// Tigris Offers two types of collections: <p></p>
-	//    <li> `DOCUMENTS`: Offers rich CRUD APIs.
-	//    <li> `MESSAGES`: Offers event streaming APIs.
+	//
+	//	<li> `DOCUMENTS`: Offers rich CRUD APIs.
+	//	<li> `MESSAGES`: Offers event streaming APIs.
 	CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error)
 	// Drops the collection inside this project. This API deletes all of the
 	// documents inside this collection and any metadata associated with it.
@@ -383,7 +385,8 @@ func (c *tigrisClient) RotateAppKeySecret(ctx context.Context, in *RotateAppKeyR
 // for forward compatibility
 type TigrisServer interface {
 	// Starts a new transaction and returns a transactional object. All reads/writes performed
-	// within a transaction will run with serializable isolation.
+	// within a transaction will run with serializable isolation. Tigris offers global transactions,
+	// with ACID properties and strict serializability.
 	BeginTransaction(context.Context, *BeginTransactionRequest) (*BeginTransactionResponse, error)
 	// Atomically commit all the changes performed in the context of the transaction. Commit provides all
 	// or nothing semantics by ensuring no partial updates are in the project due to a transaction failure.
@@ -416,15 +419,16 @@ type TigrisServer interface {
 	// Imports documents into the collection.
 	//
 	// It automatically:
-	//  * Detects the schema of the documents in the batch
-	//  * Evolves the schema as soon as it's backward compatible
-	//  * Creates collection with inferred schema (if requested)
+	//   - Detects the schema of the documents in the batch
+	//   - Evolves the schema as soon as it's backward compatible
+	//   - Creates collection with inferred schema (if requested)
 	Import(context.Context, *ImportRequest) (*ImportResponse, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
 	// Tigris Offers two types of collections: <p></p>
-	//    <li> `DOCUMENTS`: Offers rich CRUD APIs.
-	//    <li> `MESSAGES`: Offers event streaming APIs.
+	//
+	//	<li> `DOCUMENTS`: Offers rich CRUD APIs.
+	//	<li> `MESSAGES`: Offers event streaming APIs.
 	CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error)
 	// Drops the collection inside this project. This API deletes all of the
 	// documents inside this collection and any metadata associated with it.

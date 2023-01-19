@@ -25,6 +25,7 @@ type Driver struct {
 	TLS          *tls.Config   `json:"tls,omitempty"`
 	ClientID     string        `json:"client_id,omitempty"`
 	ClientSecret string        `json:"client_secret,omitempty"`
+	Branch       string        `json:"branch,omitempty"`
 	Token        string        `json:"token,omitempty"`
 	URL          string        `json:"url,omitempty"`
 	Protocol     string        `json:"protocol,omitempty"`

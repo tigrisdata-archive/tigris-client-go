@@ -48,6 +48,9 @@ type Driver interface {
 	// DescribeDatabase returns project description metadata
 	DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions) (*DescribeDatabaseResponse, error)
 
+	CreateBranch(ctx context.Context, project string, name string) (*CreateBranchResponse, error)
+	DeleteBranch(ctx context.Context, project string, name string) (*DeleteBranchResponse, error)
+
 	// ListProjects returns all projects
 	ListProjects(ctx context.Context) ([]string, error)
 
@@ -168,6 +171,16 @@ func (c *driver) DeleteProject(ctx context.Context, project string, options ...*
 	}
 
 	return c.deleteProjectWithOptions(ctx, project, opts.(*DeleteProjectOptions))
+}
+
+func (c *driver) CreateBranch(ctx context.Context, project string, name string) (*CreateBranchResponse, error) {
+	//TODO : implement
+	return nil, nil
+}
+
+func (c *driver) DeleteBranch(ctx context.Context, project string, name string) (*DeleteBranchResponse, error) {
+	// TODO: implement
+	return nil, nil
 }
 
 type driverCRUDTx struct {

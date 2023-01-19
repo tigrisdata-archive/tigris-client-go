@@ -32,6 +32,7 @@ const (
 	EnvProtocol     = "TIGRIS_PROTOCOL"
 	EnvURL          = "TIGRIS_URL"
 	EnvProject      = "TIGRIS_PROJECT"
+	EnvDbBranch     = "TIGRIS_DB_BRANCH"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version
@@ -106,6 +107,8 @@ type (
 	CreateProjectResponse      api.CreateProjectResponse
 	DeleteProjectResponse      api.DeleteProjectResponse
 	DescribeCollectionResponse api.DescribeCollectionResponse
+	CreateBranchResponse       api.CreateBranchResponse
+	DeleteBranchResponse       api.DeleteBranchResponse
 )
 
 type (

@@ -654,7 +654,8 @@ func (c *httpCRUD) createBranch(ctx context.Context, name string) (*CreateBranch
 
 	return &CreateBranchResponse{
 		Status:  PtrToString(r.Status),
-		Message: PtrToString(r.Message)}, nil
+		Message: PtrToString(r.Message),
+	}, nil
 }
 
 func (c *httpCRUD) deleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error) {

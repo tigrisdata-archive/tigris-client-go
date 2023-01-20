@@ -32,7 +32,7 @@ const (
 	EnvProtocol     = "TIGRIS_PROTOCOL"
 	EnvURL          = "TIGRIS_URL"
 	EnvProject      = "TIGRIS_PROJECT"
-	EnvDbBranch     = "TIGRIS_DB_BRANCH"
+	EnvDBBranch     = "TIGRIS_DB_BRANCH"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version

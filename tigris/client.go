@@ -76,7 +76,7 @@ func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
 	}
 
 	if len(pCfg.Branch) == 0 {
-		pCfg.Branch = os.Getenv(driver.EnvDbBranch)
+		pCfg.Branch = os.Getenv(driver.EnvDBBranch)
 		if pCfg.Branch == "" {
 			// use default
 			pCfg.Branch = "main"

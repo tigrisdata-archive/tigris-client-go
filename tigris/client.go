@@ -34,6 +34,7 @@ type Config struct {
 	URL          string      `json:"url,omitempty"`
 	Protocol     string      `json:"protocol,omitempty"`
 	Project      string      `json:"project,omitempty"`
+	Branch       string      `json:"branch,omitempty"`
 	// MustExist if set skips implicit database creation
 	MustExist bool
 }
@@ -50,6 +51,7 @@ func driverConfig(cfg *Config) *config.Driver {
 		URL:          cfg.URL,
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
+		Branch:       cfg.Branch,
 		Token:        cfg.Token,
 		Protocol:     cfg.Protocol,
 	}
@@ -70,6 +72,14 @@ func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
 		pCfg.Project = os.Getenv(driver.EnvProject)
 		if pCfg.Project == "" {
 			return nil, errors.New("failed to configure tigris project")
+		}
+	}
+
+	if len(pCfg.Branch) == 0 {
+		pCfg.Branch = os.Getenv(driver.EnvDBBranch)
+		if pCfg.Branch == "" {
+			// use default
+			pCfg.Branch = "main"
 		}
 	}
 

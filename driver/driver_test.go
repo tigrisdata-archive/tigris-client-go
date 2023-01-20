@@ -193,6 +193,34 @@ func testSearchStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_ABORTED, Message: "error_stream"}}, it.Err())
 }
 
+func testBranchCrudErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
+		Project: "db1",
+		Branch:  "staging",
+	})).DoAndReturn(func(ctx context.Context, req *api.CreateBranchRequest) (*api.CreateBranchResponse, error) {
+		return nil, &api.TigrisError{Code: api.Code_ALREADY_EXISTS, Message: "branch already exists"}
+	})
+
+	createResp, err := d.UseDatabase("db1").CreateBranch(ctx, "staging")
+	require.Nil(t, createResp)
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_ALREADY_EXISTS, Message: "branch already exists"}}, err)
+
+	mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
+		Project: "db1",
+		Branch:  "feature_1",
+	})).DoAndReturn(func(ctx context.Context, req *api.DeleteBranchRequest) (*api.DeleteBranchResponse, error) {
+		return nil, &api.TigrisError{Code: api.Code_NOT_FOUND, Message: "project does not exist"}
+	})
+
+	delResp, err := d.UseDatabase("db1").DeleteBranch(ctx, "feature_1")
+	require.Nil(t, delResp)
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_NOT_FOUND, Message: "project does not exist"}}, err)
+}
+
 func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	t.Helper()
 
@@ -250,6 +278,9 @@ func TestGRPCError(t *testing.T) {
 	t.Run("search_stream_error", func(t *testing.T) {
 		testSearchStreamError(t, client, mockServer)
 	})
+	t.Run("branch_crud_errors", func(t *testing.T) {
+		testBranchCrudErrors(t, client, mockServer)
+	})
 }
 
 func TestHTTPError(t *testing.T) {
@@ -261,6 +292,9 @@ func TestHTTPError(t *testing.T) {
 	})
 	t.Run("search_stream_error", func(t *testing.T) {
 		testSearchStreamError(t, client, mockServer)
+	})
+	t.Run("branch_crud_errors", func(t *testing.T) {
+		testBranchCrudErrors(t, client, mockServer)
 	})
 }
 

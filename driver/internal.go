@@ -62,6 +62,8 @@ type CRUDWithOptions interface {
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error)
+	createBranch(ctx context.Context, name string) (*CreateBranchResponse, error)
+	deleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error)
 }
 
 type txWithOptions interface {

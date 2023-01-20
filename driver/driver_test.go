@@ -554,6 +554,24 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	delResp, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
 	require.Equal(t, "deleted", delResp.Status)
+
+	mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
+		Project: "db1",
+		Branch:  "staging",
+	})).Return(&api.CreateBranchResponse{Status: "creationOk"}, nil)
+
+	branchCreateResp, err := db.CreateBranch(ctx, "staging")
+	require.NoError(t, err)
+	require.Equal(t, "creationOk", branchCreateResp.Status)
+
+	mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
+		Project: "db1",
+		Branch:  "staging",
+	})).Return(&api.DeleteBranchResponse{Status: "deletionOk"}, nil)
+
+	branchDelResp, err := db.DeleteBranch(ctx, "staging")
+	require.NoError(t, err)
+	require.Equal(t, "deletionOk", branchDelResp.Status)
 }
 
 func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {

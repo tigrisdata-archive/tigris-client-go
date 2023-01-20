@@ -48,9 +48,6 @@ type Driver interface {
 	// DescribeDatabase returns project description metadata
 	DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions) (*DescribeDatabaseResponse, error)
 
-	CreateBranch(ctx context.Context, project string, name string) (*CreateBranchResponse, error)
-	DeleteBranch(ctx context.Context, project string, name string) (*DeleteBranchResponse, error)
-
 	// ListProjects returns all projects
 	ListProjects(ctx context.Context) ([]string, error)
 
@@ -137,6 +134,9 @@ type Database interface {
 	// DescribeCollection returns metadata of the collection in the database
 	DescribeCollection(ctx context.Context, collection string, options ...*DescribeCollectionOptions) (
 		*DescribeCollectionResponse, error)
+
+	CreateBranch(ctx context.Context, name string) (*CreateBranchResponse, error)
+	DeleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error)
 }
 
 type driver struct {
@@ -171,16 +171,6 @@ func (c *driver) DeleteProject(ctx context.Context, project string, options ...*
 	}
 
 	return c.deleteProjectWithOptions(ctx, project, opts.(*DeleteProjectOptions))
-}
-
-func (c *driver) CreateBranch(ctx context.Context, project string, name string) (*CreateBranchResponse, error) {
-	//TODO : implement
-	return nil, nil
-}
-
-func (c *driver) DeleteBranch(ctx context.Context, project string, name string) (*DeleteBranchResponse, error) {
-	// TODO: implement
-	return nil, nil
 }
 
 type driverCRUDTx struct {
@@ -322,6 +312,20 @@ func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, 
 	}
 
 	return c.describeCollectionWithOptions(ctx, collection, opts.(*DescribeCollectionOptions))
+}
+
+func (c *driverCRUD) CreateBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
+	if len(name) == 0 {
+		return nil, fmt.Errorf("branch name is required")
+	}
+	return c.createBranch(ctx, name)
+}
+
+func (c *driverCRUD) DeleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error) {
+	if len(name) == 0 {
+		return nil, fmt.Errorf("branch name is required")
+	}
+	return c.deleteBranch(ctx, name)
 }
 
 func validateOptionsParam(options interface{}, out interface{}) (interface{}, error) {

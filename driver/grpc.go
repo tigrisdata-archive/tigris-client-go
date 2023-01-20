@@ -384,6 +384,29 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filte
 	return &readIterator{streamReader: &grpcStreamReader{stream: resp, cancel: cancel}}, nil
 }
 
+func (c *grpcCRUD) createBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
+	r, err := c.api.CreateBranch(ctx, &api.CreateBranchRequest{
+		Project: c.db,
+		Branch:  name,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*CreateBranchResponse)(r), nil
+}
+
+func (c *grpcCRUD) deleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error) {
+	r, err := c.api.DeleteBranch(ctx, &api.DeleteBranchRequest{
+		Project: c.db,
+		Branch:  name,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+	return (*DeleteBranchResponse)(r), nil
+}
+
 type grpcStreamReader struct {
 	stream api.Tigris_ReadClient
 	cancel context.CancelFunc

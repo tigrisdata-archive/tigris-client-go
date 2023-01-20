@@ -640,6 +640,41 @@ func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filte
 	return e, nil
 }
 
+func (c *httpCRUD) createBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
+	resp, err := c.api.TigrisCreateBranch(ctx, c.db, name, apiHTTP.TigrisCreateBranchJSONRequestBody{})
+
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r apiHTTP.CreateBranchResponse
+	if err := respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	return &CreateBranchResponse{
+		Status:  PtrToString(r.Status),
+		Message: PtrToString(r.Message)}, nil
+}
+
+func (c *httpCRUD) deleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error) {
+	resp, err := c.api.TigrisDeleteBranch(ctx, c.db, name, apiHTTP.TigrisDeleteBranchJSONRequestBody{})
+
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r apiHTTP.DeleteBranchResponse
+	if err := respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	return &DeleteBranchResponse{
+		Status:  PtrToString(r.Status),
+		Message: PtrToString(r.Message),
+	}, nil
+}
+
 type httpStreamReader struct {
 	closer io.Closer
 	stream *json.Decoder

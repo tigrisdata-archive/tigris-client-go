@@ -299,6 +299,21 @@ func (mr *MockTxMockRecorder) Commit(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockTx)(nil).Commit), arg0)
 }
 
+// CreateBranch mocks base method.
+func (m *MockTx) CreateBranch(arg0 context.Context, arg1 string) (*driver.CreateBranchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateBranch", arg0, arg1)
+	ret0, _ := ret[0].(*driver.CreateBranchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBranch indicates an expected call of CreateBranch.
+func (mr *MockTxMockRecorder) CreateBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBranch", reflect.TypeOf((*MockTx)(nil).CreateBranch), arg0, arg1)
+}
+
 // CreateOrUpdateCollection mocks base method.
 func (m *MockTx) CreateOrUpdateCollection(arg0 context.Context, arg1 string, arg2 driver.Schema, arg3 ...*driver.CreateCollectionOptions) error {
 	m.ctrl.T.Helper()
@@ -336,6 +351,21 @@ func (mr *MockTxMockRecorder) Delete(arg0, arg1, arg2 interface{}, arg3 ...inter
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTx)(nil).Delete), varargs...)
+}
+
+// DeleteBranch mocks base method.
+func (m *MockTx) DeleteBranch(arg0 context.Context, arg1 string) (*driver.DeleteBranchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBranch", arg0, arg1)
+	ret0, _ := ret[0].(*driver.DeleteBranchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteBranch indicates an expected call of DeleteBranch.
+func (mr *MockTxMockRecorder) DeleteBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBranch", reflect.TypeOf((*MockTx)(nil).DeleteBranch), arg0, arg1)
 }
 
 // DescribeCollection mocks base method.
@@ -568,6 +598,21 @@ func (mr *MockDatabaseMockRecorder) BeginTx(arg0 interface{}, arg1 ...interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockDatabase)(nil).BeginTx), varargs...)
 }
 
+// CreateBranch mocks base method.
+func (m *MockDatabase) CreateBranch(arg0 context.Context, arg1 string) (*driver.CreateBranchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateBranch", arg0, arg1)
+	ret0, _ := ret[0].(*driver.CreateBranchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBranch indicates an expected call of CreateBranch.
+func (mr *MockDatabaseMockRecorder) CreateBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBranch", reflect.TypeOf((*MockDatabase)(nil).CreateBranch), arg0, arg1)
+}
+
 // CreateOrUpdateCollection mocks base method.
 func (m *MockDatabase) CreateOrUpdateCollection(arg0 context.Context, arg1 string, arg2 driver.Schema, arg3 ...*driver.CreateCollectionOptions) error {
 	m.ctrl.T.Helper()
@@ -605,6 +650,21 @@ func (mr *MockDatabaseMockRecorder) Delete(arg0, arg1, arg2 interface{}, arg3 ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockDatabase)(nil).Delete), varargs...)
+}
+
+// DeleteBranch mocks base method.
+func (m *MockDatabase) DeleteBranch(arg0 context.Context, arg1 string) (*driver.DeleteBranchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBranch", arg0, arg1)
+	ret0, _ := ret[0].(*driver.DeleteBranchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteBranch indicates an expected call of DeleteBranch.
+func (mr *MockDatabaseMockRecorder) DeleteBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBranch", reflect.TypeOf((*MockDatabase)(nil).DeleteBranch), arg0, arg1)
 }
 
 // DescribeCollection mocks base method.

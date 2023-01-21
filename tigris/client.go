@@ -110,3 +110,9 @@ func (c *Client) OpenDatabase(ctx context.Context, models ...schema.Model) (*Dat
 func (c *Client) GetDatabase() *Database {
 	return newDatabase(c.config.Project, c.driver)
 }
+
+// InitializeBranch will create a database branch provided in config, if not existing already.
+func (c *Client) InitializeBranch(ctx context.Context) (*driver.CreateBranchResponse, error) {
+	db := c.GetDatabase()
+	return db.CreateBranch(ctx, c.config.Branch)
+}

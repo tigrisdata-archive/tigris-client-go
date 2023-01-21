@@ -89,4 +89,20 @@ func TestClient(t *testing.T) {
 	cfg.Branch = ""
 	_, err = NewClient(ctx, cfg)
 	require.ErrorContains(t, err, "database branch is required")
+
+	t.Run("initializes a branch", func(t *testing.T) {
+		testCfg := &Config{URL: test.GRPCURL(8), Project: "db1", Branch: "staging"}
+		testCfg.TLS = test.SetupTLS(t)
+
+		mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
+			Project: "db1",
+			Branch:  testCfg.Branch,
+		})).Return(&api.CreateBranchResponse{Status: "created"}, nil)
+
+		c, err = NewClient(ctx, testCfg)
+		require.NoError(t, err)
+		resp, err := c.InitializeBranch(ctx)
+		require.NoError(t, err)
+		require.Equal(t, "created", resp.Status)
+	})
 }

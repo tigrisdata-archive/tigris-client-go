@@ -671,6 +671,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 				Size:       222222,
 			},
 		},
+		Branches: []string{"main", "bug-fix", "feature_2"},
 	}
 
 	mc.EXPECT().DescribeDatabase(gomock.Any(),
@@ -688,6 +689,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, descDBExp.Collections[1].Collection, descDB.Collections[1].Collection)
 	require.Equal(t, descDBExp.Collections[1].Schema, descDB.Collections[1].Schema)
 	require.Equal(t, descDBExp.Collections[1].Size, descDB.Collections[1].Size)
+	require.Equal(t, descDBExp.Branches, descDB.Branches)
 
 	sch := `{"schema":"field"}`
 

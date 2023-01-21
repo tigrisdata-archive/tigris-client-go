@@ -36,6 +36,8 @@ type Database struct {
 	driver driver.Driver
 }
 
+// TODO: add create branch and delete branch
+
 func newDatabase(name string, driver driver.Driver) *Database {
 	return &Database{
 		name:   name,

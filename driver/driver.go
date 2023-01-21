@@ -135,7 +135,10 @@ type Database interface {
 	DescribeCollection(ctx context.Context, collection string, options ...*DescribeCollectionOptions) (
 		*DescribeCollectionResponse, error)
 
+	// CreateBranch creates a branch of this database
 	CreateBranch(ctx context.Context, name string) (*CreateBranchResponse, error)
+
+	// DeleteBranch deletes a branch of this database, throws an error if "main" branch is being deleted
 	DeleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error)
 }
 

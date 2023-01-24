@@ -97,6 +97,18 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 	return nil
 }
 
+// CreateBranch creates a branch of this database.
+func (db *Database) CreateBranch(ctx context.Context, name string) (*driver.CreateBranchResponse, error) {
+	inUseDB := db.driver.UseDatabase(db.name)
+	return inUseDB.CreateBranch(ctx, name)
+}
+
+// DeleteBranch deletes a branch of this database, throws an error if "main" branch is being deleted.
+func (db *Database) DeleteBranch(ctx context.Context, name string) (*driver.DeleteBranchResponse, error) {
+	inUseDB := db.driver.UseDatabase(db.name)
+	return inUseDB.DeleteBranch(ctx, name)
+}
+
 // OpenDatabaseFromModels creates Database and collections from the provided collection models.
 func OpenDatabaseFromModels(ctx context.Context, d driver.Driver,
 	project string, models ...schema.Model,

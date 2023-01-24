@@ -79,15 +79,10 @@ type (
 
 	DescribeProjectOptions struct {
 		SchemaFormat string
-		Branch       string
 	}
 
-	DeleteProjectOptions struct {
-		Branch string
-	}
-	CreateProjectOptions struct {
-		Branch string
-	}
+	DeleteProjectOptions struct{}
+	CreateProjectOptions struct{}
 
 	DescribeCollectionOptions struct {
 		SchemaFormat string

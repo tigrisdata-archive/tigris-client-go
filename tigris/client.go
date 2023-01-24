@@ -75,11 +75,10 @@ func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
 		}
 	}
 
-	if len(pCfg.Branch) == 0 {
+	if pCfg.Branch == "" {
 		pCfg.Branch = os.Getenv(driver.EnvDBBranch)
 		if pCfg.Branch == "" {
-			// use default
-			pCfg.Branch = "main"
+			return nil, errors.New("database branch is required")
 		}
 	}
 
@@ -110,4 +109,10 @@ func (c *Client) OpenDatabase(ctx context.Context, models ...schema.Model) (*Dat
 // GetDatabase gets the Database for this project.
 func (c *Client) GetDatabase() *Database {
 	return newDatabase(c.config.Project, c.driver)
+}
+
+// InitializeBranch will create a database branch provided in config, if not existing already.
+func (c *Client) InitializeBranch(ctx context.Context) (*driver.CreateBranchResponse, error) {
+	db := c.GetDatabase()
+	return db.CreateBranch(ctx, c.config.Branch)
 }

@@ -106,7 +106,7 @@ func (c *grpcDriver) Close() error {
 }
 
 func (c *grpcDriver) UseDatabase(project string) Database {
-	return &driverCRUD{&grpcCRUD{db: project, api: c.api}}
+	return &driverCRUD{&grpcCRUD{db: project, branch: c.cfg.Branch, api: c.api}}
 }
 
 func (c *grpcDriver) ListProjects(ctx context.Context) ([]string, error) {
@@ -154,6 +154,7 @@ func (c *grpcDriver) createProjectWithOptions(ctx context.Context, project strin
 func (c *grpcDriver) describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
 	r, err := c.api.DescribeDatabase(ctx, &api.DescribeDatabaseRequest{
 		Project:      project,
+		Branch:       c.cfg.Branch,
 		SchemaFormat: options.SchemaFormat,
 	})
 	if err != nil {
@@ -193,6 +194,7 @@ func (c *grpcCRUD) Commit(ctx context.Context) error {
 
 	_, err := c.api.CommitTransaction(ctx, &api.CommitTransactionRequest{
 		Project: c.db,
+		Branch:  c.branch,
 	})
 
 	if err = GRPCError(err); err == nil {
@@ -211,6 +213,7 @@ func (c *grpcCRUD) Rollback(ctx context.Context) error {
 
 	_, err := c.api.RollbackTransaction(ctx, &api.RollbackTransactionRequest{
 		Project: c.db,
+		Branch:  c.branch,
 	})
 
 	return GRPCError(err)
@@ -218,6 +221,7 @@ func (c *grpcCRUD) Rollback(ctx context.Context) error {
 
 type grpcCRUD struct {
 	db                 string
+	branch             string
 	api                api.TigrisClient
 	txCtx              *api.TransactionCtx
 	additionalMetadata meta.MD
@@ -230,6 +234,7 @@ func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 
 	resp, err := c.api.BeginTransaction(ctx, &api.BeginTransactionRequest{
 		Project: c.db,
+		Branch:  c.branch,
 		Options: (*api.TransactionOptions)(options),
 	}, grpc.Header(&respHeaders))
 	if err != nil {
@@ -248,7 +253,7 @@ func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 		}
 	}
 
-	return &grpcCRUD{db: c.db, api: c.api, txCtx: resp.GetTxCtx(), additionalMetadata: additionalHeaders}, nil
+	return &grpcCRUD{db: c.db, branch: c.branch, api: c.api, txCtx: resp.GetTxCtx(), additionalMetadata: additionalHeaders}, nil
 }
 
 func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, _ *CollectionOptions) ([]string, error) {
@@ -256,6 +261,7 @@ func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, _ *Collection
 
 	r, err := c.api.ListCollections(ctx, &api.ListCollectionsRequest{
 		Project: c.db,
+		Branch:  c.branch,
 	})
 	if err != nil {
 		return nil, GRPCError(err)
@@ -272,6 +278,7 @@ func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, _ *Collection
 func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error) {
 	r, err := c.api.DescribeCollection(ctx, &api.DescribeCollectionRequest{
 		Project:      c.db,
+		Branch:       c.branch,
 		Collection:   collection,
 		SchemaFormat: options.SchemaFormat,
 	})
@@ -287,6 +294,7 @@ func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 
 	_, err := c.api.CreateOrUpdateCollection(ctx, &api.CreateOrUpdateCollectionRequest{
 		Project:    c.db,
+		Branch:     c.branch,
 		Collection: collection,
 		Schema:     schema,
 		OnlyCreate: options.OnlyCreate,
@@ -299,6 +307,7 @@ func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, collection str
 	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
 	_, err := c.api.DropCollection(ctx, &api.DropCollectionRequest{
 		Project:    c.db,
+		Branch:     c.branch,
 		Collection: collection,
 		Options:    (*api.CollectionOptions)(options),
 	})
@@ -310,6 +319,7 @@ func (c *grpcCRUD) insertWithOptions(ctx context.Context, collection string, doc
 
 	resp, err := c.api.Insert(ctx, &api.InsertRequest{
 		Project:    c.db,
+		Branch:     c.branch,
 		Collection: collection,
 		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
 		Options:    (*api.InsertRequestOptions)(options),
@@ -326,6 +336,7 @@ func (c *grpcCRUD) replaceWithOptions(ctx context.Context, collection string, do
 
 	resp, err := c.api.Replace(ctx, &api.ReplaceRequest{
 		Project:    c.db,
+		Branch:     c.branch,
 		Collection: collection,
 		Documents:  *(*[][]byte)(unsafe.Pointer(&docs)),
 		Options:    (*api.ReplaceRequestOptions)(options),
@@ -342,6 +353,7 @@ func (c *grpcCRUD) updateWithOptions(ctx context.Context, collection string, fil
 
 	resp, err := c.api.Update(ctx, &api.UpdateRequest{
 		Project:    c.db,
+		Branch:     c.branch,
 		Collection: collection,
 		Filter:     filter,
 		Fields:     fields,
@@ -356,6 +368,7 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 
 	resp, err := c.api.Delete(ctx, &api.DeleteRequest{
 		Project:    c.db,
+		Branch:     c.branch,
 		Collection: collection,
 		Filter:     filter,
 		Options:    (*api.DeleteRequestOptions)(options),
@@ -370,6 +383,7 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filte
 
 	resp, err := c.api.Read(ctx, &api.ReadRequest{
 		Project:    c.db,
+		Branch:     c.branch,
 		Collection: collection,
 		Filter:     filter,
 		Fields:     fields,
@@ -433,6 +447,7 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 
 	resp, err := c.api.Search(ctx, &api.SearchRequest{
 		Project:       c.db,
+		Branch:        c.branch,
 		Collection:    collection,
 		Q:             req.Q,
 		SearchFields:  req.SearchFields,

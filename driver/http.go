@@ -237,7 +237,7 @@ func (c *httpDriver) Close() error {
 }
 
 func (c *httpDriver) UseDatabase(project string) Database {
-	return &driverCRUD{&httpCRUD{db: project, api: c.api}}
+	return &driverCRUD{&httpCRUD{db: project, branch: c.cfg.Branch, api: c.api}}
 }
 
 func (c *httpDriver) ListProjects(ctx context.Context) ([]string, error) {
@@ -298,6 +298,7 @@ func (c *httpDriver) Health(ctx context.Context) (*HealthResponse, error) {
 func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
 	resp, err := c.api.TigrisDescribeDatabase(ctx, project, apiHTTP.TigrisDescribeDatabaseJSONRequestBody{
 		SchemaFormat: &options.SchemaFormat,
+		Branch:       &c.cfg.Branch,
 	})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
@@ -323,6 +324,10 @@ func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project str
 			Schema:     v.Schema,
 			Size:       PtrToInt64(v.Size),
 		})
+	}
+
+	if d.Branches != nil {
+		r.Branches = append(r.Branches, *d.Branches...)
 	}
 
 	return &r, nil
@@ -377,7 +382,9 @@ func convertTransactionOptions(_ *TxOptions) *apiHTTP.TransactionOptions {
 func (c *httpCRUD) Commit(ctx context.Context) error {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
-	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{})
+	resp, err := c.api.TigrisCommitTransaction(ctx, c.db, apiHTTP.TigrisCommitTransactionJSONRequestBody{
+		Branch: &c.branch,
+	})
 
 	if err = HTTPError(err, resp); err == nil {
 		c.committed = true
@@ -393,13 +400,16 @@ func (c *httpCRUD) Rollback(ctx context.Context) error {
 		return nil
 	}
 
-	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{})
+	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{
+		Branch: &c.branch,
+	})
 
 	return HTTPError(err, resp)
 }
 
 type httpCRUD struct {
 	db      string
+	branch  string
 	api     *apiHTTP.ClientWithResponses
 	txCtx   *api.TransactionCtx
 	cookies []*http.Cookie
@@ -410,6 +420,7 @@ type httpCRUD struct {
 func (c *httpCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (txWithOptions, error) {
 	resp, err := c.api.TigrisBeginTransaction(ctx, c.db, apiHTTP.TigrisBeginTransactionJSONRequestBody{
 		Options: convertTransactionOptions(options),
+		Branch:  &c.branch,
 	})
 	if err = HTTPError(err, resp); err != nil {
 		return nil, err
@@ -469,8 +480,9 @@ func (c *httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOption
 func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, _ *CollectionOptions) ([]string, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
-	// TODO wire branch once implemented
-	resp, err := c.api.TigrisListCollections(ctx, c.db, &apiHTTP.TigrisListCollectionsParams{})
+	resp, err := c.api.TigrisListCollections(ctx, c.db, &apiHTTP.TigrisListCollectionsParams{
+		Branch: &c.branch,
+	})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
@@ -498,6 +510,7 @@ func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, _ *Collection
 
 func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error) {
 	resp, err := c.api.TigrisDescribeCollection(ctx, c.db, collection, apiHTTP.TigrisDescribeCollectionJSONRequestBody{
+		Branch:       &c.branch,
 		SchemaFormat: &options.SchemaFormat,
 	})
 	if err := HTTPError(err, resp); err != nil {
@@ -523,6 +536,7 @@ func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisCreateOrUpdateCollection(ctx, c.db, collection, apiHTTP.TigrisCreateOrUpdateCollectionJSONRequestBody{
+		Branch:     &c.branch,
 		Schema:     json.RawMessage(schema),
 		OnlyCreate: &options.OnlyCreate,
 		Options:    c.convertCollectionOptions(nil),
@@ -534,6 +548,7 @@ func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, collection str
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisDropCollection(ctx, c.db, collection, apiHTTP.TigrisDropCollectionJSONRequestBody{
+		Branch:  &c.branch,
 		Options: c.convertCollectionOptions(options),
 	})
 	return HTTPError(err, resp)
@@ -543,6 +558,7 @@ func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, doc
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisInsert(ctx, c.db, collection, apiHTTP.TigrisInsertJSONRequestBody{
+		Branch:    &c.branch,
 		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 		Options:   c.convertInsertOptions(options),
 	})
@@ -563,6 +579,7 @@ func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, do
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisReplace(ctx, c.db, collection, apiHTTP.TigrisReplaceJSONRequestBody{
+		Branch:    &c.branch,
 		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 		Options:   c.convertReplaceOptions(options),
 	})
@@ -583,6 +600,7 @@ func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, fil
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisUpdate(ctx, c.db, collection, apiHTTP.TigrisUpdateJSONRequestBody{
+		Branch:  &c.branch,
 		Filter:  json.RawMessage(filter),
 		Fields:  json.RawMessage(fields),
 		Options: c.convertUpdateOptions(options),
@@ -604,6 +622,7 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisDelete(ctx, c.db, collection, apiHTTP.TigrisDeleteJSONRequestBody{
+		Branch:  &c.branch,
 		Filter:  json.RawMessage(filter),
 		Options: c.convertDeleteOptions(options),
 	})
@@ -624,6 +643,7 @@ func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filte
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisRead(ctx, c.db, collection, apiHTTP.TigrisReadJSONRequestBody{
+		Branch:  &c.branch,
 		Filter:  json.RawMessage(filter),
 		Fields:  json.RawMessage(fields),
 		Options: c.convertReadOptions(options),
@@ -716,6 +736,7 @@ func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchReq
 	}
 
 	resp, err := c.api.TigrisSearch(ctx, c.db, collection, apiHTTP.TigrisSearchJSONRequestBody{
+		Branch:        &c.branch,
 		Q:             &req.Q,
 		SearchFields:  &req.SearchFields,
 		Filter:        json.RawMessage(req.Filter),

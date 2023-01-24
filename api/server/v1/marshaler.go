@@ -583,6 +583,7 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 		Metadata    *DatabaseMetadata `json:"metadata"`
 		Collections []*collDesc       `json:"collections"`
 		Size        int64             `json:"size"`
+		Branches    []string          `json:"branches"`
 	}{
 		Metadata: x.Metadata,
 		Size:     x.Size,
@@ -596,6 +597,8 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 			Size:       v.Size,
 		})
 	}
+
+	resp.Branches = append(resp.Branches, x.Branches...)
 
 	return json.Marshal(&resp)
 }

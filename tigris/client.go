@@ -26,6 +26,8 @@ import (
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
+const DefaultBranch = "main"
+
 type Config struct {
 	TLS          *tls.Config `json:"tls,omitempty"`
 	ClientID     string      `json:"client_id,omitempty"`
@@ -78,7 +80,8 @@ func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
 	if pCfg.Branch == "" {
 		pCfg.Branch = os.Getenv(driver.EnvDBBranch)
 		if pCfg.Branch == "" {
-			return nil, errors.New("database branch is required")
+			// setting default branch
+			pCfg.Branch = DefaultBranch
 		}
 	}
 

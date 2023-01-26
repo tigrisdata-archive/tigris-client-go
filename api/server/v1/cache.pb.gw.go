@@ -617,13 +617,12 @@ func RegisterCacheHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/CreateCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/create"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/CreateCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Cache_CreateCache_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Cache_CreateCache_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -641,13 +640,12 @@ func RegisterCacheHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/DeleteCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/delete"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/DeleteCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Cache_DeleteCache_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Cache_DeleteCache_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -665,13 +663,12 @@ func RegisterCacheHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Set", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/set"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Set", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/set"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Cache_Set_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Cache_Set_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -689,13 +686,12 @@ func RegisterCacheHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Get", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/get"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Get", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Cache_Get_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Cache_Get_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -713,13 +709,12 @@ func RegisterCacheHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Del", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/delete"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Del", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Cache_Del_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Cache_Del_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -737,13 +732,12 @@ func RegisterCacheHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Keys", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/keys"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Keys", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Cache_Keys_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Cache_Keys_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -800,13 +794,12 @@ func RegisterCacheHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/CreateCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/create"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/CreateCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Cache_CreateCache_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Cache_CreateCache_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -821,13 +814,12 @@ func RegisterCacheHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/DeleteCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/delete"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/DeleteCache", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Cache_DeleteCache_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Cache_DeleteCache_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -842,13 +834,12 @@ func RegisterCacheHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Set", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/set"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Set", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/set"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Cache_Set_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Cache_Set_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -863,13 +854,12 @@ func RegisterCacheHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Get", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/get"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Get", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Cache_Get_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Cache_Get_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -884,13 +874,12 @@ func RegisterCacheHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Del", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/delete"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Del", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/{key}/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Cache_Del_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Cache_Del_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -905,13 +894,12 @@ func RegisterCacheHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Keys", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/keys"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.cache.v1.Cache/Keys", runtime.WithHTTPPathPattern("/v1/projects/{project}/caches/{name}/keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Cache_Keys_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Cache_Keys_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)

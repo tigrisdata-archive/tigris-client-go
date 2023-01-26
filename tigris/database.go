@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -95,6 +95,18 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 	}
 
 	return nil
+}
+
+// CreateBranch creates a branch of this database.
+func (db *Database) CreateBranch(ctx context.Context, name string) (*driver.CreateBranchResponse, error) {
+	inUseDB := db.driver.UseDatabase(db.name)
+	return inUseDB.CreateBranch(ctx, name)
+}
+
+// DeleteBranch deletes a branch of this database, throws an error if "main" branch is being deleted.
+func (db *Database) DeleteBranch(ctx context.Context, name string) (*driver.DeleteBranchResponse, error) {
+	inUseDB := db.driver.UseDatabase(db.name)
+	return inUseDB.DeleteBranch(ctx, name)
 }
 
 // OpenDatabaseFromModels creates Database and collections from the provided collection models.

@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ const (
 	EnvProtocol     = "TIGRIS_PROTOCOL"
 	EnvURL          = "TIGRIS_URL"
 	EnvProject      = "TIGRIS_PROJECT"
+	EnvDBBranch     = "TIGRIS_DB_BRANCH"
 
 	Version   = "v1.0.0"
 	UserAgent = "tigris-client-go/" + Version
@@ -78,15 +79,10 @@ type (
 
 	DescribeProjectOptions struct {
 		SchemaFormat string
-		Branch       string
 	}
 
-	DeleteProjectOptions struct {
-		Branch string
-	}
-	CreateProjectOptions struct {
-		Branch string
-	}
+	DeleteProjectOptions struct{}
+	CreateProjectOptions struct{}
 
 	DescribeCollectionOptions struct {
 		SchemaFormat string
@@ -106,6 +102,8 @@ type (
 	CreateProjectResponse      api.CreateProjectResponse
 	DeleteProjectResponse      api.DeleteProjectResponse
 	DescribeCollectionResponse api.DescribeCollectionResponse
+	CreateBranchResponse       api.CreateBranchResponse
+	DeleteBranchResponse       api.DeleteBranchResponse
 )
 
 type (

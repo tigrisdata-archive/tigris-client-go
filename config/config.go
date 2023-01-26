@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ type Driver struct {
 	TLS          *tls.Config   `json:"tls,omitempty"`
 	ClientID     string        `json:"client_id,omitempty"`
 	ClientSecret string        `json:"client_secret,omitempty"`
+	Branch       string        `json:"branch,omitempty"`
 	Token        string        `json:"token,omitempty"`
 	URL          string        `json:"url,omitempty"`
 	Protocol     string        `json:"protocol,omitempty"`

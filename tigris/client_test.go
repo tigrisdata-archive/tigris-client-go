@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ func TestClient(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &Config{URL: test.GRPCURL(8), Project: "db1"}
+	cfg := &Config{URL: test.GRPCURL(8), Project: "db1", Branch: "staging"}
 	cfg.TLS = test.SetupTLS(t)
 
 	type Coll1 struct {
@@ -46,12 +46,14 @@ func TestClient(t *testing.T) {
 	mc.EXPECT().BeginTransaction(gomock.Any(),
 		pm(&api.BeginTransactionRequest{
 			Project: "db1",
+			Branch:  cfg.Branch,
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
 	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
 		pm(&api.CreateOrUpdateCollectionRequest{
 			Project: "db1", Collection: "coll_1",
+			Branch:  cfg.Branch,
 			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
 			Options: &api.CollectionOptions{},
 		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
@@ -60,6 +62,7 @@ func TestClient(t *testing.T) {
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
 			Project: "db1",
+			Branch:  cfg.Branch,
 		})).Return(&api.CommitTransactionResponse{}, nil)
 
 	c, err := NewClient(ctx, cfg)
@@ -68,6 +71,11 @@ func TestClient(t *testing.T) {
 	db, err := c.OpenDatabase(ctx, &Coll1{})
 	require.NoError(t, err)
 	require.NotNil(t, db)
+
+	cfg.Branch = ""
+	c, err = NewClient(ctx, cfg)
+	require.NoError(t, err)
+	require.Equal(t, DefaultBranch, c.config.Branch)
 
 	_, err = c.OpenDatabase(setTxCtx(ctx, &Tx{}), &Coll1{})
 	require.Error(t, err)
@@ -82,4 +90,20 @@ func TestClient(t *testing.T) {
 	cfg.URL = ""
 	_, err = NewClient(ctx, cfg, cfg)
 	require.Error(t, err)
+
+	t.Run("initializes a branch", func(t *testing.T) {
+		testCfg := &Config{URL: test.GRPCURL(8), Project: "db1", Branch: "staging"}
+		testCfg.TLS = test.SetupTLS(t)
+
+		mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
+			Project: "db1",
+			Branch:  testCfg.Branch,
+		})).Return(&api.CreateBranchResponse{Status: "created"}, nil)
+
+		c, err = NewClient(ctx, testCfg)
+		require.NoError(t, err)
+		resp, err := c.InitializeBranch(ctx)
+		require.NoError(t, err)
+		require.Equal(t, "created", resp.Status)
+	})
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import (
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
+const DefaultBranch = "main"
+
 type Config struct {
 	TLS          *tls.Config `json:"tls,omitempty"`
 	ClientID     string      `json:"client_id,omitempty"`
@@ -34,6 +36,7 @@ type Config struct {
 	URL          string      `json:"url,omitempty"`
 	Protocol     string      `json:"protocol,omitempty"`
 	Project      string      `json:"project,omitempty"`
+	Branch       string      `json:"branch,omitempty"`
 	// MustExist if set skips implicit database creation
 	MustExist bool
 }
@@ -50,6 +53,7 @@ func driverConfig(cfg *Config) *config.Driver {
 		URL:          cfg.URL,
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
+		Branch:       cfg.Branch,
 		Token:        cfg.Token,
 		Protocol:     cfg.Protocol,
 	}
@@ -70,6 +74,14 @@ func NewClient(ctx context.Context, cfg ...*Config) (*Client, error) {
 		pCfg.Project = os.Getenv(driver.EnvProject)
 		if pCfg.Project == "" {
 			return nil, errors.New("failed to configure tigris project")
+		}
+	}
+
+	if pCfg.Branch == "" {
+		pCfg.Branch = os.Getenv(driver.EnvDBBranch)
+		if pCfg.Branch == "" {
+			// setting default branch
+			pCfg.Branch = DefaultBranch
 		}
 	}
 
@@ -100,4 +112,10 @@ func (c *Client) OpenDatabase(ctx context.Context, models ...schema.Model) (*Dat
 // GetDatabase gets the Database for this project.
 func (c *Client) GetDatabase() *Database {
 	return newDatabase(c.config.Project, c.driver)
+}
+
+// InitializeBranch will create a database branch provided in config, if not existing already.
+func (c *Client) InitializeBranch(ctx context.Context) (*driver.CreateBranchResponse, error) {
+	db := c.GetDatabase()
+	return db.CreateBranch(ctx, c.config.Branch)
 }

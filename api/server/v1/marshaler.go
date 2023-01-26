@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -583,6 +583,7 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 		Metadata    *DatabaseMetadata `json:"metadata"`
 		Collections []*collDesc       `json:"collections"`
 		Size        int64             `json:"size"`
+		Branches    []string          `json:"branches"`
 	}{
 		Metadata: x.Metadata,
 		Size:     x.Size,
@@ -596,6 +597,8 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 			Size:       v.Size,
 		})
 	}
+
+	resp.Branches = append(resp.Branches, x.Branches...)
 
 	return json.Marshal(&resp)
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -134,6 +134,12 @@ type Database interface {
 	// DescribeCollection returns metadata of the collection in the database
 	DescribeCollection(ctx context.Context, collection string, options ...*DescribeCollectionOptions) (
 		*DescribeCollectionResponse, error)
+
+	// CreateBranch creates a branch of this database
+	CreateBranch(ctx context.Context, name string) (*CreateBranchResponse, error)
+
+	// DeleteBranch deletes a branch of this database, throws an error if "main" branch is being deleted
+	DeleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error)
 }
 
 type driver struct {
@@ -309,6 +315,20 @@ func (c *driverCRUD) DescribeCollection(ctx context.Context, collection string, 
 	}
 
 	return c.describeCollectionWithOptions(ctx, collection, opts.(*DescribeCollectionOptions))
+}
+
+func (c *driverCRUD) CreateBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
+	if len(name) == 0 {
+		return nil, fmt.Errorf("branch name is required")
+	}
+	return c.createBranch(ctx, name)
+}
+
+func (c *driverCRUD) DeleteBranch(ctx context.Context, name string) (*DeleteBranchResponse, error) {
+	if len(name) == 0 {
+		return nil, fmt.Errorf("branch name is required")
+	}
+	return c.deleteBranch(ctx, name)
 }
 
 func validateOptionsParam(options interface{}, out interface{}) (interface{}, error) {

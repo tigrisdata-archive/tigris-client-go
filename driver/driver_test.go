@@ -1,4 +1,4 @@
-// Copyright 2022 Tigris Data, Inc.
+// Copyright 2022-2023 Tigris Data, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -193,6 +193,34 @@ func testSearchStreamError(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_ABORTED, Message: "error_stream"}}, it.Err())
 }
 
+func testBranchCrudErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
+		Project: "db1",
+		Branch:  "staging",
+	})).DoAndReturn(func(ctx context.Context, req *api.CreateBranchRequest) (*api.CreateBranchResponse, error) {
+		return nil, &api.TigrisError{Code: api.Code_ALREADY_EXISTS, Message: "branch already exists"}
+	})
+
+	createResp, err := d.UseDatabase("db1").CreateBranch(ctx, "staging")
+	require.Nil(t, createResp)
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_ALREADY_EXISTS, Message: "branch already exists"}}, err)
+
+	mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
+		Project: "db1",
+		Branch:  "feature_1",
+	})).DoAndReturn(func(ctx context.Context, req *api.DeleteBranchRequest) (*api.DeleteBranchResponse, error) {
+		return nil, &api.TigrisError{Code: api.Code_NOT_FOUND, Message: "project does not exist"}
+	})
+
+	delResp, err := d.UseDatabase("db1").DeleteBranch(ctx, "feature_1")
+	require.Nil(t, delResp)
+	require.Equal(t, &Error{&api.TigrisError{Code: api.Code_NOT_FOUND, Message: "project does not exist"}}, err)
+}
+
 func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	t.Helper()
 
@@ -250,6 +278,9 @@ func TestGRPCError(t *testing.T) {
 	t.Run("search_stream_error", func(t *testing.T) {
 		testSearchStreamError(t, client, mockServer)
 	})
+	t.Run("branch_crud_errors", func(t *testing.T) {
+		testBranchCrudErrors(t, client, mockServer)
+	})
 }
 
 func TestHTTPError(t *testing.T) {
@@ -261,6 +292,9 @@ func TestHTTPError(t *testing.T) {
 	})
 	t.Run("search_stream_error", func(t *testing.T) {
 		testSearchStreamError(t, client, mockServer)
+	})
+	t.Run("branch_crud_errors", func(t *testing.T) {
+		testBranchCrudErrors(t, client, mockServer)
 	})
 }
 
@@ -554,6 +588,24 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	delResp, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
 	require.NoError(t, err)
 	require.Equal(t, "deleted", delResp.Status)
+
+	mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
+		Project: "db1",
+		Branch:  "staging",
+	})).Return(&api.CreateBranchResponse{Status: "creationOk"}, nil)
+
+	branchCreateResp, err := db.CreateBranch(ctx, "staging")
+	require.NoError(t, err)
+	require.Equal(t, "creationOk", branchCreateResp.Status)
+
+	mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
+		Project: "db1",
+		Branch:  "staging",
+	})).Return(&api.DeleteBranchResponse{Status: "deletionOk"}, nil)
+
+	branchDelResp, err := db.DeleteBranch(ctx, "staging")
+	require.NoError(t, err)
+	require.Equal(t, "deletionOk", branchDelResp.Status)
 }
 
 func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
@@ -619,6 +671,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 				Size:       222222,
 			},
 		},
+		Branches: []string{"main", "bug-fix", "feature_2"},
 	}
 
 	mc.EXPECT().DescribeDatabase(gomock.Any(),
@@ -636,6 +689,7 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, descDBExp.Collections[1].Collection, descDB.Collections[1].Collection)
 	require.Equal(t, descDBExp.Collections[1].Schema, descDB.Collections[1].Schema)
 	require.Equal(t, descDBExp.Collections[1].Size, descDB.Collections[1].Size)
+	require.Equal(t, descDBExp.Branches, descDB.Branches)
 
 	sch := `{"schema":"field"}`
 

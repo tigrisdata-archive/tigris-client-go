@@ -72,6 +72,11 @@ func TestClient(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, db)
 
+	cfg.Branch = ""
+	c, err = NewClient(ctx, cfg)
+	require.NoError(t, err)
+	require.Equal(t, DefaultBranch, c.config.Branch)
+
 	_, err = c.OpenDatabase(setTxCtx(ctx, &Tx{}), &Coll1{})
 	require.Error(t, err)
 
@@ -85,10 +90,6 @@ func TestClient(t *testing.T) {
 	cfg.URL = ""
 	_, err = NewClient(ctx, cfg, cfg)
 	require.Error(t, err)
-
-	cfg.Branch = ""
-	_, err = NewClient(ctx, cfg)
-	require.ErrorContains(t, err, "database branch is required")
 
 	t.Run("initializes a branch", func(t *testing.T) {
 		testCfg := &Config{URL: test.GRPCURL(8), Project: "db1", Branch: "staging"}

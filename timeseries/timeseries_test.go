@@ -101,6 +101,7 @@ func TestTimeseries(t *testing.T) {
 
 	d1 := &Coll1{Field1: "one"}
 
+	// test append
 	err = coll.Append(ctx, d1)
 	require.NoError(t, err)
 
@@ -115,6 +116,7 @@ func TestTimeseries(t *testing.T) {
 
 	require.Equal(t, 0, len(coll.buffer))
 
+	// test find after
 	mit := mock.NewMockIterator(ctrl)
 
 	b, err := json.Marshal(ts)
@@ -137,10 +139,26 @@ func TestTimeseries(t *testing.T) {
 		spew.Dump(d)
 	}
 
+	// test find after with filter
+	mdb.EXPECT().Read(ctx, "coll_1",
+		driver.Filter(`{"$and":[{"timestamp":{"$gte":`+string(b)+`}},{"field1":{"$eq":"one"}}]}`),
+		driver.Projection(nil),
+	).Return(mit, nil)
+
+	it, err = coll.FindAfter(ctx, ts, filter.Eq("field1", "one"))
+	require.NoError(t, err)
+
+	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(false)
+
+	for it.Next(&d) {
+		require.Equal(t, d1, d)
+	}
+
 	tsAfter := time.Now().Add(1 * time.Second)
 	b1, err := json.Marshal(tsAfter)
 	require.NoError(t, err)
 
+	// test find before
 	mdb.EXPECT().Read(ctx, "coll_1",
 		driver.Filter(`{"timestamp":{"$lt":`+string(b1)+`}}`),
 		driver.Projection(nil),
@@ -155,6 +173,22 @@ func TestTimeseries(t *testing.T) {
 		require.Equal(t, d1, d)
 	}
 
+	// test find before with filter
+	mdb.EXPECT().Read(ctx, "coll_1",
+		driver.Filter(`{"$and":[{"timestamp":{"$lt":`+string(b1)+`}},{"field1":{"$eq":"one"}}]}`),
+		driver.Projection(nil),
+	).Return(mit, nil)
+
+	it, err = coll.FindBefore(ctx, tsAfter, filter.Eq("field1", "one"))
+	require.NoError(t, err)
+
+	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(false)
+
+	for it.Next(&d) {
+		require.Equal(t, d1, d)
+	}
+
+	// test find in range
 	mdb.EXPECT().Read(ctx, "coll_1",
 		driver.Filter(`{"$and":[{"timestamp":{"$gte":`+string(b)+`}},{"timestamp":{"$lt":`+string(b1)+`}}]}`),
 		driver.Projection(nil),
@@ -169,6 +203,7 @@ func TestTimeseries(t *testing.T) {
 		require.Equal(t, d1, d)
 	}
 
+	// test find in range with filter
 	mdb.EXPECT().Read(ctx, "coll_1",
 		driver.Filter(`{"$and":[{"timestamp":{"$gte":`+string(b)+`}},{"timestamp":{"$lt":`+string(b1)+`}},{"field1":{"$eq":"one"}}]}`),
 		driver.Projection(nil),
@@ -183,6 +218,7 @@ func TestTimeseries(t *testing.T) {
 		require.Equal(t, d1, d)
 	}
 
+	// test flush
 	err = coll.Append(ctx, d1)
 	require.NoError(t, err)
 

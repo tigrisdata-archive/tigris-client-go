@@ -117,7 +117,7 @@ func TestCollectionSchema(t *testing.T) {
 	}
 
 	type TestModel struct {
-		TestField int `json:"ID" tigris:"primary_key:1,autoGenerate"`
+		TestField int `json:"Test_Field" tigris:"autoGenerate"`
 	}
 
 	type testModelSub struct {
@@ -133,9 +133,13 @@ func TestCollectionSchema(t *testing.T) {
 		Sub testModelSub
 	}
 
+	type TestModel1 struct {
+		TestField int `json:"ID" tigris:"primary_key:1,autoGenerate"`
+	}
+
 	// user can extend implicit primary key
 	type embModelPK struct {
-		TestModel
+		TestModel1
 		Field1 string `json:"ss_field_1" tigris:"primary_key:2"`
 	}
 
@@ -191,7 +195,7 @@ func TestCollectionSchema(t *testing.T) {
 		Map    map[string]string    `json:"map_1"`
 		Slice2 []subStruct          `json:"slice_2"`
 		Map2   map[string]subStruct `json:"map_2"`
-		Data2  subStructPK          `json:"data_2" tigris:"primary_key:3,-"` // should be skipped
+		Data2  subStructPK          `json:"data_2" tigris:"-"` // should be skipped
 
 		Bool123 bool `json:"bool_123"`
 
@@ -212,13 +216,13 @@ func TestCollectionSchema(t *testing.T) {
 		err    error
 	}{
 		{empty{}, nil, fmt.Errorf("no data fields in the collection schema")},
-		{unknownTag{}, nil, fmt.Errorf("unknown tigris tag: some")},
+		{unknownTag{}, nil, fmt.Errorf("%w: %s", ErrUnknownTag, "some")},
 		{unsupportedType{}, nil, fmt.Errorf("unsupported type: name='' kind='chan'")},
 		{pk0{}, nil, fmt.Errorf("primary key index starts from 1")},
 		{pkOutOfBound{}, nil, fmt.Errorf("maximum primary key index is 2")},
 		{pkGap{}, nil, fmt.Errorf("gap in the primary key index")},
 		{pkInvalidType{}, nil, fmt.Errorf("type is not supported for the key: bool")},
-		{pkInvalidTag{}, nil, fmt.Errorf("only one colon allowed in the tag")},
+		{pkInvalidTag{}, nil, fmt.Errorf("%w: %s", ErrPrimaryKeyIdx, "strconv.Atoi: parsing \"1:a\": invalid syntax")},
 		{input: noPK{}, output: &Schema{Name: "no_pks", Fields: map[string]*Field{
 			"ID":    {Type: typeString, Format: formatUUID, AutoGenerate: true},
 			"key_1": {Type: typeString},
@@ -309,24 +313,25 @@ func TestCollectionSchema(t *testing.T) {
 		}, PrimaryKey: []string{"string_1"}}, nil},
 		{embModel{}, &Schema{
 			Name: "emb_models", Fields: map[string]*Field{
+				"ID": {Type: typeString, Format: formatUUID, AutoGenerate: true},
 				"Sub": {
 					Type: "object",
 					Fields: map[string]*Field{
-						"ID": {Type: typeInteger},
+						"Test_Field": {Type: typeInteger, AutoGenerate: true},
 						"Tm": {
 							Type: "object",
 							Fields: map[string]*Field{
-								"ID": {Type: typeInteger},
+								"Test_Field": {Type: typeInteger, AutoGenerate: true},
 							},
 						},
 					},
 				},
-				"ID":         {Type: typeInteger, AutoGenerate: true},
+				"Test_Field": {Type: typeInteger, AutoGenerate: true},
 				"ss_field_1": {Type: typeString},
 				"Tm": {
 					Type: "object",
 					Fields: map[string]*Field{
-						"ID": {Type: typeInteger},
+						"Test_Field": {Type: typeInteger, AutoGenerate: true},
 					},
 				},
 			},
@@ -409,6 +414,79 @@ func TestCollectionSchema(t *testing.T) {
 			require.Equal(t, err, fmt.Errorf("duplicate primary key index 1 set for key_2 and key_1"))
 		}
 	})
+}
+
+func TestDefaults(t *testing.T) {
+	type struct1 struct {
+		Field1 string
+	}
+
+	type TestDefaults struct {
+		FieldRequired     int      `json:"field_required" tigris:"required"`
+		FieldRequired2    int      `json:"field_required2" tigris:"required"`
+		FieldMaxLength    string   `json:"field_max_length" tigris:"maxLength:123"`
+		FieldDefaultBool  bool     `json:"def_bool" tigris:"default:true"`
+		FieldDefaultInt   int      `json:"def_int" tigris:"default:789"`
+		FieldDefaultFloat float64  `json:"def_float" tigris:"default:456.34"`
+		FieldDefaultStr   string   `json:"def_str" tigris:"default:str1"`
+		FieldDefaultStr1  string   `json:"def_str1" tigris:"default:'st\\'r2'"`
+		FieldDefaultArr   []string `json:"def_arr_str" tigris:"default:'[\"one\", \"two\"]'"`
+		FieldDefaultObj   struct1  `json:"def_obj_str" tigris:"default:'{\"Field1\":\"aaa\"}'"`
+
+		FieldDefaultTime time.Time `json:"def_time" tigris:"default:now(),updatedAt"`
+		FieldDefaultUUID uuid.UUID `json:"def_uuid" tigris:"default:uuid()"`
+	}
+
+	schema, err := fromCollectionModel(TestDefaults{}, Documents)
+	assert.Equal(t, nil, err)
+
+	b, err := schema.Build()
+	require.NoError(t, err)
+	exp := `{
+	"title":"test_defaults",
+	"properties":{
+		"ID":{"type":"string","format":"uuid","autoGenerate":true},
+		"def_bool":{"type":"boolean","default":true},
+		"def_int":{"type":"integer","default":789},
+		"def_float":{"type":"number","default":456.34},
+		"def_str":{"type":"string","default":"str1"},
+		"def_str1":{"type":"string","default":"st'r2"},
+		"def_arr_str":{"type":"array","default":["one", "two"], "items": {"type":"string"}},
+		"def_obj_str":{"type":"object","default":{"Field1":"aaa"}, "properties": {"Field1" : { "type":"string" }}},
+		"def_time":{"type":"string","format":"date-time","default":"now()","updatedAt":true},
+		"def_uuid":{"type":"string","format":"uuid","default":"uuid()"},
+		"field_max_length":{"type":"string","maxLength":123},
+		"field_required":{"type":"integer"},
+		"field_required2":{"type":"integer"}
+	},
+	"primary_key":["ID"],
+	"required":["field_required","field_required2"],
+	"collection_type":"documents"
+}`
+
+	require.JSONEq(t, exp, string(b))
+}
+
+func TestDefaultsNegative(t *testing.T) {
+	cases := []struct {
+		name  string
+		tp    string
+		input string
+		err   error
+	}{
+		{"int", "integer", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "strconv.ParseInt: parsing \"vbn\": invalid syntax")},
+		{"float", "number", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "strconv.ParseFloat: parsing \"vbn\": invalid syntax")},
+		{"bool", "boolean", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid bool value: vbn")},
+		{"array", "array", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid character 'v' looking for beginning of value")},
+		{"object", "object", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid character 'v' looking for beginning of value")},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := parseDefaultTag(&Field{Type: c.tp}, c.input)
+			assert.Equal(t, c.err, err)
+		})
+	}
 }
 
 func TestDatabaseSchema(t *testing.T) {

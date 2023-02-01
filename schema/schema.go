@@ -29,7 +29,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"strconv"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -48,6 +48,11 @@ const (
 	tagPrimaryKey   = "primaryKey"
 	tagAutoGenerate = "autoGenerate"
 	tagSkip         = "-"
+	tagRequired     = "required"
+	tagDefault      = "default"
+	tagMaxLength    = "maxLength"
+	tagUpdatedAt    = "updatedAt"
+	tagCreatedAt    = "createdAt"
 
 	id = "ID"
 )
@@ -102,15 +107,26 @@ type Field struct {
 	Fields map[string]*Field `json:"properties,omitempty"`
 	Items  *Field            `json:"items,omitempty"`
 
+	Default      any  `json:"default,omitempty"`
 	AutoGenerate bool `json:"autoGenerate,omitempty"`
+	MaxLength    int  `json:"maxLength,omitempty"`
+	UpdatedAt    bool `json:"updatedAt,omitempty"`
+	CreatedAt    bool `json:"createdAt,omitempty"`
+
+	Required []string `json:"required,omitempty"`
+
+	// RequiredTag is used during schema building only
+	RequiredTag bool `json:"-"`
 }
 
 // Schema is top level JSON schema object.
 type Schema struct {
-	Name       string            `json:"title,omitempty"`
-	Desc       string            `json:"description,omitempty"`
+	Name string `json:"title,omitempty"`
+	Desc string `json:"description,omitempty"`
+
 	Fields     map[string]*Field `json:"properties,omitempty"`
 	PrimaryKey []string          `json:"primary_key,omitempty"`
+	Required   []string          `json:"required,omitempty"`
 
 	CollectionType string `json:"collection_type,omitempty"`
 }
@@ -206,77 +222,18 @@ func (sch *Schema) Build() (driver.Schema, error) {
 	return Build(sch)
 }
 
-// parsePrimaryKeyIndex parses primary key tag
-// The tag is expected to be in the form:
-//
-//	primary_key:{index}
-//
-// where {index} is primary key index part order in
-// the composite key. Index starts from 1.
-func parsePrimaryKeyIndex(tag string) (int, error) {
-	i, pks := 1, strings.Split(tag, ":")
-	if len(pks) > 1 {
-		if len(pks) > 2 {
-			return 0, fmt.Errorf("only one colon allowed in the tag")
-		}
+func setRequired(fields map[string]*Field) []string {
+	var r []string
 
-		var err error
-
-		i, err = strconv.Atoi(pks[1])
-		if err != nil {
-			return 0, fmt.Errorf("error parsing primary key index %w", err)
-		}
-
-		if i == 0 {
-			return 0, fmt.Errorf("primary key index starts from 1")
+	for k, v := range fields {
+		if v.RequiredTag {
+			r = append(r, k)
 		}
 	}
 
-	return i, nil
-}
+	sort.Strings(r)
 
-func isTag(name string, tag string) bool {
-	return strings.Compare(name, tag) == 0 || strings.Compare(name, strcase.ToSnake(tag)) == 0
-}
-
-// parseTag parses "tigris" tag and returns recognised tags.
-// It also returns encountered "primary_key" tagged field in "pk" map,
-// which maps field name to primary key index part.
-func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, error) {
-	if tag == "" {
-		return false, nil
-	}
-
-	tagList := strings.Split(tag, ",")
-
-	for _, tag := range tagList {
-		if strings.Compare(tag, tagSkip) == 0 {
-			return true, nil
-		}
-	}
-
-	for _, tag := range tagList {
-		switch {
-		case strings.HasPrefix(tag, tagPrimaryKey) ||
-			strings.HasPrefix(tag, strcase.ToSnake(tagPrimaryKey)):
-			if pk == nil {
-				return false, nil
-			}
-
-			i, err := parsePrimaryKeyIndex(tag)
-			if err != nil {
-				return false, err
-			}
-
-			pk[name] = i
-		case isTag(tag, tagAutoGenerate):
-			field.AutoGenerate = true
-		default:
-			return false, fmt.Errorf("unknown tigris tag: %s", tag)
-		}
-	}
-
-	return false, nil
+	return r
 }
 
 // traverseFields recursively parses the model structure and build the schema structure out of it.
@@ -308,6 +265,12 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 		}
 
 		var f Field
+		var err error
+
+		f.Type, f.Format, err = translateType(field.Type)
+		if err != nil {
+			return err
+		}
 
 		skip, err := parseTag(prefix+fName, field.Tag.Get(tagName), &f, pk)
 		if err != nil {
@@ -316,11 +279,6 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 
 		if skip {
 			continue
-		}
-
-		f.Type, f.Format, err = translateType(field.Type)
-		if err != nil {
-			return err
 		}
 
 		if _, ok := pk[prefix+fName]; ok && !isPrimaryKeyType(f.Type) {
@@ -342,6 +300,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 					return err
 				}
 
+				f.Required = setRequired(f.Fields)
 				continue
 			}
 
@@ -349,6 +308,8 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 			if err = traverseFields(prefix+fName, tp, f.Fields, lpk, nFields); err != nil {
 				return err
 			}
+
+			f.Required = setRequired(f.Fields)
 		} else if f.Type == typeArray {
 			if field.Type.Elem().Kind() == reflect.Struct {
 				f.Items = &Field{
@@ -426,6 +387,7 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 			p  *Field
 			ok bool
 		)
+
 		name := id
 		// Check for existing and not annotated Id and ID fields
 		// add `ID uuid.UUID` if none found
@@ -444,6 +406,8 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 
 		sch.PrimaryKey = append(sch.PrimaryKey, name)
 	}
+
+	sch.Required = setRequired(sch.Fields)
 
 	sch.CollectionType = typ
 

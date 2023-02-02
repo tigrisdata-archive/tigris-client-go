@@ -124,6 +124,10 @@ func (c *grpcDriver) UseDatabase(project string) Database {
 		md = meta.Join(md, meta.Pairs(api.HeaderSchemaSignOff, "true"))
 	}
 
+	if len(HeaderSchemaVersionValue) > 0 {
+		md = meta.Join(md, meta.Pairs(api.HeaderSchemaVersion, HeaderSchemaVersionValue[0]))
+	}
+
 	return &driverCRUD{&grpcCRUD{db: project, branch: c.cfg.Branch, api: c.api, metadata: md}}
 }
 
@@ -277,6 +281,10 @@ func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
 			md = meta.Join(md, meta.Pairs(CookieHeaderKey, incomingCookie))
 		}
+	}
+
+	if len(HeaderSchemaVersionValue) > 0 {
+		md = meta.Join(md, meta.Pairs(api.HeaderSchemaVersion, HeaderSchemaVersionValue[0]))
 	}
 
 	return &grpcCRUD{db: c.db, branch: c.branch, api: c.api, txCtx: resp.GetTxCtx(), metadata: md}, nil

@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -58,6 +59,8 @@ const (
 	tagSort         = "sort"
 	tagFacet        = "facet"
 	tagVector       = "vector"
+
+	tagVersion = "version"
 
 	id = "ID"
 )
@@ -137,6 +140,8 @@ type Field struct {
 
 // Schema is top level JSON schema object.
 type Schema struct {
+	Version int `json:"version,omitempty"`
+
 	Name string `json:"title,omitempty"`
 	Desc string `json:"description,omitempty"`
 
@@ -379,7 +384,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 	return nil
 }
 
-func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
+func fromCollectionModel(schemaVersion int, model interface{}, typ string) (*Schema, error) {
 	t := reflect.TypeOf(model)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -389,7 +394,7 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 		return nil, fmt.Errorf("model should be of struct type, not %s", t.Name())
 	}
 
-	sch := Schema{Name: ModelName(model), Fields: make(map[string]*Field)}
+	sch := Schema{Version: schemaVersion, Name: ModelName(model), Fields: make(map[string]*Field)}
 	pk := make(map[string]int)
 
 	var nFields int
@@ -459,10 +464,10 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 }
 
 // FromCollectionModels converts provided model(s) to the schema structure.
-func FromCollectionModels(tp string, model Model, models ...Model) (map[string]*Schema, error) {
+func FromCollectionModels(schemaVersion int, tp string, model Model, models ...Model) (map[string]*Schema, error) {
 	schemas := make(map[string]*Schema)
 
-	schema, err := fromCollectionModel(model, tp)
+	schema, err := fromCollectionModel(schemaVersion, model, tp)
 	if err != nil {
 		return nil, err
 	}
@@ -470,7 +475,7 @@ func FromCollectionModels(tp string, model Model, models ...Model) (map[string]*
 	schemas[schema.Name] = schema
 
 	for _, m := range models {
-		schema, err = fromCollectionModel(m, tp)
+		schema, err = fromCollectionModel(schemaVersion, m, tp)
 		if err != nil {
 			return nil, err
 		}
@@ -504,13 +509,25 @@ func FromDatabaseModel(dbModel interface{}) (string, map[string]*Schema, error) 
 			name = field.Name
 		}
 
-		skip, err := parseTag(name, field.Tag.Get(tagName), nil, nil)
+		// skip if tag is equal to "-"
+		if strings.Trim(field.Tag.Get(tagName), " ") == "-" {
+			continue
+		}
+
+		var version int
+
+		tags, err := tokenizeTag(field.Tag.Get(tagName))
 		if err != nil {
 			return "", nil, err
 		}
 
-		if skip {
-			continue
+		for tag, val := range tags {
+			if tag == tagVersion {
+				version, err = strconv.Atoi(val)
+				if err != nil {
+					return "", nil, err
+				}
+			}
 		}
 
 		tt := field.Type
@@ -518,7 +535,7 @@ func FromDatabaseModel(dbModel interface{}) (string, map[string]*Schema, error) 
 			tt = field.Type.Elem()
 		}
 
-		sch, err := fromCollectionModel(reflect.New(tt).Elem().Interface(), Documents)
+		sch, err := fromCollectionModel(version, reflect.New(tt).Elem().Interface(), Documents)
 		if err != nil {
 			return "", nil, err
 		}

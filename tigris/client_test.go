@@ -62,6 +62,10 @@ func TestClient(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, DefaultBranch, c.config.Branch)
 
+	cfg.Project = ""
+	_, err = NewClient(ctx, cfg)
+	require.Error(t, err)
+
 	_, err = c.OpenDatabase(setTxCtx(ctx, &Tx{}), &Coll1{})
 	require.Error(t, err)
 

@@ -160,6 +160,11 @@ func TestCollectionSchema(t *testing.T) {
 		ID time.Time
 	}
 
+	type autoID1 struct {
+		ID int64 `json:"id"`
+	}
+
+	// use annotated and not implied ID
 	type autoIDOverride struct {
 		RealID time.Time `tigris:"primaryKey,autoGenerate"`
 		ID     time.Time
@@ -360,6 +365,12 @@ func TestCollectionSchema(t *testing.T) {
 				"ID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
 			},
 			PrimaryKey: []string{"ID"},
+		}, nil},
+		{autoID1{}, &Schema{
+			Name: "auto_id_1", Fields: map[string]*Field{
+				"id": {Type: typeInteger, AutoGenerate: true},
+			},
+			PrimaryKey: []string{"id"},
 		}, nil},
 		{autoIDOverride{}, &Schema{
 			Name: "auto_id_overrides", Fields: map[string]*Field{

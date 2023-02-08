@@ -134,12 +134,12 @@ func TestModelMetadata(t *testing.T) {
 
 	t.Run("all_types", func(t *testing.T) {
 		type Coll2 struct {
-			Int     int
-			Int64   int64
-			Time    time.Time
-			UUID    uuid.UUID
-			String  string
-			Float64 float64
+			Int     int       `json:"int"`
+			Int64   int64     `json:"int64"`
+			Time    time.Time `json:"time"`
+			UUID    uuid.UUID `json:"uuid"`
+			String  string    `json:"string"`
+			Float64 float64   `json:"float64"`
 		}
 
 		d3 := &Coll2{}

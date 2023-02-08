@@ -393,6 +393,8 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 		// add `ID uuid.UUID` if none found
 		if p, ok = sch.Fields["Id"]; ok {
 			name = "Id"
+		} else if p, ok = sch.Fields["id"]; ok {
+			name = "id"
 		} else if p, ok = sch.Fields[id]; !ok {
 			sch.Fields[id] = &Field{Type: typeString, Format: formatUUID, AutoGenerate: true}
 			p = sch.Fields[id]

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//nolint:bodyclose
 package driver
 
 import (
@@ -703,8 +704,8 @@ type httpStreamReader struct {
 
 func (g *httpStreamReader) read() (Document, error) {
 	var res struct {
-		Result *apiHTTP.ReadResponse
-		Error  *api.ErrorDetails
+		Result *apiHTTP.ReadResponse `json:"result"`
+		Error  *api.ErrorDetails     `json:"error"`
 	}
 
 	if err := g.stream.Decode(&res); err != nil {
@@ -767,11 +768,11 @@ type httpSearchReader struct {
 func (g *httpSearchReader) read() (SearchResponse, error) {
 	var res struct {
 		Result struct {
-			Hits   []*api.SearchHit
-			Facets map[string]*api.SearchFacet
-			Meta   *api.SearchMetadata
-		}
-		Error *api.ErrorDetails
+			Hits   []*api.SearchHit            `json:"hits"`
+			Facets map[string]*api.SearchFacet `json:"facets"`
+			Meta   *api.SearchMetadata         `json:"meta"`
+		} `json:"result"`
+		Error *api.ErrorDetails `json:"error"`
 	}
 
 	if err := g.stream.Decode(&res); err != nil {

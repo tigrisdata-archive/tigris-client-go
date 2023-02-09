@@ -88,7 +88,7 @@ func TestTimeseries(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := tigris.OpenDatabaseFromModels(ctx, mdrv, "db1", &Coll1{})
+	db, err := tigris.TestOpenDatabase(ctx, mdrv, "db1", &Coll1{})
 	require.NoError(t, err)
 
 	mdrv.EXPECT().UseDatabase("db1").Return(mdb)

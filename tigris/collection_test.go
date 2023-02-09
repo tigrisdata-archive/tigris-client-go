@@ -178,7 +178,7 @@ func TestCollectionBasic(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := OpenDatabaseFromModels(ctx, m, "db1", &Coll1{}, &Coll2{}, &Coll3{})
+	db, err := TestOpenDatabase(ctx, m, "db1", &Coll1{}, &Coll2{}, &Coll3{})
 	require.NoError(t, err)
 
 	c := GetCollection[Coll1](db)
@@ -297,7 +297,7 @@ func TestCollection_Search(t *testing.T) {
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := OpenDatabaseFromModels(ctx, m, "db1", &Coll1{})
+	db, err := TestOpenDatabase(ctx, m, "db1", &Coll1{})
 	require.NoError(t, err)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb)
@@ -457,7 +457,7 @@ func TestCollectionNegative(t *testing.T) {
 	mit.EXPECT().Err().Return(nil)
 
 	_, err = c.ReadOne(ctx, nil, fields.All)
-	require.Equal(t, errNotFound, err)
+	require.Equal(t, ErrNotFound, err)
 
 	// Test that driver.Error is converted to tigris.Error
 	// by using driver.Error.As and tigris.Error.AsTigrisError interfaces
@@ -597,7 +597,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = OpenDatabaseFromModels(ctx, drv, "db1", &testSchema1{})
+	_, err = TestOpenDatabase(ctx, drv, "db1", &testSchema1{})
 	require.NoError(t, err)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
@@ -637,7 +637,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = OpenDatabaseFromModels(ctx, drv, "db1", &testSchema1{}, &testSchema2{})
+	_, err = TestOpenDatabase(ctx, drv, "db1", &testSchema1{}, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string
@@ -768,14 +768,14 @@ func TestCollection(t *testing.T) {
 	})
 }
 
-func TestOpenDatabase(t *testing.T) {
+func TestOpeningDatabase(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
 
-	db, err := OpenDatabaseFromModels(ctx, m, "db1")
+	db, err := TestOpenDatabase(ctx, m, "db1")
 	require.NoError(t, err)
 	require.NotNil(t, db)
 }

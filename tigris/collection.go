@@ -27,7 +27,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/search"
 )
 
-var errNotFound = fmt.Errorf("document not found")
+var ErrNotFound = fmt.Errorf("document not found")
 
 // Collation allows you to specify string comparison rules. Default is case-sensitive.
 type Collation struct {
@@ -240,7 +240,7 @@ func (c *Collection[T]) ReadOne(ctx context.Context, filter filter.Filter, field
 			return nil, it.Err()
 		}
 
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	return &doc, nil

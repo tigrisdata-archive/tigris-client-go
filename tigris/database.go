@@ -109,8 +109,7 @@ func (db *Database) DeleteBranch(ctx context.Context, name string) (*driver.Dele
 	return inUseDB.DeleteBranch(ctx, name)
 }
 
-// OpenDatabaseFromModels creates Database and collections from the provided collection models.
-func OpenDatabaseFromModels(ctx context.Context, d driver.Driver,
+func openDatabase(ctx context.Context, d driver.Driver,
 	project string, models ...schema.Model,
 ) (*Database, error) {
 	db := newDatabase(project, d)
@@ -128,6 +127,10 @@ func OpenDatabaseFromModels(ctx context.Context, d driver.Driver,
 // OpenDatabase initializes Database from given collection models.
 // It creates Database if necessary.
 // Creates and migrates schemas of the collections which constitutes the Database.
+// This is identical to calling:
+//
+//	client := tigris.NewClient(...)
+//	client.OpenDatabase(...)
 func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 ) (*Database, error) {
 	if getTxCtx(ctx) != nil {
@@ -139,7 +142,7 @@ func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 		return nil, err
 	}
 
-	return OpenDatabaseFromModels(ctx, d, cfg.Project, models...)
+	return openDatabase(ctx, d, cfg.Project, models...)
 }
 
 // GetCollection returns collection object corresponding to collection model T.
@@ -151,4 +154,16 @@ func GetCollection[T schema.Model](db *Database) *Collection[T] {
 
 func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {
 	return &Collection[T]{name: name, db: db.driver.UseDatabase(db.name)}
+}
+
+// TestOpenDatabase allows to provide mocked driver in tests.
+func TestOpenDatabase(ctx context.Context, d driver.Driver,
+	project string, models ...schema.Model,
+) (*Database, error) {
+	return openDatabase(ctx, d, project, models...)
+}
+
+// DropAllCollections allows to drop all database collections.
+func (db *Database) DropAllCollections(ctx context.Context) error {
+	return db.driver.UseDatabase(db.name).DropAllCollections(ctx)
 }

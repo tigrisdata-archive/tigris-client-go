@@ -254,6 +254,12 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 			}
 
 			field.RequiredTag = true
+		case tagIndex:
+			if val != "true" {
+				return false, fmt.Errorf("%w: index field", ErrInvalidBoolTagValue)
+			}
+
+			field.Index = true
 		case tagDefault:
 			if err := parseDefaultTag(field, val); err != nil {
 				return false, fmt.Errorf("%w: %s", ErrInvalidDefaultTag, err)

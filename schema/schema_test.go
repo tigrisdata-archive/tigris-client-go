@@ -430,9 +430,16 @@ func TestCollectionSchema(t *testing.T) {
 func TestDefaults(t *testing.T) {
 	type struct1 struct {
 		Field1 string
+
+		FieldNestedIndexAndReq int `json:"field_nested_index_and_req" tigris:"required,index"`
+		FieldNestedIndex2      int `json:"field_nested_index2" tigris:"index"`
+		FieldNestedRequired    int `json:"field_nested_required" tigris:"required"`
+		FieldNestedRequired2   int `json:"field_nested_required2" tigris:"required"`
 	}
 
 	type TestDefaults struct {
+		FieldIndexAndReq  int      `json:"field_index_and_req" tigris:"required,index"`
+		FieldIndex2       int      `json:"field_index2" tigris:"index"`
 		FieldRequired     int      `json:"field_required" tigris:"required"`
 		FieldRequired2    int      `json:"field_required2" tigris:"required"`
 		FieldMaxLength    string   `json:"field_max_length" tigris:"maxLength:123"`
@@ -463,15 +470,28 @@ func TestDefaults(t *testing.T) {
 		"def_str":{"type":"string","default":"str1"},
 		"def_str1":{"type":"string","default":"st'r2"},
 		"def_arr_str":{"type":"array","default":["one", "two"], "items": {"type":"string"}},
-		"def_obj_str":{"type":"object","default":{"Field1":"aaa"}, "properties": {"Field1" : { "type":"string" }}},
+		"def_obj_str":{
+			"type":"object",
+			"default":{"Field1":"aaa"},
+			"properties": {
+				"Field1" : { "type":"string" },
+				"field_nested_required":{"type":"integer"},
+				"field_nested_required2":{"type":"integer"},
+				"field_nested_index2":{"type":"integer", "index": true},
+				"field_nested_index_and_req":{"type":"integer", "index": true}
+			},
+			"required":["field_nested_index_and_req","field_nested_required","field_nested_required2"]
+		},
 		"def_time":{"type":"string","format":"date-time","default":"now()","updatedAt":true},
 		"def_uuid":{"type":"string","format":"uuid","default":"uuid()"},
 		"field_max_length":{"type":"string","maxLength":123},
 		"field_required":{"type":"integer"},
-		"field_required2":{"type":"integer"}
+		"field_required2":{"type":"integer"},
+		"field_index2":{"type":"integer", "index": true},
+		"field_index_and_req":{"type":"integer", "index": true}
 	},
 	"primary_key":["ID"],
-	"required":["field_required","field_required2"],
+	"required":["field_index_and_req","field_required","field_required2"],
 	"collection_type":"documents"
 }`
 

@@ -53,6 +53,7 @@ const (
 	tagMaxLength    = "maxLength"
 	tagUpdatedAt    = "updatedAt"
 	tagCreatedAt    = "createdAt"
+	tagIndex        = "index"
 
 	id = "ID"
 )
@@ -112,10 +113,11 @@ type Field struct {
 	MaxLength    int  `json:"maxLength,omitempty"`
 	UpdatedAt    bool `json:"updatedAt,omitempty"`
 	CreatedAt    bool `json:"createdAt,omitempty"`
+	Index        bool `json:"index,omitempty"`
 
 	Required []string `json:"required,omitempty"`
 
-	// RequiredTag is used during schema building only
+	// RequiredTag And IndexTag is used during schema building only
 	RequiredTag bool `json:"-"`
 }
 
@@ -127,6 +129,7 @@ type Schema struct {
 	Fields     map[string]*Field `json:"properties,omitempty"`
 	PrimaryKey []string          `json:"primary_key,omitempty"`
 	Required   []string          `json:"required,omitempty"`
+	Index      []string          `json:"index,omitempty"`
 
 	CollectionType string `json:"collection_type,omitempty"`
 }
@@ -223,17 +226,17 @@ func (sch *Schema) Build() (driver.Schema, error) {
 }
 
 func setRequired(fields map[string]*Field) []string {
-	var r []string
+	var req []string
 
 	for k, v := range fields {
 		if v.RequiredTag {
-			r = append(r, k)
+			req = append(req, k)
 		}
 	}
 
-	sort.Strings(r)
+	sort.Strings(req)
 
-	return r
+	return req
 }
 
 // traverseFields recursively parses the model structure and build the schema structure out of it.
@@ -410,7 +413,6 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 	}
 
 	sch.Required = setRequired(sch.Fields)
-
 	sch.CollectionType = typ
 
 	return &sch, nil

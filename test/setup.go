@@ -43,6 +43,7 @@ var (
 	apiPathPrefix = "/v1"
 
 	HTTPRoutes = []string{
+		apiPathPrefix + ("/projects"),
 		apiPathPrefix + ("/projects/*"),
 		apiPathPrefix + ("/collections/*"),
 		apiPathPrefix + ("/documents/*"),

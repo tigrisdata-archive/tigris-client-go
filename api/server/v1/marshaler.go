@@ -15,7 +15,6 @@
 package api
 
 import (
-	"encoding/json"
 	"io"
 	"net/url"
 	"strings"
@@ -32,7 +31,7 @@ const (
 )
 
 type CustomDecoder struct {
-	jsonDecoder *json.Decoder
+	jsonDecoder *jsoniter.Decoder
 	reader      io.Reader
 }
 
@@ -42,10 +41,8 @@ func (f CustomDecoder) Decode(dst interface{}) error {
 		if err != nil {
 			return err
 		}
-
 		return unmarshalInternal(byteArr, dst)
 	}
-
 	return f.jsonDecoder.Decode(dst)
 }
 
@@ -57,7 +54,7 @@ type CustomMarshaler struct {
 
 func (c *CustomMarshaler) NewDecoder(r io.Reader) runtime.Decoder {
 	return CustomDecoder{
-		jsonDecoder: json.NewDecoder(r),
+		jsonDecoder: jsoniter.NewDecoder(r),
 		reader:      r,
 	}
 }
@@ -75,11 +72,7 @@ func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
 	case map[string]proto.Message:
 		// this comes from GRPC-gateway streaming code
 		if e, ok := ty["error"]; ok {
-			if t, ok := e.(*spb.Status); ok {
-				return MarshalStatus(t)
-			}
-
-			return nil, Errorf(Code_INTERNAL, "unexpected error type")
+			return MarshalStatus(e.(*spb.Status))
 		}
 	case *spb.Status:
 		return MarshalStatus(ty)
@@ -87,16 +80,13 @@ func (c *CustomMarshaler) Marshal(v interface{}) ([]byte, error) {
 		if len(ty.Collections) == 0 {
 			return []byte(`{"collections":[]}`), nil
 		}
-
 		return c.JSONBuiltin.Marshal(v)
 	case *ListProjectsResponse:
 		if len(ty.Projects) == 0 {
 			return []byte(`{"projects":[]}`), nil
 		}
-
 		return c.JSONBuiltin.Marshal(v)
 	}
-
 	return c.JSONBuiltin.Marshal(v)
 }
 
@@ -104,7 +94,6 @@ func (c *CustomMarshaler) Unmarshal(data []byte, v interface{}) error {
 	if _, ok := v.(*GetAccessTokenRequest); ok {
 		return unmarshalInternal(data, v)
 	}
-
 	return c.JSONBuiltin.Unmarshal(data, v)
 }
 
@@ -124,10 +113,8 @@ func unmarshalInternal(data []byte, v interface{}) error {
 			v.ClientId = values.Get("client_id")
 			v.ClientSecret = values.Get("client_secret")
 		}
-
 		return nil
 	}
-
 	return Errorf(Code_INTERNAL, "not supported")
 }
 
@@ -135,11 +122,9 @@ func unmarshalInternal(data []byte, v interface{}) error {
 // the unmarshalling and will be avoiding any extra allocation/copying.
 func (x *ReadRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "project":
@@ -150,19 +135,24 @@ func (x *ReadRequest) UnmarshalJSON(data []byte) error {
 			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
 				return err
 			}
+		case "branch":
+			if err := jsoniter.Unmarshal(value, &x.Branch); err != nil {
+				return err
+			}
 		case "filter":
 			// not decoding it here and let it decode during filter parsing
 			x.Filter = value
 		case "fields":
 			// not decoding it here and let it decode during fields parsing
 			x.Fields = value
+		case "sort":
+			x.Sort = value
 		case "options":
 			if err := jsoniter.Unmarshal(value, &x.Options); err != nil {
 				return err
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -175,56 +165,108 @@ func (x *SearchRequest) UnmarshalJSON(data []byte) error {
 	}
 
 	for key, value := range mp {
+		var v interface{}
+
 		switch key {
 		case "project":
-			if err := jsoniter.Unmarshal(value, &x.Project); err != nil {
-				return err
-			}
+			v = &x.Project
 		case "collection":
-			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
-				return err
-			}
+			v = &x.Collection
+		case "branch":
+			v = &x.Branch
 		case "search_fields":
-			if err := jsoniter.Unmarshal(value, &x.SearchFields); err != nil {
-				return err
-			}
+			v = &x.SearchFields
 		case "q":
-			if err := jsoniter.Unmarshal(value, &x.Q); err != nil {
-				return err
-			}
+			v = &x.Q
 		case "filter":
 			// not decoding it here and let it decode during filter parsing
 			x.Filter = value
+			continue
 		case "facet":
 			// delaying the facet deserialization to dedicated handler
 			x.Facet = value
+			continue
 		case "sort":
 			// delaying the sort deserialization
 			x.Sort = value
+			continue
 		case "include_fields":
-			if err := jsoniter.Unmarshal(value, &x.IncludeFields); err != nil {
-				return err
-			}
+			v = &x.IncludeFields
 		case "exclude_fields":
-			if err := jsoniter.Unmarshal(value, &x.ExcludeFields); err != nil {
-				return err
-			}
+			v = &x.ExcludeFields
 		case "page_size":
-			if err := jsoniter.Unmarshal(value, &x.PageSize); err != nil {
-				return err
-			}
+			v = &x.PageSize
 		case "page":
-			if err := jsoniter.Unmarshal(value, &x.Page); err != nil {
-				return err
-			}
+			v = &x.Page
 		case "collation":
-			if err := jsoniter.Unmarshal(value, &x.Collation); err != nil {
-				return err
-			}
+			v = &x.Collation
+		default:
+			continue
+		}
+
+		if err := jsoniter.Unmarshal(value, v); err != nil {
+			return err
 		}
 	}
 
 	return nil
+}
+
+func (x *ImportRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+
+	for key, value := range mp {
+		var v interface{}
+
+		switch key {
+		case "primary_key":
+			v = &x.PrimaryKey
+		case "autogenerated":
+			v = &x.Autogenerated
+		case "create_collection":
+			v = &x.CreateCollection
+		case "project":
+			v = &x.Project
+		case "collection":
+			v = &x.Collection
+		case "branch":
+			v = &x.Branch
+		case "options":
+			v = &x.Options
+		case "documents":
+			var docs []jsoniter.RawMessage
+			if err := jsoniter.Unmarshal(value, &docs); err != nil {
+				return err
+			}
+
+			x.Documents = make([][]byte, len(docs))
+			for i := 0; i < len(docs); i++ {
+				x.Documents[i] = docs[i]
+			}
+			continue
+		default:
+			continue
+		}
+
+		if err := jsoniter.Unmarshal(value, v); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (x *ImportResponse) MarshalJSON() ([]byte, error) {
+	keys := make([]jsoniter.RawMessage, 0, len(x.Keys))
+	for _, k := range x.Keys {
+		keys = append(keys, k)
+	}
+
+	return jsoniter.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, Keys: keys})
 }
 
 // UnmarshalJSON on InsertRequest avoids unmarshalling user document. We only need to extract primary/index keys from
@@ -239,15 +281,17 @@ func (x *InsertRequest) UnmarshalJSON(data []byte) error {
 	}
 
 	for key, value := range mp {
+		var v interface{}
+
 		switch key {
 		case "project":
-			if err := jsoniter.Unmarshal(value, &x.Project); err != nil {
-				return err
-			}
+			v = &x.Project
 		case "collection":
-			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
-				return err
-			}
+			v = &x.Collection
+		case "branch":
+			v = &x.Branch
+		case "options":
+			v = &x.Options
 		case "documents":
 			var docs []jsoniter.RawMessage
 			if err := jsoniter.Unmarshal(value, &docs); err != nil {
@@ -258,10 +302,13 @@ func (x *InsertRequest) UnmarshalJSON(data []byte) error {
 			for i := 0; i < len(docs); i++ {
 				x.Documents[i] = docs[i]
 			}
-		case "options":
-			if err := jsoniter.Unmarshal(value, &x.Options); err != nil {
-				return err
-			}
+			continue
+		default:
+			continue
+		}
+
+		if err := jsoniter.Unmarshal(value, v); err != nil {
+			return err
 		}
 	}
 
@@ -274,11 +321,9 @@ func (x *InsertRequest) UnmarshalJSON(data []byte) error {
 // the relevant keys from the user docs and should pass it as-is to the underlying engine.
 func (x *ReplaceRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "project":
@@ -287,6 +332,10 @@ func (x *ReplaceRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "collection":
 			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
+			}
+		case "branch":
+			if err := jsoniter.Unmarshal(value, &x.Branch); err != nil {
 				return err
 			}
 		case "documents":
@@ -305,7 +354,6 @@ func (x *ReplaceRequest) UnmarshalJSON(data []byte) error {
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -313,11 +361,9 @@ func (x *ReplaceRequest) UnmarshalJSON(data []byte) error {
 // the unmarshalling and will be avoiding any extra allocation/copying.
 func (x *UpdateRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "project":
@@ -326,6 +372,10 @@ func (x *UpdateRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "collection":
 			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
+			}
+		case "branch":
+			if err := jsoniter.Unmarshal(value, &x.Branch); err != nil {
 				return err
 			}
 		case "fields":
@@ -340,7 +390,6 @@ func (x *UpdateRequest) UnmarshalJSON(data []byte) error {
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -348,11 +397,9 @@ func (x *UpdateRequest) UnmarshalJSON(data []byte) error {
 // the unmarshalling and will be avoiding any extra allocation/copying.
 func (x *DeleteRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "project":
@@ -361,6 +408,10 @@ func (x *DeleteRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "collection":
 			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
+			}
+		case "branch":
+			if err := jsoniter.Unmarshal(value, &x.Branch); err != nil {
 				return err
 			}
 		case "filter":
@@ -372,18 +423,15 @@ func (x *DeleteRequest) UnmarshalJSON(data []byte) error {
 			}
 		}
 	}
-
 	return nil
 }
 
 // UnmarshalJSON on CreateCollectionRequest avoids unmarshalling schema. The req handler deserializes the schema.
 func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "project":
@@ -392,6 +440,10 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "collection":
 			if err := jsoniter.Unmarshal(value, &x.Collection); err != nil {
+				return err
+			}
+		case "branch":
+			if err := jsoniter.Unmarshal(value, &x.Branch); err != nil {
 				return err
 			}
 		case "only_create":
@@ -413,11 +465,9 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 // UnmarshalJSON on QueryTimeSeriesMetricsRequest. Handles enum.
 func (x *QueryTimeSeriesMetricsRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "db":
@@ -446,11 +496,9 @@ func (x *QueryTimeSeriesMetricsRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "tigris_operation":
 			var t string
-
 			if err := jsoniter.Unmarshal(value, &t); err != nil {
 				return err
 			}
-
 			switch strings.ToUpper(t) {
 			case "ALL":
 				x.TigrisOperation = TigrisOperation_ALL
@@ -463,11 +511,9 @@ func (x *QueryTimeSeriesMetricsRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "space_aggregation":
 			var t string
-
 			if err := jsoniter.Unmarshal(value, &t); err != nil {
 				return err
 			}
-
 			switch strings.ToUpper(t) {
 			case "AVG":
 				x.SpaceAggregation = MetricQuerySpaceAggregation_AVG
@@ -484,11 +530,9 @@ func (x *QueryTimeSeriesMetricsRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "function":
 			var t string
-
 			if err := jsoniter.Unmarshal(value, &t); err != nil {
 				return err
 			}
-
 			switch strings.ToUpper(t) {
 			case "RATE":
 				x.Function = MetricQueryFunction_RATE
@@ -499,44 +543,36 @@ func (x *QueryTimeSeriesMetricsRequest) UnmarshalJSON(data []byte) error {
 			}
 		case "additional_functions":
 			var additionalFunctionRaw []jsoniter.RawMessage
-
 			if err := jsoniter.Unmarshal(value, &additionalFunctionRaw); err != nil {
 				return err
 			}
 
 			x.AdditionalFunctions = []*AdditionalFunction{}
-
 			for i := 0; i < len(additionalFunctionRaw); i++ {
 				additionalFunc, err := unmarshalAdditionalFunction(additionalFunctionRaw[i])
 				if err != nil {
 					return err
 				}
-
 				x.AdditionalFunctions = append(x.AdditionalFunctions, additionalFunc)
 			}
 		}
 	}
-
 	return nil
 }
 
 // UnmarshalJSON on GetAccessTokenRequest. Handles enum.
 func (x *GetAccessTokenRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "grant_type":
 			var grant string
-
 			if err := jsoniter.Unmarshal(value, &grant); err != nil {
 				return err
 			}
-
 			switch strings.ToUpper(grant) {
 			case "REFRESH_TOKEN":
 				x.GrantType = GrantType_REFRESH_TOKEN
@@ -557,19 +593,18 @@ func (x *GetAccessTokenRequest) UnmarshalJSON(data []byte) error {
 			}
 		}
 	}
-
 	return nil
 }
 
 type collDesc struct {
 	Collection string              `json:"collection"`
 	Metadata   *CollectionMetadata `json:"metadata"`
-	Schema     json.RawMessage     `json:"schema"`
+	Schema     jsoniter.RawMessage `json:"schema"`
 	Size       int64               `json:"size"`
 }
 
 func (x *DescribeCollectionResponse) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&collDesc{
+	return jsoniter.Marshal(&collDesc{
 		Collection: x.Collection,
 		Metadata:   x.Metadata,
 		Schema:     x.Schema,
@@ -579,7 +614,6 @@ func (x *DescribeCollectionResponse) MarshalJSON() ([]byte, error) {
 
 func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 	resp := struct {
-		Project     string            `json:"project"`
 		Metadata    *DatabaseMetadata `json:"metadata"`
 		Collections []*collDesc       `json:"collections"`
 		Size        int64             `json:"size"`
@@ -587,6 +621,7 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 	}{
 		Metadata: x.Metadata,
 		Size:     x.Size,
+		Branches: x.Branches,
 	}
 
 	for _, v := range x.Collections {
@@ -598,18 +633,14 @@ func (x *DescribeDatabaseResponse) MarshalJSON() ([]byte, error) {
 		})
 	}
 
-	resp.Branches = append(resp.Branches, x.Branches...)
-
-	return json.Marshal(&resp)
+	return jsoniter.Marshal(&resp)
 }
 
 func (x *InsertUserMetadataRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "metadataKey":
@@ -620,17 +651,14 @@ func (x *InsertUserMetadataRequest) UnmarshalJSON(data []byte) error {
 			x.Value = value
 		}
 	}
-
 	return nil
 }
 
 func (x *UpdateUserMetadataRequest) UnmarshalJSON(data []byte) error {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return err
 	}
-
 	for key, value := range mp {
 		switch key {
 		case "metadataKey":
@@ -641,90 +669,159 @@ func (x *UpdateUserMetadataRequest) UnmarshalJSON(data []byte) error {
 			x.Value = value
 		}
 	}
-
 	return nil
 }
 
 func (x *GetUserMetadataResponse) MarshalJSON() ([]byte, error) {
 	resp := struct {
-		MetadataKey string          `json:"metadataKey,omitempty"`
-		NamespaceID uint32          `json:"namespaceId,omitempty"`
-		UserID      string          `json:"userId,omitempty"`
-		Value       json.RawMessage `json:"value,omitempty"`
+		MetadataKey string              `json:"metadataKey,omitempty"`
+		NamespaceID uint32              `json:"namespaceId,omitempty"`
+		UserID      string              `json:"userId,omitempty"`
+		Value       jsoniter.RawMessage `json:"value,omitempty"`
 	}{
 		MetadataKey: x.MetadataKey,
 		NamespaceID: x.NamespaceId,
 		UserID:      x.UserId,
 		Value:       x.Value,
 	}
-
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 func (x *InsertUserMetadataResponse) MarshalJSON() ([]byte, error) {
 	resp := struct {
-		MetadataKey string          `json:"metadataKey,omitempty"`
-		NamespaceID uint32          `json:"namespaceId,omitempty"`
-		UserID      string          `json:"userId,omitempty"`
-		Value       json.RawMessage `json:"value,omitempty"`
+		MetadataKey string              `json:"metadataKey,omitempty"`
+		NamespaceID uint32              `json:"namespaceId,omitempty"`
+		UserID      string              `json:"userId,omitempty"`
+		Value       jsoniter.RawMessage `json:"value,omitempty"`
 	}{
 		MetadataKey: x.MetadataKey,
 		NamespaceID: x.NamespaceId,
 		UserID:      x.UserId,
 		Value:       x.Value,
 	}
-
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 func (x *UpdateUserMetadataResponse) MarshalJSON() ([]byte, error) {
 	resp := struct {
-		MetadataKey string          `json:"metadataKey,omitempty"`
-		NamespaceID uint32          `json:"namespaceId,omitempty"`
-		UserID      string          `json:"userId,omitempty"`
-		Value       json.RawMessage `json:"value,omitempty"`
+		MetadataKey string              `json:"metadataKey,omitempty"`
+		NamespaceID uint32              `json:"namespaceId,omitempty"`
+		UserID      string              `json:"userId,omitempty"`
+		Value       jsoniter.RawMessage `json:"value,omitempty"`
 	}{
 		MetadataKey: x.MetadataKey,
 		NamespaceID: x.NamespaceId,
 		UserID:      x.UserId,
 		Value:       x.Value,
 	}
+	return jsoniter.Marshal(resp)
+}
 
-	return json.Marshal(resp)
+func (x *InsertNamespaceMetadataRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "metadataKey":
+			if err := jsoniter.Unmarshal(value, &x.MetadataKey); err != nil {
+				return err
+			}
+		case "value":
+			x.Value = value
+		}
+	}
+	return nil
+}
+
+func (x *UpdateNamespaceMetadataRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+	for key, value := range mp {
+		switch key {
+		case "metadataKey":
+			if err := jsoniter.Unmarshal(value, &x.MetadataKey); err != nil {
+				return err
+			}
+		case "value":
+			x.Value = value
+		}
+	}
+	return nil
+}
+
+func (x *GetNamespaceMetadataResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		MetadataKey string              `json:"metadataKey,omitempty"`
+		NamespaceID uint32              `json:"namespaceId,omitempty"`
+		Value       jsoniter.RawMessage `json:"value,omitempty"`
+	}{
+		MetadataKey: x.MetadataKey,
+		NamespaceID: x.NamespaceId,
+		Value:       x.Value,
+	}
+	return jsoniter.Marshal(resp)
+}
+
+func (x *InsertNamespaceMetadataResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		MetadataKey string              `json:"metadataKey,omitempty"`
+		NamespaceID uint32              `json:"namespaceId,omitempty"`
+		Value       jsoniter.RawMessage `json:"value,omitempty"`
+	}{
+		MetadataKey: x.MetadataKey,
+		NamespaceID: x.NamespaceId,
+		Value:       x.Value,
+	}
+	return jsoniter.Marshal(resp)
+}
+
+func (x *UpdateNamespaceMetadataResponse) MarshalJSON() ([]byte, error) {
+	resp := struct {
+		MetadataKey string              `json:"metadataKey,omitempty"`
+		NamespaceID uint32              `json:"namespaceId,omitempty"`
+		Value       jsoniter.RawMessage `json:"value,omitempty"`
+	}{
+		MetadataKey: x.MetadataKey,
+		NamespaceID: x.NamespaceId,
+		Value:       x.Value,
+	}
+	return jsoniter.Marshal(resp)
 }
 
 // Proper marshal timestamp in metadata.
 type dmlResponse struct {
-	Metadata      Metadata          `json:"metadata,omitempty"`
-	Status        string            `json:"status,omitempty"`
-	ModifiedCount int32             `json:"modified_count,omitempty"`
-	Keys          []json.RawMessage `json:"keys,omitempty"`
+	Metadata      Metadata              `json:"metadata,omitempty"`
+	Status        string                `json:"status,omitempty"`
+	ModifiedCount int32                 `json:"modified_count,omitempty"`
+	Keys          []jsoniter.RawMessage `json:"keys,omitempty"`
 }
 
 func (x *InsertResponse) MarshalJSON() ([]byte, error) {
-	keys := make([]json.RawMessage, 0, len(x.Keys))
+	keys := make([]jsoniter.RawMessage, 0, len(x.Keys))
 	for _, k := range x.Keys {
 		keys = append(keys, k)
 	}
-
-	return json.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, Keys: keys})
+	return jsoniter.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, Keys: keys})
 }
 
 func (x *ReplaceResponse) MarshalJSON() ([]byte, error) {
-	keys := make([]json.RawMessage, 0, len(x.Keys))
+	keys := make([]jsoniter.RawMessage, 0, len(x.Keys))
 	for _, k := range x.Keys {
 		keys = append(keys, k)
 	}
-
-	return json.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, Keys: keys})
+	return jsoniter.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, Keys: keys})
 }
 
 func (x *DeleteResponse) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status})
+	return jsoniter.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status})
 }
 
 func (x *UpdateResponse) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, ModifiedCount: x.ModifiedCount})
+	return jsoniter.Marshal(&dmlResponse{Metadata: CreateMDFromResponseMD(x.Metadata), Status: x.Status, ModifiedCount: x.ModifiedCount})
 }
 
 // MarshalJSON on read response avoid any encoding/decoding on x.Data. With this approach we are not doing any extra
@@ -735,15 +832,15 @@ func (x *UpdateResponse) MarshalJSON() ([]byte, error) {
 // the openAPI specs needs to be specified Data as object instead of bytes.
 func (x *ReadResponse) MarshalJSON() ([]byte, error) {
 	resp := struct {
-		Data        json.RawMessage `json:"data,omitempty"`
-		Metadata    Metadata        `json:"metadata,omitempty"`
-		ResumeToken []byte          `json:"resume_token,omitempty"`
+		Data        jsoniter.RawMessage `json:"data,omitempty"`
+		Metadata    Metadata            `json:"metadata,omitempty"`
+		ResumeToken []byte              `json:"resume_token,omitempty"`
 	}{
 		Data:        x.Data,
 		Metadata:    CreateMDFromResponseMD(x.Metadata),
 		ResumeToken: x.ResumeToken,
 	}
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 // Explicit custom marshalling of some search data structures required
@@ -763,23 +860,21 @@ func (x *SearchResponse) MarshalJSON() ([]byte, error) {
 	if resp.Hits == nil {
 		resp.Hits = make([]*SearchHit, 0)
 	}
-
 	if resp.Facets == nil {
 		resp.Facets = make(map[string]*SearchFacet)
 	}
-
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 func (x *SearchHit) MarshalJSON() ([]byte, error) {
 	resp := struct {
-		Data     json.RawMessage   `json:"data,omitempty"`
-		Metadata SearchHitMetadata `json:"metadata,omitempty"`
+		Data     jsoniter.RawMessage `json:"data,omitempty"`
+		Metadata SearchHitMetadata   `json:"metadata,omitempty"`
 	}{
 		Data:     x.Data,
 		Metadata: CreateMDFromSearchMD(x.Metadata),
 	}
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 func (x *SearchMetadata) MarshalJSON() ([]byte, error) {
@@ -792,7 +887,7 @@ func (x *SearchMetadata) MarshalJSON() ([]byte, error) {
 		TotalPages: x.TotalPages,
 		Page:       x.Page,
 	}
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 func (x *SearchFacet) MarshalJSON() ([]byte, error) {
@@ -806,7 +901,7 @@ func (x *SearchFacet) MarshalJSON() ([]byte, error) {
 	if resp.Counts == nil {
 		resp.Counts = make([]*FacetCount, 0)
 	}
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 func (x *FacetStats) MarshalJSON() ([]byte, error) {
@@ -823,7 +918,7 @@ func (x *FacetStats) MarshalJSON() ([]byte, error) {
 		Sum:   x.Sum,
 		Count: x.Count,
 	}
-	return json.Marshal(resp)
+	return jsoniter.Marshal(resp)
 }
 
 type SearchHitMetadata struct {
@@ -839,21 +934,17 @@ type Metadata struct {
 
 func CreateMDFromResponseMD(x *ResponseMetadata) Metadata {
 	var md Metadata
-
 	if x == nil {
 		return md
 	}
-
 	if x.CreatedAt != nil {
 		tm := x.CreatedAt.AsTime()
 		md.CreatedAt = &tm
 	}
-
 	if x.UpdatedAt != nil {
 		tm := x.UpdatedAt.AsTime()
 		md.UpdatedAt = &tm
 	}
-
 	if x.DeletedAt != nil {
 		tm := x.DeletedAt.AsTime()
 		md.DeletedAt = &tm
@@ -864,16 +955,13 @@ func CreateMDFromResponseMD(x *ResponseMetadata) Metadata {
 
 func CreateMDFromSearchMD(x *SearchHitMeta) SearchHitMetadata {
 	var md SearchHitMetadata
-
 	if x == nil {
 		return md
 	}
-
 	if x.CreatedAt != nil {
 		tm := x.CreatedAt.AsTime()
 		md.CreatedAt = &tm
 	}
-
 	if x.UpdatedAt != nil {
 		tm := x.UpdatedAt.AsTime()
 		md.UpdatedAt = &tm
@@ -884,36 +972,29 @@ func CreateMDFromSearchMD(x *SearchHitMeta) SearchHitMetadata {
 
 func unmarshalAdditionalFunction(data []byte) (*AdditionalFunction, error) {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return nil, err
 	}
-
 	result := &AdditionalFunction{}
-
 	for key, value := range mp {
 		if key == "rollup" {
 			rollup, err := unmarshalRollup(value)
 			if err != nil {
 				return nil, err
 			}
-
 			result.Rollup = rollup
 		}
 	}
-
 	return result, nil
 }
 
 func unmarshalRollup(data []byte) (*RollupFunction, error) {
 	var mp map[string]jsoniter.RawMessage
-
 	if err := jsoniter.Unmarshal(data, &mp); err != nil {
 		return nil, err
 	}
 
 	result := &RollupFunction{}
-
 	for key, value := range mp {
 		switch key {
 		case "aggregator":
@@ -937,14 +1018,11 @@ func unmarshalRollup(data []byte) (*RollupFunction, error) {
 			}
 		case "interval":
 			var t int64
-
 			if err := jsoniter.Unmarshal(value, &t); err != nil {
 				return nil, err
 			}
-
 			result.Interval = t
 		}
 	}
-
 	return result, nil
 }

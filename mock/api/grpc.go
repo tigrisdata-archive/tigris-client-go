@@ -275,6 +275,21 @@ func (mr *MockTigrisServerMockRecorder) ListAppKeys(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppKeys", reflect.TypeOf((*MockTigrisServer)(nil).ListAppKeys), arg0, arg1)
 }
 
+// ListBranches mocks base method.
+func (m *MockTigrisServer) ListBranches(arg0 context.Context, arg1 *api.ListBranchesRequest) (*api.ListBranchesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListBranches", arg0, arg1)
+	ret0, _ := ret[0].(*api.ListBranchesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListBranches indicates an expected call of ListBranches.
+func (mr *MockTigrisServerMockRecorder) ListBranches(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBranches", reflect.TypeOf((*MockTigrisServer)(nil).ListBranches), arg0, arg1)
+}
+
 // ListCollections mocks base method.
 func (m *MockTigrisServer) ListCollections(arg0 context.Context, arg1 *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
 	m.ctrl.T.Helper()

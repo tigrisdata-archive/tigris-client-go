@@ -309,162 +309,177 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	defer cancel()
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
-
-	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-
-	setGRPCTxCtx(ctx, txCtx, metadata2.MD{})
-
-	mc.EXPECT().Insert(gomock.Any(),
-		pm(&api.InsertRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
-			Options:    &api.InsertRequestOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-
-			return &api.InsertResponse{}, nil
-		})
-
-	_, err := c.Insert(ctx, "c1", doc1)
-	require.NoError(t, err)
-
 	doc123 := []Document{
 		Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`), Document(`{"K1":"vK1","K2":2,"D1":"vD2"}`),
 		Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`),
 	}
 
-	mc.EXPECT().Insert(gomock.Any(),
-		pm(&api.InsertRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
-			Options:    &api.InsertRequestOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
 
-			return &api.InsertResponse{}, nil
-		})
+	setGRPCTxCtx(ctx, txCtx, metadata2.MD{})
 
-	_, err = c.Insert(ctx, "c1", doc123)
-	require.NoError(t, err)
+	t.Run("insert", func(t *testing.T) {
+		mc.EXPECT().Insert(gomock.Any(),
+			pm(&api.InsertRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+				Options:    &api.InsertRequestOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-	mc.EXPECT().Replace(gomock.Any(),
-		pm(&api.ReplaceRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
-			Options:    &api.ReplaceRequestOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.ReplaceRequest) (*api.ReplaceResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+				return &api.InsertResponse{}, nil
+			})
 
-			return &api.ReplaceResponse{}, nil
-		})
+		_, err := c.Insert(ctx, "c1", doc1)
+		require.NoError(t, err)
 
-	_, err = c.Replace(ctx, "c1", doc123)
-	require.NoError(t, err)
+		mc.EXPECT().Insert(gomock.Any(),
+			pm(&api.InsertRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+				Options:    &api.InsertRequestOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-	mc.EXPECT().Update(gomock.Any(),
-		pm(&api.UpdateRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Fields:     []byte(`{"fields":1}`),
-			Options:    &api.UpdateRequestOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.UpdateRequest) (*api.UpdateResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+				return &api.InsertResponse{}, nil
+			})
 
-			return &api.UpdateResponse{}, nil
-		})
+		_, err = c.Insert(ctx, "c1", doc123)
+		require.NoError(t, err)
+	})
 
-	_, err = c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
-	require.NoError(t, err)
+	t.Run("replace", func(t *testing.T) {
+		mc.EXPECT().Replace(gomock.Any(),
+			pm(&api.ReplaceRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+				Options:    &api.ReplaceRequestOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.ReplaceRequest) (*api.ReplaceResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-	mc.EXPECT().Read(
-		pm(&api.ReadRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Fields:     []byte(`{"fields":"value"}`),
-			Options:    &api.ReadRequestOptions{},
-		}), gomock.Any()).Return(nil)
+				return &api.ReplaceResponse{}, nil
+			})
 
-	it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
-	require.NoError(t, err)
+		_, err := c.Replace(ctx, "c1", doc123)
+		require.NoError(t, err)
+	})
 
-	require.False(t, it.Next(nil))
+	t.Run("update", func(t *testing.T) {
+		mc.EXPECT().Update(gomock.Any(),
+			pm(&api.UpdateRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Fields:     []byte(`{"fields":1}`),
+				Options:    &api.UpdateRequestOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.UpdateRequest) (*api.UpdateResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-	mc.EXPECT().Delete(gomock.Any(),
-		pm(&api.DeleteRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Options:    &api.DeleteRequestOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.DeleteRequest) (*api.DeleteResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+				return &api.UpdateResponse{}, nil
+			})
 
-			return &api.DeleteResponse{}, nil
-		})
+		_, err := c.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
+		require.NoError(t, err)
+	})
 
-	_, err = c.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
-	require.NoError(t, err)
+	t.Run("read", func(t *testing.T) {
+		mc.EXPECT().Read(
+			pm(&api.ReadRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Fields:     []byte(`{"fields":"value"}`),
+				Options:    &api.ReadRequestOptions{},
+			}), gomock.Any()).Return(nil)
 
-	mc.EXPECT().ListCollections(gomock.Any(),
-		pm(&api.ListCollectionsRequest{
-			Project: "db1",
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+		it, err := c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
+		require.NoError(t, err)
 
-			return &api.ListCollectionsResponse{Collections: []*api.CollectionInfo{
-				{Collection: "lc1"},
-				{Collection: "lc2"},
-			}}, nil
-		})
+		require.False(t, it.Next(nil))
+	})
 
-	colls, err := c.ListCollections(ctx)
-	require.NoError(t, err)
-	require.Equal(t, []string{"lc1", "lc2"}, colls)
+	t.Run("delete", func(t *testing.T) {
+		mc.EXPECT().Delete(gomock.Any(),
+			pm(&api.DeleteRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Options:    &api.DeleteRequestOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.DeleteRequest) (*api.DeleteResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-	sch := `{"schema":"field"}`
+				return &api.DeleteResponse{}, nil
+			})
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Schema:     []byte(sch),
-			Options:    &api.CollectionOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (
-			*api.CreateOrUpdateCollectionResponse, error,
-		) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+		_, err := c.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
+		require.NoError(t, err)
+	})
 
-			return &api.CreateOrUpdateCollectionResponse{}, nil
-		})
+	t.Run("list_collections", func(t *testing.T) {
+		mc.EXPECT().ListCollections(gomock.Any(),
+			pm(&api.ListCollectionsRequest{
+				Project: "db1",
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-	err = c.CreateOrUpdateCollection(ctx, "c1", Schema(sch))
-	require.NoError(t, err)
+				return &api.ListCollectionsResponse{Collections: []*api.CollectionInfo{
+					{Collection: "lc1"},
+					{Collection: "lc2"},
+				}}, nil
+			})
 
-	mc.EXPECT().DropCollection(gomock.Any(),
-		pm(&api.DropCollectionRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Options:    &api.CollectionOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.DropCollectionRequest) (*api.DropCollectionResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+		colls, err := c.ListCollections(ctx)
+		require.NoError(t, err)
+		require.Equal(t, []string{"lc1", "lc2"}, colls)
+	})
 
-			return &api.DropCollectionResponse{}, nil
-		})
+	t.Run("create_or_update_collection", func(t *testing.T) {
+		sch := `{"schema":"field"}`
 
-	err = c.DropCollection(ctx, "c1")
-	require.NoError(t, err)
+		mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Schema:     []byte(sch),
+				Options:    &api.CollectionOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (
+				*api.CreateOrUpdateCollectionResponse, error,
+			) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+				return &api.CreateOrUpdateCollectionResponse{}, nil
+			})
+
+		err := c.CreateOrUpdateCollection(ctx, "c1", Schema(sch))
+		require.NoError(t, err)
+	})
+
+	t.Run("drop_collection", func(t *testing.T) {
+		mc.EXPECT().DropCollection(gomock.Any(),
+			pm(&api.DropCollectionRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Options:    &api.CollectionOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.DropCollectionRequest) (*api.DropCollectionResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+				return &api.DropCollectionResponse{}, nil
+			})
+
+		err := c.DropCollection(ctx, "c1")
+		require.NoError(t, err)
+	})
 }
 
 func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
@@ -476,136 +491,168 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	db := c.UseDatabase("db1")
 
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
-
 	options := &api.WriteOptions{}
 
-	mc.EXPECT().Insert(gomock.Any(),
-		pm(&api.InsertRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
-			Options:    &api.InsertRequestOptions{WriteOptions: options},
-		})).Return(&api.InsertResponse{Status: "inserted"}, nil)
+	t.Run("insert", func(t *testing.T) {
+		mc.EXPECT().Insert(gomock.Any(),
+			pm(&api.InsertRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+				Options:    &api.InsertRequestOptions{WriteOptions: options},
+			})).Return(&api.InsertResponse{Status: "inserted"}, nil)
 
-	insResp, err := db.Insert(ctx, "c1", doc1, &InsertOptions{WriteOptions: options})
-	require.NoError(t, err)
-	require.Equal(t, "inserted", insResp.Status)
-
-	mc.EXPECT().Replace(gomock.Any(),
-		pm(&api.ReplaceRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
-			Options:    &api.ReplaceRequestOptions{WriteOptions: options},
-		})).Return(&api.ReplaceResponse{Status: "replaced"}, nil)
-
-	repResp, err := db.Replace(ctx, "c1", doc1, &ReplaceOptions{WriteOptions: options})
-	require.NoError(t, err)
-	require.Equal(t, "replaced", repResp.Status)
-
-	doc123 := []Document{
-		Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`), Document(`{"K1":"vK1","K2":2,"D1":"vD2"}`),
-		Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`),
-	}
-
-	mc.EXPECT().Insert(gomock.Any(),
-		pm(&api.InsertRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
-			Options:    &api.InsertRequestOptions{},
-		})).Return(&api.InsertResponse{}, nil)
-
-	_, err = db.Insert(ctx, "c1", doc123)
-	require.NoError(t, err)
-
-	mc.EXPECT().Update(gomock.Any(),
-		pm(&api.UpdateRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Fields:     []byte(`{"fields":1}`),
-			Options:    &api.UpdateRequestOptions{},
-		})).Return(&api.UpdateResponse{Status: "updated"}, nil)
-
-	updResp, err := db.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
-	require.NoError(t, err)
-	require.Equal(t, "updated", updResp.Status)
-
-	roptions := &api.ReadRequestOptions{}
-
-	mc.EXPECT().Read(
-		pm(&api.ReadRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Fields:     []byte(`{"fields":"value"}`),
-			Options:    roptions,
-		}), gomock.Any()).Return(nil)
-
-	it, err := db.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
-	require.NoError(t, err)
-
-	require.False(t, it.Next(nil))
-
-	var sit SearchResultIterator
-
-	mc.EXPECT().Search(
-		pm(&api.SearchRequest{
-			Project:       "db1",
-			Collection:    "c1",
-			Q:             "search text",
-			SearchFields:  []string{"field_1"},
-			Facet:         []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
-			IncludeFields: nil,
-			ExcludeFields: nil,
-			Sort:          []byte(`[{"field_1":"$desc"},{"field_2":"$asc"},{"field_3":"$desc"}]`),
-			Filter:        nil,
-			PageSize:      12,
-			Page:          3,
-		}), gomock.Any()).Return(nil)
-
-	sit, err = db.Search(ctx, "c1", &SearchRequest{
-		Q:            "search text",
-		SearchFields: []string{"field_1"},
-		Facet:        Facet(`{"field_1":{"size":10},"field_2":{"size":10}}`),
-		Sort:         SortOrder(`[{"field_1":"$desc"},{"field_2":"$asc"},{"field_3":"$desc"}]`),
-		PageSize:     12,
-		Page:         3,
+		insResp, err := db.Insert(ctx, "c1", doc1, &InsertOptions{WriteOptions: options})
+		require.NoError(t, err)
+		require.Equal(t, "inserted", insResp.Status)
 	})
 
-	require.NoError(t, err)
-	require.False(t, sit.Next(nil))
+	t.Run("insert_multiple", func(t *testing.T) {
+		doc123 := []Document{
+			Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`), Document(`{"K1":"vK1","K2":2,"D1":"vD2"}`),
+			Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`),
+		}
 
-	mc.EXPECT().Delete(gomock.Any(),
-		pm(&api.DeleteRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Filter:     []byte(`{"filter":"value"}`),
-			Options:    &api.DeleteRequestOptions{},
-		})).Return(&api.DeleteResponse{Status: "deleted"}, nil)
+		mc.EXPECT().Insert(gomock.Any(),
+			pm(&api.InsertRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Documents:  *(*[][]byte)(unsafe.Pointer(&doc123)),
+				Options:    &api.InsertRequestOptions{},
+			})).Return(&api.InsertResponse{}, nil)
 
-	delResp, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
-	require.NoError(t, err)
-	require.Equal(t, "deleted", delResp.Status)
+		_, err := db.Insert(ctx, "c1", doc123)
+		require.NoError(t, err)
+	})
 
-	mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
-		Project: "db1",
-		Branch:  "staging",
-	})).Return(&api.CreateBranchResponse{Status: "creationOk"}, nil)
+	t.Run("replace", func(t *testing.T) {
+		mc.EXPECT().Replace(gomock.Any(),
+			pm(&api.ReplaceRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+				Options:    &api.ReplaceRequestOptions{WriteOptions: options},
+			})).Return(&api.ReplaceResponse{Status: "replaced"}, nil)
 
-	branchCreateResp, err := db.CreateBranch(ctx, "staging")
-	require.NoError(t, err)
-	require.Equal(t, "creationOk", branchCreateResp.Status)
+		repResp, err := db.Replace(ctx, "c1", doc1, &ReplaceOptions{WriteOptions: options})
+		require.NoError(t, err)
+		require.Equal(t, "replaced", repResp.Status)
+	})
 
-	mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
-		Project: "db1",
-		Branch:  "staging",
-	})).Return(&api.DeleteBranchResponse{Status: "deletionOk"}, nil)
+	t.Run("update", func(t *testing.T) {
+		mc.EXPECT().Update(gomock.Any(),
+			pm(&api.UpdateRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Fields:     []byte(`{"fields":1}`),
+				Options:    &api.UpdateRequestOptions{},
+			})).Return(&api.UpdateResponse{Status: "updated"}, nil)
 
-	branchDelResp, err := db.DeleteBranch(ctx, "staging")
-	require.NoError(t, err)
-	require.Equal(t, "deletionOk", branchDelResp.Status)
+		updResp, err := db.Update(ctx, "c1", Filter(`{"filter":"value"}`), Update(`{"fields":1}`))
+		require.NoError(t, err)
+		require.Equal(t, "updated", updResp.Status)
+	})
+
+	t.Run("read", func(t *testing.T) {
+		roptions := &api.ReadRequestOptions{}
+
+		mc.EXPECT().Read(
+			pm(&api.ReadRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Fields:     []byte(`{"fields":"value"}`),
+				Options:    roptions,
+			}), gomock.Any()).Return(nil)
+
+		it, err := db.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
+		require.NoError(t, err)
+
+		require.False(t, it.Next(nil))
+	})
+
+	t.Run("read_with_collation", func(t *testing.T) {
+		roptions := &api.ReadRequestOptions{Collation: &api.Collation{Case: "cs"}}
+
+		mc.EXPECT().Read(
+			pm(&api.ReadRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Fields:     []byte(`{"fields":"value"}`),
+				Options:    roptions,
+			}), gomock.Any()).Return(nil)
+
+		it, err := db.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`),
+			&ReadOptions{Collation: &api.Collation{Case: "cs"}})
+		require.NoError(t, err)
+
+		require.False(t, it.Next(nil))
+	})
+
+	t.Run("search", func(t *testing.T) {
+		mc.EXPECT().Search(
+			pm(&api.SearchRequest{
+				Project:       "db1",
+				Collection:    "c1",
+				Q:             "search text",
+				SearchFields:  []string{"field_1"},
+				Facet:         []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
+				IncludeFields: nil,
+				ExcludeFields: nil,
+				Sort:          []byte(`[{"field_1":"$desc"},{"field_2":"$asc"},{"field_3":"$desc"}]`),
+				Filter:        nil,
+				PageSize:      12,
+				Page:          3,
+			}), gomock.Any()).Return(nil)
+
+		sit, err := db.Search(ctx, "c1", &SearchRequest{
+			Q:            "search text",
+			SearchFields: []string{"field_1"},
+			Facet:        Facet(`{"field_1":{"size":10},"field_2":{"size":10}}`),
+			Sort:         SortOrder(`[{"field_1":"$desc"},{"field_2":"$asc"},{"field_3":"$desc"}]`),
+			PageSize:     12,
+			Page:         3,
+		})
+
+		require.NoError(t, err)
+		require.False(t, sit.Next(nil))
+	})
+
+	t.Run("delete", func(t *testing.T) {
+		mc.EXPECT().Delete(gomock.Any(),
+			pm(&api.DeleteRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Options:    &api.DeleteRequestOptions{},
+			})).Return(&api.DeleteResponse{Status: "deleted"}, nil)
+
+		delResp, err := db.Delete(ctx, "c1", Filter(`{"filter":"value"}`))
+		require.NoError(t, err)
+		require.Equal(t, "deleted", delResp.Status)
+	})
+
+	t.Run("branches", func(t *testing.T) {
+		mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
+			Project: "db1",
+			Branch:  "staging",
+		})).Return(&api.CreateBranchResponse{Status: "creationOk"}, nil)
+
+		branchCreateResp, err := db.CreateBranch(ctx, "staging")
+		require.NoError(t, err)
+		require.Equal(t, "creationOk", branchCreateResp.Status)
+
+		mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
+			Project: "db1",
+			Branch:  "staging",
+		})).Return(&api.DeleteBranchResponse{Status: "deletionOk"}, nil)
+
+		branchDelResp, err := db.DeleteBranch(ctx, "staging")
+		require.NoError(t, err)
+		require.Equal(t, "deletionOk", branchDelResp.Status)
+	})
 }
 
 func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
@@ -616,104 +663,177 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 
 	db := c.UseDatabase("db1")
 
-	// Test empty list response
-	mc.EXPECT().ListCollections(gomock.Any(),
-		pm(&api.ListCollectionsRequest{
-			Project: "db1",
-		})).Return(&api.ListCollectionsResponse{Collections: nil}, nil)
+	t.Run("projects", func(t *testing.T) {
+		// Test empty list response
+		mc.EXPECT().ListProjects(gomock.Any(),
+			pm(&api.ListProjectsRequest{})).Return(&api.ListProjectsResponse{Projects: nil}, nil)
 
-	colls, err := db.ListCollections(ctx, &CollectionOptions{})
-	require.NoError(t, err)
-	require.Equal(t, []string{}, colls)
+		projs, err := c.ListProjects(ctx)
+		require.NoError(t, err)
+		require.Equal(t, []string{}, projs)
 
-	mc.EXPECT().ListCollections(gomock.Any(),
-		pm(&api.ListCollectionsRequest{
-			Project: "db1",
-		})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{
-		{Collection: "lc1"},
-		{Collection: "lc2"},
-	}}, nil)
+		mc.EXPECT().ListProjects(gomock.Any(),
+			pm(&api.ListProjectsRequest{})).Return(&api.ListProjectsResponse{Projects: []*api.ProjectInfo{
+			{Project: "proj1"},
+			{Project: "proj2"},
+		}}, nil)
 
-	colls, err = db.ListCollections(ctx)
-	require.NoError(t, err)
-	require.Equal(t, []string{"lc1", "lc2"}, colls)
+		projs, err = c.ListProjects(ctx)
+		require.NoError(t, err)
+		require.Equal(t, []string{"proj1", "proj2"}, projs)
 
-	descExp := api.DescribeCollectionResponse{
-		Collection: "coll1",
-		Schema:     []byte(`{"a":"b"}`),
-		Size:       123456,
-	}
+		mc.EXPECT().CreateProject(gomock.Any(),
+			pm(&api.CreateProjectRequest{
+				Project: "db1",
+			})).Return(&api.CreateProjectResponse{Message: "created"}, nil)
 
-	mc.EXPECT().DescribeCollection(gomock.Any(),
-		pm(&api.DescribeCollectionRequest{
-			Project:      "db1",
-			Collection:   "coll1",
-			SchemaFormat: "fmt1",
-		})).Return(&descExp, nil)
+		resp, err := c.CreateProject(ctx, "db1", &CreateProjectOptions{})
+		require.NoError(t, err)
+		require.Equal(t, "created", resp.Message)
 
-	desc, err := db.DescribeCollection(ctx, "coll1", &DescribeCollectionOptions{SchemaFormat: "fmt1"})
-	require.NoError(t, err)
-	require.Equal(t, descExp.Collection, desc.Collection)
-	require.Equal(t, descExp.Schema, desc.Schema)
-	require.Equal(t, descExp.Size, desc.Size)
+		mc.EXPECT().DeleteProject(gomock.Any(),
+			pm(&api.DeleteProjectRequest{
+				Project: "db1",
+			})).Return(&api.DeleteProjectResponse{Message: "deleted"}, nil)
 
-	descDBExp := api.DescribeDatabaseResponse{
-		Size: 314159,
-		Collections: []*api.CollectionDescription{
-			{
-				Collection: "coll1",
-				Schema:     []byte(`{"a":"b"}`),
-				Size:       111111,
+		dresp, err := c.DeleteProject(ctx, "db1", &DeleteProjectOptions{})
+		require.NoError(t, err)
+		require.Equal(t, "deleted", dresp.Message)
+	})
+
+	t.Run("list_collections", func(t *testing.T) {
+		// Test empty list response
+		mc.EXPECT().ListCollections(gomock.Any(),
+			pm(&api.ListCollectionsRequest{
+				Project: "db1",
+			})).Return(&api.ListCollectionsResponse{Collections: nil}, nil)
+
+		colls, err := db.ListCollections(ctx, &CollectionOptions{})
+		require.NoError(t, err)
+		require.Equal(t, []string{}, colls)
+
+		mc.EXPECT().ListCollections(gomock.Any(),
+			pm(&api.ListCollectionsRequest{
+				Project: "db1",
+			})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{
+			{Collection: "lc1"},
+			{Collection: "lc2"},
+		}}, nil)
+
+		colls, err = db.ListCollections(ctx)
+		require.NoError(t, err)
+		require.Equal(t, []string{"lc1", "lc2"}, colls)
+	})
+
+	t.Run("describe_collection", func(t *testing.T) {
+		descExp := api.DescribeCollectionResponse{
+			Collection: "coll1",
+			Schema:     []byte(`{"a":"b"}`),
+			Size:       123456,
+		}
+
+		mc.EXPECT().DescribeCollection(gomock.Any(),
+			pm(&api.DescribeCollectionRequest{
+				Project:      "db1",
+				Collection:   "coll1",
+				SchemaFormat: "fmt1",
+			})).Return(&descExp, nil)
+
+		desc, err := db.DescribeCollection(ctx, "coll1", &DescribeCollectionOptions{SchemaFormat: "fmt1"})
+		require.NoError(t, err)
+		require.Equal(t, descExp.Collection, desc.Collection)
+		require.Equal(t, descExp.Schema, desc.Schema)
+		require.Equal(t, descExp.Size, desc.Size)
+	})
+
+	t.Run("describe_database", func(t *testing.T) {
+		descDBExp := api.DescribeDatabaseResponse{
+			Size: 314159,
+			Collections: []*api.CollectionDescription{
+				{
+					Collection: "coll1",
+					Schema:     []byte(`{"a":"b"}`),
+					Size:       111111,
+				},
+				{
+					Collection: "coll2",
+					Schema:     []byte(`{"c":"d"}`),
+					Size:       222222,
+				},
 			},
-			{
-				Collection: "coll2",
-				Schema:     []byte(`{"c":"d"}`),
-				Size:       222222,
-			},
-		},
-		Branches: []string{"main", "bug-fix", "feature_2"},
-	}
+			Branches: []string{"main", "bug-fix", "feature_2"},
+		}
 
-	mc.EXPECT().DescribeDatabase(gomock.Any(),
-		pm(&api.DescribeDatabaseRequest{
-			Project:      "db1",
-			SchemaFormat: "fmt2",
-		})).Return(&descDBExp, nil)
+		mc.EXPECT().DescribeDatabase(gomock.Any(),
+			pm(&api.DescribeDatabaseRequest{
+				Project:      "db1",
+				SchemaFormat: "fmt2",
+			})).Return(&descDBExp, nil)
 
-	descDB, err := c.DescribeDatabase(ctx, "db1", &DescribeProjectOptions{SchemaFormat: "fmt2"})
-	require.NoError(t, err)
-	require.Equal(t, int64(314159), descDB.Size)
-	require.Equal(t, descDBExp.Collections[0].Collection, descDB.Collections[0].Collection)
-	require.Equal(t, descDBExp.Collections[0].Schema, descDB.Collections[0].Schema)
-	require.Equal(t, descDBExp.Collections[0].Size, descDB.Collections[0].Size)
-	require.Equal(t, descDBExp.Collections[1].Collection, descDB.Collections[1].Collection)
-	require.Equal(t, descDBExp.Collections[1].Schema, descDB.Collections[1].Schema)
-	require.Equal(t, descDBExp.Collections[1].Size, descDB.Collections[1].Size)
-	require.Equal(t, descDBExp.Branches, descDB.Branches)
+		descDB, err := c.DescribeDatabase(ctx, "db1", &DescribeProjectOptions{SchemaFormat: "fmt2"})
+		require.NoError(t, err)
+		require.Equal(t, int64(314159), descDB.Size)
+		require.Equal(t, descDBExp.Collections[0].Collection, descDB.Collections[0].Collection)
+		require.Equal(t, descDBExp.Collections[0].Schema, descDB.Collections[0].Schema)
+		require.Equal(t, descDBExp.Collections[0].Size, descDB.Collections[0].Size)
+		require.Equal(t, descDBExp.Collections[1].Collection, descDB.Collections[1].Collection)
+		require.Equal(t, descDBExp.Collections[1].Schema, descDB.Collections[1].Schema)
+		require.Equal(t, descDBExp.Collections[1].Size, descDB.Collections[1].Size)
+		require.Equal(t, descDBExp.Branches, descDB.Branches)
+	})
 
-	sch := `{"schema":"field"}`
+	t.Run("create_or_update_collection", func(t *testing.T) {
+		sch := `{"schema":"field"}`
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Schema:     []byte(sch),
-			OnlyCreate: true,
-			Options:    &api.CollectionOptions{},
-		})).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
+		mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Schema:     []byte(sch),
+				OnlyCreate: true,
+				Options:    &api.CollectionOptions{},
+			})).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
 
-	err = db.CreateOrUpdateCollection(ctx, "c1", Schema(sch), &CreateCollectionOptions{OnlyCreate: true})
-	require.NoError(t, err)
+		err := db.CreateOrUpdateCollection(ctx, "c1", Schema(sch), &CreateCollectionOptions{OnlyCreate: true})
+		require.NoError(t, err)
+	})
 
-	mc.EXPECT().DropCollection(gomock.Any(),
-		pm(&api.DropCollectionRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Options:    &api.CollectionOptions{},
-		})).Return(&api.DropCollectionResponse{}, nil)
+	t.Run("drop_collection", func(t *testing.T) {
+		mc.EXPECT().DropCollection(gomock.Any(),
+			pm(&api.DropCollectionRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Options:    &api.CollectionOptions{},
+			})).Return(&api.DropCollectionResponse{}, nil)
 
-	err = db.DropCollection(ctx, "c1", &CollectionOptions{})
-	require.NoError(t, err)
+		err := db.DropCollection(ctx, "c1", &CollectionOptions{})
+		require.NoError(t, err)
+
+		mc.EXPECT().ListCollections(gomock.Any(),
+			pm(&api.ListCollectionsRequest{
+				Project: "db1",
+			})).Return(&api.ListCollectionsResponse{Collections: []*api.CollectionInfo{
+			{Collection: "lc1"},
+			{Collection: "lc2"},
+		}}, nil)
+
+		mc.EXPECT().DropCollection(gomock.Any(),
+			pm(&api.DropCollectionRequest{
+				Project:    "db1",
+				Collection: "lc1",
+				Options:    &api.CollectionOptions{},
+			})).Return(&api.DropCollectionResponse{}, nil)
+
+		mc.EXPECT().DropCollection(gomock.Any(),
+			pm(&api.DropCollectionRequest{
+				Project:    "db1",
+				Collection: "lc2",
+				Options:    &api.CollectionOptions{},
+			})).Return(&api.DropCollectionResponse{}, nil)
+
+		err = db.DropAllCollections(ctx, &CollectionOptions{})
+		require.NoError(t, err)
+	})
 
 	testCRUDBasic(t, c, mc)
 }

@@ -30,6 +30,7 @@ type driverWithOptions interface {
 	deleteProjectWithOptions(ctx context.Context, project string, options *DeleteProjectOptions) (*DeleteProjectResponse, error)
 
 	UseDatabase(project string) Database
+	UseSearch(project string) SearchClient
 
 	ListProjects(ctx context.Context) ([]string, error)
 	Info(ctx context.Context) (*InfoResponse, error)
@@ -126,6 +127,13 @@ func PtrToString(s *string) string {
 }
 
 func PtrToInt64(b *int64) int64 {
+	if b == nil {
+		return 0
+	}
+	return *b
+}
+
+func PtrToInt32(b *int32) int32 {
 	if b == nil {
 		return 0
 	}

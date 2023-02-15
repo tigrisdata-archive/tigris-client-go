@@ -43,6 +43,7 @@ type grpcDriver struct {
 	health api.HealthAPIClient
 	conn   *grpc.ClientConn
 	cfg    *config.Driver
+	search api.SearchClient
 }
 
 func GRPCError(err error) error {
@@ -94,6 +95,7 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (*grpcDriver, err
 		auth:   api.NewAuthClient(conn),
 		o11y:   api.NewObservabilityClient(conn),
 		health: api.NewHealthAPIClient(conn),
+		search: api.NewSearchClient(conn),
 		cfg:    config,
 	}, nil
 }
@@ -107,6 +109,10 @@ func (c *grpcDriver) Close() error {
 
 func (c *grpcDriver) UseDatabase(project string) Database {
 	return &driverCRUD{&grpcCRUD{db: project, branch: c.cfg.Branch, api: c.api}}
+}
+
+func (c *grpcDriver) UseSearch(project string) SearchClient {
+	return NewGRPCSearchClient(project, c.search)
 }
 
 func (c *grpcDriver) ListProjects(ctx context.Context) ([]string, error) {
@@ -164,7 +170,7 @@ func (c *grpcDriver) describeProjectWithOptions(ctx context.Context, project str
 	return (*DescribeDatabaseResponse)(r), nil
 }
 
-func (c *grpcDriver) deleteProjectWithOptions(ctx context.Context, project string, options *DeleteProjectOptions) (*DeleteProjectResponse, error) {
+func (c *grpcDriver) deleteProjectWithOptions(ctx context.Context, project string, _ *DeleteProjectOptions) (*DeleteProjectResponse, error) {
 	r, err := c.api.DeleteProject(ctx, &api.DeleteProjectRequest{
 		Project: project,
 	})

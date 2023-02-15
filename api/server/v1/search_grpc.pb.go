@@ -120,7 +120,7 @@ func (c *searchClient) Get(ctx context.Context, in *GetDocumentRequest, opts ...
 
 func (c *searchClient) CreateById(ctx context.Context, in *CreateByIdRequest, opts ...grpc.CallOption) (*CreateByIdResponse, error) {
 	out := new(CreateByIdResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.search.v1.Search/CreateById", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tigrisdata.search.v1.Search/CreateByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func (UnimplementedSearchServer) Get(context.Context, *GetDocumentRequest) (*Get
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedSearchServer) CreateById(context.Context, *CreateByIdRequest) (*CreateByIdResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateById not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method CreateByID not implemented")
 }
 func (UnimplementedSearchServer) Create(context.Context, *CreateDocumentRequest) (*CreateDocumentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
@@ -403,7 +403,7 @@ func _Search_CreateById_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/tigrisdata.search.v1.Search/CreateById",
+		FullMethod: "/tigrisdata.search.v1.Search/CreateByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SearchServer).CreateById(ctx, req.(*CreateByIdRequest))
@@ -550,7 +550,7 @@ var Search_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Search_Get_Handler,
 		},
 		{
-			MethodName: "CreateById",
+			MethodName: "CreateByID",
 			Handler:    _Search_CreateById_Handler,
 		},
 		{

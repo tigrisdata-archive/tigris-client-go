@@ -1178,7 +1178,7 @@ func RegisterSearchHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.search.v1.Search/CreateById", runtime.WithHTTPPathPattern("/v1/projects/{project}/search/indexes/{index}/documents/{id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/tigrisdata.search.v1.Search/CreateByID", runtime.WithHTTPPathPattern("/v1/projects/{project}/search/indexes/{index}/documents/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1484,7 +1484,7 @@ func RegisterSearchHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.search.v1.Search/CreateById", runtime.WithHTTPPathPattern("/v1/projects/{project}/search/indexes/{index}/documents/{id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/tigrisdata.search.v1.Search/CreateByID", runtime.WithHTTPPathPattern("/v1/projects/{project}/search/indexes/{index}/documents/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

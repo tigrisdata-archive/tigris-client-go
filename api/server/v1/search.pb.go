@@ -2287,7 +2287,7 @@ var file_server_v1_search_proto_depIdxs = []int32{
 	5,  // 19: tigrisdata.search.v1.Search.DeleteIndex:input_type -> tigrisdata.search.v1.DeleteIndexRequest
 	7,  // 20: tigrisdata.search.v1.Search.ListIndexes:input_type -> tigrisdata.search.v1.ListIndexesRequest
 	11, // 21: tigrisdata.search.v1.Search.Get:input_type -> tigrisdata.search.v1.GetDocumentRequest
-	13, // 22: tigrisdata.search.v1.Search.CreateById:input_type -> tigrisdata.search.v1.CreateByIdRequest
+	13, // 22: tigrisdata.search.v1.Search.CreateByID:input_type -> tigrisdata.search.v1.CreateByIdRequest
 	15, // 23: tigrisdata.search.v1.Search.Create:input_type -> tigrisdata.search.v1.CreateDocumentRequest
 	17, // 24: tigrisdata.search.v1.Search.CreateOrReplace:input_type -> tigrisdata.search.v1.CreateOrReplaceDocumentRequest
 	19, // 25: tigrisdata.search.v1.Search.Update:input_type -> tigrisdata.search.v1.UpdateDocumentRequest
@@ -2299,7 +2299,7 @@ var file_server_v1_search_proto_depIdxs = []int32{
 	6,  // 31: tigrisdata.search.v1.Search.DeleteIndex:output_type -> tigrisdata.search.v1.DeleteIndexResponse
 	9,  // 32: tigrisdata.search.v1.Search.ListIndexes:output_type -> tigrisdata.search.v1.ListIndexesResponse
 	12, // 33: tigrisdata.search.v1.Search.Get:output_type -> tigrisdata.search.v1.GetDocumentResponse
-	14, // 34: tigrisdata.search.v1.Search.CreateById:output_type -> tigrisdata.search.v1.CreateByIdResponse
+	14, // 34: tigrisdata.search.v1.Search.CreateByID:output_type -> tigrisdata.search.v1.CreateByIdResponse
 	16, // 35: tigrisdata.search.v1.Search.Create:output_type -> tigrisdata.search.v1.CreateDocumentResponse
 	18, // 36: tigrisdata.search.v1.Search.CreateOrReplace:output_type -> tigrisdata.search.v1.CreateOrReplaceDocumentResponse
 	20, // 37: tigrisdata.search.v1.Search.Update:output_type -> tigrisdata.search.v1.UpdateDocumentResponse

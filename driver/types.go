@@ -121,6 +121,7 @@ type SearchRequest struct {
 	ExcludeFields []string
 	Page          int32
 	PageSize      int32
+	Collation     *Collation
 }
 type SearchResponse *api.SearchResponse
 

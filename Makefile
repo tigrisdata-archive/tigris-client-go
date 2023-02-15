@@ -41,7 +41,7 @@ mock/api/grpc.go mock/driver.go: $(SERVICES:%=$(GEN_DIR)/%.pb.go)
 	mkdir -p mock/api
 	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver \
 		Driver,Tx,Database,Iterator,SearchResultIterator
-	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer,AuthServer,ManagementServer,ObservabilityServer
+	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer,AuthServer,ManagementServer,ObservabilityServer,SearchServer
 
 mock: mock/api/grpc.go mock/driver.go
 

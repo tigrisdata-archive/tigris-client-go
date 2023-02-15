@@ -242,6 +242,20 @@ func (mr *MockDriverMockRecorder) UseDatabase(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UseDatabase", reflect.TypeOf((*MockDriver)(nil).UseDatabase), arg0)
 }
 
+// UseSearch mocks base method.
+func (m *MockDriver) UseSearch(arg0 string) driver.SearchClient {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UseSearch", arg0)
+	ret0, _ := ret[0].(driver.SearchClient)
+	return ret0
+}
+
+// UseSearch indicates an expected call of UseSearch.
+func (mr *MockDriverMockRecorder) UseSearch(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UseSearch", reflect.TypeOf((*MockDriver)(nil).UseSearch), arg0)
+}
+
 // MockTx is a mock of Tx interface.
 type MockTx struct {
 	ctrl     *gomock.Controller

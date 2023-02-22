@@ -62,6 +62,9 @@ const (
 const (
 	Documents = "documents" // Regular collection containing documents
 	Search    = "search"    // Search index
+
+	SearchSourceExternal = "external"
+	SearchSourceTigris   = "tigris"
 )
 
 // Model represents types supported as collection models.
@@ -137,7 +140,9 @@ type Schema struct {
 }
 
 type SearchSource struct {
-	Type string `json:"type"`
+	Type       string `json:"type"`
+	Collection string `json:"collection, omitempty"`
+	Branch     string `json:"collection, omitempty"`
 }
 
 // DatabaseModelName returns name of the database derived from the given database model.
@@ -349,7 +354,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 	return nil
 }
 
-func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
+func fromCollectionModel(model any, typ string) (*Schema, error) {
 	t := reflect.TypeOf(model)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -420,10 +425,12 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 
 	sch.Required = setRequired(sch.Fields)
 	if typ == Search {
-		sch.SearchSource = &SearchSource{Type: "external"}
+		sch.SearchSource = &SearchSource{Type: SearchSourceExternal}
 	} else {
 		sch.CollectionType = typ
 	}
+
+	parseCollectionTag(model, &sch)
 
 	return &sch, nil
 }

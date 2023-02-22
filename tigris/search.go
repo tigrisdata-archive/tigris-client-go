@@ -34,12 +34,14 @@ import (
 // instead of method of Tx interface.
 type Search struct {
 	name   string
+	branch string
 	search driver.SearchClient
 }
 
-func newSearch(name string, search driver.SearchClient) *Search {
+func newSearch(name string, branch string, search driver.SearchClient) *Search {
 	return &Search{
 		name:   name,
+		branch: branch,
 		search: search,
 	}
 }
@@ -58,6 +60,11 @@ func (s *Search) CreateIndexes(ctx context.Context, model schema.Model, models .
 
 func (s *Search) createIndexesFromSchemas(ctx context.Context, schemas map[string]*schema.Schema) error {
 	for _, v := range schemas {
+
+		if v.SearchSource != nil && v.SearchSource.Type == schema.SearchSourceTigris {
+			v.SearchSource.Branch = s.branch
+		}
+
 		sch, err := schema.Build(v)
 		if err != nil {
 			return err
@@ -72,9 +79,9 @@ func (s *Search) createIndexesFromSchemas(ctx context.Context, schemas map[strin
 }
 
 func openSearch(ctx context.Context, d driver.Driver,
-	project string, models ...schema.Model,
+	project string, branch string, models ...schema.Model,
 ) (*Search, error) {
-	s := newSearch(project, d.UseSearch(project))
+	s := newSearch(project, branch, d.UseSearch(project))
 
 	if len(models) > 0 {
 		err := s.CreateIndexes(ctx, models[0], models[1:]...)
@@ -103,7 +110,7 @@ func OpenSearch(ctx context.Context, cfg *Config, models ...schema.Model,
 		return nil, err
 	}
 
-	return openSearch(ctx, d, cfg.Project, models...)
+	return openSearch(ctx, d, cfg.Project, cfg.Branch, models...)
 }
 
 // GetIndex returns index object corresponding to index model T.
@@ -121,5 +128,5 @@ func getNamedIndex[T schema.Model](s *Search, name string) *search.Index[T] {
 func TestOpenSearch(ctx context.Context, d driver.Driver,
 	project string, models ...schema.Model,
 ) (*Search, error) {
-	return openSearch(ctx, d, project, models...)
+	return openSearch(ctx, d, project, "", models...)
 }

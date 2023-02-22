@@ -133,5 +133,5 @@ func (c *Client) OpenSearch(ctx context.Context, models ...schema.Model) (*Searc
 
 // GetSearch gets the Search for this project.
 func (c *Client) GetSearch() *Search {
-	return newSearch(c.config.Project, c.driver.UseSearch(c.config.Project))
+	return newSearch(c.config.Project, c.config.Branch, c.driver.UseSearch(c.config.Project))
 }

@@ -292,3 +292,13 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 
 	return false, nil
 }
+
+func setSearchSource(sch *Schema, sourceCollModel any) {
+	sch.SearchSource = &SearchSource{Type: SearchSourceTigris, Collection: ModelName(sourceCollModel)}
+}
+
+func parseCollectionTag(model any, sch *Schema) {
+	if x, ok := model.(interface{ SearchSource() any }); ok {
+		setSearchSource(sch, x.SearchSource())
+	}
+}

@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
+	"github.com/tigrisdata/tigris-client-go/code"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -27,7 +28,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/search"
 )
 
-var ErrNotFound = fmt.Errorf("document not found")
+var ErrNotFound = NewError(code.NotFound, "document not found")
 
 // Collation allows you to specify string comparison rules. Default is case-sensitive.
 type Collation struct {

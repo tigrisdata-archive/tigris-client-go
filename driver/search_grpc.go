@@ -16,7 +16,6 @@ package driver
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
 	"unsafe"
@@ -34,14 +33,14 @@ func NewGRPCSearchClient(project string, client api.SearchClient) SearchClient {
 	return &grpcSearch{Project: project, search: client}
 }
 
-func (c *grpcSearch) CreateOrUpdateIndex(ctx context.Context, name string, schema json.RawMessage) error {
+func (c *grpcSearch) CreateOrUpdateIndex(ctx context.Context, name string, schema Schema) error {
 	_, err := c.search.CreateOrUpdateIndex(ctx, &api.CreateOrUpdateIndexRequest{
 		Project: c.Project,
 		Name:    name,
 		Schema:  schema,
 	})
 
-	return err
+	return GRPCError(err)
 }
 
 func (c *grpcSearch) GetIndex(ctx context.Context, name string) (*IndexInfo, error) {
@@ -50,7 +49,7 @@ func (c *grpcSearch) GetIndex(ctx context.Context, name string) (*IndexInfo, err
 		Name:    name,
 	})
 	if err != nil {
-		return nil, err
+		return nil, GRPCError(err)
 	}
 
 	return &IndexInfo{Name: resp.Index.Name, Schema: resp.Index.Schema}, nil
@@ -62,7 +61,7 @@ func (c *grpcSearch) DeleteIndex(ctx context.Context, name string) error {
 		Name:    name,
 	})
 
-	return err
+	return GRPCError(err)
 }
 
 func (c *grpcSearch) ListIndexes(ctx context.Context, filter *IndexSource) ([]*IndexInfo, error) {
@@ -75,7 +74,7 @@ func (c *grpcSearch) ListIndexes(ctx context.Context, filter *IndexSource) ([]*I
 		Filter:  filter,
 	})
 	if err != nil {
-		return nil, err
+		return nil, GRPCError(err)
 	}
 
 	return resp.GetIndexes(), nil
@@ -88,13 +87,13 @@ func (c *grpcSearch) Get(ctx context.Context, name string, ids []string) ([]*Ind
 		Ids:     ids,
 	})
 	if err != nil {
-		return nil, err
+		return nil, GRPCError(err)
 	}
 
 	return resp.GetDocuments(), nil
 }
 
-func (c *grpcSearch) CreateByID(ctx context.Context, name string, id string, doc json.RawMessage) error {
+func (c *grpcSearch) CreateByID(ctx context.Context, name string, id string, doc Document) error {
 	_, err := c.search.CreateById(ctx, &api.CreateByIdRequest{
 		Project:  c.Project,
 		Index:    name,
@@ -102,37 +101,46 @@ func (c *grpcSearch) CreateByID(ctx context.Context, name string, id string, doc
 		Document: doc,
 	})
 
-	return err
+	return GRPCError(err)
 }
 
-func (c *grpcSearch) Create(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *grpcSearch) Create(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.search.Create(ctx, &api.CreateDocumentRequest{
 		Project:   c.Project,
 		Index:     name,
 		Documents: *(*[][]byte)(unsafe.Pointer(&docs)),
 	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
 
-	return resp.Status, err
+	return resp.Status, nil
 }
 
-func (c *grpcSearch) CreateOrReplace(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *grpcSearch) CreateOrReplace(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.search.CreateOrReplace(ctx, &api.CreateOrReplaceDocumentRequest{
 		Project:   c.Project,
 		Index:     name,
 		Documents: *(*[][]byte)(unsafe.Pointer(&docs)),
 	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
 
-	return resp.Status, err
+	return resp.Status, nil
 }
 
-func (c *grpcSearch) Update(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *grpcSearch) Update(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.search.Update(ctx, &api.UpdateDocumentRequest{
 		Project:   c.Project,
 		Index:     name,
 		Documents: *(*[][]byte)(unsafe.Pointer(&docs)),
 	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
 
-	return resp.Status, err
+	return resp.Status, nil
 }
 
 func (c *grpcSearch) Delete(ctx context.Context, name string, ids []string) ([]*DocStatus, error) {
@@ -141,18 +149,24 @@ func (c *grpcSearch) Delete(ctx context.Context, name string, ids []string) ([]*
 		Index:   name,
 		Ids:     ids,
 	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
 
-	return resp.Status, err
+	return resp.Status, nil
 }
 
-func (c *grpcSearch) DeleteByQuery(ctx context.Context, name string, filter json.RawMessage) (int32, error) {
+func (c *grpcSearch) DeleteByQuery(ctx context.Context, name string, filter Filter) (int32, error) {
 	resp, err := c.search.DeleteByQuery(ctx, &api.DeleteByQueryRequest{
 		Project: c.Project,
 		Index:   name,
 		Filter:  filter,
 	})
+	if err != nil {
+		return 0, GRPCError(err)
+	}
 
-	return resp.Count, err
+	return resp.Count, nil
 }
 
 func (c *grpcSearch) Search(ctx context.Context, name string, req *SearchRequest) (SearchIndexResultIterator, error) {
@@ -181,7 +195,7 @@ func (c *grpcSearch) Search(ctx context.Context, name string, req *SearchRequest
 	})
 	if err != nil {
 		cancel()
-		return nil, err
+		return nil, GRPCError(err)
 	}
 
 	return &searchIndexResultIterator{
@@ -201,6 +215,7 @@ func (g *searchIndexStreamReader) read() (SearchIndexResponse, error) {
 	if err != nil {
 		return nil, GRPCError(err)
 	}
+
 	return resp, nil
 }
 

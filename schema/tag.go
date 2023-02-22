@@ -159,6 +159,10 @@ func tokenizeTag(tag string) (map[string]string, error) {
 	return m, nil
 }
 
+func tagError(err error, orig string) error {
+	return fmt.Errorf("%w: %s", err, orig)
+}
+
 func parseDefaultTag(f *Field, val string) error {
 	// We only parse base JSON types and let server validate actual Tigris default values
 	switch f.Type {
@@ -168,14 +172,14 @@ func parseDefaultTag(f *Field, val string) error {
 		var o map[string]any
 
 		if err := json.Unmarshal([]byte(val), &o); err != nil {
-			return fmt.Errorf("%w: %s", ErrInvalidDefaultTag, err)
+			return tagError(ErrInvalidDefaultTag, err.Error())
 		}
 
 		f.Default = o
 	case typeArray:
 		var a []any
 		if err := json.Unmarshal([]byte(val), &a); err != nil {
-			return fmt.Errorf("%w: %s", ErrInvalidDefaultTag, err)
+			return tagError(ErrInvalidDefaultTag, err.Error())
 		}
 
 		f.Default = a
@@ -188,14 +192,14 @@ func parseDefaultTag(f *Field, val string) error {
 	case typeNumber:
 		i, err := strconv.ParseFloat(val, 64)
 		if err != nil {
-			return fmt.Errorf("%w: %s", ErrInvalidDefaultTag, err)
+			return tagError(ErrInvalidDefaultTag, err.Error())
 		}
 
 		f.Default = i
 	case typeInteger:
 		i, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
-			return fmt.Errorf("%w: %s", ErrInvalidDefaultTag, err)
+			return tagError(ErrInvalidDefaultTag, err.Error())
 		}
 
 		f.Default = i
@@ -239,7 +243,7 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 			if val != "true" {
 				i, err = strconv.Atoi(val)
 				if err != nil {
-					return false, fmt.Errorf("%w: %s", ErrPrimaryKeyIdx, err.Error())
+					return false, tagError(ErrPrimaryKeyIdx, err.Error())
 				}
 
 				if i == 0 {
@@ -261,13 +265,13 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 
 			field.Index = true
 		case tagDefault:
-			if err := parseDefaultTag(field, val); err != nil {
-				return false, fmt.Errorf("%w: %s", ErrInvalidDefaultTag, err)
+			if err = parseDefaultTag(field, val); err != nil {
+				return false, tagError(ErrInvalidDefaultTag, err.Error())
 			}
 		case tagMaxLength, strcase.ToSnake(tagMaxLength):
 			i, err := strconv.Atoi(val)
 			if err != nil {
-				return false, fmt.Errorf("%w: %s", ErrInvalidMaxLength, err.Error())
+				return false, tagError(ErrInvalidMaxLength, err.Error())
 			}
 
 			field.MaxLength = i

@@ -21,6 +21,7 @@ import (
 
 	"github.com/tigrisdata/tigris-client-go/code"
 	"github.com/tigrisdata/tigris-client-go/filter"
+	"github.com/tigrisdata/tigris-client-go/search"
 )
 
 func ExampleDatabase_Tx() {
@@ -135,5 +136,30 @@ func ExampleError() {
 		if ep.Code == code.AlreadyExists {
 			// handle duplicate key
 		}
+	}
+}
+
+func ExampleClient_GetSearch() {
+	ctx := context.TODO()
+
+	type Coll1 struct {
+		Key1 string
+	}
+
+	c, err := NewClient(ctx, &Config{Project: "db1"})
+	if err != nil {
+		panic(err)
+	}
+
+	s := c.GetSearch()
+
+	if err := s.CreateIndexes(ctx, &Coll1{}); err != nil {
+		panic(err)
+	}
+
+	idx := search.GetIndex[Coll1](s)
+
+	if _, err = idx.Create(ctx, &Coll1{"aaa"}); err != nil {
+		panic(err)
 	}
 }

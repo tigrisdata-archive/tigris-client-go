@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	"unsafe"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -39,38 +38,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type JSONMatcher struct {
-	T        *testing.T
-	Expected []byte
-}
-
-func (matcher *JSONMatcher) Matches(actual interface{}) bool {
-	return assert.JSONEq(matcher.T, string(matcher.Expected), string(actual.(driver.Schema)))
-}
-
-func (matcher *JSONMatcher) String() string {
-	return fmt.Sprintf("JSONMatcher: %v", string(matcher.Expected))
-}
-
-func (matcher *JSONMatcher) Got(actual interface{}) string {
-	ptr := unsafe.Pointer(&actual)
-	return fmt.Sprintf("JSONMatcher: %v", string(*(*[]byte)(ptr)))
-}
-
-func jm(t *testing.T, expected string) gomock.Matcher {
-	t.Helper()
-
-	j := &JSONMatcher{T: t, Expected: []byte(expected)}
-	return gomock.GotFormatterAdapter(j, j)
-}
-
-func toDocument(t *testing.T, doc interface{}) driver.Document {
-	t.Helper()
-
-	b, err := json.Marshal(doc)
-	require.NoError(t, err)
-	return b
-}
+var (
+	jm         = driver.JM
+	toDocument = driver.ToDocument
+)
 
 func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
 	t.Helper()
@@ -541,9 +512,7 @@ func TestCollectionReadOmitEmpty(t *testing.T) {
 	require.NoError(t, it.Err())
 }
 
-func pm(m proto.Message) gomock.Matcher {
-	return &test.ProtoMatcher{Message: m}
-}
+var pm = driver.PM
 
 func TestClientSchemaMigration(t *testing.T) {
 	ms, cancel := test.SetupTests(t, 6)

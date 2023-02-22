@@ -38,3 +38,5 @@ const (
 	// Extended codes.
 	Conflict = api.Code_CONFLICT // Retryable
 )
+
+type Code = api.Code

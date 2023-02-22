@@ -27,6 +27,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/config"
 	mock "github.com/tigrisdata/tigris-client-go/mock/api"
 	"github.com/tigrisdata/tigris-client-go/test"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
@@ -205,17 +206,30 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 		require.NoError(t, err)
 		require.Equal(t, []*IndexDoc(nil), docs)
 
+		tm := time.Now()
+
 		// one result
 		mc.EXPECT().Get(gomock.Any(),
 			pm(&api.GetDocumentRequest{
 				Project: "p1",
 				Index:   "idx1",
 				Ids:     []string{"id1", "id2"},
-			})).Return(&api.GetDocumentResponse{Documents: []*IndexDoc{{Doc: []byte(`{"doc1":"value1"}`)}}}, nil)
+			})).Return(&api.GetDocumentResponse{Documents: []*IndexDoc{
+			{Doc: []byte(`{"doc1":"value1"}`), Metadata: &api.DocMeta{
+				CreatedAt: timestamppb.New(tm),
+				UpdatedAt: timestamppb.New(tm),
+			}},
+		}}, nil)
 
 		docs, err = search.Get(ctx, "idx1", []string{"id1", "id2"})
 		require.NoError(t, err)
-		require.Equal(t, []*IndexDoc{{Doc: []byte(`{"doc1":"value1"}`)}}, docs)
+		require.Equal(t, []*IndexDoc{{
+			Doc: []byte(`{"doc1":"value1"}`),
+			Metadata: &api.DocMeta{
+				CreatedAt: timestamppb.New(tm),
+				UpdatedAt: timestamppb.New(tm),
+			},
+		}}, docs)
 
 		// two result
 		mc.EXPECT().Get(gomock.Any(),
@@ -251,7 +265,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
 			})).Return(&api.CreateDocumentResponse{Status: []*api.DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}}, nil)
 
-		status, err := search.Create(ctx, "idx1", []json.RawMessage{json.RawMessage(`{"doc1":"value1"}`), json.RawMessage(`{"doc2":"value2"}`)})
+		status, err := search.Create(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
 		require.NoError(t, err)
 		require.Equal(t, []*DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}, status)
 	})
@@ -264,7 +278,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
 			})).Return(&api.CreateOrReplaceDocumentResponse{Status: []*api.DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}}, nil)
 
-		status, err := search.CreateOrReplace(ctx, "idx1", []json.RawMessage{json.RawMessage(`{"doc1":"value1"}`), json.RawMessage(`{"doc2":"value2"}`)})
+		status, err := search.CreateOrReplace(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
 		require.NoError(t, err)
 		require.Equal(t, []*DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}, status)
 	})
@@ -277,7 +291,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
 			})).Return(&api.UpdateDocumentResponse{Status: []*api.DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}}, nil)
 
-		status, err := search.Update(ctx, "idx1", []json.RawMessage{json.RawMessage(`{"doc1":"value1"}`), json.RawMessage(`{"doc2":"value2"}`)})
+		status, err := search.Update(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
 		require.NoError(t, err)
 		require.Equal(t, []*DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}, status)
 	})
@@ -303,9 +317,150 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Filter:  []byte(`{"filter1":"value1"}`),
 			})).Return(&api.DeleteByQueryResponse{Count: 1}, nil)
 
-		count, err := search.DeleteByQuery(ctx, "idx1", json.RawMessage(`{"filter1":"value1"}`))
+		count, err := search.DeleteByQuery(ctx, "idx1", Filter(`{"filter1":"value1"}`))
 		require.NoError(t, err)
 		require.Equal(t, int32(1), count)
+	})
+}
+
+func testSearchBasicNegative(t *testing.T, c Driver, mc *mock.MockSearchServer) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	search := c.UseSearch("p1")
+
+	err1 := &api.TigrisError{Code: api.Code_NOT_FOUND, Message: "error3"}
+
+	t.Run("create_or_update_index", func(t *testing.T) {
+		mc.EXPECT().CreateOrUpdateIndex(gomock.Any(),
+			pm(&api.CreateOrUpdateIndexRequest{
+				Project: "p1",
+				Name:    "idx1",
+				Schema:  []byte(`{"field_1":"$desc"}`),
+			})).Return(nil, err1)
+
+		err := search.CreateOrUpdateIndex(ctx, "idx1", []byte(`{"field_1":"$desc"}`))
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("delete_index", func(t *testing.T) {
+		mc.EXPECT().DeleteIndex(gomock.Any(),
+			pm(&api.DeleteIndexRequest{
+				Project: "p1",
+				Name:    "idx1",
+			})).Return(nil, err1)
+
+		err := search.DeleteIndex(ctx, "idx1")
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("get_index", func(t *testing.T) {
+		mc.EXPECT().GetIndex(gomock.Any(),
+			pm(&api.GetIndexRequest{
+				Project: "p1",
+				Name:    "idx1",
+			})).Return(nil, err1)
+
+		_, err := search.GetIndex(ctx, "idx1")
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("list_indexes", func(t *testing.T) {
+		// one result
+		mc.EXPECT().ListIndexes(gomock.Any(),
+			pm(&api.ListIndexesRequest{
+				Project: "p1",
+				Filter:  &IndexSource{},
+			})).Return(nil, err1)
+
+		_, err := search.ListIndexes(ctx, nil)
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("get", func(t *testing.T) {
+		// empty result
+		mc.EXPECT().Get(gomock.Any(),
+			pm(&api.GetDocumentRequest{
+				Project: "p1",
+				Index:   "idx1",
+				Ids:     []string{"id1"},
+			})).Return(nil, err1)
+
+		_, err := search.Get(ctx, "idx1", []string{"id1"})
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("create_by_id", func(t *testing.T) {
+		mc.EXPECT().CreateById(gomock.Any(),
+			pm(&api.CreateByIdRequest{
+				Project:  "p1",
+				Index:    "idx1",
+				Id:       "id1",
+				Document: []byte(`{"doc1":"value1"}`),
+			})).Return(nil, err1)
+
+		err := search.CreateByID(ctx, "idx1", "id1", []byte(`{"doc1":"value1"}`))
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("create", func(t *testing.T) {
+		mc.EXPECT().Create(gomock.Any(),
+			pm(&api.CreateDocumentRequest{
+				Project:   "p1",
+				Index:     "idx1",
+				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
+			})).Return(nil, err1)
+
+		_, err := search.Create(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("create_or_replace", func(t *testing.T) {
+		mc.EXPECT().CreateOrReplace(gomock.Any(),
+			pm(&api.CreateOrReplaceDocumentRequest{
+				Project:   "p1",
+				Index:     "idx1",
+				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
+			})).Return(nil, err1)
+
+		_, err := search.CreateOrReplace(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("update", func(t *testing.T) {
+		mc.EXPECT().Update(gomock.Any(),
+			pm(&api.UpdateDocumentRequest{
+				Project:   "p1",
+				Index:     "idx1",
+				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
+			})).Return(nil, err1)
+
+		_, err := search.Update(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("delete", func(t *testing.T) {
+		mc.EXPECT().Delete(gomock.Any(),
+			pm(&api.DeleteDocumentRequest{
+				Project: "p1",
+				Index:   "idx1",
+				Ids:     []string{"id1", "id2"},
+			})).Return(nil, err1)
+
+		_, err := search.Delete(ctx, "idx1", []string{"id1", "id2"})
+		require.Equal(t, &Error{err1}, err)
+	})
+
+	t.Run("delete_by_query", func(t *testing.T) {
+		mc.EXPECT().DeleteByQuery(gomock.Any(),
+			pm(&api.DeleteByQueryRequest{
+				Project: "p1",
+				Index:   "idx1",
+				Filter:  []byte(`{"filter1":"value1"}`),
+			})).Return(nil, err1)
+
+		_, err := search.DeleteByQuery(ctx, "idx1", Filter(`{"filter1":"value1"}`))
+		require.Equal(t, &Error{err1}, err)
 	})
 }
 
@@ -321,10 +476,12 @@ func TestSearchGRPCDriver(t *testing.T) {
 	client, _, mockServer, cancel := setupSearchGRPCTests(t, &config.Driver{})
 	defer cancel()
 	testSearchBasic(t, client, mockServer.Search)
+	testSearchBasicNegative(t, client, mockServer.Search)
 }
 
 func TestSearchHTTPDriver(t *testing.T) {
 	client, _, mockServer, cancel := setupSearchHTTPTests(t, &config.Driver{})
 	defer cancel()
 	testSearchBasic(t, client, mockServer.Search)
+	testSearchBasicNegative(t, client, mockServer.Search)
 }

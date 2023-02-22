@@ -37,11 +37,12 @@ ${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml scripts/fix_openap
 
 generate: $(SERVICES:%=$(GEN_DIR)/%.pb.go) ${API_DIR}/client/${V}/api/http.go
 
-mock/api/grpc.go mock/driver.go: $(SERVICES:%=$(GEN_DIR)/%.pb.go)
+mock/api/grpc.go mock/driver.go: $(SERVICES:%=$(GEN_DIR)/%.pb.go) driver/driver.go driver/search.go
 	mkdir -p mock/api
 	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver \
-		Driver,Tx,Database,Iterator,SearchResultIterator
-	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 TigrisServer,AuthServer,ManagementServer,ObservabilityServer,SearchServer
+		Driver,Tx,Database,Iterator,SearchResultIterator,SearchClient,SearchIndexResultIterator
+	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 \
+		TigrisServer,AuthServer,ManagementServer,ObservabilityServer,SearchServer
 
 mock: mock/api/grpc.go mock/driver.go
 

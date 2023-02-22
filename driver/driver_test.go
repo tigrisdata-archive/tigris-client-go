@@ -299,7 +299,7 @@ func TestHTTPError(t *testing.T) {
 }
 
 func pm(m proto.Message) gomock.Matcher {
-	return &test.ProtoMatcher{Message: m}
+	return &ProtoMatcher{Message: m}
 }
 
 func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {

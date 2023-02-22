@@ -36,7 +36,6 @@ import (
 	mock "github.com/tigrisdata/tigris-client-go/mock/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -61,23 +60,6 @@ func HTTPURL(shift int) string {
 	return fmt.Sprintf("localhost:%d", 33333+shift)
 }
 
-type ProtoMatcher struct {
-	Message proto.Message
-}
-
-func (matcher *ProtoMatcher) Matches(actual interface{}) bool {
-	message, ok := actual.(proto.Message)
-	if !ok {
-		return false
-	}
-
-	return proto.Equal(message, matcher.Message)
-}
-
-func (matcher *ProtoMatcher) String() string {
-	return fmt.Sprintf("ProtoMatcher: %v", matcher.Message)
-}
-
 func SetupTLS(t *testing.T) *tls.Config {
 	t.Helper()
 
@@ -87,7 +69,7 @@ func SetupTLS(t *testing.T) *tls.Config {
 	return &tls.Config{RootCAs: certPool, ServerName: "localhost", MinVersion: tls.VersionTLS12}
 }
 
-// copy from Tigris' server/middleware.CustomMatcher.
+// copy from the Tigris' server/middleware.CustomMatcher.
 func customMatcher(key string) (string, bool) {
 	if strings.HasPrefix(key, api.HeaderPrefix) {
 		return key, true

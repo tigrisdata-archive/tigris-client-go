@@ -129,6 +129,14 @@ type Error struct {
 	*api.TigrisError
 }
 
+func NewError(c api.Code, format string, a ...interface{}) *Error {
+	if c == api.Code_OK {
+		return nil
+	}
+
+	return &Error{TigrisError: api.Errorf(c, format, a...)}
+}
+
 // As converts driver.Error the error which implements AsTigrisError interface.
 func (e *Error) As(i any) bool {
 	if x, ok := i.(interface{ AsTigrisError(*Error) bool }); ok && x.AsTigrisError(e) {

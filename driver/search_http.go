@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"unsafe"
 
 	apiHTTP "github.com/tigrisdata/tigris-client-go/api/client/v1/api"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
@@ -37,10 +38,10 @@ func NewHTTPSearchClient(project string, client *apiHTTP.ClientWithResponses) Se
 	return &httpSearch{Project: project, api: client}
 }
 
-func (c *httpSearch) CreateOrUpdateIndex(ctx context.Context, name string, schema json.RawMessage) error {
+func (c *httpSearch) CreateOrUpdateIndex(ctx context.Context, name string, schema Schema) error {
 	resp, err := c.api.SearchCreateOrUpdateIndex(ctx, c.Project, name,
 		apiHTTP.SearchCreateOrUpdateIndexJSONRequestBody{
-			Schema: schema,
+			Schema: json.RawMessage(schema),
 		})
 	if err = HTTPError(err, resp); err != nil {
 		return err
@@ -135,6 +136,7 @@ func (c *httpSearch) Get(ctx context.Context, name string, ids []string) ([]*Ind
 			doc := &IndexDoc{Doc: v.Doc}
 
 			if v.Metadata != nil {
+				doc.Metadata = &api.DocMeta{}
 				if v.Metadata.CreatedAt != nil {
 					doc.Metadata.CreatedAt = timestamppb.New(*v.Metadata.CreatedAt)
 				}
@@ -166,33 +168,33 @@ func respStatuses(resp *http.Response, err error) ([]*DocStatus, error) {
 	return res.Status, nil
 }
 
-func (c *httpSearch) CreateByID(ctx context.Context, name string, id string, doc json.RawMessage) error {
+func (c *httpSearch) CreateByID(ctx context.Context, name string, id string, doc Document) error {
 	resp, err := c.api.SearchCreateById(ctx, c.Project, name, id, apiHTTP.SearchCreateByIdJSONRequestBody{
-		Document: doc,
+		Document: json.RawMessage(doc),
 	})
 
 	return HTTPError(err, resp)
 }
 
-func (c *httpSearch) Create(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *httpSearch) Create(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.api.SearchCreate(ctx, c.Project, name, apiHTTP.SearchCreateJSONRequestBody{
-		Documents: &docs,
+		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 	})
 
 	return respStatuses(resp, err)
 }
 
-func (c *httpSearch) CreateOrReplace(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *httpSearch) CreateOrReplace(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.api.SearchCreateOrReplace(ctx, c.Project, name, apiHTTP.SearchCreateOrReplaceJSONRequestBody{
-		Documents: &docs,
+		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 	})
 
 	return respStatuses(resp, err)
 }
 
-func (c *httpSearch) Update(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *httpSearch) Update(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.api.SearchUpdate(ctx, c.Project, name, apiHTTP.SearchUpdateJSONRequestBody{
-		Documents: &docs,
+		Documents: (*[]json.RawMessage)(unsafe.Pointer(&docs)),
 	})
 
 	return respStatuses(resp, err)
@@ -206,9 +208,9 @@ func (c *httpSearch) Delete(ctx context.Context, name string, ids []string) ([]*
 	return respStatuses(resp, err)
 }
 
-func (c *httpSearch) DeleteByQuery(ctx context.Context, name string, filter json.RawMessage) (int32, error) {
+func (c *httpSearch) DeleteByQuery(ctx context.Context, name string, filter Filter) (int32, error) {
 	resp, err := c.api.SearchDeleteByQuery(ctx, c.Project, name, apiHTTP.SearchDeleteByQueryJSONRequestBody{
-		Filter: filter,
+		Filter: json.RawMessage(filter),
 	})
 	if err = HTTPError(err, resp); err != nil {
 		return 0, err

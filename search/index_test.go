@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tigris
+package search
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"testing"
-	"time"
-	"unsafe"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,45 +28,14 @@ import (
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/mock"
 	"github.com/tigrisdata/tigris-client-go/schema"
-	"github.com/tigrisdata/tigris-client-go/search"
 	"github.com/tigrisdata/tigris-client-go/sort"
 	"github.com/tigrisdata/tigris-client-go/test"
+	"github.com/tigrisdata/tigris-client-go/tigris"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"testing"
+	"time"
 )
-
-type JSONMatcher struct {
-	T        *testing.T
-	Expected []byte
-}
-
-func (matcher *JSONMatcher) Matches(actual interface{}) bool {
-	return assert.JSONEq(matcher.T, string(matcher.Expected), string(actual.(driver.Schema)))
-}
-
-func (matcher *JSONMatcher) String() string {
-	return fmt.Sprintf("JSONMatcher: %v", string(matcher.Expected))
-}
-
-func (matcher *JSONMatcher) Got(actual interface{}) string {
-	ptr := unsafe.Pointer(&actual)
-	return fmt.Sprintf("JSONMatcher: %v", string(*(*[]byte)(ptr)))
-}
-
-func jm(t *testing.T, expected string) gomock.Matcher {
-	t.Helper()
-
-	j := &JSONMatcher{T: t, Expected: []byte(expected)}
-	return gomock.GotFormatterAdapter(j, j)
-}
-
-func toDocument(t *testing.T, doc interface{}) driver.Document {
-	t.Helper()
-
-	b, err := json.Marshal(doc)
-	require.NoError(t, err)
-	return b
-}
 
 func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
 	t.Helper()
@@ -99,13 +64,13 @@ func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
 
 func TestGetSearchRequest(t *testing.T) {
 	t.Run("with all params", func(t *testing.T) {
-		in := search.NewRequestBuilder().
+		in := NewRequestBuilder().
 			WithQuery("search query").
 			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
-			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
+			WithFacet(NewFacetQueryBuilder().WithFields("field_3").Build()).
 			WithExcludeFields("field_5").
-			WithOptions(&search.DefaultSearchOptions).
+			WithOptions(&DefaultSearchOptions).
 			Build()
 		out, err := getSearchRequest(in)
 		assert.Nil(t, err)
@@ -127,7 +92,7 @@ func TestGetSearchRequest(t *testing.T) {
 	})
 
 	t.Run("with nil fields", func(t *testing.T) {
-		in := search.NewRequestBuilder().
+		in := NewRequestBuilder().
 			WithSearchFields("field_1").
 			Build()
 		out, err := getSearchRequest(in)
@@ -144,7 +109,7 @@ func TestGetSearchRequest(t *testing.T) {
 	})
 }
 
-func TestCollectionBasic(t *testing.T) {
+func TestIndexBasic(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -166,116 +131,57 @@ func TestCollectionBasic(t *testing.T) {
 		Field1 int64
 	}
 
-	mdb := mock.NewMockDatabase(ctrl)
-	mtx := mock.NewMockTx(ctrl)
+	mdb := mock.NewMockSearchClient(ctrl)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb).Times(2)
-	mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_2", jm(t, `{"title":"coll_2","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_3", jm(t, `{"title":"coll_3","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
+	m.EXPECT().UseSearch("db1").Return(mdb).Times(2)
+	mdb.EXPECT().CreateOrUpdateIndex(gomock.Any(), "coll_1", tigris.jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
+	mdb.EXPECT().CreateOrUpdateIndex(gomock.Any(), "coll_2", tigris.jm(t, `{"title":"coll_2","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
+	mdb.EXPECT().CreateOrUpdateIndex(gomock.Any(), "coll_3", tigris.jm(t, `{"title":"coll_3","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
 
-	mtx.EXPECT().Commit(ctx)
-	mtx.EXPECT().Rollback(ctx)
-
-	db, err := TestOpenDatabase(ctx, m, "db1", &Coll1{}, &Coll2{}, &Coll3{})
+	db, err := tigris.TestOpenSearch(ctx, m, "db1", &Coll1{}, &Coll2{}, &Coll3{})
 	require.NoError(t, err)
 
-	c := GetCollection[Coll1](db)
+	c := tigris.GetIndex[Coll1](db)
 
 	d1 := &Coll1{Key1: "aaa", Field1: 123}
 	d2 := &Coll1{Key1: "bbb", Field1: 123}
 
-	mdb.EXPECT().Insert(ctx, "coll_1", []driver.Document{toDocument(t, d1), toDocument(t, d2)})
+	mdb.EXPECT().Create(ctx, "coll_1", []driver.Document{tigris.toDocument(t, d1), tigris.toDocument(t, d2)})
 
-	_, err = c.Insert(ctx, d1, d2)
+	_, err = c.Create(ctx, d1, d2)
 	require.NoError(t, err)
 
-	mdb.EXPECT().Replace(ctx, "coll_1", []driver.Document{toDocument(t, d2)})
+	mdb.EXPECT().CreateOrReplace(ctx, "coll_1", []driver.Document{tigris.toDocument(t, d2)})
 
-	_, err = c.InsertOrReplace(ctx, d2)
+	_, err = c.CreateOrReplace(ctx, d2)
 	require.NoError(t, err)
 
-	mdb.EXPECT().Update(ctx, "coll_1",
-		driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
-		driver.Update(`{"$set":{"Field1":345}}`))
+	mdb.EXPECT().Update(ctx, "coll_1", []driver.Document{tigris.toDocument(t, d2)})
 
-	_, err = c.Update(ctx, filter.Or(
-		filter.Eq("Key1", "aaa"),
-		filter.Eq("Key1", "bbb")),
-		fields.Set("Field1", 345),
-	)
+	_, err = c.Update(ctx, d2)
 	require.NoError(t, err)
 
 	mit := mock.NewMockIterator(ctrl)
 
-	mdb.EXPECT().Read(ctx, "coll_1",
-		driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
-		driver.Projection(`{"Field1":true,"Key1":false}`),
-	).Return(mit, nil)
+	mdb.EXPECT().Get(ctx, "coll_1", []string{"id1", "id2"}).Return(mit, nil)
 
-	it, err := c.Read(ctx, filter.Or(
-		filter.Eq("Key1", "aaa"),
-		filter.Eq("Key1", "ccc")),
-		fields.Exclude("Key1").
-			Include("Field1"),
-	)
+	docs, err := c.Get(ctx, []string{"id1", "id2"})
 	require.NoError(t, err)
+	require.Equal(t, nil, docs)
 
-	var (
-		d  Coll1
-		dd driver.Document
-	)
+	mdb.EXPECT().Delete(ctx, "coll_1", []string{"id1", "id2"}).Return(mit, nil)
 
-	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
-	mit.EXPECT().Next(&dd).Return(false)
-	mit.EXPECT().Err().Return(nil)
-
-	for it.Next(&d) {
-		require.Equal(t, *d1, d)
-	}
-
-	require.NoError(t, it.Err())
-
-	mit.EXPECT().Close()
-	it.Close()
-
-	mdb.EXPECT().Read(ctx, "coll_1", driver.Filter(`{}`), driver.Projection(`{}`)).Return(mit, nil)
-
-	_, err = c.ReadAll(ctx, fields.All)
+	ids, err := c.Delete(ctx, []string{"id1", "id2"})
 	require.NoError(t, err)
+	require.Equal(t, nil, ids)
 
-	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{}`))
-
-	_, err = c.DeleteAll(ctx)
-	require.NoError(t, err)
-
-	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`))
-
-	_, err = c.Delete(ctx, filter.Or(
-		filter.Eq("Key1", "aaa"),
-		filter.Eq("Key1", "ccc")))
-	require.NoError(t, err)
-
-	mdb.EXPECT().Read(ctx, "coll_1",
-		driver.Filter(`{"Key1":{"$eq":"aaa"}}`),
-		driver.Projection(nil),
-	).Return(mit, nil)
-
-	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
-	mit.EXPECT().Close()
-
-	pd, err := c.ReadOne(ctx, filter.Eq("Key1", "aaa"))
-	require.NoError(t, err)
-	require.Equal(t, d1, pd)
-
-	mdb.EXPECT().DropCollection(ctx, "coll_1")
+	mdb.EXPECT().DropIndex(ctx, "coll_1")
 
 	err = c.Drop(ctx)
 	require.NoError(t, err)
 }
 
-func TestCollection_Search(t *testing.T) {
+func TestIndex_Search(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -287,34 +193,34 @@ func TestCollection_Search(t *testing.T) {
 		Field1 int64
 	}
 
-	mdb := mock.NewMockDatabase(ctrl)
+	mdb := mock.NewMockSearch(ctrl)
 	mtx := mock.NewMockTx(ctrl)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseSearch("db1").Return(mdb)
 	mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
+	mtx.EXPECT().CreateOrUpdateIndex(gomock.Any(), "coll_1", tigris.jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
 	mtx.EXPECT().Commit(ctx)
 	mtx.EXPECT().Rollback(ctx)
 
-	db, err := TestOpenDatabase(ctx, m, "db1", &Coll1{})
+	db, err := tigris.TestOpenSearch(ctx, m, "db1", &Coll1{})
 	require.NoError(t, err)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseSearch("db1").Return(mdb)
 
-	c := GetCollection[Coll1](db)
+	c := tigris.GetIndex[Coll1](db)
 
 	// search with all params parses completely
 	t.Run("with all request params", func(t *testing.T) {
 		rit := mock.NewMockSearchResultIterator(ctrl)
-		sr := search.NewRequestBuilder().
+		sr := NewRequestBuilder().
 			WithQuery("search query").
 			WithSearchFields("field_1").
 			WithFilter(filter.Eq("field_2", "some value")).
 			WithSorting(sort.Ascending("field_1"), sort.Descending("field_2")).
-			WithFacet(search.NewFacetQueryBuilder().WithFields("field_3").Build()).
+			WithFacet(NewFacetQueryBuilder().WithFields("field_3").Build()).
 			WithIncludeFields("field_4").
-			WithOptions(&search.DefaultSearchOptions).
+			WithOptions(&DefaultSearchOptions).
 			Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
 			Q:             sr.Q,
@@ -338,7 +244,7 @@ func TestCollection_Search(t *testing.T) {
 		rit.EXPECT().Next(&r).Return(false)
 		rit.EXPECT().Err().Return(nil)
 
-		var rs search.Result[Coll1]
+		var rs Result[Coll1]
 		for searchIter.Next(&rs) {
 			require.Equal(t, d1, rs.Hits[0].Document)
 		}
@@ -347,7 +253,7 @@ func TestCollection_Search(t *testing.T) {
 
 	t.Run("with partial request params", func(t *testing.T) {
 		rit := mock.NewMockSearchResultIterator(ctrl)
-		sr := search.NewRequestBuilder().Build()
+		sr := NewRequestBuilder().Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
 			Q:             sr.Q,
 			SearchFields:  []string{},
@@ -375,7 +281,7 @@ func TestCollection_Search(t *testing.T) {
 	// with marshalling failure
 	t.Run("when response unmarshalling fails", func(t *testing.T) {
 		rit := mock.NewMockSearchResultIterator(ctrl)
-		sr := search.NewRequestBuilder().Build()
+		sr := NewRequestBuilder().Build()
 		mdb.EXPECT().Search(ctx, "coll_1", gomock.Any()).Return(rit, nil)
 		searchIter, err := c.Search(ctx, sr)
 		require.NoError(t, err)
@@ -386,7 +292,7 @@ func TestCollection_Search(t *testing.T) {
 		rit.EXPECT().Next(&r).SetArg(0, createSearchResponse(t, d1)).Return(true)
 		rit.EXPECT().Close()
 
-		var rs search.Result[Coll1]
+		var rs Result[Coll1]
 		require.Nil(t, searchIter.err)
 		require.False(t, searchIter.Next(&rs))
 		require.NotNil(t, searchIter.err)
@@ -394,24 +300,24 @@ func TestCollection_Search(t *testing.T) {
 	})
 }
 
-func TestCollectionNegative(t *testing.T) {
+func TestIndexNegative(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
-	mdb := mock.NewMockDatabase(ctrl)
+	mdb := mock.NewMockSearch(ctrl)
 	mit := mock.NewMockIterator(ctrl)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseSearch("db1").Return(mdb)
 
-	db := newDatabase("db1", m)
+	db := tigris.newSearch("db1", m)
 
 	type Coll1 struct {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	c := GetCollection[Coll1](db)
+	c := tigris.GetIndex[Coll1](db)
 
 	// Test too many fields arguments in all Read API
 	_, err := c.Read(ctx, nil, fields.All, fields.All)
@@ -457,7 +363,7 @@ func TestCollectionNegative(t *testing.T) {
 	mit.EXPECT().Err().Return(nil)
 
 	_, err = c.ReadOne(ctx, nil, fields.All)
-	require.Equal(t, search.ErrNotFound, err)
+	require.Equal(t, ErrNotFound, err)
 
 	// Test that driver.Error is converted to tigris.Error
 	// by using driver.Error.As and tigris.Error.AsTigrisError interfaces
@@ -465,7 +371,7 @@ func TestCollectionNegative(t *testing.T) {
 	_, err = c.Delete(ctx, filter.Eq("all", "b"))
 	require.Error(t, err)
 
-	var te Error
+	var te tigris.Error
 
 	require.True(t, errors.As(err, &te))
 
@@ -487,25 +393,25 @@ func TestCollectionNegative(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestCollectionReadOmitEmpty(t *testing.T) {
+func TestIndexReadOmitEmpty(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
 
-	db := newDatabase("db1", m)
+	db := tigris.newSearch("db1", m)
 
 	type Coll1 struct {
 		Key1   string `tigris:"primary_key"`
 		Field1 int64  `json:",omitempty"`
 	}
 
-	mdb := mock.NewMockDatabase(ctrl)
+	mdb := mock.NewMockSearch(ctrl)
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseSearch("db1").Return(mdb)
 
-	c := GetCollection[Coll1](db)
+	c := tigris.GetIndex[Coll1](db)
 
 	d1 := &Coll1{Key1: "aaa", Field1: 123}
 	d2 := &Coll1{Key1: "bbb"}
@@ -525,8 +431,8 @@ func TestCollectionReadOmitEmpty(t *testing.T) {
 		dd driver.Document
 	)
 
-	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
-	mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d2)).Return(true)
+	mit.EXPECT().Next(&dd).SetArg(0, tigris.toDocument(t, d1)).Return(true)
+	mit.EXPECT().Next(&dd).SetArg(0, tigris.toDocument(t, d2)).Return(true)
 	mit.EXPECT().Next(&dd).Return(false)
 	mit.EXPECT().Err().Return(nil)
 
@@ -554,11 +460,11 @@ func TestClientSchemaMigration(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &Config{URL: test.GRPCURL(6), Project: "db1"}
+	cfg := &tigris.Config{URL: test.GRPCURL(6), Project: "db1"}
 	cfg.TLS = test.SetupTLS(t)
 
 	driver.DefaultProtocol = driver.GRPC
-	drv, err := driver.NewDriver(ctx, driverConfig(cfg))
+	drv, err := driver.NewDriver(ctx, tigris.driverConfig(cfg))
 	require.NoError(t, err)
 
 	type testSchema1 struct {
@@ -577,15 +483,15 @@ func TestClientSchemaMigration(t *testing.T) {
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "test_schema_1",
+	mc.EXPECT().CreateOrUpdateIndex(gomock.Any(),
+		pm(&api.CreateOrUpdateIndexRequest{
+			Project: "db1", Index: "test_schema_1",
 			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
-			Options: &api.CollectionOptions{},
+			Options: &api.IndexOptions{},
 		})).DoAndReturn(
-		func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
+		func(ctx context.Context, r *api.CreateOrUpdateIndexRequest) (*api.CreateOrUpdateIndexResponse, error) {
 			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CreateOrUpdateCollectionResponse{}, nil
+			return &api.CreateOrUpdateIndexResponse{}, nil
 		})
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
@@ -597,7 +503,7 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = TestOpenDatabase(ctx, drv, "db1", &testSchema1{})
+	_, err = tigris.TestOpenSearch(ctx, drv, "db1", &testSchema1{})
 	require.NoError(t, err)
 
 	mc.EXPECT().BeginTransaction(gomock.Any(),
@@ -606,26 +512,26 @@ func TestClientSchemaMigration(t *testing.T) {
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "test_schema_2",
+	mc.EXPECT().CreateOrUpdateIndex(gomock.Any(),
+		pm(&api.CreateOrUpdateIndexRequest{
+			Project: "db1", Index: "test_schema_2",
 			Schema:  []byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"],"collection_type":"documents"}`),
-			Options: &api.CollectionOptions{},
+			Options: &api.IndexOptions{},
 		})).DoAndReturn(
-		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
+		func(ctx context.Context, _ *api.CreateOrUpdateIndexRequest) (*api.CreateOrUpdateIndexResponse, error) {
 			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CreateOrUpdateCollectionResponse{}, nil
+			return &api.CreateOrUpdateIndexResponse{}, nil
 		})
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "test_schema_1",
+	mc.EXPECT().CreateOrUpdateIndex(gomock.Any(),
+		pm(&api.CreateOrUpdateIndexRequest{
+			Project: "db1", Index: "test_schema_1",
 			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
-			Options: &api.CollectionOptions{},
+			Options: &api.IndexOptions{},
 		})).DoAndReturn(
-		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
+		func(ctx context.Context, _ *api.CreateOrUpdateIndexRequest) (*api.CreateOrUpdateIndexResponse, error) {
 			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CreateOrUpdateCollectionResponse{}, nil
+			return &api.CreateOrUpdateIndexResponse{}, nil
 		})
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
@@ -637,19 +543,19 @@ func TestClientSchemaMigration(t *testing.T) {
 			return &api.CommitTransactionResponse{}, nil
 		})
 
-	_, err = TestOpenDatabase(ctx, drv, "db1", &testSchema1{}, &testSchema2{})
+	_, err = tigris.TestOpenSearch(ctx, drv, "db1", &testSchema1{}, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string
-	_, err = schema.FromCollectionModels(schema.Documents, &m)
+	_, err = schema.FromIndexModels(schema.Documents, &m)
 	require.Error(t, err)
-	_, _, err = schema.FromDatabaseModel(&m)
+	_, _, err = schema.FromSearchModel(&m)
 	require.Error(t, err)
 
 	var i int
-	_, err = schema.FromCollectionModels(schema.Documents, &i)
+	_, err = schema.FromIndexModels(schema.Documents, &i)
 	require.Error(t, err)
-	_, _, err = schema.FromDatabaseModel(&i)
+	_, _, err = schema.FromSearchModel(&i)
 	require.Error(t, err)
 
 	type Coll1 struct {
@@ -662,44 +568,44 @@ func TestClientSchemaMigration(t *testing.T) {
 			Options: &api.TransactionOptions{},
 		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "coll_1",
+	mc.EXPECT().CreateOrUpdateIndex(gomock.Any(),
+		pm(&api.CreateOrUpdateIndexRequest{
+			Project: "db1", Index: "coll_1",
 			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
-			Options: &api.CollectionOptions{},
-		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
-	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
+			Options: &api.IndexOptions{},
+		})).Do(func(ctx context.Context, r *api.CreateOrUpdateIndexRequest) {
+	}).Return(&api.CreateOrUpdateIndexResponse{}, nil)
 
 	mc.EXPECT().CommitTransaction(gomock.Any(),
 		pm(&api.CommitTransactionRequest{
 			Project: "db1",
 		})).Return(&api.CommitTransactionResponse{}, nil)
 
-	db, err := OpenDatabase(ctx, cfg, &Coll1{})
+	db, err := tigris.OpenSearch(ctx, cfg, &Coll1{})
 	require.NoError(t, err)
 	require.NotNil(t, db)
 }
 
-func TestCollection(t *testing.T) {
+func TestIndex(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
-	mdb := mock.NewMockDatabase(ctrl)
+	mdb := mock.NewMockSearch(ctrl)
 
 	mit := mock.NewMockIterator(ctrl)
 
-	db := newDatabase("db1", m)
+	db := tigris.newSearch("db1", m)
 
 	type Coll1 struct {
 		Key1   string `tigris:"primary_key"`
 		Field1 int64
 	}
 
-	m.EXPECT().UseDatabase("db1").Return(mdb)
+	m.EXPECT().UseSearch("db1").Return(mdb)
 
-	c := GetCollection[Coll1](db)
+	c := tigris.GetIndex[Coll1](db)
 
 	t.Run("read_limit_skip_offset", func(t *testing.T) {
 		mdb.EXPECT().Read(ctx, "coll_1",
@@ -731,7 +637,7 @@ func TestCollection(t *testing.T) {
 
 		d1 := &Coll1{Key1: "aaa", Field1: 123}
 
-		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
+		mit.EXPECT().Next(&dd).SetArg(0, tigris.toDocument(t, d1)).Return(true)
 		mit.EXPECT().Next(&dd1).Return(false)
 		mit.EXPECT().Err().Return(nil)
 
@@ -768,14 +674,14 @@ func TestCollection(t *testing.T) {
 	})
 }
 
-func TestOpeningDatabase(t *testing.T) {
+func TestOpeningSearch(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockDriver(ctrl)
 
-	db, err := TestOpenDatabase(ctx, m, "db1")
+	db, err := tigris.TestOpenSearch(ctx, m, "db1")
 	require.NoError(t, err)
 	require.NotNil(t, db)
 }

@@ -137,3 +137,25 @@ func ExampleError() {
 		}
 	}
 }
+
+func ExampleOpenSearch() {
+	ctx := context.TODO()
+
+	type Coll1 struct {
+		Key1 string
+	}
+
+	// Connects to the Tigris server. Creates or opens database "db1".
+	// Creates or migrate &Coll1{}. Returns a "search" object, which provides
+	// access to the search indexes of the database, Coll1 in this example.
+	s, err := OpenSearch(ctx, &Config{Project: "db1"}, &Coll1{})
+	if err != nil {
+		panic(err)
+	}
+
+	idx := GetIndex[Coll1](s)
+
+	if _, err = idx.Create(ctx, &Coll1{"aaa"}); err != nil {
+		panic(err)
+	}
+}

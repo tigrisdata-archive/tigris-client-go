@@ -16,7 +16,6 @@ package tigris
 
 import (
 	"context"
-	"github.com/tigrisdata/tigris-client-go/search"
 	"testing"
 	"time"
 
@@ -27,7 +26,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/test"
 )
 
-func TestDatabase(t *testing.T) {
+func TestSearch(t *testing.T) {
 	ms, cancel := test.SetupTests(t, 8)
 	defer cancel()
 
@@ -43,7 +42,7 @@ func TestDatabase(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("creates a branch", func(t *testing.T) {
-		mc.EXPECT().CreateBranch(gomock.Any(), search.pm(&api.CreateBranchRequest{
+		mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
 			Project: "db1",
 			Branch:  "my-feature-branch",
 		})).Return(&api.CreateBranchResponse{Status: "created"}, nil)
@@ -54,7 +53,7 @@ func TestDatabase(t *testing.T) {
 	})
 
 	t.Run("throws error when create branch fails", func(t *testing.T) {
-		mc.EXPECT().CreateBranch(gomock.Any(), search.pm(&api.CreateBranchRequest{
+		mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{
 			Project: "db1",
 			Branch:  "my_branch",
 		})).DoAndReturn(func(ctx context.Context, req *api.CreateBranchRequest) (*api.CreateBranchResponse, error) {
@@ -67,7 +66,7 @@ func TestDatabase(t *testing.T) {
 	})
 
 	t.Run("deletes a branch", func(t *testing.T) {
-		mc.EXPECT().DeleteBranch(gomock.Any(), search.pm(&api.DeleteBranchRequest{
+		mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
 			Project: "db1",
 			Branch:  "my-feature-branch",
 		})).Return(&api.DeleteBranchResponse{Status: "deleted"}, nil)
@@ -78,7 +77,7 @@ func TestDatabase(t *testing.T) {
 	})
 
 	t.Run("throws error when delete branch fails", func(t *testing.T) {
-		mc.EXPECT().DeleteBranch(gomock.Any(), search.pm(&api.DeleteBranchRequest{
+		mc.EXPECT().DeleteBranch(gomock.Any(), pm(&api.DeleteBranchRequest{
 			Project: "db1",
 			Branch:  "my_branch",
 		})).DoAndReturn(func(ctx context.Context, req *api.DeleteBranchRequest) (*api.DeleteBranchResponse, error) {

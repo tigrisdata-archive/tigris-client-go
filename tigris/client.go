@@ -119,3 +119,19 @@ func (c *Client) InitializeBranch(ctx context.Context) (*driver.CreateBranchResp
 	db := c.GetDatabase()
 	return db.CreateBranch(ctx, c.config.Branch)
 }
+
+// OpenSearch initializes Search from given collection models.
+// It creates Search if necessary.
+// Creates and migrates schemas of the collections which constitutes the Search.
+func (c *Client) OpenSearch(ctx context.Context, models ...schema.Model) (*Search, error) {
+	if getTxCtx(ctx) != nil {
+		return nil, ErrNotTransactional
+	}
+
+	return openSearch(ctx, c.driver, c.config.Project, models...)
+}
+
+// GetSearch gets the Search for this project.
+func (c *Client) GetSearch() *Search {
+	return newSearch(c.config.Project, c.driver.UseSearch(c.config.Project))
+}

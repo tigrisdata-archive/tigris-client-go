@@ -16,7 +16,6 @@ package driver
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
 	"unsafe"
@@ -34,7 +33,7 @@ func NewGRPCSearchClient(project string, client api.SearchClient) SearchClient {
 	return &grpcSearch{Project: project, search: client}
 }
 
-func (c *grpcSearch) CreateOrUpdateIndex(ctx context.Context, name string, schema json.RawMessage) error {
+func (c *grpcSearch) CreateOrUpdateIndex(ctx context.Context, name string, schema Schema) error {
 	_, err := c.search.CreateOrUpdateIndex(ctx, &api.CreateOrUpdateIndexRequest{
 		Project: c.Project,
 		Name:    name,
@@ -94,7 +93,7 @@ func (c *grpcSearch) Get(ctx context.Context, name string, ids []string) ([]*Ind
 	return resp.GetDocuments(), nil
 }
 
-func (c *grpcSearch) CreateByID(ctx context.Context, name string, id string, doc json.RawMessage) error {
+func (c *grpcSearch) CreateByID(ctx context.Context, name string, id string, doc Document) error {
 	_, err := c.search.CreateById(ctx, &api.CreateByIdRequest{
 		Project:  c.Project,
 		Index:    name,
@@ -105,7 +104,7 @@ func (c *grpcSearch) CreateByID(ctx context.Context, name string, id string, doc
 	return err
 }
 
-func (c *grpcSearch) Create(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *grpcSearch) Create(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.search.Create(ctx, &api.CreateDocumentRequest{
 		Project:   c.Project,
 		Index:     name,
@@ -115,7 +114,7 @@ func (c *grpcSearch) Create(ctx context.Context, name string, docs []json.RawMes
 	return resp.Status, err
 }
 
-func (c *grpcSearch) CreateOrReplace(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *grpcSearch) CreateOrReplace(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.search.CreateOrReplace(ctx, &api.CreateOrReplaceDocumentRequest{
 		Project:   c.Project,
 		Index:     name,
@@ -125,7 +124,7 @@ func (c *grpcSearch) CreateOrReplace(ctx context.Context, name string, docs []js
 	return resp.Status, err
 }
 
-func (c *grpcSearch) Update(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error) {
+func (c *grpcSearch) Update(ctx context.Context, name string, docs []Document) ([]*DocStatus, error) {
 	resp, err := c.search.Update(ctx, &api.UpdateDocumentRequest{
 		Project:   c.Project,
 		Index:     name,
@@ -145,7 +144,7 @@ func (c *grpcSearch) Delete(ctx context.Context, name string, ids []string) ([]*
 	return resp.Status, err
 }
 
-func (c *grpcSearch) DeleteByQuery(ctx context.Context, name string, filter json.RawMessage) (int32, error) {
+func (c *grpcSearch) DeleteByQuery(ctx context.Context, name string, filter Filter) (int32, error) {
 	resp, err := c.search.DeleteByQuery(ctx, &api.DeleteByQueryRequest{
 		Project: c.Project,
 		Index:   name,

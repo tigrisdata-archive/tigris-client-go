@@ -16,8 +16,6 @@ package driver
 
 import (
 	"context"
-	"encoding/json"
-
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
@@ -31,16 +29,16 @@ type (
 )
 
 type SearchClient interface {
-	CreateOrUpdateIndex(ctx context.Context, name string, schema json.RawMessage) error
+	CreateOrUpdateIndex(ctx context.Context, name string, schema Schema) error
 	GetIndex(ctx context.Context, name string) (*IndexInfo, error)
 	DeleteIndex(ctx context.Context, name string) error
 	ListIndexes(ctx context.Context, filter *IndexSource) ([]*IndexInfo, error)
 	Get(ctx context.Context, name string, ids []string) ([]*IndexDoc, error)
-	CreateByID(ctx context.Context, name string, id string, doc json.RawMessage) error
-	Create(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error)
-	CreateOrReplace(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error)
-	Update(ctx context.Context, name string, docs []json.RawMessage) ([]*DocStatus, error)
+	CreateByID(ctx context.Context, name string, id string, doc Document) error
+	Create(ctx context.Context, name string, docs []Document) ([]*DocStatus, error)
+	CreateOrReplace(ctx context.Context, name string, docs []Document) ([]*DocStatus, error)
+	Update(ctx context.Context, name string, docs []Document) ([]*DocStatus, error)
 	Delete(ctx context.Context, name string, ids []string) ([]*DocStatus, error)
-	DeleteByQuery(ctx context.Context, name string, filter json.RawMessage) (int32, error)
+	DeleteByQuery(ctx context.Context, name string, filter Filter) (int32, error)
 	Search(ctx context.Context, name string, req *SearchRequest) (SearchIndexResultIterator, error)
 }

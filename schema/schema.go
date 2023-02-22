@@ -61,6 +61,7 @@ const (
 // Collection types.
 const (
 	Documents = "documents" // Regular collection containing documents
+	Search    = "search"    // Search index
 )
 
 // Model represents types supported as collection models.
@@ -131,7 +132,12 @@ type Schema struct {
 	Required   []string          `json:"required,omitempty"`
 	Index      []string          `json:"index,omitempty"`
 
-	CollectionType string `json:"collection_type,omitempty"`
+	CollectionType string        `json:"collection_type,omitempty"`
+	SearchSource   *SearchSource `json:"source, omitempty"`
+}
+
+type SearchSource struct {
+	Type string `json:"type"`
 }
 
 // DatabaseModelName returns name of the database derived from the given database model.
@@ -413,7 +419,11 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 	}
 
 	sch.Required = setRequired(sch.Fields)
-	sch.CollectionType = typ
+	if typ == Search {
+		sch.SearchSource = &SearchSource{Type: "external"}
+	} else {
+		sch.CollectionType = typ
+	}
 
 	return &sch, nil
 }
@@ -430,7 +440,7 @@ func FromCollectionModels(tp string, model Model, models ...Model) (map[string]*
 	schemas[schema.Name] = schema
 
 	for _, m := range models {
-		schema, err := fromCollectionModel(m, tp)
+		schema, err = fromCollectionModel(m, tp)
 		if err != nil {
 			return nil, err
 		}

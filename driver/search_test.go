@@ -251,7 +251,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
 			})).Return(&api.CreateDocumentResponse{Status: []*api.DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}}, nil)
 
-		status, err := search.Create(ctx, "idx1", []json.RawMessage{json.RawMessage(`{"doc1":"value1"}`), json.RawMessage(`{"doc2":"value2"}`)})
+		status, err := search.Create(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
 		require.NoError(t, err)
 		require.Equal(t, []*DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}, status)
 	})
@@ -264,7 +264,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
 			})).Return(&api.CreateOrReplaceDocumentResponse{Status: []*api.DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}}, nil)
 
-		status, err := search.CreateOrReplace(ctx, "idx1", []json.RawMessage{json.RawMessage(`{"doc1":"value1"}`), json.RawMessage(`{"doc2":"value2"}`)})
+		status, err := search.CreateOrReplace(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
 		require.NoError(t, err)
 		require.Equal(t, []*DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}, status)
 	})
@@ -277,7 +277,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Documents: [][]byte{[]byte(`{"doc1":"value1"}`), []byte(`{"doc2":"value2"}`)},
 			})).Return(&api.UpdateDocumentResponse{Status: []*api.DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}}, nil)
 
-		status, err := search.Update(ctx, "idx1", []json.RawMessage{json.RawMessage(`{"doc1":"value1"}`), json.RawMessage(`{"doc2":"value2"}`)})
+		status, err := search.Update(ctx, "idx1", []Document{Document(`{"doc1":"value1"}`), Document(`{"doc2":"value2"}`)})
 		require.NoError(t, err)
 		require.Equal(t, []*DocStatus{{Id: "id1"}, {Id: "id2", Error: &api.Error{Code: 123, Message: "error1"}}}, status)
 	})
@@ -303,7 +303,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Filter:  []byte(`{"filter1":"value1"}`),
 			})).Return(&api.DeleteByQueryResponse{Count: 1}, nil)
 
-		count, err := search.DeleteByQuery(ctx, "idx1", json.RawMessage(`{"filter1":"value1"}`))
+		count, err := search.DeleteByQuery(ctx, "idx1", Filter(`{"filter1":"value1"}`))
 		require.NoError(t, err)
 		require.Equal(t, int32(1), count)
 	})

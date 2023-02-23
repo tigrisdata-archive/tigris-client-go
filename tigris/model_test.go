@@ -97,8 +97,13 @@ func TestModelMetadata(t *testing.T) {
 		_, err = c.InsertOrReplace(ctx, d1, d2)
 		require.NoError(t, err)
 
-		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id1), Metadata: Metadata{createdAt: tm, updatedAt: tm1, deletedAt: tm2}}}, d1)
+		expD1 := &Coll1{Model{ID: uuid.MustParse(id1), Metadata: Metadata{createdAt: tm, updatedAt: tm1, deletedAt: tm2}}}
+		require.Equal(t, expD1, d1)
 		require.Equal(t, &Coll1{Model{ID: uuid.MustParse(id2), Metadata: Metadata{createdAt: tm, updatedAt: tm1, deletedAt: tm2}}}, d2)
+
+		require.Equal(t, tm, expD1.GetCreatedAt())
+		require.Equal(t, tm1, expD1.GetUpdatedAt())
+		require.Equal(t, tm2, expD1.GetDeletedAt())
 	})
 
 	t.Run("composite_key", func(t *testing.T) {

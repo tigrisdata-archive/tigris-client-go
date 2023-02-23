@@ -53,6 +53,7 @@ const (
 	tagMaxLength    = "maxLength"
 	tagUpdatedAt    = "updatedAt"
 	tagCreatedAt    = "createdAt"
+	tagIndex        = "index"
 
 	id = "ID"
 )
@@ -60,6 +61,7 @@ const (
 // Collection types.
 const (
 	Documents = "documents" // Regular collection containing documents
+	Search    = "search"    // Search index
 )
 
 // Model represents types supported as collection models.
@@ -112,10 +114,11 @@ type Field struct {
 	MaxLength    int  `json:"maxLength,omitempty"`
 	UpdatedAt    bool `json:"updatedAt,omitempty"`
 	CreatedAt    bool `json:"createdAt,omitempty"`
+	Index        bool `json:"index,omitempty"`
 
 	Required []string `json:"required,omitempty"`
 
-	// RequiredTag is used during schema building only
+	// RequiredTag And IndexTag is used during schema building only
 	RequiredTag bool `json:"-"`
 }
 
@@ -127,8 +130,14 @@ type Schema struct {
 	Fields     map[string]*Field `json:"properties,omitempty"`
 	PrimaryKey []string          `json:"primary_key,omitempty"`
 	Required   []string          `json:"required,omitempty"`
+	Index      []string          `json:"index,omitempty"`
 
-	CollectionType string `json:"collection_type,omitempty"`
+	CollectionType string        `json:"collection_type,omitempty"`
+	SearchSource   *SearchSource `json:"source,omitempty"`
+}
+
+type SearchSource struct {
+	Type string `json:"type"`
 }
 
 // DatabaseModelName returns name of the database derived from the given database model.
@@ -223,17 +232,17 @@ func (sch *Schema) Build() (driver.Schema, error) {
 }
 
 func setRequired(fields map[string]*Field) []string {
-	var r []string
+	var req []string
 
 	for k, v := range fields {
 		if v.RequiredTag {
-			r = append(r, k)
+			req = append(req, k)
 		}
 	}
 
-	sort.Strings(r)
+	sort.Strings(req)
 
-	return r
+	return req
 }
 
 // traverseFields recursively parses the model structure and build the schema structure out of it.
@@ -410,8 +419,11 @@ func fromCollectionModel(model interface{}, typ string) (*Schema, error) {
 	}
 
 	sch.Required = setRequired(sch.Fields)
-
-	sch.CollectionType = typ
+	if typ == Search {
+		sch.SearchSource = &SearchSource{Type: "external"}
+	} else {
+		sch.CollectionType = typ
+	}
 
 	return &sch, nil
 }
@@ -428,7 +440,7 @@ func FromCollectionModels(tp string, model Model, models ...Model) (map[string]*
 	schemas[schema.Name] = schema
 
 	for _, m := range models {
-		schema, err := fromCollectionModel(m, tp)
+		schema, err = fromCollectionModel(m, tp)
 		if err != nil {
 			return nil, err
 		}

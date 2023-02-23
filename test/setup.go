@@ -36,13 +36,13 @@ import (
 	mock "github.com/tigrisdata/tigris-client-go/mock/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/protobuf/proto"
 )
 
 var (
 	apiPathPrefix = "/v1"
 
 	HTTPRoutes = []string{
+		apiPathPrefix + ("/projects"),
 		apiPathPrefix + ("/projects/*"),
 		apiPathPrefix + ("/collections/*"),
 		apiPathPrefix + ("/documents/*"),
@@ -60,23 +60,6 @@ func HTTPURL(shift int) string {
 	return fmt.Sprintf("localhost:%d", 33333+shift)
 }
 
-type ProtoMatcher struct {
-	Message proto.Message
-}
-
-func (matcher *ProtoMatcher) Matches(actual interface{}) bool {
-	message, ok := actual.(proto.Message)
-	if !ok {
-		return false
-	}
-
-	return proto.Equal(message, matcher.Message)
-}
-
-func (matcher *ProtoMatcher) String() string {
-	return fmt.Sprintf("ProtoMatcher: %v", matcher.Message)
-}
-
 func SetupTLS(t *testing.T) *tls.Config {
 	t.Helper()
 
@@ -86,7 +69,7 @@ func SetupTLS(t *testing.T) *tls.Config {
 	return &tls.Config{RootCAs: certPool, ServerName: "localhost", MinVersion: tls.VersionTLS12}
 }
 
-// copy from Tigris' server/middleware.CustomMatcher.
+// copy from the Tigris' server/middleware.CustomMatcher.
 func customMatcher(key string) (string, bool) {
 	if strings.HasPrefix(key, api.HeaderPrefix) {
 		return key, true
@@ -95,10 +78,11 @@ func customMatcher(key string) (string, bool) {
 }
 
 type MockServers struct {
-	API  *mock.MockTigrisServer
-	Mgmt *mock.MockManagementServer
-	Auth *mock.MockAuthServer
-	O11y *mock.MockObservabilityServer
+	API    *mock.MockTigrisServer
+	Mgmt   *mock.MockManagementServer
+	Auth   *mock.MockAuthServer
+	O11y   *mock.MockObservabilityServer
+	Search *mock.MockSearchServer
 }
 
 func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
@@ -108,10 +92,11 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	c := gomock.NewController(t)
 
 	ms := &MockServers{
-		API:  mock.NewMockTigrisServer(c),
-		Auth: mock.NewMockAuthServer(c),
-		Mgmt: mock.NewMockManagementServer(c),
-		O11y: mock.NewMockObservabilityServer(c),
+		API:    mock.NewMockTigrisServer(c),
+		Auth:   mock.NewMockAuthServer(c),
+		Mgmt:   mock.NewMockManagementServer(c),
+		O11y:   mock.NewMockObservabilityServer(c),
+		Search: mock.NewMockSearchServer(c),
 	}
 
 	inproc := &inprocgrpc.Channel{}
@@ -119,6 +104,7 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	authClient := api.NewAuthClient(inproc)
 	userClient := api.NewManagementClient(inproc)
 	o11yClient := api.NewObservabilityClient(inproc)
+	searchClient := api.NewSearchClient(inproc)
 
 	mux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &api.CustomMarshaler{}),
@@ -132,11 +118,14 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	require.NoError(t, err)
 	err = api.RegisterObservabilityHandlerClient(ctx, mux, o11yClient)
 	require.NoError(t, err)
+	err = api.RegisterSearchHandlerClient(ctx, mux, searchClient)
+	require.NoError(t, err)
 
 	api.RegisterTigrisServer(inproc, ms.API)
 	api.RegisterAuthServer(inproc, ms.Auth)
 	api.RegisterManagementServer(inproc, ms.Mgmt)
 	api.RegisterObservabilityServer(inproc, ms.O11y)
+	api.RegisterSearchServer(inproc, ms.Search)
 
 	cert, err := tls.X509KeyPair([]byte(ServerCert), []byte(ServerKey))
 	require.NoError(t, err)
@@ -152,6 +141,7 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 	api.RegisterAuthServer(s, ms.Auth)
 	api.RegisterManagementServer(s, ms.Mgmt)
 	api.RegisterObservabilityServer(s, ms.O11y)
+	api.RegisterSearchServer(s, ms.Search)
 
 	r := chi.NewRouter()
 

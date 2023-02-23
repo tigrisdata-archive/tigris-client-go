@@ -41,6 +41,7 @@ type Driver interface {
 	// UseDatabase returns and interface for collections and documents management
 	// of the database
 	UseDatabase(project string) Database
+	UseSearch(project string) SearchClient
 
 	// CreateProject creates the project
 	CreateProject(ctx context.Context, project string, options ...*CreateProjectOptions) (*CreateProjectResponse, error)

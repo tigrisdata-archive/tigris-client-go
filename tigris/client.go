@@ -24,6 +24,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
+	"github.com/tigrisdata/tigris-client-go/search"
 )
 
 const DefaultBranch = "main"
@@ -118,4 +119,9 @@ func (c *Client) GetDatabase() *Database {
 func (c *Client) InitializeBranch(ctx context.Context) (*driver.CreateBranchResponse, error) {
 	db := c.GetDatabase()
 	return db.CreateBranch(ctx, c.config.Branch)
+}
+
+// GetSearch gets the Search for this project.
+func (c *Client) GetSearch() *search.Search {
+	return search.NewSearch(c.config.Project, c.driver.UseSearch(c.config.Project))
 }

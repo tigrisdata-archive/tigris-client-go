@@ -57,15 +57,16 @@ type TigrisClient interface {
 	// Imports documents into the collection.
 	//
 	// It automatically:
-	//  * Detects the schema of the documents in the batch
-	//  * Evolves the schema as soon as it's backward compatible
-	//  * Creates collection with inferred schema (if requested)
+	//   - Detects the schema of the documents in the batch
+	//   - Evolves the schema as soon as it's backward compatible
+	//   - Creates collection with inferred schema (if requested)
 	Import(ctx context.Context, in *ImportRequest, opts ...grpc.CallOption) (*ImportResponse, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
 	// Tigris Offers two types of collections: <p></p>
-	//    <li> `DOCUMENTS`: Offers rich CRUD APIs.
-	//    <li> `MESSAGES`: Offers event streaming APIs.
+	//
+	//	<li> `DOCUMENTS`: Offers rich CRUD APIs.
+	//	<li> `MESSAGES`: Offers event streaming APIs.
 	CreateOrUpdateCollection(ctx context.Context, in *CreateOrUpdateCollectionRequest, opts ...grpc.CallOption) (*CreateOrUpdateCollectionResponse, error)
 	// Drops the collection inside this project. This API deletes all of the
 	// documents inside this collection and any metadata associated with it.
@@ -86,6 +87,8 @@ type TigrisClient interface {
 	// Deletes a database branch, if exists.
 	// Throws 400 Bad Request if "main" branch is being deleted
 	DeleteBranch(ctx context.Context, in *DeleteBranchRequest, opts ...grpc.CallOption) (*DeleteBranchResponse, error)
+	// List database branches
+	ListBranches(ctx context.Context, in *ListBranchesRequest, opts ...grpc.CallOption) (*ListBranchesResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
 	// Create an app key.
@@ -325,6 +328,15 @@ func (c *tigrisClient) DeleteBranch(ctx context.Context, in *DeleteBranchRequest
 	return out, nil
 }
 
+func (c *tigrisClient) ListBranches(ctx context.Context, in *ListBranchesRequest, opts ...grpc.CallOption) (*ListBranchesResponse, error) {
+	out := new(ListBranchesResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/ListBranches", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error) {
 	out := new(DescribeCollectionResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/DescribeCollection", in, out, opts...)
@@ -418,15 +430,16 @@ type TigrisServer interface {
 	// Imports documents into the collection.
 	//
 	// It automatically:
-	//  * Detects the schema of the documents in the batch
-	//  * Evolves the schema as soon as it's backward compatible
-	//  * Creates collection with inferred schema (if requested)
+	//   - Detects the schema of the documents in the batch
+	//   - Evolves the schema as soon as it's backward compatible
+	//   - Creates collection with inferred schema (if requested)
 	Import(context.Context, *ImportRequest) (*ImportResponse, error)
 	// Creates a new collection or atomically upgrades the collection to the new schema provided in the request.
 	// Schema changes are applied atomically and immediately without any downtime.
 	// Tigris Offers two types of collections: <p></p>
-	//    <li> `DOCUMENTS`: Offers rich CRUD APIs.
-	//    <li> `MESSAGES`: Offers event streaming APIs.
+	//
+	//	<li> `DOCUMENTS`: Offers rich CRUD APIs.
+	//	<li> `MESSAGES`: Offers event streaming APIs.
 	CreateOrUpdateCollection(context.Context, *CreateOrUpdateCollectionRequest) (*CreateOrUpdateCollectionResponse, error)
 	// Drops the collection inside this project. This API deletes all of the
 	// documents inside this collection and any metadata associated with it.
@@ -447,6 +460,8 @@ type TigrisServer interface {
 	// Deletes a database branch, if exists.
 	// Throws 400 Bad Request if "main" branch is being deleted
 	DeleteBranch(context.Context, *DeleteBranchRequest) (*DeleteBranchResponse, error)
+	// List database branches
+	ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
 	// Create an app key.
@@ -521,6 +536,9 @@ func (UnimplementedTigrisServer) CreateBranch(context.Context, *CreateBranchRequ
 }
 func (UnimplementedTigrisServer) DeleteBranch(context.Context, *DeleteBranchRequest) (*DeleteBranchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBranch not implemented")
+}
+func (UnimplementedTigrisServer) ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBranches not implemented")
 }
 func (UnimplementedTigrisServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeCollection not implemented")
@@ -900,6 +918,24 @@ func _Tigris_DeleteBranch_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Tigris_ListBranches_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBranchesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).ListBranches(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/ListBranches",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).ListBranches(ctx, req.(*ListBranchesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Tigris_DescribeCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DescribeCollectionRequest)
 	if err := dec(in); err != nil {
@@ -1082,6 +1118,10 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteBranch",
 			Handler:    _Tigris_DeleteBranch_Handler,
+		},
+		{
+			MethodName: "ListBranches",
+			Handler:    _Tigris_ListBranches_Handler,
 		},
 		{
 			MethodName: "DescribeCollection",

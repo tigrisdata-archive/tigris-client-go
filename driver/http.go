@@ -241,6 +241,10 @@ func (c *httpDriver) UseDatabase(project string) Database {
 	return &driverCRUD{&httpCRUD{db: project, branch: c.cfg.Branch, api: c.api}}
 }
 
+func (c *httpDriver) UseSearch(project string) SearchClient {
+	return NewHTTPSearchClient(project, c.api)
+}
+
 func (c *httpDriver) ListProjects(ctx context.Context) ([]string, error) {
 	resp, err := c.api.TigrisListProjects(ctx)
 	if err := HTTPError(err, resp); err != nil {

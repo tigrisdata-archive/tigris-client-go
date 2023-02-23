@@ -23,11 +23,13 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CacheClient interface {
 	CreateCache(ctx context.Context, in *CreateCacheRequest, opts ...grpc.CallOption) (*CreateCacheResponse, error)
+	ListCaches(ctx context.Context, in *ListCachesRequest, opts ...grpc.CallOption) (*ListCachesResponse, error)
 	DeleteCache(ctx context.Context, in *DeleteCacheRequest, opts ...grpc.CallOption) (*DeleteCacheResponse, error)
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
+	GetSet(ctx context.Context, in *GetSetRequest, opts ...grpc.CallOption) (*GetSetResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*DelResponse, error)
-	Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error)
+	Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (Cache_KeysClient, error)
 }
 
 type cacheClient struct {
@@ -41,6 +43,15 @@ func NewCacheClient(cc grpc.ClientConnInterface) CacheClient {
 func (c *cacheClient) CreateCache(ctx context.Context, in *CreateCacheRequest, opts ...grpc.CallOption) (*CreateCacheResponse, error) {
 	out := new(CreateCacheResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.cache.v1.Cache/CreateCache", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheClient) ListCaches(ctx context.Context, in *ListCachesRequest, opts ...grpc.CallOption) (*ListCachesResponse, error) {
+	out := new(ListCachesResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.cache.v1.Cache/ListCaches", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +76,15 @@ func (c *cacheClient) Set(ctx context.Context, in *SetRequest, opts ...grpc.Call
 	return out, nil
 }
 
+func (c *cacheClient) GetSet(ctx context.Context, in *GetSetRequest, opts ...grpc.CallOption) (*GetSetResponse, error) {
+	out := new(GetSetResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.cache.v1.Cache/GetSet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cacheClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.cache.v1.Cache/Get", in, out, opts...)
@@ -83,13 +103,36 @@ func (c *cacheClient) Del(ctx context.Context, in *DelRequest, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *cacheClient) Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error) {
-	out := new(KeysResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.cache.v1.Cache/Keys", in, out, opts...)
+func (c *cacheClient) Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (Cache_KeysClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Cache_ServiceDesc.Streams[0], "/tigrisdata.cache.v1.Cache/Keys", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &cacheKeysClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Cache_KeysClient interface {
+	Recv() (*KeysResponse, error)
+	grpc.ClientStream
+}
+
+type cacheKeysClient struct {
+	grpc.ClientStream
+}
+
+func (x *cacheKeysClient) Recv() (*KeysResponse, error) {
+	m := new(KeysResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // CacheServer is the server API for Cache service.
@@ -97,11 +140,13 @@ func (c *cacheClient) Keys(ctx context.Context, in *KeysRequest, opts ...grpc.Ca
 // for forward compatibility
 type CacheServer interface {
 	CreateCache(context.Context, *CreateCacheRequest) (*CreateCacheResponse, error)
+	ListCaches(context.Context, *ListCachesRequest) (*ListCachesResponse, error)
 	DeleteCache(context.Context, *DeleteCacheRequest) (*DeleteCacheResponse, error)
 	Set(context.Context, *SetRequest) (*SetResponse, error)
+	GetSet(context.Context, *GetSetRequest) (*GetSetResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Del(context.Context, *DelRequest) (*DelResponse, error)
-	Keys(context.Context, *KeysRequest) (*KeysResponse, error)
+	Keys(*KeysRequest, Cache_KeysServer) error
 }
 
 // UnimplementedCacheServer should be embedded to have forward compatible implementations.
@@ -111,11 +156,17 @@ type UnimplementedCacheServer struct {
 func (UnimplementedCacheServer) CreateCache(context.Context, *CreateCacheRequest) (*CreateCacheResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCache not implemented")
 }
+func (UnimplementedCacheServer) ListCaches(context.Context, *ListCachesRequest) (*ListCachesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCaches not implemented")
+}
 func (UnimplementedCacheServer) DeleteCache(context.Context, *DeleteCacheRequest) (*DeleteCacheResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCache not implemented")
 }
 func (UnimplementedCacheServer) Set(context.Context, *SetRequest) (*SetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
+}
+func (UnimplementedCacheServer) GetSet(context.Context, *GetSetRequest) (*GetSetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSet not implemented")
 }
 func (UnimplementedCacheServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -123,8 +174,8 @@ func (UnimplementedCacheServer) Get(context.Context, *GetRequest) (*GetResponse,
 func (UnimplementedCacheServer) Del(context.Context, *DelRequest) (*DelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Del not implemented")
 }
-func (UnimplementedCacheServer) Keys(context.Context, *KeysRequest) (*KeysResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Keys not implemented")
+func (UnimplementedCacheServer) Keys(*KeysRequest, Cache_KeysServer) error {
+	return status.Errorf(codes.Unimplemented, "method Keys not implemented")
 }
 
 // UnsafeCacheServer may be embedded to opt out of forward compatibility for this service.
@@ -152,6 +203,24 @@ func _Cache_CreateCache_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CacheServer).CreateCache(ctx, req.(*CreateCacheRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cache_ListCaches_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCachesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).ListCaches(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.cache.v1.Cache/ListCaches",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).ListCaches(ctx, req.(*ListCachesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,6 +261,24 @@ func _Cache_Set_Handler(srv interface{}, ctx context.Context, dec func(interface
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Cache_GetSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).GetSet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.cache.v1.Cache/GetSet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).GetSet(ctx, req.(*GetSetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Cache_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetRequest)
 	if err := dec(in); err != nil {
@@ -228,22 +315,25 @@ func _Cache_Del_Handler(srv interface{}, ctx context.Context, dec func(interface
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Cache_Keys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeysRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Cache_Keys_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(KeysRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(CacheServer).Keys(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.cache.v1.Cache/Keys",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CacheServer).Keys(ctx, req.(*KeysRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(CacheServer).Keys(m, &cacheKeysServer{stream})
+}
+
+type Cache_KeysServer interface {
+	Send(*KeysResponse) error
+	grpc.ServerStream
+}
+
+type cacheKeysServer struct {
+	grpc.ServerStream
+}
+
+func (x *cacheKeysServer) Send(m *KeysResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // Cache_ServiceDesc is the grpc.ServiceDesc for Cache service.
@@ -258,12 +348,20 @@ var Cache_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Cache_CreateCache_Handler,
 		},
 		{
+			MethodName: "ListCaches",
+			Handler:    _Cache_ListCaches_Handler,
+		},
+		{
 			MethodName: "DeleteCache",
 			Handler:    _Cache_DeleteCache_Handler,
 		},
 		{
 			MethodName: "Set",
 			Handler:    _Cache_Set_Handler,
+		},
+		{
+			MethodName: "GetSet",
+			Handler:    _Cache_GetSet_Handler,
 		},
 		{
 			MethodName: "Get",
@@ -273,11 +371,13 @@ var Cache_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Del",
 			Handler:    _Cache_Del_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "Keys",
-			Handler:    _Cache_Keys_Handler,
+			StreamName:    "Keys",
+			Handler:       _Cache_Keys_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "server/v1/cache.proto",
 }

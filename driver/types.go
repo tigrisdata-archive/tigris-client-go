@@ -121,11 +121,20 @@ type SearchRequest struct {
 	ExcludeFields []string
 	Page          int32
 	PageSize      int32
+	Collation     *Collation
 }
 type SearchResponse *api.SearchResponse
 
 type Error struct {
 	*api.TigrisError
+}
+
+func NewError(c api.Code, format string, a ...interface{}) *Error {
+	if c == api.Code_OK {
+		return nil
+	}
+
+	return &Error{TigrisError: api.Errorf(c, format, a...)}
 }
 
 // As converts driver.Error the error which implements AsTigrisError interface.

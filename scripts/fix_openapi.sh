@@ -33,9 +33,6 @@ main() {
 	yq_fix_json ReplaceRequest documents.items
 	yq_fix_json UpdateRequest fields
 	yq_fix_json ReadRequest fields
-	yq_fix_json SearchRequest fields
-	yq_fix_json SearchRequest facet
-	yq_fix_json SearchRequest sort
 	yq_fix_json ReadResponse data
 	yq_fix_json StreamEvent data
 	yq_fix_json SearchHit data
@@ -44,6 +41,26 @@ main() {
 	yq_fix_json DescribeCollectionResponse schema
 	yq_fix_json PublishRequest messages.items
 	yq_fix_json SubscribeResponse message
+
+	yq_fix_json IndexDoc doc
+	yq_fix_json CreateByIdRequest document
+	yq_fix_json DeleteByQueryRequest filter
+
+	yq_fix_json CreateOrUpdateIndexRequest schema
+	yq_fix_json IndexInfo schema
+
+	yq_fix_json UpdateDocumentRequest documents.items
+	yq_fix_json CreateOrReplaceDocumentRequest documents.items
+	yq_fix_json CreateDocumentRequest documents.items
+
+	yq_fix_json SearchIndexRequest filter
+	yq_fix_json SearchIndexRequest facet
+	yq_fix_json SearchIndexRequest sort
+
+  # old search request
+	yq_fix_json SearchRequest fields
+	yq_fix_json SearchRequest facet
+	yq_fix_json SearchRequest sort
 }
 
 fix_bytes() {

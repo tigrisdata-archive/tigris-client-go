@@ -15,6 +15,7 @@
 package schema
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -159,6 +160,67 @@ func TestTokenizeTag(t *testing.T) {
 			res, err := tokenizeTag(c.input)
 			assert.Equal(t, c.err, err)
 			assert.Equal(t, c.expected, res)
+		})
+	}
+}
+
+func TestParseTag(t *testing.T) {
+	cases := []struct {
+		name string
+		tag  string
+		err  error
+		res  bool
+	}{
+		{
+			"invalid_required",
+			"required:asdf",
+			ErrInvalidBoolTagValue,
+			false,
+		},
+		{
+			"invalid_index",
+			"index:asdf",
+			ErrInvalidBoolTagValue,
+			false,
+		},
+		{
+			"invalid_default",
+			"default:asdf",
+			ErrInvalidDefaultTag,
+			false,
+		},
+		{
+			"invalid_max_length",
+			"maxLength:asdf",
+			ErrInvalidMaxLength,
+			false,
+		},
+		{
+			"invalid_updated_at",
+			"updatedAt:asdf",
+			ErrInvalidBoolTagValue,
+			false,
+		},
+		{
+			"invalid_created_at",
+			"createdAt:asdf",
+			ErrInvalidBoolTagValue,
+			false,
+		},
+		{
+			"invalid_key_name",
+			"creat%#:asdf",
+			ErrInvalidKeyName,
+			false,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			field := Field{Type: typeBoolean}
+			res, err := parseTag(c.name, c.tag, &field, nil)
+			assert.True(t, errors.Is(err, c.err))
+			assert.Equal(t, c.res, res)
 		})
 	}
 }

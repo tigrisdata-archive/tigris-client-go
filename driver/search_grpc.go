@@ -80,7 +80,7 @@ func (c *grpcSearch) ListIndexes(ctx context.Context, filter *IndexSource) ([]*I
 	return resp.GetIndexes(), nil
 }
 
-func (c *grpcSearch) Get(ctx context.Context, name string, ids []string) ([]*IndexDoc, error) {
+func (c *grpcSearch) Get(ctx context.Context, name string, ids []string) ([]*SearchHit, error) {
 	resp, err := c.search.Get(ctx, &api.GetDocumentRequest{
 		Project: c.Project,
 		Index:   name,

@@ -131,7 +131,7 @@ func (c *Index[T]) Get(ctx context.Context, ids []string) ([]T, error) {
 	for _, v := range resp {
 		var doc T
 
-		err = json.Unmarshal(v.Doc, &doc)
+		err = json.Unmarshal(v.Data, &doc)
 		if err != nil {
 			return nil, err
 		}

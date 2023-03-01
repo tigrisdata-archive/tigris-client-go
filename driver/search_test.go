@@ -39,8 +39,8 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 	t.Run("search", func(t *testing.T) {
 		dv := 1.234
 		searchResp := api.SearchIndexResponse{
-			Hits: []*IndexDoc{
-				{Doc: []byte(`{"doc1":"value1"}`)},
+			Hits: []*SearchHit{
+				{Data: []byte(`{"doc1":"value1"}`)},
 			},
 			Facets: map[string]*api.SearchFacet{
 				"one": {
@@ -200,11 +200,11 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Project: "p1",
 				Index:   "idx1",
 				Ids:     []string{"id1"},
-			})).Return(&api.GetDocumentResponse{Documents: []*IndexDoc{}}, nil)
+			})).Return(&api.GetDocumentResponse{Documents: []*SearchHit{}}, nil)
 
 		docs, err := search.Get(ctx, "idx1", []string{"id1"})
 		require.NoError(t, err)
-		require.Equal(t, []*IndexDoc(nil), docs)
+		require.Equal(t, []*SearchHit(nil), docs)
 
 		tm := time.Now()
 
@@ -214,8 +214,8 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Project: "p1",
 				Index:   "idx1",
 				Ids:     []string{"id1", "id2"},
-			})).Return(&api.GetDocumentResponse{Documents: []*IndexDoc{
-			{Doc: []byte(`{"doc1":"value1"}`), Metadata: &api.DocMeta{
+			})).Return(&api.GetDocumentResponse{Documents: []*SearchHit{
+			{Data: []byte(`{"doc1":"value1"}`), Metadata: &api.SearchHitMeta{
 				CreatedAt: timestamppb.New(tm),
 				UpdatedAt: timestamppb.New(tm),
 			}},
@@ -223,9 +223,9 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 
 		docs, err = search.Get(ctx, "idx1", []string{"id1", "id2"})
 		require.NoError(t, err)
-		require.Equal(t, []*IndexDoc{{
-			Doc: []byte(`{"doc1":"value1"}`),
-			Metadata: &api.DocMeta{
+		require.Equal(t, []*SearchHit{{
+			Data: []byte(`{"doc1":"value1"}`),
+			Metadata: &api.SearchHitMeta{
 				CreatedAt: timestamppb.New(tm),
 				UpdatedAt: timestamppb.New(tm),
 			},
@@ -237,11 +237,11 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Project: "p1",
 				Index:   "idx1",
 				Ids:     []string{"id1", "id2"},
-			})).Return(&api.GetDocumentResponse{Documents: []*IndexDoc{{Doc: []byte(`{"doc1":"value1"}`)}, {Doc: []byte(`{"doc2":"value2"}`)}}}, nil)
+			})).Return(&api.GetDocumentResponse{Documents: []*SearchHit{{Data: []byte(`{"doc1":"value1"}`)}, {Data: []byte(`{"doc2":"value2"}`)}}}, nil)
 
 		docs, err = search.Get(ctx, "idx1", []string{"id1", "id2"})
 		require.NoError(t, err)
-		require.Equal(t, []*IndexDoc{{Doc: []byte(`{"doc1":"value1"}`)}, {Doc: []byte(`{"doc2":"value2"}`)}}, docs)
+		require.Equal(t, []*SearchHit{{Data: []byte(`{"doc1":"value1"}`)}, {Data: []byte(`{"doc2":"value2"}`)}}, docs)
 	})
 
 	t.Run("create_by_id", func(t *testing.T) {

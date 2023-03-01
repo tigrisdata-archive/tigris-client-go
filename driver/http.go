@@ -770,14 +770,7 @@ type httpSearchReader struct {
 }
 
 func (g *httpSearchReader) read() (SearchResponse, error) {
-	var res struct {
-		Result struct {
-			Hits   []*api.SearchHit            `json:"hits"`
-			Facets map[string]*api.SearchFacet `json:"facets"`
-			Meta   *api.SearchMetadata         `json:"meta"`
-		} `json:"result"`
-		Error *api.ErrorDetails `json:"error"`
-	}
+	var res searchHTTPResult
 
 	if err := g.stream.Decode(&res); err != nil {
 		return nil, HTTPError(err, nil)
@@ -788,9 +781,9 @@ func (g *httpSearchReader) read() (SearchResponse, error) {
 	}
 
 	return &api.SearchResponse{
-		Hits:   res.Result.Hits,
-		Facets: res.Result.Facets,
-		Meta:   res.Result.Meta,
+		Hits:   fromHTTPHits(res.Result.Hits),
+		Facets: fromHTTPFacets(res.Result.Facets),
+		Meta:   fromHTTPSearchMeta(res.Result.Meta),
 	}, nil
 }
 

@@ -21,7 +21,7 @@ import (
 )
 
 type (
-	IndexDoc            = api.IndexDoc
+	SearchHit           = api.SearchHit
 	IndexInfo           = api.IndexInfo
 	SearchIndexResponse = *api.SearchIndexResponse
 	IndexSource         = api.IndexSource
@@ -34,7 +34,7 @@ type SearchClient interface {
 	GetIndex(ctx context.Context, name string) (*IndexInfo, error)
 	DeleteIndex(ctx context.Context, name string) error
 	ListIndexes(ctx context.Context, filter *IndexSource) ([]*IndexInfo, error)
-	Get(ctx context.Context, name string, ids []string) ([]*IndexDoc, error)
+	Get(ctx context.Context, name string, ids []string) ([]*SearchHit, error)
 	CreateByID(ctx context.Context, name string, id string, doc Document) error
 	Create(ctx context.Context, name string, docs []Document) ([]*DocStatus, error)
 	CreateOrReplace(ctx context.Context, name string, docs []Document) ([]*DocStatus, error)

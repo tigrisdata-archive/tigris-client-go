@@ -19,7 +19,6 @@ import (
 	"time"
 
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
@@ -41,15 +40,8 @@ func (result *Result[T]) From(apiResponse *api.SearchResponse) error {
 	if apiResponse == nil {
 		m.From(nil)
 	} else {
-		for _, h := range apiResponse.Hits {
-			if h == nil {
-				continue
-			}
-			hit := &Hit[T]{}
-			if err := hit.From(h); err != nil {
-				return err
-			}
-			result.Hits = append(result.Hits, *hit)
+		if err := result.FromHits(apiResponse.Hits); err != nil {
+			return err
 		}
 
 		for field, facets := range apiResponse.Facets {
@@ -74,15 +66,8 @@ func (result *Result[T]) FromIndexResponse(apiResponse *api.SearchIndexResponse)
 	if apiResponse == nil {
 		m.From(nil)
 	} else {
-		for _, h := range apiResponse.Hits {
-			if h == nil {
-				continue
-			}
-			hit := &Hit[T]{}
-			if err := hit.FromIndexDoc(h); err != nil {
-				return err
-			}
-			result.Hits = append(result.Hits, *hit)
+		if err := result.FromHits(apiResponse.Hits); err != nil {
+			return err
 		}
 
 		for field, facets := range apiResponse.Facets {
@@ -95,6 +80,21 @@ func (result *Result[T]) FromIndexResponse(apiResponse *api.SearchIndexResponse)
 	}
 
 	result.Meta = *m
+
+	return nil
+}
+
+func (result *Result[T]) FromHits(hits []*api.SearchHit) error {
+	for _, h := range hits {
+		if h == nil {
+			continue
+		}
+		hit := &Hit[T]{}
+		if err := hit.From(h); err != nil {
+			return err
+		}
+		result.Hits = append(result.Hits, *hit)
+	}
 
 	return nil
 }
@@ -123,20 +123,6 @@ func (h *Hit[T]) From(apiHit *api.SearchHit) error {
 	return nil
 }
 
-func (h *Hit[T]) FromIndexDoc(apiHit *driver.IndexDoc) error {
-	if apiHit != nil {
-		var d T
-		if err := json.Unmarshal(apiHit.Doc, &d); err != nil {
-			return err
-		}
-
-		h.Document = &d
-		h.Meta = &HitMeta{}
-		h.Meta.FromIndexDocMeta(apiHit.Metadata)
-	}
-	return nil
-}
-
 // HitMeta represents the metadata associated with a search hit.
 type HitMeta struct {
 	// CreatedAt is the time at which document was inserted/replaced
@@ -149,22 +135,6 @@ type HitMeta struct {
 
 // From constructs HitMeta from Tigris server's response.
 func (hm *HitMeta) From(apiHitMeta *api.SearchHitMeta) {
-	if apiHitMeta == nil {
-		return
-	}
-
-	if apiHitMeta.CreatedAt.CheckValid() == nil {
-		t := apiHitMeta.CreatedAt.AsTime()
-		hm.CreatedAt = &t
-	}
-
-	if apiHitMeta.UpdatedAt.CheckValid() == nil {
-		t := apiHitMeta.UpdatedAt.AsTime()
-		hm.UpdatedAt = &t
-	}
-}
-
-func (hm *HitMeta) FromIndexDocMeta(apiHitMeta *api.DocMeta) {
 	if apiHitMeta == nil {
 		return
 	}

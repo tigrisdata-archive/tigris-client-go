@@ -203,6 +203,8 @@ func ToHTTPCode(code Code) int {
 		return 502
 	case Code_METHOD_NOT_ALLOWED:
 		return 405
+	case Code_CONTENT_TOO_LARGE:
+		return 413
 	}
 
 	return 500

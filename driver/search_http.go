@@ -115,7 +115,7 @@ func (c *httpSearch) ListIndexes(ctx context.Context, filter *IndexSource) ([]*I
 	return indexes, nil
 }
 
-func (c *httpSearch) Get(ctx context.Context, name string, ids []string) ([]*IndexDoc, error) {
+func (c *httpSearch) Get(ctx context.Context, name string, ids []string) ([]*SearchHit, error) {
 	resp, err := c.api.SearchGet(ctx, c.Project, name, &apiHTTP.SearchGetParams{
 		Ids: &ids,
 	})
@@ -128,15 +128,17 @@ func (c *httpSearch) Get(ctx context.Context, name string, ids []string) ([]*Ind
 	if err = respDecode(resp.Body, &i); err != nil {
 		return nil, err
 	}
+	if i.Documents == nil {
+		return nil, nil
+	}
 
-	var docs []*IndexDoc
-
+	var docs []*SearchHit
 	if i.Documents != nil {
 		for _, v := range *i.Documents {
-			doc := &IndexDoc{Doc: v.Doc}
+			doc := &SearchHit{Data: v.Data}
 
 			if v.Metadata != nil {
-				doc.Metadata = &api.DocMeta{}
+				doc.Metadata = &api.SearchHitMeta{}
 				if v.Metadata.CreatedAt != nil {
 					doc.Metadata.CreatedAt = timestamppb.New(*v.Metadata.CreatedAt)
 				}
@@ -274,18 +276,17 @@ type httpSearchIndexReader struct {
 	stream *json.Decoder
 }
 
+type searchHTTPResult struct {
+	Result struct {
+		Hits   []*apiHTTP.SearchHit            `json:"hits"`
+		Facets map[string]*apiHTTP.SearchFacet `json:"facets"`
+		Meta   *apiHTTP.SearchMetadata         `json:"meta"`
+	} `json:"result"`
+	Error *api.ErrorDetails `json:"error"`
+}
+
 func (g *httpSearchIndexReader) read() (SearchIndexResponse, error) {
-	var res struct {
-		Result struct {
-			Hits []*struct {
-				Doc      json.RawMessage `json:"doc"`
-				Metadata api.DocMetadata
-			} `json:"hits"`
-			Facets map[string]*api.SearchFacet `json:"facets"`
-			Meta   *api.SearchMetadata         `json:"meta"`
-		} `json:"result"`
-		Error *api.ErrorDetails `json:"error"`
-	}
+	var res searchHTTPResult
 
 	if err := g.stream.Decode(&res); err != nil {
 		return nil, HTTPError(err, nil)
@@ -295,25 +296,104 @@ func (g *httpSearchIndexReader) read() (SearchIndexResponse, error) {
 		return nil, &Error{TigrisError: api.FromErrorDetails(res.Error)}
 	}
 
-	resp := &api.SearchIndexResponse{
-		Facets: res.Result.Facets,
-		Meta:   res.Result.Meta,
+	return &api.SearchIndexResponse{
+		Hits:   fromHTTPHits(res.Result.Hits),
+		Facets: fromHTTPFacets(res.Result.Facets),
+		Meta:   fromHTTPSearchMeta(res.Result.Meta),
+	}, nil
+}
+
+func fromHTTPHits(incoming []*apiHTTP.SearchHit) []*SearchHit {
+	var hits []*SearchHit
+	for _, h := range incoming {
+		if h.Data != nil {
+			hit := &SearchHit{Data: h.Data}
+
+			if h.Metadata != nil {
+				hit.Metadata = &api.SearchHitMeta{}
+				if h.Metadata.CreatedAt != nil {
+					hit.Metadata.CreatedAt = timestamppb.New(*h.Metadata.CreatedAt)
+				}
+				if h.Metadata.UpdatedAt != nil {
+					hit.Metadata.UpdatedAt = timestamppb.New(*h.Metadata.UpdatedAt)
+				}
+			}
+
+			hits = append(hits, hit)
+		}
 	}
 
-	for _, v := range res.Result.Hits {
-		doc := &IndexDoc{Doc: v.Doc}
+	return hits
+}
 
-		if v.Metadata.CreatedAt != nil {
-			doc.Metadata.CreatedAt = timestamppb.New(*v.Metadata.CreatedAt)
-		}
-		if v.Metadata.UpdatedAt != nil {
-			doc.Metadata.UpdatedAt = timestamppb.New(*v.Metadata.UpdatedAt)
-		}
-
-		resp.Hits = append(resp.Hits, doc)
+func fromHTTPFacets(incoming map[string]*apiHTTP.SearchFacet) map[string]*api.SearchFacet {
+	if incoming == nil {
+		return nil
 	}
 
-	return resp, nil
+	facets := make(map[string]*api.SearchFacet)
+	for k, f := range incoming {
+		facetCopy := &api.SearchFacet{}
+		if f.Stats != nil {
+			statsCopy := &api.FacetStats{
+				Avg: f.Stats.Avg,
+				Sum: f.Stats.Sum,
+				Min: f.Stats.Min,
+				Max: f.Stats.Max,
+			}
+			if f.Stats.Count != nil {
+				statsCopy.Count = *f.Stats.Count
+			}
+
+			facetCopy.Stats = statsCopy
+		}
+		if f.Counts != nil {
+			var countsCopy []*api.FacetCount
+			for _, c := range *f.Counts {
+				copyCount := &api.FacetCount{}
+				if c.Count != nil {
+					copyCount.Count = *c.Count
+				}
+				if c.Value != nil {
+					copyCount.Value = *c.Value
+				}
+
+				countsCopy = append(countsCopy, copyCount)
+			}
+			facetCopy.Counts = countsCopy
+		}
+		facets[k] = facetCopy
+	}
+
+	return facets
+}
+
+func fromHTTPSearchMeta(incoming *apiHTTP.SearchMetadata) *api.SearchMetadata {
+	if incoming == nil {
+		return nil
+	}
+
+	meta := &api.SearchMetadata{}
+	if incoming.MatchedFields != nil {
+		meta.MatchedFields = *incoming.MatchedFields
+	}
+	if incoming.Page != nil {
+		meta.Page = &api.Page{}
+		if incoming.Page.Current != nil {
+			meta.Page.Current = *incoming.Page.Current
+		}
+		if incoming.Page.Size != nil {
+			meta.Page.Size = *incoming.Page.Size
+		}
+	}
+	if incoming.Found != nil {
+		meta.Found = *incoming.Found
+	}
+	if incoming.TotalPages != nil {
+		meta.TotalPages = *incoming.TotalPages
+	}
+
+	return meta
 }
 
 func (g *httpSearchIndexReader) close() error {

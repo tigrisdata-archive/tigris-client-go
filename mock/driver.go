@@ -1107,10 +1107,10 @@ func (mr *MockSearchClientMockRecorder) DeleteIndex(arg0, arg1 interface{}) *gom
 }
 
 // Get mocks base method.
-func (m *MockSearchClient) Get(arg0 context.Context, arg1 string, arg2 []string) ([]*api.IndexDoc, error) {
+func (m *MockSearchClient) Get(arg0 context.Context, arg1 string, arg2 []string) ([]*api.SearchHit, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]*api.IndexDoc)
+	ret0, _ := ret[0].([]*api.SearchHit)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -42,7 +42,6 @@ main() {
 	yq_fix_json PublishRequest messages.items
 	yq_fix_json SubscribeResponse message
 
-	yq_fix_json IndexDoc doc
 	yq_fix_json CreateByIdRequest document
 	yq_fix_json DeleteByQueryRequest filter
 

@@ -55,7 +55,7 @@ func (m *Metadata) setUpdatedAt(t time.Time) {
 	m.updatedAt = t
 }
 
-func populateIndexDocMetadata(umodel any, md *driver.IndexDoc) {
+func populateIndexDocMetadata(umodel any, md *driver.SearchHit) {
 	if m, ok := umodel.(metadataSetter); ok {
 		m.setCreatedAt(md.Metadata.CreatedAt.AsTime())
 		m.setUpdatedAt(md.Metadata.UpdatedAt.AsTime())

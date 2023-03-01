@@ -71,7 +71,7 @@ func TestSearchIndex_DocumentCRUDIndex(t *testing.T) {
 
 	t.Run("get", func(t *testing.T) {
 		msearch.EXPECT().Get(gomock.Any(), "coll_search_tests", []string{"id1"}).Return(
-			[]*api.IndexDoc{{Doc: toDocument(t, d1), Metadata: &api.DocMeta{
+			[]*api.SearchHit{{Data: toDocument(t, d1), Metadata: &api.SearchHitMeta{
 				CreatedAt: timestamppb.New(tm),
 				UpdatedAt: timestamppb.New(tm),
 			}}}, nil)
@@ -270,9 +270,9 @@ func createSearchResponse(t *testing.T, doc interface{}) driver.SearchIndexRespo
 	require.NoError(t, err)
 	tm := time.Now()
 	return &api.SearchIndexResponse{
-		Hits: []*api.IndexDoc{{
-			Doc: d,
-			Metadata: &api.DocMeta{
+		Hits: []*api.SearchHit{{
+			Data: d,
+			Metadata: &api.SearchHitMeta{
 				CreatedAt: timestamppb.New(tm),
 			},
 		}},

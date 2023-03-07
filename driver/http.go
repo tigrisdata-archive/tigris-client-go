@@ -170,6 +170,16 @@ func dmlRespDecode(body io.ReadCloser, v interface{}) error {
 	return nil
 }
 
+func setHeadersSkipSchema(ctx context.Context, req *http.Request) error {
+	if err := setHeaders(ctx, req); err != nil {
+		return err
+	}
+
+	req.Header[api.HeaderSchemaSignOff] = []string{"true"}
+
+	return nil
+}
+
 func setHeaders(ctx context.Context, req *http.Request) error {
 	req.Header["Host"] = []string{req.Host}
 	req.Header["User-Agent"] = []string{UserAgent}
@@ -187,6 +197,7 @@ func setHeaders(ctx context.Context, req *http.Request) error {
 			req.AddCookie(cookie)
 		}
 	}
+
 	return nil
 }
 
@@ -226,10 +237,16 @@ func newHTTPClient(_ context.Context, config *config.Driver) (*httpDriver, error
 		httpClient = &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
 	}
 
-	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(setHeaders))
+	hf := setHeaders
+	if config.SkipSchemaValidation {
+		hf = setHeadersSkipSchema
+	}
+
+	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(hf))
 	if err != nil {
 		return nil, err
 	}
+
 	return &httpDriver{api: c, tokenURL: tokenURL, cfg: config}, nil
 }
 

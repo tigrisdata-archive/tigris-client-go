@@ -108,7 +108,13 @@ func (c *grpcDriver) Close() error {
 }
 
 func (c *grpcDriver) UseDatabase(project string) Database {
-	return &driverCRUD{&grpcCRUD{db: project, branch: c.cfg.Branch, api: c.api}}
+	md := meta.New(nil)
+
+	if c.cfg.SkipSchemaValidation {
+		md = meta.Join(md, meta.Pairs(api.HeaderSchemaSignOff, "true"))
+	}
+
+	return &driverCRUD{&grpcCRUD{db: project, branch: c.cfg.Branch, api: c.api, metadata: md}}
 }
 
 func (c *grpcDriver) UseSearch(project string) SearchClient {
@@ -181,22 +187,26 @@ func (c *grpcDriver) deleteProjectWithOptions(ctx context.Context, project strin
 	return (*DeleteProjectResponse)(r), nil
 }
 
-func setGRPCTxCtx(ctx context.Context, txCtx *api.TransactionCtx, additionalMetadata meta.MD) context.Context {
-	if txCtx == nil || txCtx.Id == "" {
+// setGRPCMetadata creates new outgoing metadata which combines
+// driver level metadata and transaction context.
+func setGRPCMetadata(ctx context.Context, txCtx *api.TransactionCtx, md meta.MD) context.Context {
+	if len(md) == 0 && (txCtx == nil || txCtx.Id == "") {
 		return ctx
 	}
 
-	outgoingMd := meta.Pairs(api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin)
+	outgoingMD := meta.Join(md)
 
-	if additionalMetadata != nil {
-		outgoingMd = meta.Join(outgoingMd, additionalMetadata)
+	if txCtx != nil && txCtx.Id != "" {
+		outgoingMD = meta.Join(outgoingMD,
+			meta.Pairs(api.HeaderTxID, txCtx.Id, api.HeaderTxOrigin, txCtx.Origin),
+		)
 	}
 
-	return meta.NewOutgoingContext(ctx, outgoingMd)
+	return meta.NewOutgoingContext(ctx, outgoingMD)
 }
 
 func (c *grpcCRUD) Commit(ctx context.Context) error {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	_, err := c.api.CommitTransaction(ctx, &api.CommitTransactionRequest{
 		Project: c.db,
@@ -211,7 +221,7 @@ func (c *grpcCRUD) Commit(ctx context.Context) error {
 }
 
 func (c *grpcCRUD) Rollback(ctx context.Context) error {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	if c.committed {
 		return nil
@@ -226,11 +236,11 @@ func (c *grpcCRUD) Rollback(ctx context.Context) error {
 }
 
 type grpcCRUD struct {
-	db                 string
-	branch             string
-	api                api.TigrisClient
-	txCtx              *api.TransactionCtx
-	additionalMetadata meta.MD
+	db       string
+	branch   string
+	api      api.TigrisClient
+	txCtx    *api.TransactionCtx
+	metadata meta.MD
 
 	committed bool
 }
@@ -251,19 +261,19 @@ func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
 	}
 
-	additionalHeaders := meta.New(map[string]string{})
+	md := meta.Join(c.metadata)
 
 	if respHeaders.Get(SetCookieHeaderKey) != nil {
 		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
-			additionalHeaders = meta.Join(additionalHeaders, meta.Pairs(CookieHeaderKey, incomingCookie))
+			md = meta.Join(md, meta.Pairs(CookieHeaderKey, incomingCookie))
 		}
 	}
 
-	return &grpcCRUD{db: c.db, branch: c.branch, api: c.api, txCtx: resp.GetTxCtx(), additionalMetadata: additionalHeaders}, nil
+	return &grpcCRUD{db: c.db, branch: c.branch, api: c.api, txCtx: resp.GetTxCtx(), metadata: md}, nil
 }
 
 func (c *grpcCRUD) listCollectionsWithOptions(ctx context.Context, _ *CollectionOptions) ([]string, error) {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	r, err := c.api.ListCollections(ctx, &api.ListCollectionsRequest{
 		Project: c.db,
@@ -296,7 +306,7 @@ func (c *grpcCRUD) describeCollectionWithOptions(ctx context.Context, collection
 }
 
 func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema, options *CreateCollectionOptions) error {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	_, err := c.api.CreateOrUpdateCollection(ctx, &api.CreateOrUpdateCollectionRequest{
 		Project:    c.db,
@@ -310,7 +320,7 @@ func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 }
 
 func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 	_, err := c.api.DropCollection(ctx, &api.DropCollectionRequest{
 		Project:    c.db,
 		Branch:     c.branch,
@@ -321,7 +331,7 @@ func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, collection str
 }
 
 func (c *grpcCRUD) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error) {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	resp, err := c.api.Insert(ctx, &api.InsertRequest{
 		Project:    c.db,
@@ -338,7 +348,7 @@ func (c *grpcCRUD) insertWithOptions(ctx context.Context, collection string, doc
 }
 
 func (c *grpcCRUD) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error) {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	resp, err := c.api.Replace(ctx, &api.ReplaceRequest{
 		Project:    c.db,
@@ -355,7 +365,7 @@ func (c *grpcCRUD) replaceWithOptions(ctx context.Context, collection string, do
 }
 
 func (c *grpcCRUD) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error) {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	resp, err := c.api.Update(ctx, &api.UpdateRequest{
 		Project:    c.db,
@@ -370,7 +380,7 @@ func (c *grpcCRUD) updateWithOptions(ctx context.Context, collection string, fil
 }
 
 func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error) {
-	ctx = setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata)
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 
 	resp, err := c.api.Delete(ctx, &api.DeleteRequest{
 		Project:    c.db,
@@ -385,7 +395,7 @@ func (c *grpcCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 
 func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
 	var cancel context.CancelFunc
-	ctx, cancel = context.WithCancel(setGRPCTxCtx(ctx, c.txCtx, c.additionalMetadata))
+	ctx, cancel = context.WithCancel(setGRPCMetadata(ctx, c.txCtx, c.metadata))
 
 	resp, err := c.api.Read(ctx, &api.ReadRequest{
 		Project:    c.db,

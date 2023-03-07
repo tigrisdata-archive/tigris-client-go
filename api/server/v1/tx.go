@@ -17,46 +17,70 @@ package api
 import (
 	"context"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"google.golang.org/grpc"
 )
 
-var (
-	HeaderPrefix   = "Tigris-"
-	HeaderTxID     = HeaderPrefix + "Tx-Id"
-	HeaderTxOrigin = HeaderPrefix + "Tx-Origin"
+const (
+	HealthMethodName = "/HealthAPI/Health"
 
-	grpcGatewayPrefix = "grpc-gateway-"
+	apiMethodPrefix = "/tigrisdata.v1.Tigris/"
+
+	InsertMethodName  = apiMethodPrefix + "Insert"
+	ReplaceMethodName = apiMethodPrefix + "Replace"
+	UpdateMethodName  = apiMethodPrefix + "Update"
+	DeleteMethodName  = apiMethodPrefix + "Delete"
+	ReadMethodName    = apiMethodPrefix + "Read"
+
+	SearchMethodName = apiMethodPrefix + "Search"
+
+	SubscribeMethodName = apiMethodPrefix + "Subscribe"
+
+	EventsMethodName = apiMethodPrefix + "Events"
+
+	CommitTransactionMethodName   = apiMethodPrefix + "CommitTransaction"
+	RollbackTransactionMethodName = apiMethodPrefix + "RollbackTransaction"
+
+	CreateOrUpdateCollectionMethodName = apiMethodPrefix + "CreateOrUpdateCollection"
+	DropCollectionMethodName           = apiMethodPrefix + "DropCollection"
+
+	DropDatabaseMethodName = apiMethodPrefix + "DropDatabase"
+
+	ListDatabasesMethodName   = apiMethodPrefix + "ListDatabases"
+	ListCollectionsMethodName = apiMethodPrefix + "ListCollections"
+
+	DescribeDatabaseMethodName   = apiMethodPrefix + "DescribeDatabase"
+	DescribeCollectionMethodName = apiMethodPrefix + "DescribeCollection"
+
+	ObservabilityMethodPrefix    = "/tigrisdata.observability.v1.Observability/"
+	ManagementMethodPrefix       = "/tigrisdata.management.v1.Management/"
+	CreateNamespaceMethodName    = ManagementMethodPrefix + "CreateNamespace"
+	ListNamespaceMethodName      = ManagementMethodPrefix + "ListNamespaces"
+	DescribeNamespacesMethodName = ManagementMethodPrefix + "DescribeNamespaces"
+
+	AuthMethodPrefix         = "/tigrisdata.auth.v1.Auth/"
+	GetAccessTokenMethodName = AuthMethodPrefix + "GetAccessToken"
 )
 
 func IsTxSupported(ctx context.Context) bool {
 	m, _ := grpc.Method(ctx)
 	switch m {
-	case "Insert", "Replace", "Update", "Delete", "Read",
-		"CreateOrUpdateCollection", "DropCollection", "ListCollections":
+	case InsertMethodName, ReplaceMethodName, UpdateMethodName, DeleteMethodName, ReadMethodName,
+		CommitTransactionMethodName, RollbackTransactionMethodName,
+		DropCollectionMethodName, ListCollectionsMethodName, CreateOrUpdateCollectionMethodName:
 		return true
 	default:
 		return false
 	}
 }
 
-func getHeader(ctx context.Context, header string) string {
-	if val := metautils.ExtractIncoming(ctx).Get(header); val != "" {
-		return val
-	}
-
-	return metautils.ExtractIncoming(ctx).Get(grpcGatewayPrefix + header)
-}
-
 func GetTransaction(ctx context.Context) *TransactionCtx {
-	tx := &TransactionCtx{
-		Id:     getHeader(ctx, HeaderTxID),
-		Origin: getHeader(ctx, HeaderTxOrigin),
+	origin := GetHeader(ctx, HeaderTxOrigin)
+	if len(origin) == 0 {
+		return nil
 	}
 
-	if tx.Id != "" {
-		return tx
+	return &TransactionCtx{
+		Id:     GetHeader(ctx, HeaderTxID),
+		Origin: origin,
 	}
-
-	return nil
 }

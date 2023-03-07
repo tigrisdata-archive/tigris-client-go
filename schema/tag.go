@@ -264,6 +264,24 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 			}
 
 			field.Index = true
+		case tagSearchIndex:
+			if val != "true" {
+				return false, fmt.Errorf("%w: search index field", ErrInvalidBoolTagValue)
+			}
+
+			field.SearchIndex = true
+		case tagSort:
+			if val != "true" {
+				return false, fmt.Errorf("%w: search index sort field", ErrInvalidBoolTagValue)
+			}
+
+			field.Sort = true
+		case tagFacet:
+			if val != "true" {
+				return false, fmt.Errorf("%w: search index facet field", ErrInvalidBoolTagValue)
+			}
+
+			field.Facet = true
 		case tagDefault:
 			if err = parseDefaultTag(field, val); err != nil {
 				return false, tagError(ErrInvalidDefaultTag, err.Error())

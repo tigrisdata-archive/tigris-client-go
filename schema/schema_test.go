@@ -450,6 +450,7 @@ func TestDefaults(t *testing.T) {
 		FieldDefaultStr1  string   `json:"def_str1" tigris:"default:'st\\'r2'"`
 		FieldDefaultArr   []string `json:"def_arr_str" tigris:"default:'[\"one\", \"two\"]'"`
 		FieldDefaultObj   struct1  `json:"def_obj_str" tigris:"default:'{\"Field1\":\"aaa\"}'"`
+		FieldSearchIndex  string   `json:"def_search_index" tigris:"searchIndex,sort,facet"`
 
 		FieldDefaultTime time.Time `json:"def_time" tigris:"default:now(),updatedAt"`
 		FieldDefaultUUID uuid.UUID `json:"def_uuid" tigris:"default:uuid()"`
@@ -467,6 +468,7 @@ func TestDefaults(t *testing.T) {
 		"def_bool":{"type":"boolean","default":true},
 		"def_int":{"type":"integer","default":789},
 		"def_float":{"type":"number","default":456.34},
+		"def_search_index":{"type":"string","searchIndex":true,"facet":true,"sort":true},
 		"def_str":{"type":"string","default":"str1"},
 		"def_str1":{"type":"string","default":"st'r2"},
 		"def_arr_str":{"type":"array","default":["one", "two"], "items": {"type":"string"}},

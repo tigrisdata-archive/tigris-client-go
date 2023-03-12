@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//nolint:bodyclose
 package driver
 
 import (
@@ -54,14 +53,14 @@ type (
 // Returns nil, if HTTP status is OK.
 func HTTPError(err error, resp *http.Response) error {
 	if err != nil {
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
+
 		var terr *api.TigrisError
 		if errors.As(err, &terr) {
 			//		if terr, ok := err.(*api.TigrisError); ok {
 			return &Error{TigrisError: terr}
-		}
-
-		if errors.Is(err, io.EOF) {
-			return err
 		}
 
 		return err
@@ -410,23 +409,30 @@ func (c *httpCRUD) Commit(ctx context.Context) error {
 
 	if err = HTTPError(err, resp); err == nil {
 		c.committed = true
+		_ = resp.Body.Close()
 	}
 
 	return err
 }
 
 func (c *httpCRUD) Rollback(ctx context.Context) error {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
-
 	if c.committed {
 		return nil
 	}
+
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{
 		Branch: &c.branch,
 	})
 
-	return HTTPError(err, resp)
+	if err = HTTPError(err, resp); err != nil {
+		return err
+	}
+
+	_ = resp.Body.Close()
+
+	return nil
 }
 
 type httpCRUD struct {

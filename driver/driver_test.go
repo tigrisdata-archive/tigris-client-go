@@ -316,7 +316,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
 
-	setGRPCTxCtx(ctx, txCtx, metadata2.MD{})
+	setGRPCMetadata(ctx, txCtx, metadata2.MD{})
 
 	t.Run("insert", func(t *testing.T) {
 		mc.EXPECT().Insert(gomock.Any(),
@@ -978,7 +978,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-	setGRPCTxCtx(ctx, txCtx, metadata2.MD{})
+	setGRPCMetadata(ctx, txCtx, metadata2.MD{})
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
@@ -1348,4 +1348,71 @@ func TestInvalidDriverAPIOptions(t *testing.T) {
 	require.Error(t, err)
 	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
 	require.Error(t, err)
+}
+
+func testSchemaSignOffHeader(t *testing.T, mc *mock.MockTigrisServer, c Driver) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+	setGRPCMetadata(ctx, txCtx, metadata2.MD{})
+
+	doc1 := []Document{Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`)}
+
+	mc.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Project:    "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.InsertRequestOptions{},
+		})).DoAndReturn(
+		func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
+			require.Equal(t, "true", api.GetHeader(ctx, api.HeaderSchemaSignOff))
+
+			return nil, fmt.Errorf("error")
+		})
+
+	_, err := c.UseDatabase("db1").Insert(ctx, "c1", doc1)
+	require.Error(t, err)
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Project: "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
+
+	tx, err := c.UseDatabase("db1").BeginTx(ctx, &TxOptions{})
+	require.NoError(t, err)
+
+	mc.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Project:    "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.InsertRequestOptions{},
+		})).DoAndReturn(
+		func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
+			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+			require.Equal(t, "true", api.GetHeader(ctx, api.HeaderSchemaSignOff))
+
+			return nil, fmt.Errorf("error")
+		})
+
+	_, err = tx.Insert(ctx, "c1", doc1)
+	require.Error(t, err)
+}
+
+func TestGRPCHeaders(t *testing.T) {
+	c, mc, cancel := SetupGRPCTests(t, &config.Driver{SkipSchemaValidation: true})
+	defer cancel()
+
+	testSchemaSignOffHeader(t, mc, c)
+}
+
+func TestHTTPHeaders(t *testing.T) {
+	c, mc, cancel := SetupHTTPTests(t, &config.Driver{SkipSchemaValidation: true})
+	defer cancel()
+
+	testSchemaSignOffHeader(t, mc, c)
 }

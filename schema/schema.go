@@ -54,6 +54,9 @@ const (
 	tagUpdatedAt    = "updatedAt"
 	tagCreatedAt    = "createdAt"
 	tagIndex        = "index"
+	tagSearchIndex  = "searchIndex"
+	tagSort         = "sort"
+	tagFacet        = "facet"
 
 	id = "ID"
 )
@@ -115,6 +118,9 @@ type Field struct {
 	UpdatedAt    bool `json:"updatedAt,omitempty"`
 	CreatedAt    bool `json:"createdAt,omitempty"`
 	Index        bool `json:"index,omitempty"`
+	SearchIndex  bool `json:"searchIndex,omitempty"`
+	Sort         bool `json:"sort,omitempty"`
+	Facet        bool `json:"facet,omitempty"`
 
 	Required []string `json:"required,omitempty"`
 

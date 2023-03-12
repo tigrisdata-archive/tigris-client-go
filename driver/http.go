@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//nolint:bodyclose
 package driver
 
 import (
@@ -54,14 +53,14 @@ type (
 // Returns nil, if HTTP status is OK.
 func HTTPError(err error, resp *http.Response) error {
 	if err != nil {
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
+
 		var terr *api.TigrisError
 		if errors.As(err, &terr) {
 			//		if terr, ok := err.(*api.TigrisError); ok {
 			return &Error{TigrisError: terr}
-		}
-
-		if errors.Is(err, io.EOF) {
-			return err
 		}
 
 		return err
@@ -170,6 +169,16 @@ func dmlRespDecode(body io.ReadCloser, v interface{}) error {
 	return nil
 }
 
+func setHeadersSkipSchema(ctx context.Context, req *http.Request) error {
+	if err := setHeaders(ctx, req); err != nil {
+		return err
+	}
+
+	req.Header[api.HeaderSchemaSignOff] = []string{"true"}
+
+	return nil
+}
+
 func setHeaders(ctx context.Context, req *http.Request) error {
 	req.Header["Host"] = []string{req.Host}
 	req.Header["User-Agent"] = []string{UserAgent}
@@ -187,6 +196,7 @@ func setHeaders(ctx context.Context, req *http.Request) error {
 			req.AddCookie(cookie)
 		}
 	}
+
 	return nil
 }
 
@@ -226,10 +236,16 @@ func newHTTPClient(_ context.Context, config *config.Driver) (*httpDriver, error
 		httpClient = &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
 	}
 
-	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(setHeaders))
+	hf := setHeaders
+	if config.SkipSchemaValidation {
+		hf = setHeadersSkipSchema
+	}
+
+	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(hf))
 	if err != nil {
 		return nil, err
 	}
+
 	return &httpDriver{api: c, tokenURL: tokenURL, cfg: config}, nil
 }
 
@@ -393,23 +409,30 @@ func (c *httpCRUD) Commit(ctx context.Context) error {
 
 	if err = HTTPError(err, resp); err == nil {
 		c.committed = true
+		_ = resp.Body.Close()
 	}
 
 	return err
 }
 
 func (c *httpCRUD) Rollback(ctx context.Context) error {
-	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
-
 	if c.committed {
 		return nil
 	}
+
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisRollbackTransaction(ctx, c.db, apiHTTP.TigrisRollbackTransactionJSONRequestBody{
 		Branch: &c.branch,
 	})
 
-	return HTTPError(err, resp)
+	if err = HTTPError(err, resp); err != nil {
+		return err
+	}
+
+	_ = resp.Body.Close()
+
+	return nil
 }
 
 type httpCRUD struct {

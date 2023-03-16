@@ -209,7 +209,9 @@ func (c *driverCRUD) Insert(ctx context.Context, collection string, docs []Docum
 		return nil, err
 	}
 
-	fmt.Fprintf(os.Stderr, "driver insert %s", spew.Sprint(docs))
+	for k, v := range docs {
+		fmt.Fprintf(os.Stderr, "driver insert %d %s", k, spew.Sprint(string(v)))
+	}
 
 	return c.insertWithOptions(ctx, collection, docs, opts.(*InsertOptions))
 }
@@ -222,7 +224,9 @@ func (c *driverCRUD) Replace(ctx context.Context, collection string, docs []Docu
 		return nil, err
 	}
 
-	fmt.Fprintf(os.Stderr, "driver replace %s", spew.Sprint(docs))
+	for k, v := range docs {
+		fmt.Fprintf(os.Stderr, "driver replace %d %s", k, spew.Sprint(string(v)))
+	}
 
 	return c.replaceWithOptions(ctx, collection, docs, opts.(*ReplaceOptions))
 }
@@ -235,8 +239,8 @@ func (c *driverCRUD) Update(ctx context.Context, collection string, filter Filte
 		return nil, err
 	}
 
-	fmt.Fprintf(os.Stderr, "driver update %s", spew.Sprint(filter))
-	fmt.Fprintf(os.Stderr, "driver update %s", spew.Sprint(fields))
+	fmt.Fprintf(os.Stderr, "driver update %s", spew.Sprint(string(filter)))
+	fmt.Fprintf(os.Stderr, "driver update %s", spew.Sprint(string(fields)))
 
 	return c.updateWithOptions(ctx, collection, filter, fields, opts.(*UpdateOptions))
 }

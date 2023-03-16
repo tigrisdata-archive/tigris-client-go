@@ -28,6 +28,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/tigrisdata/tigris-client-go/config"
 )
 
@@ -208,6 +209,8 @@ func (c *driverCRUD) Insert(ctx context.Context, collection string, docs []Docum
 		return nil, err
 	}
 
+	fmt.Fprintf(os.Stderr, "driver insert %s", spew.Sprint(docs))
+
 	return c.insertWithOptions(ctx, collection, docs, opts.(*InsertOptions))
 }
 
@@ -219,6 +222,8 @@ func (c *driverCRUD) Replace(ctx context.Context, collection string, docs []Docu
 		return nil, err
 	}
 
+	fmt.Fprintf(os.Stderr, "driver replace %s", spew.Sprint(docs))
+
 	return c.replaceWithOptions(ctx, collection, docs, opts.(*ReplaceOptions))
 }
 
@@ -229,6 +234,9 @@ func (c *driverCRUD) Update(ctx context.Context, collection string, filter Filte
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Fprintf(os.Stderr, "driver update %s", spew.Sprint(filter))
+	fmt.Fprintf(os.Stderr, "driver update %s", spew.Sprint(fields))
 
 	return c.updateWithOptions(ctx, collection, filter, fields, opts.(*UpdateOptions))
 }

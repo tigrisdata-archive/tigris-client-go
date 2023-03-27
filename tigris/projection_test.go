@@ -113,7 +113,7 @@ func TestProjectionBasic(t *testing.T) {
 	"properties":
 	{ 
 		"Address": {
-			"type":"object",
+			"type":["object","null"],
 			"properties":{
 				"City":{"type":"string"},
 				"State":{"type":"string"},
@@ -125,12 +125,12 @@ func TestProjectionBasic(t *testing.T) {
 			"type":"object",
 			"properties":{
 				"Accounts":{
-					"type":"array",
+					"type":["array","null"],
 					"items":{
 						"type":"object",
 						"properties":{
 							"BankAddress": {
-								"type":"object",
+								"type":["object", "null"],
 								"properties":{
 									"City":{"type":"string"},
 									"State":{"type":"string"},

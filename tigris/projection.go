@@ -80,8 +80,15 @@ func GetProjection[T schema.Model, P schema.Model](db *Database, keyPath ...stri
 	)
 
 	name := schema.ModelName(&m)
-	prefix := strings.Join(keyPath, ".")
 	pt := &Projection[T, P]{coll: getNamedCollection[T](db, name)}
+
+	if len(keyPath) == 0 && reflect.TypeOf(m) == reflect.TypeOf(p) {
+		pt.projection = driver.Projection(`{}`)
+
+		return pt
+	}
+
+	prefix := strings.Join(keyPath, ".")
 
 	t, err := findSubType(reflect.TypeOf(m), keyPath)
 	if err != nil {

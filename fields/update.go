@@ -28,12 +28,12 @@ import (
 
 type Update struct {
 	built      driver.Update
-	SetF       map[string]any     `json:"$set,omitempty"`
-	UnsetF     map[string]any     `json:"$unset,omitempty"`
-	IncrementF map[string]float64 `json:"$increment,omitempty"`
-	DecrementF map[string]float64 `json:"$decrement,omitempty"`
-	MultiplyF  map[string]float64 `json:"$multiply,omitempty"`
-	DivideF    map[string]float64 `json:"$divide,omitempty"`
+	SetF       map[string]any `json:"$set,omitempty"`
+	UnsetF     map[string]any `json:"$unset,omitempty"`
+	IncrementF map[string]any `json:"$increment,omitempty"`
+	DecrementF map[string]any `json:"$decrement,omitempty"`
+	MultiplyF  map[string]any `json:"$multiply,omitempty"`
+	DivideF    map[string]any `json:"$divide,omitempty"`
 }
 
 // UpdateBuilder returns and object to construct the update field of Update API.
@@ -41,10 +41,10 @@ func UpdateBuilder() *Update {
 	return &Update{
 		SetF:       map[string]any{},
 		UnsetF:     map[string]any{},
-		IncrementF: make(map[string]float64),
-		DecrementF: make(map[string]float64),
-		MultiplyF:  make(map[string]float64),
-		DivideF:    make(map[string]float64),
+		IncrementF: make(map[string]any),
+		DecrementF: make(map[string]any),
+		MultiplyF:  make(map[string]any),
+		DivideF:    make(map[string]any),
 	}
 }
 
@@ -88,46 +88,6 @@ func (u *Update) Unset(field string) *Update {
 	return u
 }
 
-// Increment instructs operation to increment given field in the document by the provided value
-// The result is equivalent to
-//
-//	field = field + value
-func (u *Update) Increment(field string, value float64) *Update {
-	u.IncrementF[field] = value
-
-	return u
-}
-
-// Decrement instructs operation to decrement given field in the document by the provided value
-// The result is equivalent to
-//
-//	field = field - value
-func (u *Update) Decrement(field string, value float64) *Update {
-	u.DecrementF[field] = value
-
-	return u
-}
-
-// Multiply instructs operation to multiply given field in the document by the provided value
-// The result is equivalent to
-//
-//	field = field * value
-func (u *Update) Multiply(field string, value float64) *Update {
-	u.MultiplyF[field] = value
-
-	return u
-}
-
-// Divide instructs operation to increment given field in the document by the provided value
-// The result is equivalent to
-//
-//	field = field / value
-func (u *Update) Divide(field string, value float64) *Update {
-	u.DivideF[field] = value
-
-	return u
-}
-
 // Set instructs operation to set given field to the provided value
 // The result is equivalent to
 //
@@ -150,44 +110,84 @@ func Unset(field string) *Update {
 	return u
 }
 
-// Increment instructs operation to increment given field in the document by the provided value
+// Increment instructs operation to increment the field by given value
 // The result is equivalent to
 //
-//	field = field + value
-func Increment(field string, value float64) *Update {
+//	field += value
+func (u *Update) Increment(field string, value any) *Update {
+	u.IncrementF[field] = value
+
+	return u
+}
+
+// Decrement instructs operation to decrement the field by given value
+// The result is equivalent to
+//
+//	field -= value
+func (u *Update) Decrement(field string, value any) *Update {
+	u.DecrementF[field] = value
+
+	return u
+}
+
+// Multiply instructs operation to multiply the field by given value
+// The result is equivalent to
+//
+//	field *= value
+func (u *Update) Multiply(field string, value interface{}) *Update {
+	u.MultiplyF[field] = value
+
+	return u
+}
+
+// Divide instructs operation to divide the field by given value
+// The result is equivalent to
+//
+//	field /= value
+func (u *Update) Divide(field string, value interface{}) *Update {
+	u.DivideF[field] = value
+
+	return u
+}
+
+// Increment instructs operation to increment the field by given value
+// The result is equivalent to
+//
+//	field += value
+func Increment(field string, value any) *Update {
 	u := UpdateBuilder()
 	u.IncrementF[field] = value
 
 	return u
 }
 
-// Decrement instructs operation to decrement given field in the document by the provided value
+// Decrement instructs operation to decrement the field by given value
 // The result is equivalent to
 //
-//	field = field - value
-func Decrement(field string, value float64) *Update {
+//	field -= value
+func Decrement(field string, value any) *Update {
 	u := UpdateBuilder()
 	u.DecrementF[field] = value
 
 	return u
 }
 
-// Multiply instructs operation to multiply given field in the document by the provided value
+// Multiply instructs operation to multiply the field by given value
 // The result is equivalent to
 //
-//	field = field * value
-func Multiply(field string, value float64) *Update {
+//	field *= value
+func Multiply(field string, value any) *Update {
 	u := UpdateBuilder()
 	u.MultiplyF[field] = value
 
 	return u
 }
 
-// Divide instructs operation to divide given field in the document by the provided value
+// Divide instructs operation to divide the field by given value
 // The result is equivalent to
 //
-//	field = field / value
-func Divide(field string, value float64) *Update {
+//	field /= value
+func Divide(field string, value any) *Update {
 	u := UpdateBuilder()
 	u.DivideF[field] = value
 

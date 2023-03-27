@@ -99,10 +99,12 @@ func (c *Collection[T]) Insert(ctx context.Context, docs ...*T) (*InsertResponse
 	return &InsertResponse{Keys: md.Keys}, nil
 }
 
-// InsertOrReplace inserts new documents and in the case of duplicate key
-// replaces existing documents with the new document.
-func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*InsertOrReplaceResponse, error) {
-	var err error
+func insertOrReplaceLow[T schema.Model](ctx context.Context, db driver.Database, name string, insert bool, docs ...*T) (*InsertOrReplaceResponse, error) {
+	var (
+		err  error
+		keys [][]byte
+		meta *api.ResponseMetadata
+	)
 
 	bdocs := make([]driver.Document, len(docs))
 
@@ -112,26 +114,49 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 		}
 	}
 
-	md, err := getDB(ctx, c.db).Replace(ctx, c.name, bdocs)
-	if err != nil {
-		return nil, err
+	if insert {
+		md, err := getDB(ctx, db).Insert(ctx, name, bdocs)
+		if err != nil {
+			return nil, err
+		}
+
+		if md == nil {
+			return &InsertOrReplaceResponse{}, nil
+		}
+
+		keys = md.Keys
+		meta = md.Metadata
+	} else {
+		md, err := getDB(ctx, db).Replace(ctx, name, bdocs)
+		if err != nil {
+			return nil, err
+		}
+
+		if md == nil {
+			return &InsertOrReplaceResponse{}, nil
+		}
+
+		keys = md.Keys
+		meta = md.Metadata
 	}
 
-	if md == nil {
-		return &InsertOrReplaceResponse{}, nil
-	}
-
-	if len(md.Keys) > 0 && len(md.Keys) != len(docs) {
+	if len(keys) > 0 && len(keys) != len(docs) {
 		return nil, fmt.Errorf("broken response. number of inserted documents is not the same as number of provided documents")
 	}
 
-	for k, v := range md.Keys {
-		if err := populateModelMetadata(docs[k], md.Metadata, v); err != nil {
+	for k, v := range keys {
+		if err := populateModelMetadata(docs[k], meta, v); err != nil {
 			return nil, err
 		}
 	}
 
-	return &InsertOrReplaceResponse{Keys: md.Keys}, nil
+	return &InsertOrReplaceResponse{Keys: keys}, nil
+}
+
+// InsertOrReplace inserts new documents and in the case of duplicate key
+// replaces existing documents with the new document.
+func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*InsertOrReplaceResponse, error) {
+	return insertOrReplaceLow(ctx, c.db, c.name, false, docs...)
 }
 
 func (c *Collection[T]) updateWithOptions(ctx context.Context, filter filter.Filter, update *fields.Update, options *driver.UpdateOptions) (*UpdateResponse, error) {
@@ -189,7 +214,7 @@ func getFields(fields ...*fields.Read) (driver.Projection, error) {
 }
 
 // Read returns documents which satisfies the filter.
-// Only field from the give fields are populated in the documents. By default, all fields are populated.
+// Only fields from the given fields are populated in the documents. By default, all fields are populated.
 func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*Iterator[T], error) {
 	p, err := getFields(fields...)
 	if err != nil {

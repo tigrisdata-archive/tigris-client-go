@@ -36,6 +36,7 @@ ${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml scripts/fix_openap
 		/tmp/openapi.yaml
 
 generate: $(SERVICES:%=$(GEN_DIR)/%.pb.go) ${API_DIR}/client/${V}/api/http.go
+	go generate ./...
 
 mock/api/grpc.go mock/driver.go: $(SERVICES:%=$(GEN_DIR)/%.pb.go) driver/driver.go driver/search.go
 	mkdir -p mock/api

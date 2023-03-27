@@ -42,6 +42,10 @@ func (matcher *JSONMatcher) Matches(actual any) bool {
 		s = string(t)
 	case Filter:
 		s = string(t)
+	case Update:
+		s = string(t)
+	case Document:
+		s = string(t)
 	}
 
 	if s == "" && matcher.Expected == "" {
@@ -49,7 +53,7 @@ func (matcher *JSONMatcher) Matches(actual any) bool {
 	}
 
 	if s == "" {
-		panic("unknow type received in JSONMatcher")
+		panic(fmt.Sprintf("unknow type received in JSONMatcher: %v", reflect.TypeOf(actual)))
 	}
 
 	return assert.JSONEq(matcher.T, matcher.Expected, s)
@@ -87,12 +91,22 @@ type JSONArrMatcher struct {
 }
 
 func (matcher *JSONArrMatcher) Matches(actual any) bool {
-	act, err := jsoniter.Marshal(actual)
-	require.NoError(matcher.T, err)
-	exp, err := jsoniter.Marshal(actual)
-	require.NoError(matcher.T, err)
+	switch b := actual.(type) {
+	case []Schema:
+		require.Equal(matcher.T, len(matcher.Expected), len(b))
 
-	assert.JSONEq(matcher.T, string(exp), string(act))
+		for k, v := range b {
+			assert.JSONEq(matcher.T, matcher.Expected[k], string(v))
+		}
+	case []Document:
+		require.Equal(matcher.T, len(matcher.Expected), len(b))
+
+		for k, v := range b {
+			assert.JSONEq(matcher.T, matcher.Expected[k], string(v))
+		}
+	default:
+		panic(fmt.Sprintf("unknown type received for JSON array matcher %v", reflect.TypeOf(actual)))
+	}
 
 	return true
 }
@@ -107,7 +121,17 @@ func (*JSONArrMatcher) Got(actual any) string {
 
 // JAM = JSON Array Matcher.
 func JAM(t *testing.T, expected []string) gomock.Matcher {
-	j := &JSONArrMatcher{T: t, Expected: expected}
+	var res []string
+	// remarshal for cleanup (\t\n, etc...)
+	for _, v := range expected {
+		var o any
+		err := jsoniter.Unmarshal([]byte(v), &o)
+		require.NoError(t, err)
+		b, err := jsoniter.Marshal(o)
+		require.NoError(t, err)
+		res = append(res, string(b))
+	}
+	j := &JSONArrMatcher{T: t, Expected: res}
 	return gomock.GotFormatterAdapter(j, j)
 }
 

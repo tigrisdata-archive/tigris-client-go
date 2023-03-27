@@ -24,8 +24,7 @@ import (
 )
 
 type (
-	Operand map[string]comparison
-	value   any
+	value any
 )
 
 type comparison struct {
@@ -35,6 +34,9 @@ type comparison struct {
 	Lte value `json:"$lte,omitempty"`
 	Ne  value `json:"$ne,omitempty"`
 	Eq  value `json:"$eq,omitempty"`
+
+	Contains    value `json:"$contains,omitempty"`
+	NotContains value `json:"$not_contains,omitempty"`
 }
 
 const (
@@ -46,10 +48,23 @@ const (
 // All represents filter which includes all the documents of the collection.
 var All = Expr{}
 
+var (
+	True  = Expr{}
+	False = Expr(nil)
+)
+
 type (
 	Expr   map[string]any
 	Filter = Expr
 )
+
+func IsTrue(e Expr) bool {
+	return e != nil && len(e) == 0
+}
+
+func IsFalse(e Expr) bool {
+	return e == nil
+}
 
 // And composes 'and' operation.
 // Result is equivalent to: (ops[0] && ... && ops[len(ops-1]).
@@ -63,27 +78,21 @@ func Or(ops ...Expr) Expr {
 	return Expr{or: ops}
 }
 
-/*
-// Not composes 'not' operation.
-// Result is equivalent to: !(op)
-func Not(op Expr) Expr {
-	return Expr{not: op}
-}
-*/
-
 // Eq composes 'equal' operation.
 // Result is equivalent to: field == value.
 func Eq[T schema.PrimitiveFieldType](field string, value T) Expr {
 	return Expr{field: comparison{Eq: value}}
 }
 
-/*
+func Eq1(field string, value any) Expr {
+	return Expr{field: comparison{Eq: value}}
+}
+
 // Ne composes 'not equal' operation.
 // Result is equivalent to: field != value
 func Ne(field string, value any) Expr {
 	return Expr{field: comparison{Ne: value}}
 }
-*/
 
 // Gt composes 'greater than' operation.
 // Result is equivalent to: field > value.
@@ -110,10 +119,10 @@ func Lte(field string, value any) Expr {
 }
 
 // Build materializes the filter.
-func (prev Expr) Build() (driver.Filter, error) {
-	if prev == nil {
+func (e Expr) Build() (driver.Filter, error) {
+	if e == nil {
 		return nil, nil
 	}
 
-	return jsoniter.Marshal(prev)
+	return jsoniter.Marshal(e)
 }

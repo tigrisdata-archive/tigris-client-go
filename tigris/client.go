@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/tigrisdata/tigris-client-go/util"
+
 	"github.com/tigrisdata/tigris-client-go/config"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
@@ -43,7 +45,11 @@ type Config struct {
 	// MustExist if set skips implicit database creation
 	MustExist     bool
 	DisableSearch bool
+
+	Log LogConfig
 }
+
+type LogConfig = util.LogConfig
 
 // Client responsible for connecting to the server and opening a database.
 type Client struct {

@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tigrisdata/tigris-client-go/util"
+
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
@@ -172,6 +174,8 @@ func openDatabase(ctx context.Context, d driver.Driver,
 //	client.OpenDatabase(...)
 func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 ) (*Database, error) {
+	util.Configure(cfg.Log)
+
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
 	}

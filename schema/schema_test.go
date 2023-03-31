@@ -287,7 +287,7 @@ func TestCollectionSchema(t *testing.T) {
 
 			"slice_1": {Type: typeArray, Items: &Field{Type: typeString}},
 			"arr_1":   {Type: typeArray, Items: &Field{Type: typeString}},
-			"map_1":   {Type: typeObject},
+			"map_1":   {Type: typeObject, AdditionalProperties: true},
 
 			"slice_2": {
 				Type: typeArray,
@@ -304,7 +304,7 @@ func TestCollectionSchema(t *testing.T) {
 					},
 				},
 			},
-			"map_2": {Type: typeObject},
+			"map_2": {Type: typeObject, AdditionalProperties: true},
 
 			// use original name if JSON tag name is not defined
 			"bool_123": {Type: typeBoolean},
@@ -404,7 +404,7 @@ func TestCollectionSchema(t *testing.T) {
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"}},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object"},"map_2":{"type":"object"},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
+		require.Equal(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"}},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {

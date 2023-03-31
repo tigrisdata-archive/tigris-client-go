@@ -126,6 +126,8 @@ type Field struct {
 
 	// RequiredTag And IndexTag is used during schema building only
 	RequiredTag bool `json:"-"`
+
+	AdditionalProperties bool `json:"additionalProperties,omitempty"`
 }
 
 // Schema is top level JSON schema object.
@@ -173,7 +175,7 @@ func ModelName(s interface{}) string {
 	return plural.Plural(name)
 }
 
-func translateType(t reflect.Type) (string, string, error) {
+func translateType(t reflect.Type) (string, string, bool, error) {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
@@ -182,45 +184,45 @@ func translateType(t reflect.Type) (string, string, error) {
 	switch t.Kind() {
 	case reflect.Struct:
 		if t.PkgPath() == "time" && t.Name() == "Time" {
-			return typeString, formatDateTime, nil
+			return typeString, formatDateTime, false, nil
 		}
 
-		return typeObject, "", nil
+		return typeObject, "", false, nil
 	case reflect.Array:
 		if t.Elem().Kind() == reflect.Uint8 {
 			if t.PkgPath() == "github.com/google/uuid" && t.Name() == "UUID" {
-				return typeString, formatUUID, nil
+				return typeString, formatUUID, false, nil
 			}
-			return typeString, formatByte, nil
+			return typeString, formatByte, false, nil
 		}
 
-		return typeArray, "", nil
+		return typeArray, "", false, nil
 	case reflect.Slice:
 		if t.Elem().Kind() == reflect.Uint8 {
-			return typeString, formatByte, nil
+			return typeString, formatByte, false, nil
 		}
-		return typeArray, "", nil
+		return typeArray, "", false, nil
 	case reflect.Int32:
-		return typeInteger, formatInt32, nil
+		return typeInteger, formatInt32, false, nil
 	case reflect.Int64:
-		return typeInteger, "", nil
+		return typeInteger, "", false, nil
 	case reflect.String:
-		return typeString, "", nil
+		return typeString, "", false, nil
 	case reflect.Float32, reflect.Float64:
-		return typeNumber, "", nil
+		return typeNumber, "", false, nil
 	case reflect.Bool:
-		return typeBoolean, "", nil
+		return typeBoolean, "", false, nil
 	case reflect.Map:
-		return typeObject, "", nil
+		return typeObject, "", true, nil
 	case reflect.Int:
 		var a int
 		if unsafe.Sizeof(a) == 4 {
-			return typeInteger, formatInt32, nil
+			return typeInteger, formatInt32, false, nil
 		}
-		return typeInteger, "", nil
+		return typeInteger, "", false, nil
 	}
 
-	return "", "", fmt.Errorf("unsupported type: name='%s' kind='%s'", t.Name(), t.Kind())
+	return "", "", false, fmt.Errorf("unsupported type: name='%s' kind='%s'", t.Name(), t.Kind())
 }
 
 func isPrimaryKeyType(tp string) bool {
@@ -282,7 +284,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 		var f Field
 		var err error
 
-		f.Type, f.Format, err = translateType(field.Type)
+		f.Type, f.Format, f.AdditionalProperties, err = translateType(field.Type)
 		if err != nil {
 			return err
 		}
@@ -337,13 +339,14 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 				}
 			} else {
 				// FIXME: Support multidimensional arrays
-				tp, fm, err := translateType(tp.Elem())
+				tp, fm, ap, err := translateType(tp.Elem())
 				if err != nil {
 					return err
 				}
 				f.Items = &Field{
-					Type:   tp,
-					Format: fm,
+					Type:                 tp,
+					Format:               fm,
+					AdditionalProperties: ap,
 				}
 			}
 		}

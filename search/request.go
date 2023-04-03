@@ -34,7 +34,7 @@ type Request struct {
 	// Optional Facet query can be used to request categorical arrangement of the indexed terms
 	Facet *FacetQuery
 	// Optional Sort order can be specified to order the search results
-	Sort *sort.Order
+	Sort sort.Order
 	// Optional IncludeFields sets the document fields to include in search results
 	// By default, all documents fields will be included, unless ExcludeFields is specified
 	IncludeFields []string
@@ -73,7 +73,7 @@ type requestBuilder struct {
 	searchFields map[string]bool
 	filter       filter.Filter
 	facet        *FacetQuery
-	sort         *sort.Order
+	sort         sort.Order
 	include      []string
 	exclude      []string
 	options      *Options
@@ -114,13 +114,13 @@ func (b *requestBuilder) WithFacet(facet *FacetQuery) RequestBuilder {
 
 func (b *requestBuilder) WithSorting(sortByFields ...sort.Sort) RequestBuilder {
 	s := sort.NewSortOrder(sortByFields...)
-	b.sort = &s
+	b.sort = s
 
 	return b
 }
 
 func (b *requestBuilder) WithSortOrder(sortOrder sort.Order) RequestBuilder {
-	b.sort = &sortOrder
+	b.sort = sortOrder
 
 	return b
 }

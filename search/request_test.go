@@ -73,7 +73,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 		req := NewRequestBuilder().
 			WithSorting(sort.Ascending("field_1"), sort.Descending("field_2")).
 			Build()
-		assert.Len(t, *req.Sort, 2)
+		assert.Len(t, req.Sort, 2)
 		b, err := req.Sort.Built()
 		assert.Nil(t, err)
 		assert.Equal(t, driver.SortOrder(`[{"field_1":"$asc"},{"field_2":"$desc"}]`), b)
@@ -84,7 +84,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 		req := NewRequestBuilder().
 			WithSortOrder(order).
 			Build()
-		assert.Equal(t, &order, req.Sort)
+		assert.Equal(t, order, req.Sort)
 	})
 }
 

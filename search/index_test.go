@@ -86,6 +86,32 @@ func TestSearchIndex_DocumentCRUDIndex(t *testing.T) {
 		require.Equal(t, tm, d[0].GetUpdatedAt())
 	})
 
+	t.Run("get_not_found", func(t *testing.T) {
+		msearch.EXPECT().Get(gomock.Any(), "coll_search_tests", []string{"id1"}).Return(
+			[]*api.SearchHit{{Data: nil, Metadata: nil}}, // server return empty result for every not found id
+			nil)
+
+		d, err := idx.Get(ctx, []string{"id1"})
+		require.NoError(t, err)
+		require.Equal(t, []CollSearchTest{}, d)
+	})
+
+	t.Run("get_one", func(t *testing.T) {
+		msearch.EXPECT().Get(gomock.Any(), "coll_search_tests", []string{"id1"}).Return(
+			[]*api.SearchHit{{Data: toDocument(t, d1), Metadata: &api.SearchHitMeta{
+				CreatedAt: timestamppb.New(tm),
+				UpdatedAt: timestamppb.New(tm),
+			}}}, nil)
+
+		d, err := idx.GetOne(ctx, "id1")
+		require.NoError(t, err)
+		require.Equal(t, &CollSearchTest{
+			Field1:   "value1",
+			Metadata: newMetadata(tm, tm),
+		}, d)
+		require.Equal(t, tm, d.GetCreatedAt())
+	})
+
 	t.Run("create", func(t *testing.T) {
 		msearch.EXPECT().Create(gomock.Any(), "coll_search_tests", []driver.Document{toDocument(t, d1), toDocument(t, d2)}).
 			Return(
@@ -148,6 +174,17 @@ func TestSearchIndex_DocumentCRUDIndex(t *testing.T) {
 		require.Equal(t, &Response{
 			Statuses: []DocStatus{{ID: "id1"}, {ID: "id2", Error: NewError(code.InvalidArgument, "error2")}},
 		}, resp)
+	})
+
+	t.Run("delete_one", func(t *testing.T) {
+		msearch.EXPECT().Delete(gomock.Any(), "coll_search_tests", []string{"id1"}).
+			Return(
+				[]*api.DocStatus{
+					{Id: "id1", Error: nil},
+				}, nil)
+
+		err := idx.DeleteOne(ctx, "id1")
+		require.NoError(t, err)
 	})
 
 	t.Run("delete_by_query", func(t *testing.T) {

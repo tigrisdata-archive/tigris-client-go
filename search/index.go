@@ -131,6 +131,10 @@ func (c *Index[T]) Get(ctx context.Context, ids []string) ([]T, error) {
 	for _, v := range resp {
 		var doc T
 
+		if v.Data == nil {
+			continue
+		}
+
 		err = json.Unmarshal(v.Data, &doc)
 		if err != nil {
 			return nil, err
@@ -142,6 +146,16 @@ func (c *Index[T]) Get(ctx context.Context, ids []string) ([]T, error) {
 	}
 
 	return docs, nil
+}
+
+// GetOne retrieves one document.
+func (c *Index[T]) GetOne(ctx context.Context, id string) (*T, error) {
+	docs, err := c.Get(ctx, []string{id})
+	if err != nil {
+		return nil, err
+	}
+
+	return &docs[0], nil
 }
 
 func getSearchRequest(req *Request) (*driver.SearchRequest, error) {
@@ -220,6 +234,12 @@ func (c *Index[T]) Delete(ctx context.Context, ids []string) (*Response, error) 
 	}
 
 	return &Response{Statuses: setStatuses(resp)}, nil
+}
+
+// DeleteOne deletes one document.
+func (c *Index[T]) DeleteOne(ctx context.Context, id string) error {
+	_, err := c.Delete(ctx, []string{id})
+	return err
 }
 
 // DeleteByQuery is used to delete documents that match the filter. A filter is required. To delete document by id,

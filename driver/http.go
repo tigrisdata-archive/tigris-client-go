@@ -769,7 +769,7 @@ func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchReq
 		SearchFields:  &req.SearchFields,
 		Filter:        json.RawMessage(req.Filter),
 		Facet:         json.RawMessage(req.Facet),
-		Sort:          json.RawMessage(req.Sort),
+		Sort:          (*[]json.RawMessage)(&req.Sort),
 		IncludeFields: &req.IncludeFields,
 		ExcludeFields: &req.ExcludeFields,
 		Page:          &req.Page,
@@ -956,7 +956,7 @@ func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
 }
 
 func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {
-	resp, err := c.api.ManagementListNamespaces(ctx)
+	resp, err := c.api.ManagementListNamespaces(ctx, "", &apiHTTP.ManagementListNamespacesParams{})
 	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}

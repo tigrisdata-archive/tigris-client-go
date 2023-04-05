@@ -15,6 +15,7 @@
 package sort
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,6 +59,10 @@ func TestExpr_Built(t *testing.T) {
 		b, err := NewSortOrder(Ascending("field_1"), Ascending("field_1"), Descending("field_2")).Built()
 		assert.Nil(t, err)
 		assert.NotNil(t, b)
-		assert.Equal(t, driver.SortOrder(`[{"field_1":"$asc"},{"field_1":"$asc"},{"field_2":"$desc"}]`), b)
+		assert.Equal(t, driver.SortOrder([]json.RawMessage{
+			json.RawMessage(`{"field_1":"$asc"}`),
+			json.RawMessage(`{"field_1":"$asc"}`),
+			json.RawMessage(`{"field_2":"$desc"}`),
+		}), b)
 	})
 }

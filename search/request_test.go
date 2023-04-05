@@ -76,7 +76,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 		assert.Len(t, req.Sort, 2)
 		b, err := req.Sort.Built()
 		assert.Nil(t, err)
-		assert.Equal(t, driver.SortOrder(`[{"field_1":"$asc"},{"field_2":"$desc"}]`), b)
+		assert.Equal(t, driver.SortOrder{json.RawMessage(`{"field_1":"$asc"}`), json.RawMessage(`{"field_2":"$desc"}`)}, b)
 	})
 
 	t.Run("with sort oder", func(t *testing.T) {

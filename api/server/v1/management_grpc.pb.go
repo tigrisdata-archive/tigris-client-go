@@ -24,9 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ManagementClient interface {
 	// Creates a new namespace, if it does not exist
 	CreateNamespace(ctx context.Context, in *CreateNamespaceRequest, opts ...grpc.CallOption) (*CreateNamespaceResponse, error)
-	// Get details for all namespaces
-	DescribeNamespaces(ctx context.Context, in *DescribeNamespacesRequest, opts ...grpc.CallOption) (*DescribeNamespacesResponse, error)
-	// List all namespace
+	// List all namespace and optionally lists specific namespace by namespaceId filter, also supports `describe` request.
 	ListNamespaces(ctx context.Context, in *ListNamespacesRequest, opts ...grpc.CallOption) (*ListNamespacesResponse, error)
 	// insertUserMetadata inserts the user metadata object
 	InsertUserMetadata(ctx context.Context, in *InsertUserMetadataRequest, opts ...grpc.CallOption) (*InsertUserMetadataResponse, error)
@@ -53,15 +51,6 @@ func NewManagementClient(cc grpc.ClientConnInterface) ManagementClient {
 func (c *managementClient) CreateNamespace(ctx context.Context, in *CreateNamespaceRequest, opts ...grpc.CallOption) (*CreateNamespaceResponse, error) {
 	out := new(CreateNamespaceResponse)
 	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/CreateNamespace", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *managementClient) DescribeNamespaces(ctx context.Context, in *DescribeNamespacesRequest, opts ...grpc.CallOption) (*DescribeNamespacesResponse, error) {
-	out := new(DescribeNamespacesResponse)
-	err := c.cc.Invoke(ctx, "/tigrisdata.management.v1.Management/DescribeNamespaces", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -137,9 +126,7 @@ func (c *managementClient) UpdateNamespaceMetadata(ctx context.Context, in *Upda
 type ManagementServer interface {
 	// Creates a new namespace, if it does not exist
 	CreateNamespace(context.Context, *CreateNamespaceRequest) (*CreateNamespaceResponse, error)
-	// Get details for all namespaces
-	DescribeNamespaces(context.Context, *DescribeNamespacesRequest) (*DescribeNamespacesResponse, error)
-	// List all namespace
+	// List all namespace and optionally lists specific namespace by namespaceId filter, also supports `describe` request.
 	ListNamespaces(context.Context, *ListNamespacesRequest) (*ListNamespacesResponse, error)
 	// insertUserMetadata inserts the user metadata object
 	InsertUserMetadata(context.Context, *InsertUserMetadataRequest) (*InsertUserMetadataResponse, error)
@@ -161,9 +148,6 @@ type UnimplementedManagementServer struct {
 
 func (UnimplementedManagementServer) CreateNamespace(context.Context, *CreateNamespaceRequest) (*CreateNamespaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNamespace not implemented")
-}
-func (UnimplementedManagementServer) DescribeNamespaces(context.Context, *DescribeNamespacesRequest) (*DescribeNamespacesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DescribeNamespaces not implemented")
 }
 func (UnimplementedManagementServer) ListNamespaces(context.Context, *ListNamespacesRequest) (*ListNamespacesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListNamespaces not implemented")
@@ -212,24 +196,6 @@ func _Management_CreateNamespace_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ManagementServer).CreateNamespace(ctx, req.(*CreateNamespaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Management_DescribeNamespaces_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DescribeNamespacesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ManagementServer).DescribeNamespaces(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/tigrisdata.management.v1.Management/DescribeNamespaces",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagementServer).DescribeNamespaces(ctx, req.(*DescribeNamespacesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -370,10 +336,6 @@ var Management_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateNamespace",
 			Handler:    _Management_CreateNamespace_Handler,
-		},
-		{
-			MethodName: "DescribeNamespaces",
-			Handler:    _Management_DescribeNamespaces_Handler,
 		},
 		{
 			MethodName: "ListNamespaces",

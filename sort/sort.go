@@ -58,11 +58,16 @@ func (o Expr) Built() (driver.SortOrder, error) {
 		return nil, nil
 	}
 
-	sortOrders := make([]map[string]string, len(o))
+	sortOrders := make([]json.RawMessage, len(o))
 	for i, s := range o {
-		sortOrders[i] = s.ToSortOrder()
+		b, err := json.Marshal(s.ToSortOrder())
+		if err != nil {
+			return nil, err
+		}
+		sortOrders[i] = b
 	}
-	return json.Marshal(sortOrders)
+
+	return sortOrders, nil
 }
 
 type fieldSort struct {

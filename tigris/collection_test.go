@@ -292,7 +292,7 @@ func TestCollection_Search(t *testing.T) {
 			SearchFields:  sr.SearchFields,
 			Filter:        driver.Filter(`{"field_2":{"$eq":"some value"}}`),
 			Facet:         driver.Facet(`{"field_3":{"size":10}}`),
-			Sort:          driver.SortOrder(`[{"field_1":"$asc"},{"field_2":"$desc"}]`),
+			Sort:          driver.SortOrder{json.RawMessage(`{"field_1":"$asc"}`), json.RawMessage(`{"field_2":"$desc"}`)},
 			IncludeFields: []string{"field_4"},
 			ExcludeFields: nil,
 			Page:          sr.Options.Page,

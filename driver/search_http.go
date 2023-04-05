@@ -251,7 +251,7 @@ func (c *httpSearch) Search(ctx context.Context, name string, req *SearchRequest
 		Q:             &req.Q,
 		Filter:        json.RawMessage(req.Filter),
 		Facet:         json.RawMessage(req.Facet),
-		Sort:          json.RawMessage(req.Sort),
+		Sort:          (*[]json.RawMessage)(&req.Sort),
 		SearchFields:  &req.SearchFields,
 		IncludeFields: &req.IncludeFields,
 		ExcludeFields: &req.ExcludeFields,

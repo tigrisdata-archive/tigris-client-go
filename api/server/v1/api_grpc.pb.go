@@ -49,6 +49,9 @@ type TigrisClient interface {
 	// the `limit` parameter is used to specify the number of documents to read. You can find more detailed documentation
 	// of the Read API <a href="https://docs.tigrisdata.com/overview/query" title="here">here</a>.
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (Tigris_ReadClient, error)
+	// Explain takes the same parameters as Read and returns how the Tigris Query Planner would process the
+	// response
+	Explain(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ExplainResponse, error)
 	// Searches a collection for the documents matching the query, or messages in case of event streaming. A search can be
 	// a term search or a phrase search. Search API allows filtering the result set using filters as documented <a href="https://docs.tigrisdata.com/overview/query#specification-1" title="here">here</a>.
 	// You can also perform a faceted search by passing the fields in the facet parameter.
@@ -204,6 +207,15 @@ func (x *tigrisReadClient) Recv() (*ReadResponse, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (c *tigrisClient) Explain(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ExplainResponse, error) {
+	out := new(ExplainResponse)
+	err := c.cc.Invoke(ctx, "/tigrisdata.v1.Tigris/Explain", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *tigrisClient) Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (Tigris_SearchClient, error) {
@@ -422,6 +434,9 @@ type TigrisServer interface {
 	// the `limit` parameter is used to specify the number of documents to read. You can find more detailed documentation
 	// of the Read API <a href="https://docs.tigrisdata.com/overview/query" title="here">here</a>.
 	Read(*ReadRequest, Tigris_ReadServer) error
+	// Explain takes the same parameters as Read and returns how the Tigris Query Planner would process the
+	// response
+	Explain(context.Context, *ReadRequest) (*ExplainResponse, error)
 	// Searches a collection for the documents matching the query, or messages in case of event streaming. A search can be
 	// a term search or a phrase search. Search API allows filtering the result set using filters as documented <a href="https://docs.tigrisdata.com/overview/query#specification-1" title="here">here</a>.
 	// You can also perform a faceted search by passing the fields in the facet parameter.
@@ -503,6 +518,9 @@ func (UnimplementedTigrisServer) Update(context.Context, *UpdateRequest) (*Updat
 }
 func (UnimplementedTigrisServer) Read(*ReadRequest, Tigris_ReadServer) error {
 	return status.Errorf(codes.Unimplemented, "method Read not implemented")
+}
+func (UnimplementedTigrisServer) Explain(context.Context, *ReadRequest) (*ExplainResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Explain not implemented")
 }
 func (UnimplementedTigrisServer) Search(*SearchRequest, Tigris_SearchServer) error {
 	return status.Errorf(codes.Unimplemented, "method Search not implemented")
@@ -715,6 +733,24 @@ type tigrisReadServer struct {
 
 func (x *tigrisReadServer) Send(m *ReadResponse) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func _Tigris_Explain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).Explain(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tigrisdata.v1.Tigris/Explain",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).Explain(ctx, req.(*ReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Tigris_Search_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -1078,6 +1114,10 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _Tigris_Update_Handler,
+		},
+		{
+			MethodName: "Explain",
+			Handler:    _Tigris_Explain_Handler,
 		},
 		{
 			MethodName: "Import",

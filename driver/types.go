@@ -56,7 +56,7 @@ type (
 	Update     json.RawMessage
 	Schema     json.RawMessage
 	Facet      json.RawMessage
-	SortOrder  json.RawMessage
+	SortOrder  []json.RawMessage
 )
 
 type (

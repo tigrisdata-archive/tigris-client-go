@@ -16,6 +16,7 @@ package driver
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"unsafe"
@@ -176,6 +177,15 @@ func (c *grpcSearch) Search(ctx context.Context, name string, req *SearchRequest
 		coll = &api.Collation{Case: req.Collation.Case}
 	}
 
+	var b []byte
+	var err error
+
+	if req.Sort != nil {
+		if b, err = json.Marshal(req.Sort); err != nil {
+			return nil, err
+		}
+	}
+
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithCancel(ctx)
 
@@ -185,7 +195,7 @@ func (c *grpcSearch) Search(ctx context.Context, name string, req *SearchRequest
 		Q:             req.Q,
 		Filter:        req.Filter,
 		Facet:         req.Facet,
-		Sort:          req.Sort,
+		Sort:          b,
 		SearchFields:  req.SearchFields,
 		IncludeFields: req.IncludeFields,
 		ExcludeFields: req.ExcludeFields,

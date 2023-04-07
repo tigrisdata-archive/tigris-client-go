@@ -57,6 +57,7 @@ const (
 	tagSearchIndex  = "searchIndex"
 	tagSort         = "sort"
 	tagFacet        = "facet"
+	tagVector       = "vector"
 
 	id = "ID"
 )
@@ -101,6 +102,7 @@ const (
 	formatByte     = "byte"
 	formatDateTime = "date-time"
 	formatUUID     = "uuid"
+	formatVector   = "vector"
 )
 
 // Field represents JSON schema object.
@@ -121,6 +123,8 @@ type Field struct {
 	SearchIndex  bool `json:"searchIndex,omitempty"`
 	Sort         bool `json:"sort,omitempty"`
 	Facet        bool `json:"facet,omitempty"`
+	MaxItems     int  `json:"maxItems,omitempty"`
+	Dimensions   int  `json:"dimensions,omitempty"`
 
 	Required []string `json:"required,omitempty"`
 
@@ -175,54 +179,66 @@ func ModelName(s interface{}) string {
 	return plural.Plural(name)
 }
 
-func translateType(t reflect.Type) (string, string, bool, error) {
+func translateType(t reflect.Type, f *Field) error {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
 
-	//nolint:golint,exhaustive
+	//nolint:exhaustive
 	switch t.Kind() {
 	case reflect.Struct:
+		f.Type = typeObject
+
 		if t.PkgPath() == "time" && t.Name() == "Time" {
-			return typeString, formatDateTime, false, nil
+			f.Type = typeString
+			f.Format = formatDateTime
 		}
-
-		return typeObject, "", false, nil
 	case reflect.Array:
-		if t.Elem().Kind() == reflect.Uint8 {
-			if t.PkgPath() == "github.com/google/uuid" && t.Name() == "UUID" {
-				return typeString, formatUUID, false, nil
-			}
-			return typeString, formatByte, false, nil
-		}
+		f.Type = typeArray
+		f.MaxItems = t.Len()
 
-		return typeArray, "", false, nil
-	case reflect.Slice:
 		if t.Elem().Kind() == reflect.Uint8 {
-			return typeString, formatByte, false, nil
+			f.Type = typeString
+			f.Format = formatByte
+			f.MaxItems = 0 // it's irrelevant for strings
+
+			if t.PkgPath() == "github.com/google/uuid" && t.Name() == "UUID" {
+				f.Format = formatUUID
+			}
 		}
-		return typeArray, "", false, nil
+	case reflect.Slice:
+		f.Type = typeArray
+
+		if t.Elem().Kind() == reflect.Uint8 {
+			f.Type = typeString
+			f.Format = formatByte
+		}
 	case reflect.Int32:
-		return typeInteger, formatInt32, false, nil
+		f.Type = typeInteger
+		f.Format = formatInt32
 	case reflect.Int64:
-		return typeInteger, "", false, nil
+		f.Type = typeInteger
 	case reflect.String:
-		return typeString, "", false, nil
+		f.Type = typeString
 	case reflect.Float32, reflect.Float64:
-		return typeNumber, "", false, nil
+		f.Type = typeNumber
 	case reflect.Bool:
-		return typeBoolean, "", false, nil
+		f.Type = typeBoolean
 	case reflect.Map:
-		return typeObject, "", true, nil
+		f.Type = typeObject
+		f.AdditionalProperties = true
 	case reflect.Int:
+		f.Type = typeInteger
+
 		var a int
 		if unsafe.Sizeof(a) == 4 {
-			return typeInteger, formatInt32, false, nil
+			f.Format = formatInt32
 		}
-		return typeInteger, "", false, nil
+	default:
+		return fmt.Errorf("unsupported type: name='%s' kind='%s'", t.Name(), t.Kind())
 	}
 
-	return "", "", false, fmt.Errorf("unsupported type: name='%s' kind='%s'", t.Name(), t.Kind())
+	return nil
 }
 
 func isPrimaryKeyType(tp string) bool {
@@ -284,8 +300,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 		var f Field
 		var err error
 
-		f.Type, f.Format, f.AdditionalProperties, err = translateType(field.Type)
-		if err != nil {
+		if err = translateType(field.Type, &f); err != nil {
 			return err
 		}
 
@@ -339,14 +354,9 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 				}
 			} else {
 				// FIXME: Support multidimensional arrays
-				tp, fm, ap, err := translateType(tp.Elem())
-				if err != nil {
+				f.Items = &Field{}
+				if err = translateType(tp.Elem(), f.Items); err != nil {
 					return err
-				}
-				f.Items = &Field{
-					Type:                 tp,
-					Format:               fm,
-					AdditionalProperties: ap,
 				}
 			}
 		}

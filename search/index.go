@@ -17,7 +17,6 @@ package search
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -158,60 +157,10 @@ func (c *Index[T]) GetOne(ctx context.Context, id string) (*T, error) {
 	return &docs[0], nil
 }
 
-func getSearchRequest(req *Request) (*driver.SearchRequest, error) {
-	if req == nil {
-		return nil, fmt.Errorf("search request cannot be null")
-	}
-
-	r := driver.SearchRequest{
-		Q:             req.Q,
-		SearchFields:  req.SearchFields,
-		IncludeFields: req.IncludeFields,
-		ExcludeFields: req.ExcludeFields,
-	}
-	if req.Options != nil {
-		r.Page = req.Options.Page
-		r.PageSize = req.Options.PageSize
-	}
-
-	f, err := req.Filter.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	if f != nil {
-		r.Filter = f
-	}
-
-	if req.Facet != nil {
-		facet, err := req.Facet.Built()
-		if err != nil {
-			return nil, err
-		}
-
-		if facet != nil {
-			r.Facet = facet
-		}
-	}
-
-	if req.Sort != nil {
-		sortOrder, err := req.Sort.Built()
-		if err != nil {
-			return nil, err
-		}
-
-		if sortOrder != nil {
-			r.Sort = sortOrder
-		}
-	}
-
-	return &r, nil
-}
-
 // Search returns Iterator which iterates over matched documents
 // in the index.
 func (c *Index[T]) Search(ctx context.Context, req *Request) (*Iterator[T], error) {
-	r, err := getSearchRequest(req)
+	r, err := req.BuildInternal()
 	if err != nil || r == nil {
 		return nil, err
 	}

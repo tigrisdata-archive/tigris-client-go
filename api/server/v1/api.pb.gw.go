@@ -2626,7 +2626,7 @@ func RegisterTigrisHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 // RegisterTigrisHandlerFromEndpoint is same as RegisterTigrisHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterTigrisHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
-	conn, err := grpc.Dial(endpoint, opts...)
+	conn, err := grpc.DialContext(ctx, endpoint, opts...)
 	if err != nil {
 		return err
 	}

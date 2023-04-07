@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/sort"
 )
@@ -47,7 +48,7 @@ func TestRequestBuilder_Build(t *testing.T) {
 	t.Run("with search fields", func(t *testing.T) {
 		req := NewRequestBuilder().WithQuery(inputQ).WithSearchFields("field_1", "field_2").Build()
 		assert.Len(t, req.SearchFields, 2)
-		assert.Subset(t, []string{"field_1", "field_2"}, req.SearchFields)
+		assert.Equal(t, map[string]bool{"field_1": true, "field_2": true}, req.SearchFields)
 	})
 
 	t.Run("with facet fields", func(t *testing.T) {
@@ -124,6 +125,11 @@ func TestFacetQueryBuilder_Build(t *testing.T) {
 			assert.Equal(t, m[field].Size, options.Size)
 		}
 	})
+	t.Run("with vector search", func(t *testing.T) {
+		f := NewRequestBuilder().WithVectorSearch("vec_field1", []float64{1.1, 2.2, 3.3}).Build()
+		assert.Len(t, f.Vector.Vector, 1)
+		assert.Equal(t, &VectorType{Vector: map[string][]float64{"vec_field1": {1.1, 2.2, 3.3}}}, f.Vector)
+	})
 }
 
 func TestFacetQuery_Built(t *testing.T) {
@@ -145,6 +151,14 @@ func TestFacetQuery_Built(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "{\"field_1\":{\"size\":10},\"field_2\":{\"size\":10}}", string(b))
 	})
+
+	t.Run("with vector search", func(t *testing.T) {
+		f := NewRequestBuilder().WithVectorSearch("vec_field1", []float64{1.1, 2.2, 3.3}).Build()
+		r, err := f.BuildInternal()
+		require.NoError(t, err)
+
+		assert.Equal(t, &driver.SearchRequest{Vector: driver.Vector(`{"vector":{"vec_field1":[1.1,2.2,3.3]}}`)}, r)
+	})
 }
 
 func ExampleNewRequestBuilder() {
@@ -160,5 +174,5 @@ func ExampleRequestBuilder_WithSearchFields() {
 		panic(err)
 	}
 	fmt.Println(string(b))
-	// Output: ["field_1"]
+	// Output: {"field_1":true}
 }

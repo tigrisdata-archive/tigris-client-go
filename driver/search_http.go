@@ -258,6 +258,7 @@ func (c *httpSearch) Search(ctx context.Context, name string, req *SearchRequest
 		PageSize:      &req.PageSize,
 		Page:          &req.Page,
 		Collation:     coll,
+		Vector:        json.RawMessage(req.Vector),
 	})
 
 	err = HTTPError(err, resp)

@@ -514,6 +514,21 @@ func (mr *MockManagementServerMockRecorder) CreateNamespace(arg0, arg1 interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockManagementServer)(nil).CreateNamespace), arg0, arg1)
 }
 
+// DeleteNamespace mocks base method.
+func (m *MockManagementServer) DeleteNamespace(arg0 context.Context, arg1 *api.DeleteNamespaceRequest) (*api.DeleteNamespaceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteNamespace", arg0, arg1)
+	ret0, _ := ret[0].(*api.DeleteNamespaceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteNamespace indicates an expected call of DeleteNamespace.
+func (mr *MockManagementServerMockRecorder) DeleteNamespace(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockManagementServer)(nil).DeleteNamespace), arg0, arg1)
+}
+
 // GetNamespaceMetadata mocks base method.
 func (m *MockManagementServer) GetNamespaceMetadata(arg0 context.Context, arg1 *api.GetNamespaceMetadataRequest) (*api.GetNamespaceMetadataResponse, error) {
 	m.ctrl.T.Helper()

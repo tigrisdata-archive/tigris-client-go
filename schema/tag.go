@@ -307,6 +307,19 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 			}
 
 			field.CreatedAt = true
+		case tagVector, strcase.ToSnake(tagVector):
+			if val != "true" {
+				return false, fmt.Errorf("%w: vector field", ErrInvalidBoolTagValue)
+			}
+
+			if field.Type != typeArray {
+				return false, fmt.Errorf("only array of type float64 can be annotated with vector tag")
+			}
+
+			field.Dimensions = field.MaxItems
+			field.MaxItems = 0
+
+			field.Format = formatVector
 		default:
 			return false, fmt.Errorf("%w: %s", ErrUnknownTag, tag)
 		}

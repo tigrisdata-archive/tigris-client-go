@@ -82,6 +82,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Filter:        []byte(`{"filter_1":"desc"}`),
 				PageSize:      12,
 				Page:          3,
+				Vector:        json.RawMessage(`{"vector":{"vec_field1":[1.1,2.2]}}`),
 			}), gomock.Any()).DoAndReturn(func(r *api.SearchIndexRequest, srv api.Search_SearchServer) error {
 			err := srv.Send(&searchResp)
 			require.NoError(t, err)
@@ -97,6 +98,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 			Filter:       Filter(`{"filter_1":"desc"}`),
 			PageSize:     12,
 			Page:         3,
+			Vector:       Vector(`{"vector":{"vec_field1":[1.1,2.2]}}`),
 		})
 		require.NoError(t, err)
 

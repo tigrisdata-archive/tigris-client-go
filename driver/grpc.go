@@ -484,6 +484,7 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 		ExcludeFields: req.ExcludeFields,
 		PageSize:      req.PageSize,
 		Page:          req.Page,
+		Vector:        req.Vector,
 	})
 	if err != nil {
 		cancel()

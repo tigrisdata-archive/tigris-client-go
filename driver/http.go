@@ -774,6 +774,7 @@ func (c *httpCRUD) search(ctx context.Context, collection string, req *SearchReq
 		ExcludeFields: &req.ExcludeFields,
 		Page:          &req.Page,
 		PageSize:      &req.PageSize,
+		Vector:        json.RawMessage(req.Vector),
 	})
 
 	err = HTTPError(err, resp)

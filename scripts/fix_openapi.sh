@@ -56,11 +56,13 @@ main() {
 	yq_fix_json SearchIndexRequest filter
 	yq_fix_json SearchIndexRequest facet
 	yq_fix_json SearchIndexRequest sort.items
+	yq_fix_json SearchIndexRequest vector
 
   # old search request
 	yq_fix_json SearchRequest fields
 	yq_fix_json SearchRequest facet
 	yq_fix_json SearchRequest sort.items
+	yq_fix_json SearchRequest vector
 }
 
 fix_bytes() {

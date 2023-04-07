@@ -202,6 +202,7 @@ func (c *grpcSearch) Search(ctx context.Context, name string, req *SearchRequest
 		PageSize:      req.PageSize,
 		Page:          req.Page,
 		Collation:     coll,
+		Vector:        req.Vector,
 	})
 	if err != nil {
 		cancel()

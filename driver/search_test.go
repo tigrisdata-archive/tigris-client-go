@@ -78,10 +78,11 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 				Facet:         []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
 				IncludeFields: nil,
 				ExcludeFields: nil,
-				Sort:          []byte(`{"sort_1":"desc"}`),
+				Sort:          []byte(`[{"sort_1":"desc"}]`),
 				Filter:        []byte(`{"filter_1":"desc"}`),
 				PageSize:      12,
 				Page:          3,
+				Vector:        json.RawMessage(`{"vector":{"vec_field1":[1.1,2.2]}}`),
 			}), gomock.Any()).DoAndReturn(func(r *api.SearchIndexRequest, srv api.Search_SearchServer) error {
 			err := srv.Send(&searchResp)
 			require.NoError(t, err)
@@ -93,10 +94,11 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 			Q:            "search text",
 			SearchFields: []string{"field_1"},
 			Facet:        Facet(`{"field_1":{"size":10},"field_2":{"size":10}}`),
-			Sort:         SortOrder(`{"sort_1":"desc"}`),
+			Sort:         []json.RawMessage{json.RawMessage(`{"sort_1":"desc"}`)},
 			Filter:       Filter(`{"filter_1":"desc"}`),
 			PageSize:     12,
 			Page:         3,
+			Vector:       Vector(`{"vector":{"vec_field1":[1.1,2.2]}}`),
 		})
 		require.NoError(t, err)
 

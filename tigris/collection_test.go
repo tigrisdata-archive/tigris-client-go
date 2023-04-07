@@ -78,11 +78,11 @@ func TestGetSearchRequest(t *testing.T) {
 			WithExcludeFields("field_5").
 			WithOptions(&search.DefaultSearchOptions).
 			Build()
-		out, err := getSearchRequest(in)
+		out, err := in.BuildInternal()
 		assert.Nil(t, err)
 		assert.NotNil(t, out)
 		assert.Equal(t, in.Q, out.Q)
-		assert.Equal(t, in.SearchFields, out.SearchFields)
+		assert.Equal(t, []string{"field_1"}, out.SearchFields)
 		assert.Equal(t, driver.Filter(`{"field_2":{"$eq":"some value"}}`), out.Filter)
 		assert.Equal(t, driver.Facet(`{"field_3":{"size":10}}`), out.Facet)
 		assert.Equal(t, in.ExcludeFields, out.ExcludeFields)
@@ -92,7 +92,7 @@ func TestGetSearchRequest(t *testing.T) {
 	})
 
 	t.Run("with nil request", func(t *testing.T) {
-		out, err := getSearchRequest(nil)
+		out, err := ((*search.Request)(nil)).BuildInternal()
 		assert.Nil(t, out)
 		assert.NotNil(t, err)
 	})
@@ -101,7 +101,7 @@ func TestGetSearchRequest(t *testing.T) {
 		in := search.NewRequestBuilder().
 			WithSearchFields("field_1").
 			Build()
-		out, err := getSearchRequest(in)
+		out, err := in.BuildInternal()
 		assert.Nil(t, err)
 		assert.NotNil(t, out)
 		assert.Equal(t, "", out.Q)
@@ -289,10 +289,10 @@ func TestCollection_Search(t *testing.T) {
 			Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
 			Q:             sr.Q,
-			SearchFields:  sr.SearchFields,
+			SearchFields:  []string{"field_1"},
 			Filter:        driver.Filter(`{"field_2":{"$eq":"some value"}}`),
 			Facet:         driver.Facet(`{"field_3":{"size":10}}`),
-			Sort:          driver.SortOrder(`[{"field_1":"$asc"},{"field_2":"$desc"}]`),
+			Sort:          driver.SortOrder{json.RawMessage(`{"field_1":"$asc"}`), json.RawMessage(`{"field_2":"$desc"}`)},
 			IncludeFields: []string{"field_4"},
 			ExcludeFields: nil,
 			Page:          sr.Options.Page,
@@ -321,7 +321,7 @@ func TestCollection_Search(t *testing.T) {
 		sr := search.NewRequestBuilder().Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
 			Q:             sr.Q,
-			SearchFields:  []string{},
+			SearchFields:  []string(nil),
 			Filter:        nil,
 			Facet:         nil,
 			Sort:          nil,

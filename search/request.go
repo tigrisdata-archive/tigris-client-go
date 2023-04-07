@@ -16,6 +16,7 @@ package search
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -28,7 +29,7 @@ type Request struct {
 	Q string
 	// Optional SearchFields is an array of fields to project Q against
 	// if not specified, query will be projected against all searchable fields
-	SearchFields []string
+	SearchFields map[string]bool
 	// Optional Filter is applied on search results to further refine them
 	Filter filter.Filter
 	// Optional Facet query can be used to request categorical arrangement of the indexed terms
@@ -40,6 +41,8 @@ type Request struct {
 	IncludeFields []string
 	// Optional ExcludeFields sets the document fields that shouldn't be included in results
 	ExcludeFields []string
+	// Vector is the map of fields for vector search
+	Vector *VectorType
 	// Optional Options provide pagination input
 	Options *Options
 }
@@ -49,8 +52,8 @@ func MatchAll() RequestBuilder {
 }
 
 func NewRequestBuilder() RequestBuilder {
-	return &requestBuilder{
-		searchFields: make(map[string]bool),
+	return &Request{
+		SearchFields: make(map[string]bool),
 	}
 }
 
@@ -65,104 +68,153 @@ type RequestBuilder interface {
 	WithIncludeFields(fields ...string) RequestBuilder
 	WithExcludeFields(fields ...string) RequestBuilder
 	WithOptions(*Options) RequestBuilder
+	WithVectorSearch(field string, value []float64) RequestBuilder
 	Build() *Request
 }
 
-type requestBuilder struct {
-	q            string
-	searchFields map[string]bool
-	filter       filter.Filter
-	facet        *FacetQuery
-	sort         sort.Order
-	include      []string
-	exclude      []string
-	options      *Options
+type VectorType struct {
+	Vector map[string][]float64 `json:"vector"`
 }
 
-func (b *requestBuilder) WithQuery(q string) RequestBuilder {
-	b.q = q
+func (r *Request) WithQuery(q string) RequestBuilder {
+	r.Q = q
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithSearchFields(fields ...string) RequestBuilder {
+func (r *Request) WithSearchFields(fields ...string) RequestBuilder {
 	for _, f := range fields {
-		b.searchFields[f] = true
+		r.SearchFields[f] = true
 	}
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithFilter(f filter.Filter) RequestBuilder {
-	b.filter = f
+func (r *Request) WithFilter(f filter.Filter) RequestBuilder {
+	r.Filter = f
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithFacetFields(fields ...string) RequestBuilder {
+func (r *Request) WithFacetFields(fields ...string) RequestBuilder {
 	facetQuery := NewFacetQueryBuilder().WithFields(fields...).Build()
-	b.facet = facetQuery
+	r.Facet = facetQuery
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithFacet(facet *FacetQuery) RequestBuilder {
-	b.facet = facet
+func (r *Request) WithFacet(facet *FacetQuery) RequestBuilder {
+	r.Facet = facet
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithSorting(sortByFields ...sort.Sort) RequestBuilder {
-	s := sort.NewSortOrder(sortByFields...)
-	b.sort = s
+func (r *Request) WithSorting(sortByFields ...sort.Sort) RequestBuilder {
+	r.Sort = sort.NewSortOrder(sortByFields...)
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithSortOrder(sortOrder sort.Order) RequestBuilder {
-	b.sort = sortOrder
+func (r *Request) WithSortOrder(sortOrder sort.Order) RequestBuilder {
+	r.Sort = sortOrder
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithIncludeFields(fields ...string) RequestBuilder {
-	b.include = fields
+func (r *Request) WithIncludeFields(fields ...string) RequestBuilder {
+	r.IncludeFields = fields
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithExcludeFields(fields ...string) RequestBuilder {
-	b.exclude = fields
+func (r *Request) WithExcludeFields(fields ...string) RequestBuilder {
+	r.ExcludeFields = fields
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) WithOptions(options *Options) RequestBuilder {
-	b.options = options
+func (r *Request) WithOptions(options *Options) RequestBuilder {
+	r.Options = options
 
-	return b
+	return r
 }
 
-func (b *requestBuilder) Build() *Request {
-	searchFields := make([]string, len(b.searchFields))
-
-	i := 0
-
-	for f := range b.searchFields {
-		searchFields[i] = f
-		i++
+func (r *Request) WithVectorSearch(field string, value []float64) RequestBuilder {
+	if r.Vector == nil {
+		r.Vector = &VectorType{Vector: make(map[string][]float64)}
 	}
 
-	return &Request{
-		Q:             b.q,
-		SearchFields:  searchFields,
-		Filter:        b.filter,
-		Facet:         b.facet,
-		Sort:          b.sort,
-		IncludeFields: b.include,
-		ExcludeFields: b.exclude,
-		Options:       b.options,
+	r.Vector.Vector[field] = value
+
+	return r
+}
+
+func (r *Request) Build() *Request {
+	return r
+}
+
+func (r *Request) BuildInternal() (*driver.SearchRequest, error) {
+	req := r
+	if req == nil {
+		return nil, fmt.Errorf("search request cannot be null")
 	}
+
+	dr := driver.SearchRequest{
+		Q:             req.Q,
+		IncludeFields: req.IncludeFields,
+		ExcludeFields: req.ExcludeFields,
+	}
+
+	for v := range req.SearchFields {
+		dr.SearchFields = append(dr.SearchFields, v)
+	}
+
+	if req.Options != nil {
+		dr.Page = req.Options.Page
+		dr.PageSize = req.Options.PageSize
+	}
+
+	f, err := req.Filter.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	if f != nil {
+		dr.Filter = f
+	}
+
+	if req.Facet != nil {
+		facet, err := req.Facet.Built()
+		if err != nil {
+			return nil, err
+		}
+
+		if facet != nil {
+			dr.Facet = facet
+		}
+	}
+
+	if req.Sort != nil {
+		sortOrder, err := req.Sort.Built()
+		if err != nil {
+			return nil, err
+		}
+
+		if sortOrder != nil {
+			dr.Sort = sortOrder
+		}
+	}
+
+	if req.Vector != nil {
+		b, err := json.Marshal(req.Vector)
+		if err != nil {
+			return nil, err
+		}
+
+		dr.Vector = b
+	}
+
+	return &dr, nil
 }
 
 type Options struct {

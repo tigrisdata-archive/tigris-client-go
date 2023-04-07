@@ -360,10 +360,10 @@ func TestSearchIndex_Search(t *testing.T) {
 			Build()
 		msearch.EXPECT().Search(ctx, "coll_search_tests", &driver.SearchRequest{
 			Q:             sr.Q,
-			SearchFields:  sr.SearchFields,
+			SearchFields:  []string{"field_1"},
 			Filter:        driver.Filter(`{"field_2":{"$eq":"some value"}}`),
 			Facet:         driver.Facet(`{"field_3":{"size":10}}`),
-			Sort:          driver.SortOrder(`[{"field_1":"$asc"},{"field_2":"$desc"}]`),
+			Sort:          []json.RawMessage{json.RawMessage(`{"field_1":"$asc"}`), json.RawMessage(`{"field_2":"$desc"}`)},
 			IncludeFields: []string{"field_4"},
 			ExcludeFields: nil,
 			Page:          sr.Options.Page,
@@ -392,7 +392,7 @@ func TestSearchIndex_Search(t *testing.T) {
 		sr := NewRequestBuilder().Build()
 		msearch.EXPECT().Search(ctx, "coll_search_tests", &driver.SearchRequest{
 			Q:             sr.Q,
-			SearchFields:  []string{},
+			SearchFields:  nil,
 			Filter:        nil,
 			Facet:         nil,
 			Sort:          nil,

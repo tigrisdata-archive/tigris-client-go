@@ -260,60 +260,10 @@ func (c *Collection[T]) ReadAll(ctx context.Context, fields ...*fields.Read) (*I
 	return &Iterator[T]{Iterator: it}, err
 }
 
-func getSearchRequest(req *search.Request) (*driver.SearchRequest, error) {
-	if req == nil {
-		return nil, fmt.Errorf("search request cannot be null")
-	}
-
-	r := driver.SearchRequest{
-		Q:             req.Q,
-		SearchFields:  req.SearchFields,
-		IncludeFields: req.IncludeFields,
-		ExcludeFields: req.ExcludeFields,
-	}
-	if req.Options != nil {
-		r.Page = req.Options.Page
-		r.PageSize = req.Options.PageSize
-	}
-
-	f, err := req.Filter.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	if f != nil {
-		r.Filter = f
-	}
-
-	if req.Facet != nil {
-		facet, err := req.Facet.Built()
-		if err != nil {
-			return nil, err
-		}
-
-		if facet != nil {
-			r.Facet = facet
-		}
-	}
-
-	if req.Sort != nil {
-		sortOrder, err := req.Sort.Built()
-		if err != nil {
-			return nil, err
-		}
-
-		if sortOrder != nil {
-			r.Sort = sortOrder
-		}
-	}
-
-	return &r, nil
-}
-
 // Search returns Iterator which iterates over matched documents
 // in the collection.
 func (c *Collection[T]) Search(ctx context.Context, req *search.Request) (*SearchIterator[T], error) {
-	r, err := getSearchRequest(req)
+	r, err := req.BuildInternal()
 	if err != nil || r == nil {
 		return nil, err
 	}

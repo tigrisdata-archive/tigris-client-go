@@ -174,6 +174,10 @@ func TestCollectionSchema(t *testing.T) {
 		ID []bool
 	}
 
+	type InvalidVectorType struct {
+		Vec int64 `tigris:"vector"`
+	}
+
 	type allTypes struct {
 		Tm      time.Time
 		TmPtr   *time.Time
@@ -229,6 +233,7 @@ func TestCollectionSchema(t *testing.T) {
 		{pkGap{}, nil, fmt.Errorf("gap in the primary key index")},
 		{pkInvalidType{}, nil, fmt.Errorf("type is not supported for the key: bool")},
 		{pkInvalidTag{}, nil, fmt.Errorf("%w: %s", ErrPrimaryKeyIdx, "strconv.Atoi: parsing \"1:a\": invalid syntax")},
+		{InvalidVectorType{}, nil, fmt.Errorf("only array of type float64 can be annotated with vector tag")},
 		{input: noPK{}, output: &Schema{Name: "no_pks", Fields: map[string]*Field{
 			"ID":    {Type: typeString, Format: formatUUID, AutoGenerate: true},
 			"key_1": {Type: typeString},
@@ -287,7 +292,7 @@ func TestCollectionSchema(t *testing.T) {
 			},
 
 			"slice_1": {Type: typeArray, Items: &Field{Type: typeString}},
-			"arr_1":   {Type: typeArray, Items: &Field{Type: typeString}},
+			"arr_1":   {Type: typeArray, MaxItems: 3, Items: &Field{Type: typeString}},
 			"map_1":   {Type: typeObject, AdditionalProperties: true},
 
 			"slice_2": {
@@ -406,7 +411,7 @@ func TestCollectionSchema(t *testing.T) {
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"}},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
+		require.Equal(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"},"maxItems":3},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {
@@ -429,7 +434,7 @@ func TestCollectionSchema(t *testing.T) {
 	})
 }
 
-func TestDefaults(t *testing.T) {
+func TestTags(t *testing.T) {
 	type struct1 struct {
 		Field1 string
 
@@ -453,6 +458,8 @@ func TestDefaults(t *testing.T) {
 		FieldDefaultArr   []string `json:"def_arr_str" tigris:"default:'[\"one\", \"two\"]'"`
 		FieldDefaultObj   struct1  `json:"def_obj_str" tigris:"default:'{\"Field1\":\"aaa\"}'"`
 		FieldSearchIndex  string   `json:"def_search_index" tigris:"searchIndex,sort,facet"`
+
+		VectorField [5]float64 `json:"vector_field" tigris:"vector"`
 
 		FieldDefaultTime time.Time `json:"def_time" tigris:"default:now(),updatedAt"`
 		FieldDefaultUUID uuid.UUID `json:"def_uuid" tigris:"default:uuid()"`
@@ -492,7 +499,8 @@ func TestDefaults(t *testing.T) {
 		"field_required":{"type":"integer"},
 		"field_required2":{"type":"integer"},
 		"field_index2":{"type":"integer", "index": true},
-		"field_index_and_req":{"type":"integer", "index": true}
+		"field_index_and_req":{"type":"integer", "index": true},
+		"vector_field":{"type":"array", "format":"vector", "dimensions": 5, "items": {"type": "number"} }
 	},
 	"primary_key":["ID"],
 	"required":["field_index_and_req","field_required","field_required2"],

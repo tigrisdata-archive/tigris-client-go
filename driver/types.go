@@ -56,7 +56,9 @@ type (
 	Update     json.RawMessage
 	Schema     json.RawMessage
 	Facet      json.RawMessage
-	SortOrder  json.RawMessage
+	SortOrder  []json.RawMessage
+
+	Vector json.RawMessage
 )
 
 type (
@@ -122,6 +124,7 @@ type SearchRequest struct {
 	Page          int32
 	PageSize      int32
 	Collation     *Collation
+	Vector        Vector
 }
 type SearchResponse *api.SearchResponse
 

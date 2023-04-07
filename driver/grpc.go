@@ -16,6 +16,7 @@ package driver
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -458,6 +459,15 @@ func (g *grpcStreamReader) close() error {
 }
 
 func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error) {
+	var b []byte
+	var err error
+
+	if req.Sort != nil {
+		if b, err = json.Marshal(req.Sort); err != nil {
+			return nil, err
+		}
+	}
+
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithCancel(ctx)
 
@@ -469,11 +479,12 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 		SearchFields:  req.SearchFields,
 		Filter:        req.Filter,
 		Facet:         req.Facet,
-		Sort:          req.Sort,
+		Sort:          b,
 		IncludeFields: req.IncludeFields,
 		ExcludeFields: req.ExcludeFields,
 		PageSize:      req.PageSize,
 		Page:          req.Page,
+		Vector:        req.Vector,
 	})
 	if err != nil {
 		cancel()

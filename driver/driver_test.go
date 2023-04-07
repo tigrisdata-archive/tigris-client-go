@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -605,15 +606,17 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 				Filter:        nil,
 				PageSize:      12,
 				Page:          3,
+				Vector:        Vector(`{"vector":{"f1":[5.5]}}`),
 			}), gomock.Any()).Return(nil)
 
 		sit, err := db.Search(ctx, "c1", &SearchRequest{
 			Q:            "search text",
 			SearchFields: []string{"field_1"},
 			Facet:        Facet(`{"field_1":{"size":10},"field_2":{"size":10}}`),
-			Sort:         SortOrder(`[{"field_1":"$desc"},{"field_2":"$asc"},{"field_3":"$desc"}]`),
+			Sort:         SortOrder{json.RawMessage(`{"field_1":"$desc"}`), json.RawMessage(`{"field_2":"$asc"}`), json.RawMessage(`{"field_3":"$desc"}`)},
 			PageSize:     12,
 			Page:         3,
+			Vector:       Vector(`{"vector":{"f1":[5.5]}}`),
 		})
 
 		require.NoError(t, err)

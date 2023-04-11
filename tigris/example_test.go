@@ -163,3 +163,57 @@ func ExampleClient_GetSearch() {
 		panic(err)
 	}
 }
+
+func ExampleProjection_Read() {
+	ctx := context.TODO()
+
+	type NestedColl1 struct {
+		Key2 string
+	}
+
+	type Coll1 struct {
+		Key1   string
+		Nested NestedColl1
+	}
+
+	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
+	if err != nil {
+		panic(err)
+	}
+
+	coll := GetCollection[Coll1](db)
+
+	_, err = coll.Insert(ctx, &Coll1{Key1: "k1", Nested: NestedColl1{Key2: "k2"}})
+	if err != nil {
+		panic(err)
+	}
+
+	proj := GetProjection[Coll1, NestedColl1](db, "Nested")
+
+	it, err := proj.Read(ctx, filter.All)
+	if err != nil {
+		panic(err)
+	}
+
+	var Nested NestedColl1
+	for it.Next(&Nested) {
+		fmt.Printf("%+v\n", Nested)
+	}
+
+	// Projection with only top level key included
+	type Proj2 struct {
+		Key1 string
+	}
+
+	proj2 := GetProjection[Coll1, Proj2](db)
+
+	it2, err := proj2.Read(ctx, filter.All)
+	if err != nil {
+		panic(err)
+	}
+
+	var p2 Proj2
+	for it2.Next(&p2) {
+		fmt.Printf("%+v\n", p2)
+	}
+}

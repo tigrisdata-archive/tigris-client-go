@@ -269,6 +269,12 @@ func setRequired(fields map[string]*Field) []string {
 	return req
 }
 
+// SimpleType returns true if type marshals to primitive JSON types: string, bool, number.
+func SimpleType(t reflect.Type) bool {
+	return t.PkgPath() == "time" && t.Name() == "Time" ||
+		t.PkgPath() == "github.com/google/uuid" && t.Name() == "UUID"
+}
+
 // traverseFields recursively parses the model structure and build the schema structure out of it.
 func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk map[string]int, nFields *int) error {
 	if prefix != "" {
@@ -343,7 +349,11 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 
 			f.Required = setRequired(f.Fields)
 		} else if f.Type == typeArray {
-			if field.Type.Elem().Kind() == reflect.Struct {
+			if tp.Elem().Kind() == reflect.Ptr {
+				tp = tp.Elem()
+			}
+
+			if tp.Elem().Kind() == reflect.Struct {
 				f.Items = &Field{
 					// Name:   tp.Elem().Name(),
 					Type:   typeObject,

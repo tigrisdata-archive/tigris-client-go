@@ -127,8 +127,8 @@ func TestFacetQueryBuilder_Build(t *testing.T) {
 	})
 	t.Run("with vector search", func(t *testing.T) {
 		f := NewRequestBuilder().WithVectorSearch("vec_field1", []float64{1.1, 2.2, 3.3}).Build()
-		assert.Len(t, f.Vector.Vector, 1)
-		assert.Equal(t, &VectorType{Vector: map[string][]float64{"vec_field1": {1.1, 2.2, 3.3}}}, f.Vector)
+		assert.Len(t, f.Vector, 1)
+		assert.Equal(t, VectorType{"vec_field1": {1.1, 2.2, 3.3}}, f.Vector)
 	})
 }
 
@@ -157,7 +157,7 @@ func TestFacetQuery_Built(t *testing.T) {
 		r, err := f.BuildInternal()
 		require.NoError(t, err)
 
-		assert.Equal(t, &driver.SearchRequest{Vector: driver.Vector(`{"vector":{"vec_field1":[1.1,2.2,3.3]}}`)}, r)
+		assert.Equal(t, &driver.SearchRequest{Vector: driver.Vector(`{"vec_field1":[1.1,2.2,3.3]}`)}, r)
 	})
 }
 

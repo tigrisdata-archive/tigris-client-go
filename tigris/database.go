@@ -145,6 +145,16 @@ func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 	return openDatabase(ctx, d, cfg.Project, models...)
 }
 
+func MustOpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
+) *Database {
+	db, err := OpenDatabase(ctx, cfg, models...)
+	if err != nil {
+		panic(err)
+	}
+
+	return db
+}
+
 // GetCollection returns collection object corresponding to collection model T.
 func GetCollection[T schema.Model](db *Database) *Collection[T] {
 	var m T

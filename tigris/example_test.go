@@ -176,14 +176,11 @@ func ExampleProjection_Read() {
 		Nested NestedColl1
 	}
 
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
-	if err != nil {
-		panic(err)
-	}
+	db := MustOpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
 
 	coll := GetCollection[Coll1](db)
 
-	_, err = coll.Insert(ctx, &Coll1{Key1: "k1", Nested: NestedColl1{Key2: "k2"}})
+	_, err := coll.Insert(ctx, &Coll1{Key1: "k1", Nested: NestedColl1{Key2: "k2"}})
 	if err != nil {
 		panic(err)
 	}

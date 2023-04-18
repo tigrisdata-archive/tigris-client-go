@@ -3,6 +3,7 @@ module github.com/tigrisdata/tigris-client-go
 go 1.18
 
 require (
+	github.com/buger/jsonparser v1.1.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/deepmap/oapi-codegen v1.12.4
 	github.com/fullstorydev/grpchan v1.1.1

@@ -42,7 +42,7 @@ type Request struct {
 	// Optional ExcludeFields sets the document fields that shouldn't be included in results
 	ExcludeFields []string
 	// Vector is the map of fields for vector search
-	Vector *VectorType
+	Vector VectorType
 	// Optional Options provide pagination input
 	Options *Options
 }
@@ -72,9 +72,7 @@ type RequestBuilder interface {
 	Build() *Request
 }
 
-type VectorType struct {
-	Vector map[string][]float64 `json:"vector"`
-}
+type VectorType map[string][]float64
 
 func (r *Request) WithQuery(q string) RequestBuilder {
 	r.Q = q
@@ -141,10 +139,10 @@ func (r *Request) WithOptions(options *Options) RequestBuilder {
 
 func (r *Request) WithVectorSearch(field string, value []float64) RequestBuilder {
 	if r.Vector == nil {
-		r.Vector = &VectorType{Vector: make(map[string][]float64)}
+		r.Vector = make(VectorType)
 	}
 
-	r.Vector.Vector[field] = value
+	r.Vector[field] = value
 
 	return r
 }

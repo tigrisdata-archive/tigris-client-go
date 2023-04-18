@@ -25,7 +25,8 @@ import (
 // returned by streaming APIs.
 type Iterator[T interface{}] struct {
 	driver.Iterator
-	err error
+	err         error
+	unmarshaler func([]byte, *T) error
 }
 
 // Next populates 'doc' with the next document in the iteration order
@@ -41,9 +42,18 @@ func (it *Iterator[T]) Next(doc *T) bool {
 		return false
 	}
 
-	var v T
+	var (
+		v   T
+		err error
+	)
 
-	if err := json.Unmarshal(b, &v); err != nil {
+	if it.unmarshaler != nil {
+		err = it.unmarshaler(b, &v)
+	} else {
+		err = json.Unmarshal(b, &v)
+	}
+
+	if err != nil {
 		it.err = err
 		it.Close()
 		return false
@@ -61,6 +71,7 @@ func (it *Iterator[T]) Err() error {
 	if it.Iterator.Err() != nil {
 		return it.Iterator.Err()
 	}
+
 	return it.err
 }
 

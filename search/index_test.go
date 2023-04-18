@@ -30,11 +30,13 @@ import (
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/mock"
 	"github.com/tigrisdata/tigris-client-go/sort"
+	"github.com/tigrisdata/tigris-client-go/test"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
 	jm         = driver.JM
+	pm         = driver.PM
 	toDocument = driver.ToDocument
 )
 
@@ -434,4 +436,36 @@ func TestSearchIndex_Search(t *testing.T) {
 		require.NotNil(t, searchIter.err)
 		require.ErrorContains(t, searchIter.err, "cannot unmarshal string")
 	})
+}
+
+func TestSearchOpen(t *testing.T) {
+	ms, cancel := test.SetupTests(t, 8)
+	defer cancel()
+
+	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel1()
+
+	cfg := &Config{URL: test.GRPCURL(8), Project: "db1"}
+	cfg.TLS = test.SetupTLS(t)
+
+	ms.Search.EXPECT().CreateOrUpdateIndex(gomock.Any(),
+		pm(&api.CreateOrUpdateIndexRequest{
+			Project: "db1",
+			Name:    "coll_search_tests",
+			Schema:  []byte(`{"title":"coll_search_tests","properties":{"Field1":{"type":"string"}},"source":{"type":"external"}}`),
+		})).Return(&api.CreateOrUpdateIndexResponse{Message: "created"}, nil)
+
+	s, err := Open(ctx, cfg, &CollSearchTest{})
+	require.NoError(t, err)
+	require.NotNil(t, s)
+
+	ms.Search.EXPECT().CreateOrUpdateIndex(gomock.Any(),
+		pm(&api.CreateOrUpdateIndexRequest{
+			Project: "db1",
+			Name:    "coll_search_tests",
+			Schema:  []byte(`{"title":"coll_search_tests","properties":{"Field1":{"type":"string"}},"source":{"type":"external"}}`),
+		})).Return(&api.CreateOrUpdateIndexResponse{Message: "created"}, nil)
+
+	s = MustOpen(ctx, cfg, &CollSearchTest{})
+	require.NotNil(t, s)
 }

@@ -606,7 +606,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 				Filter:        nil,
 				PageSize:      12,
 				Page:          3,
-				Vector:        Vector(`{"vector":{"f1":[5.5]}}`),
+				Vector:        Vector(`{"f1":[5.5]}`),
 			}), gomock.Any()).Return(nil)
 
 		sit, err := db.Search(ctx, "c1", &SearchRequest{
@@ -616,7 +616,7 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 			Sort:         SortOrder{json.RawMessage(`{"field_1":"$desc"}`), json.RawMessage(`{"field_2":"$asc"}`), json.RawMessage(`{"field_3":"$desc"}`)},
 			PageSize:     12,
 			Page:         3,
-			Vector:       Vector(`{"vector":{"f1":[5.5]}}`),
+			Vector:       Vector(`{"f1":[5.5]}`),
 		})
 
 		require.NoError(t, err)

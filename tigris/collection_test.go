@@ -647,6 +647,28 @@ func TestClientSchemaMigration(t *testing.T) {
 	db, err := OpenDatabase(ctx, cfg, &Coll1{})
 	require.NoError(t, err)
 	require.NotNil(t, db)
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Project: "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
+
+	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionRequest{
+			Project: "db1", Collection: "coll_1",
+			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
+			Options: &api.CollectionOptions{},
+		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
+	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
+
+	mc.EXPECT().CommitTransaction(gomock.Any(),
+		pm(&api.CommitTransactionRequest{
+			Project: "db1",
+		})).Return(&api.CommitTransactionResponse{}, nil)
+
+	db = MustOpenDatabase(ctx, cfg, &Coll1{})
+	require.NotNil(t, db)
 }
 
 func TestCollection(t *testing.T) {

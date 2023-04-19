@@ -757,6 +757,32 @@ func TestCollection(t *testing.T) {
 		)
 		require.NoError(t, err)
 	})
+
+	t.Run("update_one", func(t *testing.T) {
+		mdb.EXPECT().Update(ctx, "coll_1",
+			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
+			driver.Update(`{"$set":{"Field1":345}}`),
+			&driver.UpdateOptions{Limit: 1},
+		)
+
+		_, err := c.UpdateOne(ctx, filter.Or(
+			filter.Eq("Key1", "aaa"),
+			filter.Eq("Key1", "bbb")),
+			fields.Set("Field1", 345),
+		)
+		require.NoError(t, err)
+	})
+	t.Run("delete_one", func(t *testing.T) {
+		mdb.EXPECT().Delete(ctx, "coll_1",
+			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
+			&driver.DeleteOptions{Limit: 1},
+		)
+
+		_, err := c.DeleteOne(ctx, filter.Or(
+			filter.Eq("Key1", "aaa"),
+			filter.Eq("Key1", "ccc")))
+		require.NoError(t, err)
+	})
 }
 
 func TestOpeningDatabase(t *testing.T) {

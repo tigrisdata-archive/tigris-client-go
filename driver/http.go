@@ -688,6 +688,26 @@ func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filte
 	return e, nil
 }
 
+func (c *httpCRUD) countWithOptions(ctx context.Context, collection string, filter Filter) (int64, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
+
+	resp, err := c.api.TigrisCount(ctx, c.db, collection, apiHTTP.TigrisCountJSONRequestBody{
+		Branch: &c.branch,
+		Filter: json.RawMessage(filter),
+	})
+
+	if err = HTTPError(err, resp); err != nil {
+		return 0, err
+	}
+
+	var r apiHTTP.CountResponse
+	if err = respDecode(resp.Body, &r); err != nil {
+		return 0, err
+	}
+
+	return PtrToInt64(r.Count), nil
+}
+
 func (c *httpCRUD) createBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
 	resp, err := c.api.TigrisCreateBranch(ctx, c.db, name, apiHTTP.TigrisCreateBranchJSONRequestBody{})
 

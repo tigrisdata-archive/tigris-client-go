@@ -415,6 +415,25 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filte
 	return &readIterator{streamReader: &grpcStreamReader{stream: resp, cancel: cancel}}, nil
 }
 
+func (c *grpcCRUD) countWithOptions(ctx context.Context, collection string, filter Filter) (int64, error) {
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithCancel(setGRPCMetadata(ctx, c.txCtx, c.metadata))
+
+	resp, err := c.api.Count(ctx, &api.CountRequest{
+		Project:    c.db,
+		Branch:     c.branch,
+		Collection: collection,
+		Filter:     filter,
+	})
+	cancel()
+
+	if err != nil {
+		return 0, GRPCError(err)
+	}
+
+	return resp.Count, nil
+}
+
 func (c *grpcCRUD) createBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
 	r, err := c.api.CreateBranch(ctx, &api.CreateBranchRequest{
 		Project: c.db,

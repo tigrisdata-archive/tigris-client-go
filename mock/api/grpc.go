@@ -50,6 +50,21 @@ func (mr *MockTigrisServerMockRecorder) BeginTransaction(arg0, arg1 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTransaction", reflect.TypeOf((*MockTigrisServer)(nil).BeginTransaction), arg0, arg1)
 }
 
+// BuildCollectionIndex mocks base method.
+func (m *MockTigrisServer) BuildCollectionIndex(arg0 context.Context, arg1 *api.BuildCollectionIndexRequest) (*api.BuildCollectionIndexResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuildCollectionIndex", arg0, arg1)
+	ret0, _ := ret[0].(*api.BuildCollectionIndexResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BuildCollectionIndex indicates an expected call of BuildCollectionIndex.
+func (mr *MockTigrisServerMockRecorder) BuildCollectionIndex(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildCollectionIndex", reflect.TypeOf((*MockTigrisServer)(nil).BuildCollectionIndex), arg0, arg1)
+}
+
 // CommitTransaction mocks base method.
 func (m *MockTigrisServer) CommitTransaction(arg0 context.Context, arg1 *api.CommitTransactionRequest) (*api.CommitTransactionResponse, error) {
 	m.ctrl.T.Helper()
@@ -63,6 +78,21 @@ func (m *MockTigrisServer) CommitTransaction(arg0 context.Context, arg1 *api.Com
 func (mr *MockTigrisServerMockRecorder) CommitTransaction(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitTransaction", reflect.TypeOf((*MockTigrisServer)(nil).CommitTransaction), arg0, arg1)
+}
+
+// Count mocks base method.
+func (m *MockTigrisServer) Count(arg0 context.Context, arg1 *api.CountRequest) (*api.CountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Count", arg0, arg1)
+	ret0, _ := ret[0].(*api.CountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Count indicates an expected call of Count.
+func (mr *MockTigrisServerMockRecorder) Count(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockTigrisServer)(nil).Count), arg0, arg1)
 }
 
 // CreateAppKey mocks base method.
@@ -461,6 +491,36 @@ func (m *MockAuthServer) EXPECT() *MockAuthServerMockRecorder {
 	return m.recorder
 }
 
+// CreateInvitations mocks base method.
+func (m *MockAuthServer) CreateInvitations(arg0 context.Context, arg1 *api.CreateInvitationsRequest) (*api.CreateInvitationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateInvitations", arg0, arg1)
+	ret0, _ := ret[0].(*api.CreateInvitationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateInvitations indicates an expected call of CreateInvitations.
+func (mr *MockAuthServerMockRecorder) CreateInvitations(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInvitations", reflect.TypeOf((*MockAuthServer)(nil).CreateInvitations), arg0, arg1)
+}
+
+// DeleteInvitations mocks base method.
+func (m *MockAuthServer) DeleteInvitations(arg0 context.Context, arg1 *api.DeleteInvitationsRequest) (*api.DeleteInvitationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteInvitations", arg0, arg1)
+	ret0, _ := ret[0].(*api.DeleteInvitationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteInvitations indicates an expected call of DeleteInvitations.
+func (mr *MockAuthServerMockRecorder) DeleteInvitations(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInvitations", reflect.TypeOf((*MockAuthServer)(nil).DeleteInvitations), arg0, arg1)
+}
+
 // GetAccessToken mocks base method.
 func (m *MockAuthServer) GetAccessToken(arg0 context.Context, arg1 *api.GetAccessTokenRequest) (*api.GetAccessTokenResponse, error) {
 	m.ctrl.T.Helper()
@@ -474,6 +534,36 @@ func (m *MockAuthServer) GetAccessToken(arg0 context.Context, arg1 *api.GetAcces
 func (mr *MockAuthServerMockRecorder) GetAccessToken(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccessToken", reflect.TypeOf((*MockAuthServer)(nil).GetAccessToken), arg0, arg1)
+}
+
+// ListInvitations mocks base method.
+func (m *MockAuthServer) ListInvitations(arg0 context.Context, arg1 *api.ListInvitationsRequest) (*api.ListInvitationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListInvitations", arg0, arg1)
+	ret0, _ := ret[0].(*api.ListInvitationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListInvitations indicates an expected call of ListInvitations.
+func (mr *MockAuthServerMockRecorder) ListInvitations(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListInvitations", reflect.TypeOf((*MockAuthServer)(nil).ListInvitations), arg0, arg1)
+}
+
+// VerifyInvitation mocks base method.
+func (m *MockAuthServer) VerifyInvitation(arg0 context.Context, arg1 *api.VerifyInvitationRequest) (*api.VerifyInvitationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyInvitation", arg0, arg1)
+	ret0, _ := ret[0].(*api.VerifyInvitationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// VerifyInvitation indicates an expected call of VerifyInvitation.
+func (mr *MockAuthServerMockRecorder) VerifyInvitation(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyInvitation", reflect.TypeOf((*MockAuthServer)(nil).VerifyInvitation), arg0, arg1)
 }
 
 // MockManagementServer is a mock of ManagementServer interface.

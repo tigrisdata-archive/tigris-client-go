@@ -772,6 +772,7 @@ func TestCollection(t *testing.T) {
 		)
 		require.NoError(t, err)
 	})
+
 	t.Run("delete_one", func(t *testing.T) {
 		mdb.EXPECT().Delete(ctx, "coll_1",
 			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
@@ -782,6 +783,19 @@ func TestCollection(t *testing.T) {
 			filter.Eq("Key1", "aaa"),
 			filter.Eq("Key1", "ccc")))
 		require.NoError(t, err)
+	})
+
+	t.Run("count", func(t *testing.T) {
+		mdb.EXPECT().Count(ctx, "coll_1",
+			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
+		).Return(int64(789), nil)
+
+		cnt, err := c.Count(ctx, filter.Or(
+			filter.Eq("Key1", "aaa"),
+			filter.Eq("Key1", "bbb")),
+		)
+		require.NoError(t, err)
+		require.Equal(t, int64(789), cnt)
 	})
 }
 

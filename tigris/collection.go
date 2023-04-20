@@ -325,3 +325,14 @@ func (c *Collection[T]) DeleteAll(ctx context.Context) (*DeleteResponse, error) 
 	// TODO: forward response
 	return &DeleteResponse{}, nil
 }
+
+// Count returns documents which satisfies the filter.
+// Only field from the give fields are populated in the documents. By default, all fields are populated.
+func (c *Collection[T]) Count(ctx context.Context, filter filter.Filter) (int64, error) {
+	f, err := filter.Build()
+	if err != nil {
+		return 0, err
+	}
+
+	return getDB(ctx, c.db).Count(ctx, c.name, f)
+}

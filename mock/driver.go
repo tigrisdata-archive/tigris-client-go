@@ -314,6 +314,21 @@ func (mr *MockTxMockRecorder) Commit(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockTx)(nil).Commit), arg0)
 }
 
+// Count mocks base method.
+func (m *MockTx) Count(arg0 context.Context, arg1 string, arg2 driver.Filter) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Count", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Count indicates an expected call of Count.
+func (mr *MockTxMockRecorder) Count(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockTx)(nil).Count), arg0, arg1, arg2)
+}
+
 // CreateBranch mocks base method.
 func (m *MockTx) CreateBranch(arg0 context.Context, arg1 string) (*driver.CreateBranchResponse, error) {
 	m.ctrl.T.Helper()
@@ -611,6 +626,21 @@ func (mr *MockDatabaseMockRecorder) BeginTx(arg0 interface{}, arg1 ...interface{
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockDatabase)(nil).BeginTx), varargs...)
+}
+
+// Count mocks base method.
+func (m *MockDatabase) Count(arg0 context.Context, arg1 string, arg2 driver.Filter) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Count", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Count indicates an expected call of Count.
+func (mr *MockDatabaseMockRecorder) Count(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockDatabase)(nil).Count), arg0, arg1, arg2)
 }
 
 // CreateBranch mocks base method.

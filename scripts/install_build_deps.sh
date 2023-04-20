@@ -20,7 +20,7 @@ export GO111MODULE=on
 ARCH=$(uname -m)
 OS=$(uname -s)
 
-PROTO_VERSION=21.9
+PROTO_VERSION=21.12
 PROTO_RELEASES="https://github.com/protocolbuffers/protobuf/releases"
 
 # Install protobuf compiler

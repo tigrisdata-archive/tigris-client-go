@@ -406,6 +406,24 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 		require.False(t, it.Next(nil))
 	})
 
+	t.Run("count", func(t *testing.T) {
+		mc.EXPECT().Count(gomock.Any(),
+			pm(&api.CountRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.CountRequest) (*api.CountResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+				return &api.CountResponse{Count: 12341234}, nil
+			})
+
+		cnt, err := c.Count(ctx, "c1", Filter(`{"filter":"value"}`))
+		require.NoError(t, err)
+		require.Equal(t, int64(12341234), cnt)
+	})
+
 	t.Run("delete", func(t *testing.T) {
 		mc.EXPECT().Delete(gomock.Any(),
 			pm(&api.DeleteRequest{
@@ -571,6 +589,19 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 		require.NoError(t, err)
 
 		require.False(t, it.Next(nil))
+	})
+
+	t.Run("count", func(t *testing.T) {
+		mc.EXPECT().Count(gomock.Any(),
+			pm(&api.CountRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+			})).Return(&api.CountResponse{Count: 112233}, nil)
+
+		cnt, err := db.Count(ctx, "c1", Filter(`{"filter":"value"}`))
+		require.NoError(t, err)
+		require.Equal(t, int64(112233), cnt)
 	})
 
 	t.Run("read_with_collation", func(t *testing.T) {

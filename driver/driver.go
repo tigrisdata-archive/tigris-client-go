@@ -104,6 +104,8 @@ type Database interface {
 	// Delete documents from the collection matching specified filter.
 	Delete(ctx context.Context, collection string, filter Filter, options ...*DeleteOptions) (*DeleteResponse, error)
 
+	Count(ctx context.Context, collection string, filter Filter) (int64, error)
+
 	// CreateOrUpdateCollection either creates a collection or update the collection with the new schema
 	// There are three categories of data types supported:
 	//   Primitive: Strings, Numbers, Binary Data, Booleans, UUIDs, DateTime
@@ -253,6 +255,10 @@ func (c *driverCRUD) Read(ctx context.Context, collection string, filter Filter,
 	}
 
 	return c.readWithOptions(ctx, collection, filter, fields, opts.(*ReadOptions))
+}
+
+func (c *driverCRUD) Count(ctx context.Context, collection string, filter Filter) (int64, error) {
+	return c.countWithOptions(ctx, collection, filter)
 }
 
 func (c *driverCRUD) Search(ctx context.Context, collection string, request *SearchRequest) (

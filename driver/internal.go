@@ -53,6 +53,7 @@ type CRUDWithOptions interface {
 		*ReplaceResponse, error)
 	readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (
 		Iterator, error)
+	countWithOptions(ctx context.Context, collection string, filter Filter) (int64, error)
 	search(ctx context.Context, collection string, req *SearchRequest) (SearchResultIterator, error)
 	updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (
 		*UpdateResponse, error)

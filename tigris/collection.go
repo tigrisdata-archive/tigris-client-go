@@ -131,9 +131,7 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 	return &InsertOrReplaceResponse{Keys: md.Keys}, nil
 }
 
-// Update partially updates documents based on the provided filter
-// and provided document mutation.
-func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update *fields.Update) (*UpdateResponse, error) {
+func (c *Collection[T]) updateWithOptions(ctx context.Context, filter filter.Filter, update *fields.Update, options *driver.UpdateOptions) (*UpdateResponse, error) {
 	f, err := filter.Build()
 	if err != nil {
 		return nil, err
@@ -144,13 +142,28 @@ func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update
 		return nil, err
 	}
 
-	_, err = getDB(ctx, c.db).Update(ctx, c.name, f, u.Built())
+	if options != nil {
+		_, err = getDB(ctx, c.db).Update(ctx, c.name, f, u.Built(), options)
+	} else {
+		_, err = getDB(ctx, c.db).Update(ctx, c.name, f, u.Built())
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: forward response
 	return &UpdateResponse{}, nil
+}
+
+// Update partially updates documents based on the provided filter
+// and provided document mutation.
+func (c *Collection[T]) Update(ctx context.Context, filter filter.Filter, update *fields.Update) (*UpdateResponse, error) {
+	return c.updateWithOptions(ctx, filter, update, nil)
+}
+
+// UpdateOne partially updates first document matching the filter.
+func (c *Collection[T]) UpdateOne(ctx context.Context, filter filter.Filter, update *fields.Update) (*UpdateResponse, error) {
+	return c.updateWithOptions(ctx, filter, update, &driver.UpdateOptions{Limit: 1})
 }
 
 func getFields(fields ...*fields.Read) (driver.Projection, error) {
@@ -275,20 +288,32 @@ func (c *Collection[T]) Search(ctx context.Context, req *search.Request) (*Searc
 	return &SearchIterator[T]{Iterator: it}, err
 }
 
-// Delete removes documents from the collection according to the filter.
-func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*DeleteResponse, error) {
+func (c *Collection[T]) deleteWithOptions(ctx context.Context, filter filter.Filter, options *driver.DeleteOptions) (*DeleteResponse, error) {
 	f, err := filter.Build()
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = getDB(ctx, c.db).Delete(ctx, c.name, f)
+	if options != nil {
+		_, err = getDB(ctx, c.db).Delete(ctx, c.name, f, options)
+	} else {
+		_, err = getDB(ctx, c.db).Delete(ctx, c.name, f)
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: forward response
 	return &DeleteResponse{}, err
+}
+
+// Delete removes documents from the collection according to the filter.
+func (c *Collection[T]) Delete(ctx context.Context, filter filter.Filter) (*DeleteResponse, error) {
+	return c.deleteWithOptions(ctx, filter, nil)
+}
+
+func (c *Collection[T]) DeleteOne(ctx context.Context, filter filter.Filter) (*DeleteResponse, error) {
+	return c.deleteWithOptions(ctx, filter, &driver.DeleteOptions{Limit: 1})
 }
 
 // DeleteAll removes all the documents from the collection.
@@ -299,4 +324,15 @@ func (c *Collection[T]) DeleteAll(ctx context.Context) (*DeleteResponse, error) 
 	}
 	// TODO: forward response
 	return &DeleteResponse{}, nil
+}
+
+// Count returns documents which satisfies the filter.
+// Only field from the give fields are populated in the documents. By default, all fields are populated.
+func (c *Collection[T]) Count(ctx context.Context, filter filter.Filter) (int64, error) {
+	f, err := filter.Build()
+	if err != nil {
+		return 0, err
+	}
+
+	return getDB(ctx, c.db).Count(ctx, c.name, f)
 }

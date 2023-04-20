@@ -208,7 +208,7 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields .
 
 // Read returns documents which satisfies the filter.
 // Only field from the give fields are populated in the documents. By default, all fields are populated.
-func (c *Collection[T]) Explain(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*driver.ExplainResponse, error) {
+func (c *Collection[T]) Explain(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*ExplainResponse, error) {
 	p, err := getFields(fields...)
 	if err != nil {
 		return nil, err

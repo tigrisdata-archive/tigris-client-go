@@ -406,6 +406,30 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 		require.False(t, it.Next(nil))
 	})
 
+	t.Run("explain", func(t *testing.T) {
+		mc.EXPECT().Explain(
+			pm(&api.ReadRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Fields:     []byte(`{"fields":"value"}`),
+				Options:    &api.ReadRequestOptions{},
+			}), gomock.Any()).DoAndReturn(
+			func(ctx context.Context, r *api.ReadRequest) (*api.ExplainResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+				return &api.ExplainResponse{
+					Field:    "test",
+					KeyRange: []string{"nil", "$TIGRIS_MAX"},
+				}, nil
+			})
+
+		resp, err := c.Explain(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
+		require.NoError(t, err)
+		require.Equal(t, resp.Field, "test")
+		require.Equal(t, resp.KeyRange, []string{"nil", "$TIGRIS_MAX"})
+	})
+
 	t.Run("count", func(t *testing.T) {
 		mc.EXPECT().Count(gomock.Any(),
 			pm(&api.CountRequest{

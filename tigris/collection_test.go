@@ -243,7 +243,7 @@ func TestCollectionBasic(t *testing.T) {
 	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`), driver.Projection(nil)).Return(&driver.ExplainResponse{}, nil)
 	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"))
 	require.NoError(t, err)
-	require.Equal(t, &driver.ExplainResponse{}, explain)
+	require.Equal(t, &ExplainResponse{}, explain)
 
 	mdb.EXPECT().DropCollection(ctx, "coll_1")
 

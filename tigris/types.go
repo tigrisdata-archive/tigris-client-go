@@ -42,6 +42,10 @@ type DeleteResponse struct{}
 // Returned by Update-documents collection API.
 type UpdateResponse struct{}
 
+// ExplainResponse includes the query plan
+// Tigris would run for a query.
+type ExplainResponse = driver.ExplainResponse
+
 // Error contains Tigris server error.
 type Error driver.Error
 

@@ -434,6 +434,22 @@ func (c *grpcCRUD) countWithOptions(ctx context.Context, collection string, filt
 	return resp.Count, nil
 }
 
+func (c *grpcCRUD) explainWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (*ExplainResponse, error) {
+	r, err := c.api.Explain(ctx, &api.ReadRequest{
+		Project:    c.db,
+		Branch:     c.branch,
+		Collection: collection,
+		Filter:     filter,
+		Fields:     fields,
+		Options:    (*api.ReadRequestOptions)(options),
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	return (*ExplainResponse)(r), nil
+}
+
 func (c *grpcCRUD) createBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
 	r, err := c.api.CreateBranch(ctx, &api.CreateBranchRequest{
 		Project: c.db,

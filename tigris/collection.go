@@ -206,6 +206,22 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields .
 	return &Iterator[T]{Iterator: it}, nil
 }
 
+// Read returns documents which satisfies the filter.
+// Only field from the give fields are populated in the documents. By default, all fields are populated.
+func (c *Collection[T]) Explain(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*ExplainResponse, error) {
+	p, err := getFields(fields...)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := filter.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	return getDB(ctx, c.db).Explain(ctx, c.name, f, p)
+}
+
 // ReadWithOptions returns specific fields of the documents according to the filter.
 // It allows further configure returned documents by providing options:
 //

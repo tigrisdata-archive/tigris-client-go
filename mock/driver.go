@@ -456,6 +456,26 @@ func (mr *MockTxMockRecorder) DropCollection(arg0, arg1 interface{}, arg2 ...int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropCollection", reflect.TypeOf((*MockTx)(nil).DropCollection), varargs...)
 }
 
+// Explain mocks base method.
+func (m *MockTx) Explain(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 driver.Projection, arg4 ...*driver.ReadOptions) (*driver.ExplainResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1, arg2, arg3}
+	for _, a := range arg4 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Explain", varargs...)
+	ret0, _ := ret[0].(*driver.ExplainResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Explain indicates an expected call of Explain.
+func (mr *MockTxMockRecorder) Explain(arg0, arg1, arg2, arg3 interface{}, arg4 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1, arg2, arg3}, arg4...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Explain", reflect.TypeOf((*MockTx)(nil).Explain), varargs...)
+}
+
 // Insert mocks base method.
 func (m *MockTx) Insert(arg0 context.Context, arg1 string, arg2 []driver.Document, arg3 ...*driver.InsertOptions) (*driver.InsertResponse, error) {
 	m.ctrl.T.Helper()
@@ -768,6 +788,26 @@ func (mr *MockDatabaseMockRecorder) DropCollection(arg0, arg1 interface{}, arg2 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DropCollection", reflect.TypeOf((*MockDatabase)(nil).DropCollection), varargs...)
+}
+
+// Explain mocks base method.
+func (m *MockDatabase) Explain(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 driver.Projection, arg4 ...*driver.ReadOptions) (*driver.ExplainResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1, arg2, arg3}
+	for _, a := range arg4 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Explain", varargs...)
+	ret0, _ := ret[0].(*driver.ExplainResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Explain indicates an expected call of Explain.
+func (mr *MockDatabaseMockRecorder) Explain(arg0, arg1, arg2, arg3 interface{}, arg4 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1, arg2, arg3}, arg4...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Explain", reflect.TypeOf((*MockDatabase)(nil).Explain), varargs...)
 }
 
 // Insert mocks base method.

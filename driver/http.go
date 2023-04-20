@@ -708,6 +708,28 @@ func (c *httpCRUD) countWithOptions(ctx context.Context, collection string, filt
 	return PtrToInt64(r.Count), nil
 }
 
+func (c *httpCRUD) explainWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (*ExplainResponse, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
+
+	resp, err := c.api.TigrisExplain(ctx, c.db, collection, apiHTTP.TigrisReadJSONRequestBody{
+		Branch:  &c.branch,
+		Filter:  json.RawMessage(filter),
+		Fields:  json.RawMessage(fields),
+		Options: c.convertReadOptions(options),
+	})
+
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r ExplainResponse
+	if err := respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}
+
 func (c *httpCRUD) createBranch(ctx context.Context, name string) (*CreateBranchResponse, error) {
 	resp, err := c.api.TigrisCreateBranch(ctx, c.db, name, apiHTTP.TigrisCreateBranchJSONRequestBody{})
 

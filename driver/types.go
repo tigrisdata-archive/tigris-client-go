@@ -96,6 +96,7 @@ type (
 	ReplaceResponse api.ReplaceResponse
 	UpdateResponse  api.UpdateResponse
 	DeleteResponse  api.DeleteResponse
+	ExplainResponse api.ExplainResponse
 )
 
 type (

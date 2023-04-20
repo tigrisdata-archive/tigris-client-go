@@ -43,7 +43,7 @@ type DeleteResponse struct{}
 type UpdateResponse struct{}
 
 // ExplainResponse includes the query plan
-// Tigris would run for a query
+// Tigris would run for a query.
 type ExplainResponse = driver.ExplainResponse
 
 // Error contains Tigris server error.

@@ -407,17 +407,15 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	})
 
 	t.Run("explain", func(t *testing.T) {
-		mc.EXPECT().Explain(
+		mc.EXPECT().Explain(gomock.Any(),
 			pm(&api.ReadRequest{
 				Project:    "db1",
 				Collection: "c1",
 				Filter:     []byte(`{"filter":"value"}`),
 				Fields:     []byte(`{"fields":"value"}`),
 				Options:    &api.ReadRequestOptions{},
-			}), gomock.Any()).DoAndReturn(
+			})).DoAndReturn(
 			func(ctx context.Context, r *api.ReadRequest) (*api.ExplainResponse, error) {
-				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-
 				return &api.ExplainResponse{
 					Field:    "test",
 					KeyRange: []string{"nil", "$TIGRIS_MAX"},

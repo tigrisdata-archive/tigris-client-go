@@ -2,6 +2,7 @@ name: go-test
 on:
   push:
   workflow_call:
+  pull_request:
 jobs:
   test:
     runs-on: ubuntu-latest

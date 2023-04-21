@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tigris
+package tigris_test
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/tigrisdata/tigris-client-go/code"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/search"
+	"github.com/tigrisdata/tigris-client-go/tigris"
 )
 
 func ExampleDatabase_Tx() {
@@ -31,13 +33,13 @@ func ExampleDatabase_Tx() {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
+	db, err := tigris.OpenDatabase(ctx, &tigris.Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}
 
 	err = db.Tx(ctx, func(ctx context.Context) error {
-		c := GetCollection[Coll1](db)
+		c := tigris.GetCollection[Coll1](db)
 
 		if _, err := c.Insert(ctx, &Coll1{"aaa"}); err != nil {
 			panic(err)
@@ -64,12 +66,12 @@ func ExampleOpenDatabase() {
 	// Connects to the Tigris server. Creates or opens database "db1".
 	// Creates or migrate &Coll1{}. Returns a "db" object, which provides
 	// access to the collections of the database, Coll1 in this example.
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
+	db, err := tigris.OpenDatabase(ctx, &tigris.Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}
 
-	c := GetCollection[Coll1](db)
+	c := tigris.GetCollection[Coll1](db)
 
 	if _, err := c.Insert(ctx, &Coll1{"aaa"}); err != nil {
 		panic(err)
@@ -83,12 +85,12 @@ func ExampleIterator() {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
+	db, err := tigris.OpenDatabase(ctx, &tigris.Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}
 
-	c := GetCollection[Coll1](db)
+	c := tigris.GetCollection[Coll1](db)
 
 	it, err := c.ReadAll(ctx)
 	if err != nil {
@@ -114,12 +116,12 @@ func ExampleError() {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	db, err := OpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
+	db, err := tigris.OpenDatabase(ctx, &tigris.Config{Project: "db1"}, &Coll1{})
 	if err != nil {
 		panic(err)
 	}
 
-	coll := GetCollection[Coll1](db)
+	coll := tigris.GetCollection[Coll1](db)
 
 	// Insert document into collection
 	_, err = coll.Insert(ctx, &Coll1{"aaa"})
@@ -131,7 +133,7 @@ func ExampleError() {
 	_, err = coll.Insert(ctx, &Coll1{"aaa"})
 
 	// Unwrap tigris.Error and check the code
-	var ep *Error
+	var ep *tigris.Error
 	if errors.As(err, &ep) {
 		if ep.Code == code.AlreadyExists {
 			// handle duplicate key
@@ -146,7 +148,7 @@ func ExampleClient_GetSearch() {
 		Key1 string
 	}
 
-	c, err := NewClient(ctx, &Config{Project: "db1"})
+	c, err := tigris.NewClient(ctx, &tigris.Config{Project: "db1"})
 	if err != nil {
 		panic(err)
 	}
@@ -176,16 +178,16 @@ func ExampleProjection_Read() {
 		Nested NestedColl1
 	}
 
-	db := MustOpenDatabase(ctx, &Config{Project: "db1"}, &Coll1{})
+	db := tigris.MustOpenDatabase(ctx, &tigris.Config{Project: "db1"}, &Coll1{})
 
-	coll := GetCollection[Coll1](db)
+	coll := tigris.GetCollection[Coll1](db)
 
 	_, err := coll.Insert(ctx, &Coll1{Key1: "k1", Nested: NestedColl1{Key2: "k2"}})
 	if err != nil {
 		panic(err)
 	}
 
-	proj := GetProjection[Coll1, NestedColl1](db, "Nested")
+	proj := tigris.GetProjection[Coll1, NestedColl1](db, "Nested")
 
 	it, err := proj.Read(ctx, filter.All)
 	if err != nil {
@@ -202,7 +204,7 @@ func ExampleProjection_Read() {
 		Key1 string
 	}
 
-	proj2 := GetProjection[Coll1, Proj2](db)
+	proj2 := tigris.GetProjection[Coll1, Proj2](db)
 
 	it2, err := proj2.Read(ctx, filter.All)
 	if err != nil {
@@ -212,5 +214,56 @@ func ExampleProjection_Read() {
 	var p2 Proj2
 	for it2.Next(&p2) {
 		fmt.Printf("%+v\n", p2)
+	}
+}
+
+func ExampleIterator_Iterate() {
+	ctx := context.TODO()
+
+	type Coll1 struct {
+		Key1 string
+	}
+
+	db := tigris.MustOpenDatabase(ctx, &tigris.Config{Project: "db1"}, &Coll1{})
+
+	coll := tigris.GetCollection[Coll1](db)
+
+	it, err := coll.Read(ctx, filter.All)
+	if err != nil {
+		panic(err)
+	}
+
+	err = it.Iterate(func(doc *Coll1) error {
+		fmt.Fprintf(os.Stderr, "%+v\n", doc)
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ExampleIterator_Array() {
+	ctx := context.TODO()
+
+	type Coll1 struct {
+		Key1 string
+	}
+
+	db := tigris.MustOpenDatabase(ctx, &tigris.Config{Project: "db1"}, &Coll1{})
+
+	coll := tigris.GetCollection[Coll1](db)
+
+	it, err := coll.Read(ctx, filter.All)
+	if err != nil {
+		panic(err)
+	}
+
+	arr, err := it.Array()
+	if err != nil {
+		panic(err)
+	}
+
+	for k, v := range arr {
+		fmt.Fprintf(os.Stderr, "doc %v = %+v\n", k, v)
 	}
 }

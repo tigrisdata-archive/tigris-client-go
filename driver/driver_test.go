@@ -636,10 +636,14 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 				Filter:     []byte(`{"filter":"value"}`),
 				Fields:     []byte(`{"fields":"value"}`),
 				Options:    roptions,
+				Sort:       []byte("[{\"fields\":\"$asc\"}]"),
 			}), gomock.Any()).Return(nil)
 
 		it, err := db.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`),
-			&ReadOptions{Collation: &api.Collation{Case: "cs"}})
+			&ReadOptions{
+				Collation: &api.Collation{Case: "cs"},
+				Sort:      []byte("[{\"fields\":\"$asc\"}]"),
+			})
 		require.NoError(t, err)
 
 		require.False(t, it.Next(nil))

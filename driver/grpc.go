@@ -404,7 +404,13 @@ func (c *grpcCRUD) readWithOptions(ctx context.Context, collection string, filte
 		Collection: collection,
 		Filter:     filter,
 		Fields:     fields,
-		Options:    (*api.ReadRequestOptions)(options),
+		Options: &api.ReadRequestOptions{
+			Limit:     options.Limit,
+			Skip:      options.Skip,
+			Offset:    options.Offset,
+			Collation: (options.Collation),
+		},
+		Sort: options.Sort,
 	})
 	if err != nil {
 		cancel()
@@ -441,7 +447,12 @@ func (c *grpcCRUD) explainWithOptions(ctx context.Context, collection string, fi
 		Collection: collection,
 		Filter:     filter,
 		Fields:     fields,
-		Options:    (*api.ReadRequestOptions)(options),
+		Options: &api.ReadRequestOptions{
+			Limit:     options.Limit,
+			Skip:      options.Skip,
+			Offset:    options.Offset,
+			Collation: (options.Collation),
+		},
 	})
 	if err != nil {
 		return nil, GRPCError(err)

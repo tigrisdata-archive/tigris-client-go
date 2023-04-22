@@ -34,7 +34,7 @@ main() {
 	yq_fix_json ReplaceRequest documents.items
 	yq_fix_json UpdateRequest fields
 	yq_fix_json ReadRequest fields
-	yq_fix_json ReadRequest sort.items
+	yq_fix_json ReadRequest sort
 	yq_fix_json ReadResponse data
 	yq_fix_json StreamEvent data
 	yq_fix_json SearchHit data

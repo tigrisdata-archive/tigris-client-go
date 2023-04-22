@@ -749,15 +749,16 @@ func TestCollection(t *testing.T) {
 				Limit:  111,
 				Skip:   222,
 				Offset: []byte("333"),
+				Sort:   []byte("[{\"Key1\":\"$asc\"}]"),
 			},
 		).Return(mit, nil)
-
 		_, err := c.ReadWithOptions(ctx, filter.All,
 			fields.All,
 			&ReadOptions{
 				Limit:  111,
 				Skip:   222,
 				Offset: []byte("333"),
+				Sort:   sort.NewSortOrder(sort.Ascending("Key1")),
 			},
 		)
 		require.NoError(t, err)

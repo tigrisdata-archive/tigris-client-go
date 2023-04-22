@@ -26,6 +26,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/schema"
 	"github.com/tigrisdata/tigris-client-go/search"
+	"github.com/tigrisdata/tigris-client-go/sort"
 )
 
 var ErrNotFound = NewError(code.NotFound, "document not found")
@@ -47,6 +48,8 @@ type ReadOptions struct {
 	Offset []byte
 	// Collation allows you to specify string comparison rules. Default is case-sensitive.
 	Collation *driver.Collation
+	// Sort order
+	Sort sort.Order
 }
 
 // Collection provides an interface for documents manipulation.
@@ -241,11 +244,24 @@ func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filte
 		return nil, fmt.Errorf("API expecting options but received null")
 	}
 
+	var sortOrderbytes []byte = nil
+	if options.Sort != nil {
+		sortOrder, err := options.Sort.Built()
+		if err != nil {
+			return nil, err
+		}
+		sortOrderbytes, err = json.Marshal(sortOrder)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	it, err := getDB(ctx, c.db).Read(ctx, c.name, f, p, &driver.ReadOptions{
 		Limit:     options.Limit,
 		Skip:      options.Skip,
 		Offset:    options.Offset,
 		Collation: (*api.Collation)(options.Collation),
+		Sort:      sortOrderbytes,
 	})
 	if err != nil {
 		return nil, err

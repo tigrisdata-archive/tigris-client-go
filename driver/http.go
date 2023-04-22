@@ -675,6 +675,7 @@ func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filte
 		Filter:  json.RawMessage(filter),
 		Fields:  json.RawMessage(fields),
 		Options: c.convertReadOptions(options),
+		Sort:    json.RawMessage(options.Sort),
 	})
 
 	err = HTTPError(err, resp)

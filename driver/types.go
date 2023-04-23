@@ -61,12 +61,24 @@ type (
 	Vector json.RawMessage
 )
 
+type ReadOptions struct {
+	// Limit the number of documents returned by the read operation.
+	Limit int64
+	// Number of documents to skip before starting to return resulting documents.
+	Skip int64
+	// A cursor for use in pagination. The next streams will return documents after this offset.
+	Offset []byte
+	// Collation allows you to specify string comparison rules. Default is case-sensitive.
+	Collation *api.Collation
+	// Sort order
+	Sort []byte
+}
+
 type (
 	InsertOptions  api.InsertRequestOptions
 	ReplaceOptions api.ReplaceRequestOptions
 	UpdateOptions  api.UpdateRequestOptions
 	DeleteOptions  api.DeleteRequestOptions
-	ReadOptions    api.ReadRequestOptions
 	WriteOptions   api.WriteOptions
 	Collation      api.Collation
 )
@@ -96,6 +108,7 @@ type (
 	ReplaceResponse api.ReplaceResponse
 	UpdateResponse  api.UpdateResponse
 	DeleteResponse  api.DeleteResponse
+	ExplainResponse api.ExplainResponse
 )
 
 type (

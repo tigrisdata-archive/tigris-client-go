@@ -94,6 +94,10 @@ type Database interface {
 	Read(ctx context.Context, collection string, filter Filter, fields Projection,
 		options ...*ReadOptions) (Iterator, error)
 
+	// Explain the query planner for a specified filter.
+	Explain(ctx context.Context, collection string, filter Filter, fields Projection,
+		options ...*ReadOptions) (*ExplainResponse, error)
+
 	// Search for documents in the collection matching specified query
 	Search(ctx context.Context, collection string, request *SearchRequest) (SearchResultIterator, error)
 
@@ -259,6 +263,17 @@ func (c *driverCRUD) Read(ctx context.Context, collection string, filter Filter,
 
 func (c *driverCRUD) Count(ctx context.Context, collection string, filter Filter) (int64, error) {
 	return c.countWithOptions(ctx, collection, filter)
+}
+
+func (c *driverCRUD) Explain(ctx context.Context, collection string, filter Filter, fields Projection,
+	options ...*ReadOptions,
+) (*ExplainResponse, error) {
+	opts, err := validateOptionsParam(options, &ReadOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return c.explainWithOptions(ctx, collection, filter, fields, opts.(*ReadOptions))
 }
 
 func (c *driverCRUD) Search(ctx context.Context, collection string, request *SearchRequest) (

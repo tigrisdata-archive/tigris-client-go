@@ -406,6 +406,28 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 		require.False(t, it.Next(nil))
 	})
 
+	t.Run("explain", func(t *testing.T) {
+		mc.EXPECT().Explain(gomock.Any(),
+			pm(&api.ReadRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Filter:     []byte(`{"filter":"value"}`),
+				Fields:     []byte(`{"fields":"value"}`),
+				Options:    &api.ReadRequestOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.ReadRequest) (*api.ExplainResponse, error) {
+				return &api.ExplainResponse{
+					Field:    "test",
+					KeyRange: []string{"nil", "$TIGRIS_MAX"},
+				}, nil
+			})
+
+		resp, err := c.Explain(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`))
+		require.NoError(t, err)
+		require.Equal(t, resp.Field, "test")
+		require.Equal(t, resp.KeyRange, []string{"nil", "$TIGRIS_MAX"})
+	})
+
 	t.Run("count", func(t *testing.T) {
 		mc.EXPECT().Count(gomock.Any(),
 			pm(&api.CountRequest{
@@ -614,10 +636,14 @@ func testCRUDBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 				Filter:     []byte(`{"filter":"value"}`),
 				Fields:     []byte(`{"fields":"value"}`),
 				Options:    roptions,
+				Sort:       []byte("[{\"fields\":\"$asc\"}]"),
 			}), gomock.Any()).Return(nil)
 
 		it, err := db.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`),
-			&ReadOptions{Collation: &api.Collation{Case: "cs"}})
+			&ReadOptions{
+				Collation: &api.Collation{Case: "cs"},
+				Sort:      []byte("[{\"fields\":\"$asc\"}]"),
+			})
 		require.NoError(t, err)
 
 		require.False(t, it.Next(nil))

@@ -240,6 +240,11 @@ func TestCollectionBasic(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, d1, pd)
 
+	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`), driver.Projection(nil)).Return(&driver.ExplainResponse{}, nil)
+	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"))
+	require.NoError(t, err)
+	require.Equal(t, &ExplainResponse{}, explain)
+
 	mdb.EXPECT().DropCollection(ctx, "coll_1")
 
 	err = c.Drop(ctx)
@@ -744,15 +749,16 @@ func TestCollection(t *testing.T) {
 				Limit:  111,
 				Skip:   222,
 				Offset: []byte("333"),
+				Sort:   []byte("[{\"Key1\":\"$asc\"}]"),
 			},
 		).Return(mit, nil)
-
 		_, err := c.ReadWithOptions(ctx, filter.All,
 			fields.All,
 			&ReadOptions{
 				Limit:  111,
 				Skip:   222,
 				Offset: []byte("333"),
+				Sort:   sort.NewSortOrder(sort.Ascending("Key1")),
 			},
 		)
 		require.NoError(t, err)
@@ -796,6 +802,58 @@ func TestCollection(t *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, int64(789), cnt)
+	})
+
+	t.Run("iterate", func(t *testing.T) {
+		mdb.EXPECT().Read(ctx, "coll_1",
+			driver.Filter(`{"Key1":{"$eq":"aaa"}}`),
+			driver.Projection(`{}`),
+		).Return(mit, nil)
+
+		it, err := c.Read(ctx, filter.Eq("Key1", "aaa"), fields.All)
+		require.NoError(t, err)
+
+		var dd driver.Document
+		var dd1 driver.Document
+
+		d1 := &Coll1{Key1: "aaa", Field1: 123}
+
+		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
+		mit.EXPECT().Next(&dd1).Return(false)
+		mit.EXPECT().Err().Return(nil)
+		mit.EXPECT().Close()
+
+		err = it.Iterate(func(d *Coll1) error {
+			require.Equal(t, d1, d)
+			return nil
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("iterator_array", func(t *testing.T) {
+		mdb.EXPECT().Read(ctx, "coll_1",
+			driver.Filter(`{"Key1":{"$eq":"aaa"}}`),
+			driver.Projection(`{}`),
+		).Return(mit, nil)
+
+		it, err := c.Read(ctx, filter.Eq("Key1", "aaa"), fields.All)
+		require.NoError(t, err)
+
+		var dd driver.Document
+		var dd1 driver.Document
+
+		d1 := &Coll1{Key1: "aaa", Field1: 123}
+
+		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, d1)).Return(true)
+		mit.EXPECT().Next(&dd1).Return(false)
+		mit.EXPECT().Err().Return(nil)
+		mit.EXPECT().Close()
+
+		arr, err := it.Array()
+
+		require.Equal(t, []Coll1{*d1}, arr)
+
+		require.NoError(t, err)
 	})
 }
 

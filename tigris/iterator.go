@@ -23,7 +23,7 @@ import (
 
 // Iterator is used to iterate documents
 // returned by streaming APIs.
-type Iterator[T interface{}] struct {
+type Iterator[T any] struct {
 	driver.Iterator
 	err         error
 	unmarshaler func([]byte, *T) error
@@ -63,6 +63,42 @@ func (it *Iterator[T]) Next(doc *T) bool {
 	*doc = v
 
 	return true
+}
+
+// Iterate calls provided function for every document in the result.
+// It's ia convenience to avoid common mistakes of not closing the
+// iterator and not checking the error from the iterator.
+func (it *Iterator[T]) Iterate(fn func(doc *T) error) error {
+	defer it.Close()
+
+	var doc T
+	for it.Next(&doc) {
+		if err := fn(&doc); err != nil {
+			return err
+		}
+	}
+
+	return it.Err()
+}
+
+// Array returns result of iteration as an array of documents.
+func (it *Iterator[T]) Array() ([]T, error) {
+	defer it.Close()
+
+	var (
+		arr []T
+		doc T
+	)
+
+	for it.Next(&doc) {
+		arr = append(arr, doc)
+	}
+
+	if it.Err() != nil {
+		return nil, it.Err()
+	}
+
+	return arr, nil
 }
 
 // Err returns nil if iteration was successful,

@@ -31,19 +31,32 @@ type Sort interface {
 }
 
 // Ascending builds an increasing order for given field name.
-func Ascending(fieldName string) Sort {
-	return &fieldSort{fieldName: fieldName, operator: asc}
+func Ascending(fieldName string) Order {
+	return Order{&fieldSort{fieldName: fieldName, operator: asc}}
 }
 
 // Descending builds a decreasing order for given field name.
-func Descending(fieldName string) Sort {
-	return &fieldSort{fieldName: fieldName, operator: desc}
+func Descending(fieldName string) Order {
+	return Order{&fieldSort{fieldName: fieldName, operator: desc}}
+}
+
+// Ascending builds an increasing order for given field name.
+func (o Order) Ascending(fieldName string) Order {
+	return append(o, &fieldSort{fieldName: fieldName, operator: asc})
+}
+
+// Descending builds a decreasing order for given field name.
+func (o Order) Descending(fieldName string) Order {
+	return append(o, &fieldSort{fieldName: fieldName, operator: desc})
 }
 
 // NewSortOrder creates an array of multiple fields that will be used to sort results.
-func NewSortOrder(sort ...Sort) Order {
-	o := make(Order, len(sort))
-	copy(o, sort)
+func NewSortOrder(sort ...Order) Order {
+	o := make(Order, 0, len(sort))
+	for _, v := range sort {
+		o = append(o, v...)
+	}
+
 	return o
 }
 

@@ -24,14 +24,14 @@ import (
 
 func TestAscending(t *testing.T) {
 	s := Ascending("field_1")
-	assert.Equal(t, "field_1", s.FieldName())
-	assert.Equal(t, map[string]string{"field_1": "$asc"}, s.ToSortOrder())
+	assert.Equal(t, "field_1", s[0].FieldName())
+	assert.Equal(t, map[string]string{"field_1": "$asc"}, s[0].ToSortOrder())
 }
 
 func TestDescending(t *testing.T) {
 	s := Descending("field_1")
-	assert.Equal(t, "field_1", s.FieldName())
-	assert.Equal(t, map[string]string{"field_1": "$desc"}, s.ToSortOrder())
+	assert.Equal(t, "field_1", s[0].FieldName())
+	assert.Equal(t, map[string]string{"field_1": "$desc"}, s[0].ToSortOrder())
 }
 
 func TestNewSortOrder(t *testing.T) {
@@ -42,6 +42,13 @@ func TestNewSortOrder(t *testing.T) {
 
 	t.Run("multiple sort orders", func(t *testing.T) {
 		o := NewSortOrder(Descending("field_1"), Ascending("parent.field_2"))
+		assert.Len(t, o, 2)
+		assert.Equal(t, map[string]string{"field_1": "$desc"}, o[0].ToSortOrder())
+		assert.Equal(t, map[string]string{"parent.field_2": "$asc"}, o[1].ToSortOrder())
+	})
+
+	t.Run("multiple sort orders", func(t *testing.T) {
+		o := Descending("field_1").Ascending("parent.field_2")
 		assert.Len(t, o, 2)
 		assert.Equal(t, map[string]string{"field_1": "$desc"}, o[0].ToSortOrder())
 		assert.Equal(t, map[string]string{"parent.field_2": "$asc"}, o[1].ToSortOrder())

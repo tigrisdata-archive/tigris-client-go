@@ -63,7 +63,7 @@ type RequestBuilder interface {
 	WithFilter(filter.Filter) RequestBuilder
 	WithFacetFields(fields ...string) RequestBuilder
 	WithFacet(*FacetQuery) RequestBuilder
-	WithSorting(sortByFields ...sort.Sort) RequestBuilder
+	WithSorting(sortByFields ...sort.Order) RequestBuilder
 	WithSortOrder(sortOrder sort.Order) RequestBuilder
 	WithIncludeFields(fields ...string) RequestBuilder
 	WithExcludeFields(fields ...string) RequestBuilder
@@ -107,7 +107,7 @@ func (r *Request) WithFacet(facet *FacetQuery) RequestBuilder {
 	return r
 }
 
-func (r *Request) WithSorting(sortByFields ...sort.Sort) RequestBuilder {
+func (r *Request) WithSorting(sortByFields ...sort.Order) RequestBuilder {
 	r.Sort = sort.NewSortOrder(sortByFields...)
 
 	return r

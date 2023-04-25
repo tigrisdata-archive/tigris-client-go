@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
+	"github.com/tigrisdata/tigris-client-go/code"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -879,4 +880,12 @@ func TestOpeningDatabase(t *testing.T) {
 	db, err := TestOpenDatabase(ctx, m, "db1")
 	require.NoError(t, err)
 	require.NotNil(t, db)
+}
+
+func TestNewError(t *testing.T) {
+	err := NewError(code.Conflict, "msg1")
+	require.Equal(t, &Error{TigrisError: &api.TigrisError{Code: api.Code_CONFLICT, Message: "msg1"}}, err)
+
+	err = NewError(code.OK, "msg1")
+	require.Equal(t, (*Error)(nil), err)
 }

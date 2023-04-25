@@ -43,6 +43,10 @@ func TestProjectionBasic(t *testing.T) {
 	}
 
 	type Account struct {
+		unexported string //nolint:unused
+		JSONSkip   string `json:"-"`
+		TigrisSkip string `tigris:"-"`
+
 		Name        string
 		Balance     string
 		BankAddress *Address
@@ -54,7 +58,7 @@ func TestProjectionBasic(t *testing.T) {
 
 	type User struct {
 		Name           string
-		Address        Address
+		Address        *Address
 		MailingAddress Address `json:"mailing_address"`
 		Assets         Assets
 		CreatedAt      time.Time
@@ -193,9 +197,20 @@ func TestProjectionBasic(t *testing.T) {
 	pt33 := GetProjection[User, FieldNotInDoc](db)
 	require.Equal(t, fmt.Errorf("field present in projection and doesn't exist in the document: NoSuchField"), pt33.err)
 
+	expErr := fmt.Errorf("projection type mismatch. doc=string, projection=float64")
 	m.EXPECT().UseDatabase("db1").Return(mdb).Times(1)
 	pt34 := GetProjection[User, FieldTypeMismatch](db)
-	require.Equal(t, fmt.Errorf("projection type mismatch. doc=string, projection=float64"), pt34.err)
+	require.Equal(t, expErr, pt34.err)
+
+	// test that read API returns error delayed from GetProjection
+	_, err = pt34.Read(ctx, filter.Eq("f1", true))
+	require.Equal(t, expErr, err)
+	_, err = pt34.ReadAll(ctx)
+	require.Equal(t, expErr, err)
+	_, err = pt34.ReadOne(ctx, filter.Eq("f1", true))
+	require.Equal(t, expErr, err)
+	_, err = pt34.ReadWithOptions(ctx, filter.Eq("f1", true), &ReadOptions{Skip: 10})
+	require.Equal(t, expErr, err)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb).Times(1)
 	pt4 := GetProjection[User, []Account](db, "Assets", "Accounts")
@@ -380,4 +395,18 @@ func TestProjectionBasic(t *testing.T) {
 	require.NoError(t, it.Err())
 
 	it.Close()
+
+	t.Run("read_one", func(t *testing.T) {
+		mdb.EXPECT().Read(ctx, "users",
+			driver.Filter(`{}`),
+			driver.Projection(`{"mailing_address":true}`),
+		).Return(mit, nil)
+
+		mit.EXPECT().Close()
+		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, usr)).Return(true)
+
+		ma, err := pt.ReadOne(ctx, filter.All)
+		require.NoError(t, err)
+		require.Equal(t, &usr.MailingAddress, ma)
+	})
 }

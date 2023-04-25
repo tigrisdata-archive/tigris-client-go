@@ -240,10 +240,12 @@ func TestCollectionBasic(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, d1, pd)
 
-	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`), driver.Projection(nil)).Return(&driver.ExplainResponse{}, nil)
-	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"))
+	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`), driver.Projection(`{"f1":true}`),
+		&driver.ReadOptions{Skip: 10},
+	).Return(&driver.ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, nil)
+	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"), fields.Include("f1"), &ReadOptions{Skip: 10})
 	require.NoError(t, err)
-	require.Equal(t, &ExplainResponse{}, explain)
+	require.Equal(t, &ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, explain)
 
 	mdb.EXPECT().DropCollection(ctx, "coll_1")
 
@@ -854,6 +856,16 @@ func TestCollection(t *testing.T) {
 		require.Equal(t, []Coll1{*d1}, arr)
 
 		require.NoError(t, err)
+	})
+
+	t.Run("describe_collection", func(t *testing.T) {
+		mdb.EXPECT().DescribeCollection(ctx, "coll_1",
+			&driver.DescribeCollectionOptions{},
+		).Return(&driver.DescribeCollectionResponse{Collection: "coll_1", Schema: []byte("{schema}")}, nil)
+		resp, err := c.Describe(ctx)
+		require.NoError(t, err)
+
+		require.Equal(t, &DescribeCollectionResponse{Collection: "coll_1", Schema: []byte("{schema}")}, resp)
 	})
 }
 

@@ -209,22 +209,6 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields .
 	return &Iterator[T]{Iterator: it}, nil
 }
 
-// Read returns documents which satisfies the filter.
-// Only field from the give fields are populated in the documents. By default, all fields are populated.
-func (c *Collection[T]) Explain(ctx context.Context, filter filter.Filter, fields ...*fields.Read) (*ExplainResponse, error) {
-	p, err := getFields(fields...)
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := filter.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	return getDB(ctx, c.db).Explain(ctx, c.name, f, p)
-}
-
 // ReadWithOptions returns specific fields of the documents according to the filter.
 // It allows further configure returned documents by providing options:
 //
@@ -367,4 +351,42 @@ func (c *Collection[T]) Count(ctx context.Context, filter filter.Filter) (int64,
 	}
 
 	return getDB(ctx, c.db).Count(ctx, c.name, f)
+}
+
+// Explain describes the given query execution plan.
+func (c *Collection[T]) Explain(ctx context.Context, filter filter.Filter, fields *fields.Read, options *ReadOptions) (*ExplainResponse, error) {
+	p, err := getFields(fields)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := filter.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	var sortOrderbytes []byte = nil
+	if options.Sort != nil {
+		sortOrder, err := options.Sort.Built()
+		if err != nil {
+			return nil, err
+		}
+		sortOrderbytes, err = json.Marshal(sortOrder)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return getDB(ctx, c.db).Explain(ctx, c.name, f, p, &driver.ReadOptions{
+		Limit:     options.Limit,
+		Skip:      options.Skip,
+		Offset:    options.Offset,
+		Collation: (*api.Collation)(options.Collation),
+		Sort:      sortOrderbytes,
+	})
+}
+
+// Describe returns information about the collection.
+func (c *Collection[T]) Describe(ctx context.Context) (*DescribeCollectionResponse, error) {
+	return getDB(ctx, c.db).DescribeCollection(ctx, c.name, &driver.DescribeCollectionOptions{})
 }

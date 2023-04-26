@@ -44,7 +44,10 @@ type UpdateResponse struct{}
 
 // ExplainResponse includes the query plan
 // Tigris would run for a query.
-type ExplainResponse = driver.ExplainResponse
+type (
+	ExplainResponse            = driver.ExplainResponse
+	DescribeCollectionResponse = driver.DescribeCollectionResponse
+)
 
 // Error contains Tigris server error.
 type Error driver.Error

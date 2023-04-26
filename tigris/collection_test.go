@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
+	"github.com/tigrisdata/tigris-client-go/code"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/fields"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -240,10 +241,12 @@ func TestCollectionBasic(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, d1, pd)
 
-	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`), driver.Projection(nil)).Return(&driver.ExplainResponse{}, nil)
-	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"))
+	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`), driver.Projection(`{"f1":true}`),
+		&driver.ReadOptions{Skip: 10},
+	).Return(&driver.ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, nil)
+	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"), fields.Include("f1"), &ReadOptions{Skip: 10})
 	require.NoError(t, err)
-	require.Equal(t, &ExplainResponse{}, explain)
+	require.Equal(t, &ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, explain)
 
 	mdb.EXPECT().DropCollection(ctx, "coll_1")
 
@@ -855,6 +858,16 @@ func TestCollection(t *testing.T) {
 
 		require.NoError(t, err)
 	})
+
+	t.Run("describe_collection", func(t *testing.T) {
+		mdb.EXPECT().DescribeCollection(ctx, "coll_1",
+			&driver.DescribeCollectionOptions{},
+		).Return(&driver.DescribeCollectionResponse{Collection: "coll_1", Schema: []byte("{schema}")}, nil)
+		resp, err := c.Describe(ctx)
+		require.NoError(t, err)
+
+		require.Equal(t, &DescribeCollectionResponse{Collection: "coll_1", Schema: []byte("{schema}")}, resp)
+	})
 }
 
 func TestOpeningDatabase(t *testing.T) {
@@ -867,4 +880,12 @@ func TestOpeningDatabase(t *testing.T) {
 	db, err := TestOpenDatabase(ctx, m, "db1")
 	require.NoError(t, err)
 	require.NotNil(t, db)
+}
+
+func TestNewError(t *testing.T) {
+	err := NewError(code.Conflict, "msg1")
+	require.Equal(t, &Error{TigrisError: &api.TigrisError{Code: api.Code_CONFLICT, Message: "msg1"}}, err)
+
+	err = NewError(code.OK, "msg1")
+	require.Equal(t, (*Error)(nil), err)
 }

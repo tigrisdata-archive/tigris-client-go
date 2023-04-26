@@ -202,6 +202,28 @@ func fieldName(field reflect.StructField) string {
 	return fName
 }
 
+// ReadOne returns first documents which satisfies the filter.
+func (p *Projection[T, P]) ReadOne(ctx context.Context, filter filter.Filter) (*P, error) {
+	var doc P
+
+	it, err := p.Read(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	defer it.Close()
+
+	if !it.Next(&doc) {
+		if it.Err() != nil {
+			return nil, it.Err()
+		}
+
+		return nil, ErrNotFound
+	}
+
+	return &doc, nil
+}
+
 func flattenType(prefix string, d reflect.Type, p reflect.Type, fields *fields.Read) (bool, error) {
 	if prefix != "" {
 		prefix += "."
@@ -210,6 +232,9 @@ func flattenType(prefix string, d reflect.Type, p reflect.Type, fields *fields.R
 	docFields := make(map[string]reflect.Type)
 	for i := 0; i < d.NumField(); i++ {
 		fn := fieldName(d.Field(i))
+		if fn == "" {
+			continue
+		}
 
 		dp := d.Field(i).Type
 		if dp.Kind() == reflect.Ptr {
@@ -231,6 +256,9 @@ func flattenType(prefix string, d reflect.Type, p reflect.Type, fields *fields.R
 		field := p.Field(i)
 
 		fName := fieldName(field)
+		if fName == "" {
+			continue
+		}
 
 		pft := field.Type
 		if pft.Kind() == reflect.Ptr {

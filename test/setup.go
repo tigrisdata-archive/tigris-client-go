@@ -60,6 +60,11 @@ func HTTPURL(shift int) string {
 	return fmt.Sprintf("localhost:%d", 33333+shift)
 }
 
+// FIXME: the tests which are calling URL function in "tigris" package
+// FIXME: cannot be run from IDE.
+
+var URL func(shift int) string
+
 func SetupTLS(t *testing.T) *tls.Config {
 	t.Helper()
 

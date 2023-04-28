@@ -41,7 +41,7 @@ const (
 )
 
 var (
-	DefaultProtocol = GRPC
+	DefaultProtocol string
 	DefaultURL      = "api.preview.tigrisdata.cloud"
 
 	// TokenURLOverride Only used in tests to point auth to proper HTTP port in GRPC tests.

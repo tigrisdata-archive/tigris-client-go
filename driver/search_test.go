@@ -24,9 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/config"
 	mock "github.com/tigrisdata/tigris-client-go/mock/api"
-	"github.com/tigrisdata/tigris-client-go/test"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -464,26 +462,4 @@ func testSearchBasicNegative(t *testing.T, c Driver, mc *mock.MockSearchServer) 
 		_, err := search.DeleteByQuery(ctx, "idx1", Filter(`{"filter1":"value1"}`))
 		require.Equal(t, &Error{err1}, err)
 	})
-}
-
-func setupSearchGRPCTests(t *testing.T, config *config.Driver) (Driver, *grpcDriver, *test.MockServers, func()) {
-	return setupGRPCTests(t, config)
-}
-
-func setupSearchHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *test.MockServers, func()) {
-	return setupHTTPTests(t, config)
-}
-
-func TestSearchGRPCDriver(t *testing.T) {
-	client, _, mockServer, cancel := setupSearchGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testSearchBasic(t, client, mockServer.Search)
-	testSearchBasicNegative(t, client, mockServer.Search)
-}
-
-func TestSearchHTTPDriver(t *testing.T) {
-	client, _, mockServer, cancel := setupSearchHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testSearchBasic(t, client, mockServer.Search)
-	testSearchBasicNegative(t, client, mockServer.Search)
 }

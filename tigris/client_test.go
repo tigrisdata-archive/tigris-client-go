@@ -34,7 +34,7 @@ func TestClient(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &Config{URL: test.GRPCURL(8), Project: "db1", Branch: "staging"}
+	cfg := &Config{URL: test.URL(8), Project: "db1", Branch: "staging"}
 	cfg.TLS = test.SetupTLS(t)
 
 	type Coll1 struct {
@@ -92,7 +92,7 @@ func TestClient(t *testing.T) {
 	require.Error(t, err)
 
 	t.Run("initializes a branch", func(t *testing.T) {
-		testCfg := &Config{URL: test.GRPCURL(8), Project: "db1", Branch: "staging"}
+		testCfg := &Config{URL: test.URL(8), Project: "db1", Branch: "staging"}
 		testCfg.TLS = test.SetupTLS(t)
 
 		mc.EXPECT().CreateBranch(gomock.Any(), pm(&api.CreateBranchRequest{

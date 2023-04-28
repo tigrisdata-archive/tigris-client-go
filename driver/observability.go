@@ -16,9 +16,6 @@ package driver
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/tigrisdata/tigris-client-go/config"
 )
 
 // Observability declares Tigris Observability APIs.
@@ -29,30 +26,31 @@ type Observability interface {
 	Close() error
 }
 
+/*
 // NewObservability instantiates observability API client.
 func NewObservability(ctx context.Context, cfg *config.Driver) (Observability, error) {
-	var (
-		o11y Observability
-		err  error
-	)
+	var err error
 
 	cfg, err = initConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	switch cfg.Protocol {
-	case GRPC:
-		o11y, err = newGRPCClient(ctx, cfg)
-	case HTTP:
-		o11y, err = newHTTPClient(ctx, cfg)
-	default:
-		err = fmt.Errorf("unsupported protocol")
+	proto := DefaultProtocol
+	if cfg.Protocol != "" {
+		proto = cfg.Protocol
 	}
 
+	initDrv, ok := drivers[proto]
+	if !ok {
+		return nil, fmt.Errorf("unsupported protocol")
+	}
+
+	_, _, o11y, err := initDrv(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	return o11y, nil
 }
+*/

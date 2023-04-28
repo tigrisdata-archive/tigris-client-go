@@ -32,16 +32,16 @@ func TestDriverConfig(t *testing.T) {
 		cfg  *config.Driver
 		err  error
 	}{
-		{name: "host", url: "host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC}},
-		{name: "host_with_port", url: "host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC}},
-		{name: "localhost", url: "localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC}},
-		{name: "localhost_with_port", url: "localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: GRPC}},
-		{name: "ip", url: "127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: GRPC}},
-		{name: "ip_with_port", url: "127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC}},
+		{name: "host", url: "host1", cfg: &config.Driver{URL: "host1", Protocol: DefaultProtocol}},
+		{name: "host_with_port", url: "host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: DefaultProtocol}},
+		{name: "localhost", url: "localhost", cfg: &config.Driver{URL: "localhost", Protocol: DefaultProtocol}},
+		{name: "localhost_with_port", url: "localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: DefaultProtocol}},
+		{name: "ip", url: "127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: DefaultProtocol}},
+		{name: "ip_with_port", url: "127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: DefaultProtocol}},
 		{name: "https_ipv6", url: "https://[::1]", cfg: &config.Driver{URL: "[::1]", Protocol: HTTP, TLS: TLS}},
 		{name: "https_ipv6_with_port", url: "https://[::1]:777", cfg: &config.Driver{URL: "[::1]:777", Protocol: HTTP, TLS: TLS}},
-		{name: "ipv6", url: "::1", cfg: &config.Driver{URL: "::1", Protocol: GRPC}},
-		{name: "ipv6_with_port", url: "[::1]:777", cfg: &config.Driver{URL: "[::1]:777", Protocol: GRPC}},
+		{name: "ipv6", url: "::1", cfg: &config.Driver{URL: "::1", Protocol: DefaultProtocol}},
+		{name: "ipv6_with_port", url: "[::1]:777", cfg: &config.Driver{URL: "[::1]:777", Protocol: DefaultProtocol}},
 		{name: "http_host", url: "http://host1", cfg: &config.Driver{URL: "host1", Protocol: HTTP}},
 		{name: "http_host_with_port", url: "http://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: HTTP}},
 		{name: "http_localhost", url: "http://localhost", cfg: &config.Driver{URL: "localhost", Protocol: HTTP}},
@@ -72,7 +72,7 @@ func TestDriverConfig(t *testing.T) {
 		{name: "https_localhost_with_port_userinfo", url: "https://usr1:pwd1@localhost:555", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
 		{name: "https_ip_userinfo", url: "https://usr1:pwd1@127.0.0.1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
 		{name: "https_ip_with_port_userinfo", url: "https://usr1:pwd1@127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
-		{name: "ip_with_port_userinfo", url: "usr1:pwd1@127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: GRPC, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
+		{name: "ip_with_port_userinfo", url: "usr1:pwd1@127.0.0.1:777", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: DefaultProtocol, TLS: TLS, ClientID: "usr1", ClientSecret: "pwd1"}},
 		{name: "dns_host", url: "dns://host1", cfg: &config.Driver{URL: "host1", Protocol: GRPC}},
 		{name: "dns_host_with_port", url: "dns://host1:333", cfg: &config.Driver{URL: "host1:333", Protocol: GRPC}},
 		{name: "dns_localhost", url: "dns://localhost", cfg: &config.Driver{URL: "localhost", Protocol: GRPC}},
@@ -113,7 +113,7 @@ func TestDriverConfigPrecedence(t *testing.T) {
 	assert.NoError(t, err)
 
 	// default
-	assert.Equal(t, config.Driver{URL: "api.preview.tigrisdata.cloud", Protocol: GRPC}, *res)
+	assert.Equal(t, config.Driver{URL: "api.preview.tigrisdata.cloud", Protocol: DefaultProtocol}, *res)
 
 	// env have precedence over default
 	t.Setenv(EnvToken, "token1")

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build tigris_http
+
 package driver
 
 import (
@@ -34,11 +36,8 @@ import (
 )
 
 const (
-	DefaultHTTPSPort   = 443
-	DefaultHTTPPort    = 80
-	SetCookieHeaderKey = "Set-Cookie"
-	CookieHeaderKey    = "Cookie"
-
+	DefaultHTTPSPort           = 443
+	DefaultHTTPPort            = 80
 	grantTypeRefreshToken      = "refresh_token"
 	grantTypeClientCredentials = "client_credentials"
 	scope                      = "offline_access openid"
@@ -48,6 +47,13 @@ type (
 	txCtxKey                        struct{}
 	additionalOutboundHeadersCtxKey struct{}
 )
+
+func init() {
+	drivers[HTTP] = newHTTPClient
+	if DefaultProtocol == "" {
+		DefaultProtocol = HTTP
+	}
+}
 
 // HTTPError parses HTTP error into TigrisError
 // Returns nil, if HTTP status is OK.
@@ -215,7 +221,7 @@ func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx, cookies []*htt
 }
 
 // newHTTPClient return Driver interface implementation using HTTP transport protocol.
-func newHTTPClient(_ context.Context, config *config.Driver) (*httpDriver, error) {
+func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error) {
 	if !strings.Contains(config.URL, ":") {
 		if config.TLS != nil {
 			config.URL = fmt.Sprintf("%s:%d", config.URL, DefaultHTTPSPort)
@@ -243,10 +249,12 @@ func newHTTPClient(_ context.Context, config *config.Driver) (*httpDriver, error
 
 	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(hf))
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
-	return &httpDriver{api: c, tokenURL: tokenURL, cfg: config}, nil
+	drv := &httpDriver{api: c, tokenURL: tokenURL, cfg: config}
+
+	return drv, drv, drv, nil
 }
 
 func (c *httpDriver) Close() error {
@@ -467,7 +475,12 @@ func (c *httpCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 	var outboundCookies []*http.Cookie
 
 	outboundCookies = append(outboundCookies, resp.Cookies()...)
-	return &httpCRUD{db: c.db, api: c.api, txCtx: &api.TransactionCtx{Id: PtrToString(bTx.TxCtx.Id), Origin: PtrToString(bTx.TxCtx.Origin)}, cookies: outboundCookies}, nil
+	return &httpCRUD{
+		db: c.db, api: c.api,
+		txCtx:   &api.TransactionCtx{Id: PtrToString(bTx.TxCtx.Id), Origin: PtrToString(bTx.TxCtx.Origin)},
+		cookies: outboundCookies,
+		branch:  c.branch,
+	}, nil
 }
 
 func (c *httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {

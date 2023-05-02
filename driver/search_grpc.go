@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build tigris_grpc || (!tigris_grpc && !tigris_http)
+
 package driver
 
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"io"
 	"unsafe"
 
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
@@ -234,59 +234,4 @@ func (g *searchIndexStreamReader) close() error {
 	g.cancel()
 
 	return nil
-}
-
-type SearchIndexResultIterator interface {
-	Next(r *SearchIndexResponse) bool
-	Err() error
-	Close()
-}
-
-type searchIndexReader interface {
-	read() (SearchIndexResponse, error)
-	close() error
-}
-
-type searchIndexResultIterator struct {
-	searchIndexReader
-	eof bool
-	err error
-}
-
-func (i *searchIndexResultIterator) Next(r *SearchIndexResponse) bool {
-	if i.eof {
-		return false
-	}
-
-	resp, err := i.read()
-	if errors.Is(err, io.EOF) {
-		i.eof = true
-		_ = i.close()
-		return false
-	}
-
-	if err != nil {
-		i.eof = true
-		i.err = err
-		_ = i.close()
-
-		return false
-	}
-
-	*r = resp
-
-	return true
-}
-
-func (i *searchIndexResultIterator) Err() error {
-	return i.err
-}
-
-func (i *searchIndexResultIterator) Close() {
-	if i.eof {
-		return
-	}
-
-	_ = i.close()
-	i.eof = true
 }

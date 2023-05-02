@@ -88,3 +88,6 @@ linters-settings:
       limitations under the License.
   lll:
     line-length: 120
+run:
+  build-tags:
+    - tigris_grpc,tigris_http

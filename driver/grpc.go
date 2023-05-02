@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build tigris_grpc || (!tigris_grpc && !tigris_http)
+
 package driver
 
 import (
@@ -47,6 +49,11 @@ type grpcDriver struct {
 	search api.SearchClient
 }
 
+func init() {
+	drivers[GRPC] = newGRPCClient
+	DefaultProtocol = GRPC
+}
+
 func GRPCError(err error) error {
 	if err == nil {
 		return nil
@@ -60,7 +67,7 @@ func GRPCError(err error) error {
 }
 
 // newGRPCClient return Driver interface implementation using GRPC transport protocol.
-func newGRPCClient(ctx context.Context, config *config.Driver) (*grpcDriver, error) {
+func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error) {
 	if !strings.Contains(config.URL, ":") {
 		config.URL = fmt.Sprintf("%s:%d", config.URL, DefaultGRPCPort)
 	}
@@ -86,10 +93,10 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (*grpcDriver, err
 
 	conn, err := grpc.DialContext(ctx, config.URL, opts...)
 	if err != nil {
-		return nil, GRPCError(err)
+		return nil, nil, nil, GRPCError(err)
 	}
 
-	return &grpcDriver{
+	drv := &grpcDriver{
 		conn:   conn,
 		api:    api.NewTigrisClient(conn),
 		mgmt:   api.NewManagementClient(conn),
@@ -98,7 +105,9 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (*grpcDriver, err
 		health: api.NewHealthAPIClient(conn),
 		search: api.NewSearchClient(conn),
 		cfg:    config,
-	}, nil
+	}
+
+	return drv, drv, drv, nil
 }
 
 func (c *grpcDriver) Close() error {

@@ -16,8 +16,6 @@ package driver
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,67 +28,15 @@ import (
 	gproto "github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/config"
 	mock "github.com/tigrisdata/tigris-client-go/mock/api"
-	"github.com/tigrisdata/tigris-client-go/test"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
-	metadata2 "google.golang.org/grpc/metadata"
+	meta "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-func setupGRPCTests(t *testing.T, config *config.Driver) (Driver, *grpcDriver, *test.MockServers, func()) {
-	mockServers, cancel := test.SetupTests(t, 0)
-	config.TLS = test.SetupTLS(t)
-	config.URL = test.GRPCURL(0)
-	client, err := newGRPCClient(context.Background(), config)
-	require.NoError(t, err)
-
-	return &driver{driverWithOptions: client, cfg: config}, client, mockServers, func() { cancel(); _ = client.Close() }
-}
-
-func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *test.MockServers, func()) {
-	mockServers, cancel := test.SetupTests(t, 2)
-	url := test.HTTPURL(2)
-	config.URL = url
-	config.TLS = test.SetupTLS(t)
-	client, err := newHTTPClient(context.Background(), config)
-	require.NoError(t, err)
-
-	// FIXME: implement proper wait for HTTP server to start
-	time.Sleep(10 * time.Millisecond)
-
-	return &driver{driverWithOptions: client, cfg: config}, client, mockServers, func() { cancel(); _ = client.Close() }
-}
-
-func SetupO11yGRPCTests(t *testing.T, config *config.Driver) (Driver, Observability, *test.MockServers, func()) {
-	return setupGRPCTests(t, config)
-}
-
-func SetupO11yHTTPTests(t *testing.T, config *config.Driver) (Driver, Observability, *test.MockServers, func()) {
-	return setupHTTPTests(t, config)
-}
-
-func SetupMgmtGRPCTests(t *testing.T, config *config.Driver) (Driver, Management, *test.MockServers, func()) {
-	return setupGRPCTests(t, config)
-}
-
-func SetupMgmtHTTPTests(t *testing.T, config *config.Driver) (Driver, Management, *test.MockServers, func()) {
-	return setupHTTPTests(t, config)
-}
-
-func SetupGRPCTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
-	d, _, s, f := setupGRPCTests(t, config)
-	return d, s.API, f
-}
-
-func SetupHTTPTests(t *testing.T, config *config.Driver) (Driver, *mock.MockTigrisServer, func()) {
-	d, _, s, f := setupHTTPTests(t, config)
-	return d, s.API, f
-}
 
 func testError(t *testing.T, d Driver, mc *mock.MockTigrisServer, in error, exp error, rd time.Duration) {
 	t.Helper()
@@ -269,39 +215,11 @@ func testErrors(t *testing.T, d Driver, mc *mock.MockTigrisServer) {
 	}
 }
 
-func TestGRPCError(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testErrors(t, client, mockServer)
-	t.Run("read_stream_error", func(t *testing.T) {
-		testReadStreamError(t, client, mockServer)
-	})
-	t.Run("search_stream_error", func(t *testing.T) {
-		testSearchStreamError(t, client, mockServer)
-	})
-	t.Run("branch_crud_errors", func(t *testing.T) {
-		testBranchCrudErrors(t, client, mockServer)
-	})
-}
-
-func TestHTTPError(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testErrors(t, client, mockServer)
-	t.Run("read_stream_error", func(t *testing.T) {
-		testReadStreamError(t, client, mockServer)
-	})
-	t.Run("search_stream_error", func(t *testing.T) {
-		testSearchStreamError(t, client, mockServer)
-	})
-	t.Run("branch_crud_errors", func(t *testing.T) {
-		testBranchCrudErrors(t, client, mockServer)
-	})
-}
-
 func pm(m proto.Message) gomock.Matcher {
 	return &ProtoMatcher{Message: m}
 }
+
+var setMetadata func(ctx context.Context, txCtx *api.TransactionCtx, md meta.MD)
 
 func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	t.Helper()
@@ -317,7 +235,7 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
 
-	setGRPCMetadata(ctx, txCtx, metadata2.MD{})
+	setMetadata(ctx, txCtx, meta.MD{})
 
 	t.Run("insert", func(t *testing.T) {
 		mc.EXPECT().Insert(gomock.Any(),
@@ -1003,32 +921,6 @@ func testResponseMetadata(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.Equal(t, md.DeletedAt.AsTime(), delResp.Metadata.DeletedAt.AsTime())
 }
 
-func TestGRPCDriver(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testDriverBasic(t, client, mockServer)
-	testResponseMetadata(t, client, mockServer)
-}
-
-func TestHTTPDriver(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testDriverBasic(t, client, mockServer)
-	testResponseMetadata(t, client, mockServer)
-}
-
-func TestTxGRPCDriver(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testTxBasic(t, client, mockServer)
-}
-
-func TestTxHTTPDriver(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testTxBasic(t, client, mockServer)
-}
-
 func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	t.Helper()
 
@@ -1038,7 +930,7 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	doc1 := []Document{Document(`{"K1":"vK1","K2":1,"D1":"vD1"}`)}
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-	setGRPCMetadata(ctx, txCtx, metadata2.MD{})
+	setMetadata(ctx, txCtx, meta.MD{})
 
 	mc.EXPECT().Insert(gomock.Any(),
 		pm(&api.InsertRequest{
@@ -1304,118 +1196,12 @@ func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 	require.NoError(t, err)
 }
 
-func TestTxGRPCDriverNegative(t *testing.T) {
-	client, mockServer, cancel := SetupGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testTxBasicNegative(t, client, mockServer)
-}
-
-func TestTxHTTPDriverNegative(t *testing.T) {
-	client, mockServer, cancel := SetupHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testTxBasicNegative(t, client, mockServer)
-}
-
-func TestNewDriver(t *testing.T) {
-	_, cancel := test.SetupTests(t, 4)
-	defer cancel()
-
-	DefaultProtocol = HTTP
-	cfg := config.Driver{URL: test.HTTPURL(4)}
-	client, err := NewDriver(context.Background(), &cfg)
-	require.NoError(t, err)
-
-	_ = client.Close()
-
-	DefaultProtocol = GRPC
-
-	certPool := x509.NewCertPool()
-	require.True(t, certPool.AppendCertsFromPEM([]byte(test.CaCert)))
-
-	cfg = config.Driver{URL: test.GRPCURL(4), TLS: &tls.Config{
-		RootCAs: certPool, ServerName: "localhost",
-		MinVersion: tls.VersionTLS12,
-	}}
-	client, err = NewDriver(context.Background(), &cfg)
-	require.NoError(t, err)
-
-	_ = client.Close()
-
-	DefaultProtocol = "SOMETHING"
-	_, err = NewDriver(context.Background(), nil)
-	require.Error(t, err)
-
-	DefaultProtocol = GRPC
-	cfg1 := &config.Driver{URL: test.GRPCURL(4), ClientSecret: "aaaa"}
-	cfg1, err = initConfig(cfg1)
-	require.NoError(t, err)
-	require.NotNil(t, cfg1.TLS)
-}
-
-func TestInvalidDriverAPIOptions(t *testing.T) {
-	c, mc, cancel := SetupGRPCTests(t, &config.Driver{})
-	defer cancel()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	db := c.UseDatabase("db1")
-
-	_, err := db.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
-	require.Error(t, err)
-	_, err = db.Insert(ctx, "coll1", nil, &InsertOptions{}, &InsertOptions{})
-	require.Error(t, err)
-	_, err = db.Replace(ctx, "coll1", nil, &ReplaceOptions{}, &ReplaceOptions{})
-	require.Error(t, err)
-	_, err = db.Update(ctx, "coll1", nil, nil, &UpdateOptions{}, &UpdateOptions{})
-	require.Error(t, err)
-	_, err = db.Delete(ctx, "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
-	require.Error(t, err)
-	_, err = c.UseDatabase("db1").BeginTx(ctx, &TxOptions{}, &TxOptions{})
-	require.Error(t, err)
-	err = db.CreateOrUpdateCollection(ctx, "coll1", nil, &CreateCollectionOptions{}, &CreateCollectionOptions{})
-	require.Error(t, err)
-	err = db.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
-	require.Error(t, err)
-	_, err = db.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
-	require.Error(t, err)
-	_, err = db.Search(ctx, "coll1", nil)
-	require.Error(t, err)
-
-	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-
-	mc.EXPECT().BeginTransaction(gomock.Any(),
-		pm(&api.BeginTransactionRequest{
-			Project: "db1",
-			Options: &api.TransactionOptions{},
-		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
-
-	tx, err := c.UseDatabase("db1").BeginTx(ctx)
-	require.NoError(t, err)
-	_, err = tx.ListCollections(ctx, &CollectionOptions{}, &CollectionOptions{})
-	require.Error(t, err)
-	_, err = tx.Insert(ctx, "coll1", nil, &InsertOptions{}, &InsertOptions{})
-	require.Error(t, err)
-	_, err = tx.Replace(ctx, "coll1", nil, &ReplaceOptions{}, &ReplaceOptions{})
-	require.Error(t, err)
-	_, err = tx.Update(ctx, "coll1", nil, nil, &UpdateOptions{}, &UpdateOptions{})
-	require.Error(t, err)
-	_, err = tx.Delete(ctx, "coll1", nil, nil, &DeleteOptions{}, &DeleteOptions{})
-	require.Error(t, err)
-	_, err = tx.Read(ctx, "coll1", nil, nil, &ReadOptions{}, &ReadOptions{})
-	require.Error(t, err)
-	err = tx.CreateOrUpdateCollection(ctx, "coll1", nil, &CreateCollectionOptions{}, &CreateCollectionOptions{})
-	require.Error(t, err)
-	err = tx.DropCollection(ctx, "coll1", &CollectionOptions{}, &CollectionOptions{})
-	require.Error(t, err)
-}
-
 func testSchemaSignOffHeader(t *testing.T, mc *mock.MockTigrisServer, c Driver) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-	setGRPCMetadata(ctx, txCtx, metadata2.MD{})
+	setMetadata(ctx, txCtx, meta.MD{})
 
 	doc1 := []Document{Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`)}
 
@@ -1461,18 +1247,4 @@ func testSchemaSignOffHeader(t *testing.T, mc *mock.MockTigrisServer, c Driver) 
 
 	_, err = tx.Insert(ctx, "c1", doc1)
 	require.Error(t, err)
-}
-
-func TestGRPCHeaders(t *testing.T) {
-	c, mc, cancel := SetupGRPCTests(t, &config.Driver{SkipSchemaValidation: true})
-	defer cancel()
-
-	testSchemaSignOffHeader(t, mc, c)
-}
-
-func TestHTTPHeaders(t *testing.T) {
-	c, mc, cancel := SetupHTTPTests(t, &config.Driver{SkipSchemaValidation: true})
-	defer cancel()
-
-	testSchemaSignOffHeader(t, mc, c)
 }

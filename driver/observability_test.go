@@ -24,7 +24,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
-	"github.com/tigrisdata/tigris-client-go/config"
 	mock "github.com/tigrisdata/tigris-client-go/mock/api"
 )
 
@@ -70,18 +69,4 @@ func testDriverObservability(t *testing.T, c Observability, mc *mock.MockObserva
 	require.NoError(t, err)
 	assert.Equal(t, int64(500), u.WriteUnits)
 	assert.Equal(t, int64(1000), u.ReadUnits)
-}
-
-func TestGRPCObservabilityDriver(t *testing.T) {
-	_, client, mockServers, cancel := SetupO11yGRPCTests(t, &config.Driver{})
-	defer cancel()
-	testDriverObservability(t, client, mockServers.O11y)
-	testDriverObservabilityNegative(t, client, mockServers.O11y)
-}
-
-func TestHTTPObservabilityDriver(t *testing.T) {
-	_, client, mockServers, cancel := SetupO11yHTTPTests(t, &config.Driver{})
-	defer cancel()
-	testDriverObservability(t, client, mockServers.O11y)
-	testDriverObservabilityNegative(t, client, mockServers.O11y)
 }

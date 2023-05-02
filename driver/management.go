@@ -33,23 +33,26 @@ type Management interface {
 
 // NewManagement instantiates authentication API client.
 func NewManagement(ctx context.Context, cfg *config.Driver) (Management, error) {
-	var (
-		mgmt Management
-		err  error
-	)
+	var err error
 
 	cfg, err = initConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	switch cfg.Protocol {
-	case GRPC:
-		mgmt, err = newGRPCClient(ctx, cfg)
-	case HTTP:
-		mgmt, err = newHTTPClient(ctx, cfg)
-	default:
-		err = fmt.Errorf("unsupported protocol")
+	proto := DefaultProtocol
+	if cfg.Protocol != "" {
+		proto = cfg.Protocol
+	}
+
+	initDrv, ok := drivers[proto]
+	if !ok {
+		return nil, fmt.Errorf("unsupported protocol")
+	}
+
+	_, mgmt, _, err := initDrv(ctx, cfg)
+	if err != nil {
+		return nil, err
 	}
 
 	return mgmt, err

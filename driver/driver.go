@@ -31,6 +31,11 @@ import (
 	"github.com/tigrisdata/tigris-client-go/config"
 )
 
+const (
+	SetCookieHeaderKey = "Set-Cookie"
+	CookieHeaderKey    = "Cookie"
+)
+
 // Driver implements Tigris API.
 type Driver interface {
 	// Info returns server information
@@ -453,7 +458,11 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	URL := cfg.URL
 	noScheme := !strings.Contains(URL, "://")
 	if noScheme {
-		URL = strings.ToLower(DefaultProtocol) + "://" + URL
+		if DefaultProtocol == "" {
+			URL = strings.ToLower(GRPC) + "://" + URL
+		} else {
+			URL = strings.ToLower(DefaultProtocol) + "://" + URL
+		}
 	}
 
 	u, err := url.Parse(URL)
@@ -482,28 +491,31 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	return &cfg, nil
 }
 
+type initDriverFunc func(ctx context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error)
+
+var drivers = map[string]initDriverFunc{}
+
 // NewDriver connect to the Tigris instance at the specified URL.
 // URL should be in the form: {hostname}:{port}.
 func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
-	var (
-		drv driverWithOptions
-		err error
-	)
+	var err error
 
 	cfg, err = initConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	switch cfg.Protocol {
-	case GRPC:
-		drv, err = newGRPCClient(ctx, cfg)
-	case HTTP:
-		drv, err = newHTTPClient(ctx, cfg)
-	default:
-		err = fmt.Errorf("unsupported protocol")
+	proto := DefaultProtocol
+	if cfg.Protocol != "" {
+		proto = cfg.Protocol
 	}
 
+	initDrv, ok := drivers[proto]
+	if !ok {
+		return nil, fmt.Errorf("unsupported protocol")
+	}
+
+	drv, _, _, err := initDrv(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}

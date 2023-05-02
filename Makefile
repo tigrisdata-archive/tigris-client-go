@@ -5,8 +5,8 @@ V=v1
 GEN_DIR=${API_DIR}/server/${V}
 PROTO_DIR=${API_DIR}/proto/server/${V}
 
-BUILD_PARAM=-tags=release -ldflags "-X 'github.com/tigrisdata/tigris-client-go/main.Version=$(VERSION)'" $(shell printenv BUILD_PARAM)
-TEST_PARAM=-cover -race -tags=test $(shell printenv TEST_PARAM)
+#BUILD_PARAM=-tags=tigris_grpc,release -ldflags "-X 'github.com/tigrisdata/tigris-client-go/main.Version=$(VERSION)'" $(shell printenv BUILD_PARAM)
+TEST_PARAM=-cover -race $(shell printenv TEST_PARAM)
 
 SERVICES = api health auth observability management
 
@@ -55,4 +55,10 @@ go.sum: go.mod generate mock
 	go mod download
 
 test: go.sum generate mock
+	go test -tags tigris_grpc,tigris_http $(TEST_PARAM) ./...
+
+test-all: go.sum generate mock
+	go test -tags tigris_grpc,tigris_http $(TEST_PARAM) ./...
+	go test -tags tigris_grpc $(TEST_PARAM) ./...
+	go test -tags tigris_http $(TEST_PARAM) ./...
 	go test $(TEST_PARAM) ./...

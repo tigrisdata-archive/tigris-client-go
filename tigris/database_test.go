@@ -35,7 +35,7 @@ func TestDatabase(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	testCfg := &Config{URL: test.GRPCURL(8), Project: "db1", Branch: "staging"}
+	testCfg := &Config{URL: test.URL(8), Project: "db1", Branch: "staging"}
 	testCfg.TLS = test.SetupTLS(t)
 
 	client, err := NewClient(ctx, testCfg)

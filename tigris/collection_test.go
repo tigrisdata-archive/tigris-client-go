@@ -531,10 +531,10 @@ func TestClientSchemaMigration(t *testing.T) {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 
-	cfg := &Config{URL: test.GRPCURL(6), Project: "db1"}
+	cfg := &Config{URL: test.URL(6), Project: "db1"}
 	cfg.TLS = test.SetupTLS(t)
 
-	driver.DefaultProtocol = driver.GRPC
+	//	driver.DefaultProtocol = driver.GRPC
 	drv, err := driver.NewDriver(ctx, driverConfig(cfg))
 	require.NoError(t, err)
 

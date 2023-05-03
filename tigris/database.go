@@ -55,17 +55,31 @@ func (db *Database) CreateCollections(ctx context.Context, model schema.Model, m
 	return db.createCollectionsFromSchemas(ctx, schemas)
 }
 
-func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driver.Tx, schemas map[string]*schema.Schema) error {
-	for _, v := range schemas {
+func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driver.Tx, inSchemas map[string]*schema.Schema) error {
+	schemas := make([]driver.Schema, len(inSchemas))
+
+	var i int
+	for _, v := range inSchemas {
 		sch, err := schema.Build(v)
 		if err != nil {
 			return err
 		}
 
-		if err = tx.CreateOrUpdateCollection(ctx, v.Name, sch); err != nil {
-			return err
-		}
+		schemas[i] = sch
+		i++
 	}
+
+	var err error
+	if tx != nil {
+		_, err = tx.CreateOrUpdateCollections(ctx, schemas)
+	} else {
+		_, err = db.driver.UseDatabase(db.name).CreateOrUpdateCollections(ctx, schemas)
+	}
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle partial failure. Use FailedAtIndex to retry and continue
 
 	return nil
 }
@@ -78,23 +92,7 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 		return db.createCollectionsFromSchemasLow(ctx, tx.tx, schemas)
 	}
 
-	// Run in new implicit transaction
-	tx, err := db.driver.UseDatabase(db.name).BeginTx(ctx)
-	if err != nil {
-		return err
-	}
-
-	defer func() { _ = tx.Rollback(ctx) }()
-
-	if err = db.createCollectionsFromSchemasLow(ctx, tx, schemas); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return db.createCollectionsFromSchemasLow(ctx, nil, schemas)
 }
 
 // CreateBranch creates a branch of this database.

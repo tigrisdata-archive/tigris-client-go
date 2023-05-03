@@ -423,6 +423,31 @@ func testTxCRUDBasic(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 		require.NoError(t, err)
 	})
 
+	t.Run("create_or_update_collections", func(t *testing.T) {
+		sch1 := `{"schema":"field"}`
+		sch2 := `{"schema":"field"}`
+
+		mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionsRequest{
+				Project: "db1",
+				Schemas: [][]byte{[]byte(sch1), []byte(sch2)},
+				Options: &api.CollectionOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) (
+				*api.CreateOrUpdateCollectionsResponse, error,
+			) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+				return &api.CreateOrUpdateCollectionsResponse{Resp: []*api.CreateCollectionStatus{{Status: "created"}}}, nil
+			})
+
+		resp, err := c.CreateOrUpdateCollections(ctx, []Schema{Schema(sch1), Schema(sch2)})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+		require.Equal(t, 1, len(resp.Resp))
+		require.Equal(t, "created", resp.Resp[0].Status)
+	})
+
 	t.Run("drop_collection", func(t *testing.T) {
 		mc.EXPECT().DropCollection(gomock.Any(),
 			pm(&api.DropCollectionRequest{
@@ -776,6 +801,21 @@ func testDriverBasic(t *testing.T, c Driver, mc *mock.MockTigrisServer) {
 		require.NoError(t, err)
 	})
 
+	t.Run("create_or_update_collections", func(t *testing.T) {
+		sch1 := `{"schema":"field"}`
+		sch2 := `{"schema":"field"}`
+
+		mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionsRequest{
+				Project: "db1",
+				Schemas: [][]byte{[]byte(sch1), []byte(sch2)},
+				Options: &api.CollectionOptions{},
+			})).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
+
+		_, err := db.CreateOrUpdateCollections(ctx, []Schema{Schema(sch1), Schema(sch2)})
+		require.NoError(t, err)
+	})
+
 	t.Run("drop_collection", func(t *testing.T) {
 		mc.EXPECT().DropCollection(gomock.Any(),
 			pm(&api.DropCollectionRequest{
@@ -1075,52 +1115,80 @@ func testTxCRUDBasicNegative(t *testing.T, c Tx, mc *mock.MockTigrisServer) {
 	_, err = c.Read(ctx, "c1", Filter(`{"filter":"value"}`), Projection(`{"fields":"value"}`), ro)
 	require.NoError(t, err)
 
-	mc.EXPECT().ListCollections(gomock.Any(),
-		pm(&api.ListCollectionsRequest{
-			Project: "db1",
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return nil, fmt.Errorf("error")
-		})
+	t.Run("list_collections", func(t *testing.T) {
+		mc.EXPECT().ListCollections(gomock.Any(),
+			pm(&api.ListCollectionsRequest{
+				Project: "db1",
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.ListCollectionsRequest) (*api.ListCollectionsResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+				return nil, fmt.Errorf("error")
+			})
 
-	_, err = c.ListCollections(ctx)
-	require.Error(t, err)
+		_, err = c.ListCollections(ctx)
+		require.Error(t, err)
+	})
 
 	sch := `{"schema":"field"}`
+	sch2 := `{"schema":"field"}`
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Schema:     []byte(sch),
-			Options:    &api.CollectionOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (
-			*api.CreateOrUpdateCollectionResponse, error,
-		) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+	t.Run("create_or_update_collection", func(t *testing.T) {
+		mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Schema:     []byte(sch),
+				Options:    &api.CollectionOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (
+				*api.CreateOrUpdateCollectionResponse, error,
+			) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-			return nil, fmt.Errorf("error")
-		})
+				return nil, fmt.Errorf("error")
+			})
 
-	err = c.CreateOrUpdateCollection(ctx, "c1", Schema(sch))
-	require.Error(t, err)
+		err = c.CreateOrUpdateCollection(ctx, "c1", Schema(sch))
+		require.Error(t, err)
+	})
 
-	mc.EXPECT().DropCollection(gomock.Any(),
-		pm(&api.DropCollectionRequest{
-			Project:    "db1",
-			Collection: "c1",
-			Options:    &api.CollectionOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.DropCollectionRequest) (*api.DropCollectionResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+	t.Run("create_or_update_collections", func(t *testing.T) {
+		mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionsRequest{
+				Project: "db1",
+				Schemas: [][]byte{[]byte(sch), []byte(sch2)},
+				Options: &api.CollectionOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) (
+				*api.CreateOrUpdateCollectionsResponse, error,
+			) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
 
-			return nil, fmt.Errorf("error")
-		})
+				return &api.CreateOrUpdateCollectionsResponse{FailedAtIndex: 1, Error: &api.Error{Code: api.Code_INVALID_ARGUMENT, Message: "err"}}, nil
+			})
 
-	err = c.DropCollection(ctx, "c1")
-	require.Error(t, err)
+		resp, err := c.CreateOrUpdateCollections(ctx, []Schema{Schema(sch), Schema(sch2)})
+		require.Error(t, err)
+		require.NotNil(t, resp)
+		require.Equal(t, int32(1), resp.FailedAtIndex)
+	})
+
+	t.Run("drop_collection", func(t *testing.T) {
+		mc.EXPECT().DropCollection(gomock.Any(),
+			pm(&api.DropCollectionRequest{
+				Project:    "db1",
+				Collection: "c1",
+				Options:    &api.CollectionOptions{},
+			})).DoAndReturn(
+			func(ctx context.Context, r *api.DropCollectionRequest) (*api.DropCollectionResponse, error) {
+				require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+				return nil, fmt.Errorf("error")
+			})
+
+		err = c.DropCollection(ctx, "c1")
+		require.Error(t, err)
+	})
 }
 
 func testTxBasicNegative(t *testing.T, c Driver, mc *mock.MockTigrisServer) {

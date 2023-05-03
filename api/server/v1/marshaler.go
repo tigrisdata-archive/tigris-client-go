@@ -19,6 +19,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unsafe"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	jsoniter "github.com/json-iterator/go"
@@ -511,6 +512,48 @@ func (x *CreateOrUpdateCollectionRequest) UnmarshalJSON(data []byte) error {
 			v = &x.OnlyCreate
 		case "schema":
 			x.Schema = value
+			continue
+		case "options":
+			v = &x.Options
+		default:
+			continue
+		}
+
+		if err := jsoniter.Unmarshal(value, v); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// UnmarshalJSON on CreateCollectionsRequest avoids unmarshalling schemas. The req handler deserializes the schema.
+func (x *CreateOrUpdateCollectionsRequest) UnmarshalJSON(data []byte) error {
+	var mp map[string]jsoniter.RawMessage
+
+	if err := jsoniter.Unmarshal(data, &mp); err != nil {
+		return err
+	}
+
+	for key, value := range mp {
+		var v interface{}
+
+		switch key {
+		case "project":
+			v = &x.Project
+		case "branch":
+			v = &x.Branch
+		case "only_create":
+			v = &x.OnlyCreate
+		case "schemas":
+			var schemas []jsoniter.RawMessage
+
+			if err := jsoniter.Unmarshal(value, &schemas); err != nil {
+				return err
+			}
+
+			x.Schemas = RawMessageToByte(schemas)
+
 			continue
 		case "options":
 			v = &x.Options
@@ -1134,4 +1177,9 @@ func unmarshalRollup(data []byte) (*RollupFunction, error) {
 	}
 
 	return result, nil
+}
+
+func RawMessageToByte(arr []jsoniter.RawMessage) [][]byte {
+	ptr := unsafe.Pointer(&arr)
+	return *(*[][]byte)(ptr)
 }

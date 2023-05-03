@@ -104,12 +104,10 @@ func TestProjectionBasic(t *testing.T) {
 	}
 
 	mdb := mock.NewMockDatabase(ctrl)
-	mtx := mock.NewMockTx(ctrl)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb).Times(2)
-	mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "users",
-		jm(t, `
+	mdb.EXPECT().CreateOrUpdateCollections(gomock.Any(), driver.JAM(t, []string{
+		`
 {
 	"title":"users",
 	"properties":
@@ -163,10 +161,8 @@ func TestProjectionBasic(t *testing.T) {
 	},
 	"primary_key":["ID"],
 	"collection_type":"documents"
-}`))
-
-	mtx.EXPECT().Commit(ctx)
-	mtx.EXPECT().Rollback(ctx)
+}`,
+	}))
 
 	db, err := TestOpenDatabase(ctx, m, "db1", &User{})
 	require.NoError(t, err)

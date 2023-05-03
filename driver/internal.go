@@ -63,6 +63,8 @@ type CRUDWithOptions interface {
 		*DeleteResponse, error)
 	createOrUpdateCollectionWithOptions(ctx context.Context, collection string, schema Schema,
 		options *CreateCollectionOptions) error
+	createOrUpdateCollectionsWithOptions(ctx context.Context, schemas []Schema,
+		options *CreateCollectionOptions) (*CreateOrUpdateCollectionsResponse, error)
 	dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error
 	listCollectionsWithOptions(ctx context.Context, options *CollectionOptions) ([]string, error)
 	describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error)

@@ -41,29 +41,14 @@ func TestClient(t *testing.T) {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-
-	mc.EXPECT().BeginTransaction(gomock.Any(),
-		pm(&api.BeginTransactionRequest{
+	mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
 			Branch:  cfg.Branch,
-			Options: &api.TransactionOptions{},
-		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
-
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "coll_1",
-			Branch:  cfg.Branch,
-			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
+			Schemas: [][]byte{[]byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`)},
 			Options: &api.CollectionOptions{},
-		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
-	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
-
-	mc.EXPECT().CommitTransaction(gomock.Any(),
-		pm(&api.CommitTransactionRequest{
-			Project: "db1",
-			Branch:  cfg.Branch,
-		})).Return(&api.CommitTransactionResponse{}, nil)
+		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) {
+	}).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
 
 	c, err := NewClient(ctx, cfg)
 	require.NoError(t, err)

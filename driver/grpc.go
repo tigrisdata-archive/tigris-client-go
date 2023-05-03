@@ -329,6 +329,27 @@ func (c *grpcCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 	return GRPCError(err)
 }
 
+func (c *grpcCRUD) createOrUpdateCollectionsWithOptions(ctx context.Context, schemas []Schema, options *CreateCollectionOptions) (*CreateOrUpdateCollectionsResponse, error) {
+	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
+
+	resp, err := c.api.CreateOrUpdateCollections(ctx, &api.CreateOrUpdateCollectionsRequest{
+		Project:    c.db,
+		Branch:     c.branch,
+		Schemas:    *(*[][]byte)(unsafe.Pointer(&schemas)),
+		OnlyCreate: options.OnlyCreate,
+		Options:    &api.CollectionOptions{},
+	})
+	if err = GRPCError(err); err != nil {
+		return nil, err
+	}
+
+	if resp.Error != nil {
+		err = api.Errorf(resp.Error.Code, resp.Error.Message)
+	}
+
+	return (*CreateOrUpdateCollectionsResponse)(resp), err
+}
+
 func (c *grpcCRUD) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
 	ctx = setGRPCMetadata(ctx, c.txCtx, c.metadata)
 	_, err := c.api.DropCollection(ctx, &api.DropCollectionRequest{

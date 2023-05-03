@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
@@ -109,10 +110,10 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 		assert.True(t, sit.Next(&r))
 		require.NoError(t, sit.Err())
 
-		res, err := json.Marshal(r)
+		res, err := jsoniter.Marshal(r)
 		require.NoError(t, err)
 
-		exp, err := json.Marshal(&searchResp)
+		exp, err := jsoniter.Marshal(&searchResp)
 		require.NoError(t, err)
 
 		require.JSONEq(t, string(exp), string(res))

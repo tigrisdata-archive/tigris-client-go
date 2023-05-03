@@ -15,9 +15,9 @@
 package search
 
 import (
-	"encoding/json"
 	"time"
 
+	jsoniter "github.com/json-iterator/go"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
@@ -112,7 +112,7 @@ type Hit[T schema.Model] struct {
 func (h *Hit[T]) From(apiHit *api.SearchHit) error {
 	if apiHit != nil {
 		var d T
-		if err := json.Unmarshal(apiHit.Data, &d); err != nil {
+		if err := jsoniter.Unmarshal(apiHit.Data, &d); err != nil {
 			return err
 		}
 

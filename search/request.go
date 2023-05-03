@@ -15,9 +15,9 @@
 package search
 
 import (
-	"encoding/json"
 	"fmt"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/sort"
@@ -204,7 +204,7 @@ func (r *Request) BuildInternal() (*driver.SearchRequest, error) {
 	}
 
 	if req.Vector != nil {
-		b, err := json.Marshal(req.Vector)
+		b, err := jsoniter.Marshal(req.Vector)
 		if err != nil {
 			return nil, err
 		}
@@ -247,7 +247,7 @@ func (f *FacetQuery) Built() (driver.Facet, error) {
 
 	var err error
 
-	f.built, err = json.Marshal(m)
+	f.built, err = jsoniter.Marshal(m)
 
 	return f.built, err
 }

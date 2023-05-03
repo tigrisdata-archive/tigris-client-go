@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
@@ -38,12 +39,15 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var toDocument = driver.ToDocument
+var (
+	toDocument = driver.ToDocument
+	jm         = driver.JM
+)
 
 func createSearchResponse(t *testing.T, doc any) driver.SearchResponse {
 	t.Helper()
 
-	d, err := json.Marshal(doc)
+	d, err := jsoniter.Marshal(doc)
 	require.NoError(t, err)
 	tm := time.Now()
 	return &api.SearchResponse{
@@ -179,7 +183,7 @@ func TestCollectionBasic(t *testing.T) {
 
 	mdb.EXPECT().Read(ctx, "coll_1",
 		driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
-		driver.Projection(`{"Field1":true,"Key1":false}`),
+		jm(t, `{"Key1":false,"Field1":true}`),
 	).Return(mit, nil)
 
 	it, err := c.Read(ctx, filter.Or(
@@ -381,7 +385,7 @@ func TestCollection_Search(t *testing.T) {
 		require.Nil(t, searchIter.err)
 		require.False(t, searchIter.Next(&rs))
 		require.NotNil(t, searchIter.err)
-		require.ErrorContains(t, searchIter.err, "cannot unmarshal string")
+		require.ErrorContains(t, searchIter.err, "error found in #1 byte of")
 	})
 }
 
@@ -674,7 +678,7 @@ func TestCollection(t *testing.T) {
 	t.Run("read_limit_skip_offset", func(t *testing.T) {
 		mdb.EXPECT().Read(ctx, "coll_1",
 			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
-			driver.Projection(`{"Field1":true,"Key1":false}`),
+			driver.Projection(`{"Key1":false,"Field1":true}`),
 			&driver.ReadOptions{
 				Limit:  111,
 				Skip:   222,

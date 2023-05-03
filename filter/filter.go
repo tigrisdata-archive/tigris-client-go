@@ -18,8 +18,7 @@
 package filter
 
 import (
-	"encoding/json"
-
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/schema"
 )
@@ -116,5 +115,5 @@ func (prev Expr) Build() (driver.Filter, error) {
 		return nil, nil
 	}
 
-	return json.Marshal(prev)
+	return jsoniter.Marshal(prev)
 }

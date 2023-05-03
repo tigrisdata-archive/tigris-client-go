@@ -16,8 +16,8 @@ package search
 
 import (
 	"context"
-	"encoding/json"
 
+	jsoniter "github.com/json-iterator/go"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -69,7 +69,7 @@ func (c *Index[T]) createOrReplace(ctx context.Context, tp int, docs ...*T) (*Re
 	bdocs := make([]driver.Document, len(docs))
 
 	for k, v := range docs {
-		if bdocs[k], err = json.Marshal(v); err != nil {
+		if bdocs[k], err = jsoniter.Marshal(v); err != nil {
 			return nil, err
 		}
 	}
@@ -134,7 +134,7 @@ func (c *Index[T]) Get(ctx context.Context, ids []string) ([]T, error) {
 			continue
 		}
 
-		err = json.Unmarshal(v.Data, &doc)
+		err = jsoniter.Unmarshal(v.Data, &doc)
 		if err != nil {
 			return nil, err
 		}

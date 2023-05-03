@@ -15,12 +15,12 @@
 package driver
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 	"unsafe"
 
 	"github.com/golang/mock/gomock"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -34,7 +34,15 @@ type JSONMatcher struct {
 }
 
 func (matcher *JSONMatcher) Matches(actual any) bool {
-	return assert.JSONEq(matcher.T, string(matcher.Expected), string(actual.(Schema)))
+	var s string
+	switch t := actual.(type) {
+	case Schema:
+		s = string(t)
+	case Projection:
+		s = string(t)
+	}
+
+	return assert.JSONEq(matcher.T, string(matcher.Expected), s)
 }
 
 func (matcher *JSONMatcher) String() string {
@@ -57,9 +65,9 @@ type JSONArrMatcher struct {
 }
 
 func (matcher *JSONArrMatcher) Matches(actual any) bool {
-	act, err := json.Marshal(actual)
+	act, err := jsoniter.Marshal(actual)
 	require.NoError(matcher.T, err)
-	exp, err := json.Marshal(actual)
+	exp, err := jsoniter.Marshal(actual)
 	require.NoError(matcher.T, err)
 
 	assert.JSONEq(matcher.T, string(exp), string(act))
@@ -82,7 +90,7 @@ func JAM(t *testing.T, expected []string) gomock.Matcher {
 }
 
 func ToDocument(t *testing.T, doc any) Document {
-	b, err := json.Marshal(doc)
+	b, err := jsoniter.Marshal(doc)
 	require.NoError(t, err)
 
 	return b

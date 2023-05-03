@@ -16,12 +16,12 @@ package tigris
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -155,7 +155,7 @@ func TestModelMetadata(t *testing.T) {
 
 		exp := &Coll2{Int: 123, Int64: 456, Time: tm, UUID: uuid.MustParse(id1), String: "str1", Float64: 123.123}
 
-		b, err := json.Marshal(exp)
+		b, err := jsoniter.Marshal(exp)
 		require.NoError(t, err)
 
 		mdb.EXPECT().Replace(ctx, "coll_2",

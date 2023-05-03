@@ -18,7 +18,6 @@ package driver
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -26,6 +25,7 @@ import (
 	"strings"
 	"unsafe"
 
+	jsoniter "github.com/json-iterator/go"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/config"
 	"google.golang.org/grpc"
@@ -576,7 +576,7 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 	var err error
 
 	if req.Sort != nil {
-		if b, err = json.Marshal(req.Sort); err != nil {
+		if b, err = jsoniter.Marshal(req.Sort); err != nil {
 			return nil, err
 		}
 	}

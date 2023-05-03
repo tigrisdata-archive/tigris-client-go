@@ -16,12 +16,12 @@ package timeseries
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/golang/mock/gomock"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/require"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/filter"
@@ -81,7 +81,7 @@ func TestTimeseries(t *testing.T) {
 	// test find after
 	mit := mock.NewMockIterator(ctrl)
 
-	b, err := json.Marshal(ts)
+	b, err := jsoniter.Marshal(ts)
 	require.NoError(t, err)
 
 	mdb.EXPECT().Read(ctx, "coll_1",
@@ -117,7 +117,7 @@ func TestTimeseries(t *testing.T) {
 	}
 
 	tsAfter := time.Now().Add(1 * time.Second)
-	b1, err := json.Marshal(tsAfter)
+	b1, err := jsoniter.Marshal(tsAfter)
 	require.NoError(t, err)
 
 	// test find before

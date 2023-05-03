@@ -83,7 +83,7 @@ func TestCollectionTx(t *testing.T) {
 
 		mtx.EXPECT().Read(ctx, "coll_1",
 			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
-			driver.Projection(`{"Field1":true,"Key1":false}`),
+			jm(t, `{"Field1":true,"Key1":false}`),
 			&driver.ReadOptions{
 				Limit:  111,
 				Skip:   222,

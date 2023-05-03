@@ -78,7 +78,7 @@ func TestResult_From(t *testing.T) {
 			Hits: []*api.SearchHit{{Data: []byte(`{"Key1": "aaa", "Field1": "val1"}`)}},
 		})
 		assert.NotNil(t, err)
-		assert.Contains(t, err.Error(), "cannot unmarshal")
+		assert.Contains(t, err.Error(), "search.Coll1.Field1: readUint64: unexpected character")
 	})
 
 	t.Run("from complete response", func(t *testing.T) {
@@ -141,14 +141,14 @@ func TestHit_From(t *testing.T) {
 		h := &Hit[Coll1]{}
 		err := h.From(&api.SearchHit{})
 		assert.NotNil(t, err)
-		assert.Equal(t, "unexpected end of JSON input", err.Error())
+		assert.Contains(t, err.Error(), "readObjectStart")
 	})
 
 	t.Run("from missing collection document", func(t *testing.T) {
 		h := &Hit[Coll1]{}
 		err := h.From(&api.SearchHit{Metadata: &api.SearchHitMeta{CreatedAt: timestamppb.Now()}})
 		assert.NotNil(t, err)
-		assert.Equal(t, "unexpected end of JSON input", err.Error())
+		assert.Contains(t, err.Error(), "readObjectStart")
 	})
 
 	t.Run("from document with missing values", func(t *testing.T) {
@@ -172,7 +172,7 @@ func TestHit_From(t *testing.T) {
 			Metadata: &api.SearchHitMeta{CreatedAt: timestamppb.Now()},
 		})
 		assert.NotNil(t, err)
-		assert.Contains(t, err.Error(), "cannot unmarshal")
+		assert.Contains(t, err.Error(), "search.Coll1.Field1: readUint64: unexpected character")
 	})
 
 	t.Run("from valid response", func(t *testing.T) {

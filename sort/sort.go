@@ -16,7 +16,7 @@ package sort
 
 import (
 	"encoding/json"
-
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
@@ -73,7 +73,7 @@ func (o Expr) Built() (driver.SortOrder, error) {
 
 	sortOrders := make([]json.RawMessage, len(o))
 	for i, s := range o {
-		b, err := json.Marshal(s.ToSortOrder())
+		b, err := jsoniter.Marshal(s.ToSortOrder())
 		if err != nil {
 			return nil, err
 		}

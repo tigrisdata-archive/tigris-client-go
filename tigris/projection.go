@@ -16,12 +16,12 @@ package tigris
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/buger/jsonparser"
+	jsoniter "github.com/json-iterator/go"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/fields"
@@ -324,8 +324,8 @@ func (p *Projection[T, P]) projectionUnmarshal(b []byte, v *P) error {
 			return err
 		}
 
-		return json.Unmarshal(sub, v)
+		return jsoniter.Unmarshal(sub, v)
 	}
 
-	return json.Unmarshal(b, v)
+	return jsoniter.Unmarshal(b, v)
 }

@@ -59,7 +59,7 @@ func TestUpdateBasic(t *testing.T) {
 		t.Run(v.name, func(t *testing.T) {
 			b, err := v.fields.Build()
 			assert.Equal(t, v.err, err)
-			assert.Equal(t, v.exp, string(b.Built()))
+			assert.JSONEq(t, v.exp, string(b.Built()))
 		})
 	}
 

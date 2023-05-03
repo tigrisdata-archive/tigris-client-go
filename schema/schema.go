@@ -26,7 +26,6 @@
 package schema
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"sort"
@@ -259,7 +258,7 @@ func isPrimaryKeyType(tp string) bool {
 
 // Build converts structured schema to driver schema.
 func Build(sch *Schema) (driver.Schema, error) {
-	return json.Marshal(sch)
+	return jsoniter.Marshal(sch)
 }
 
 // Build converts structured schema to driver schema.
@@ -619,14 +618,14 @@ func (f *FieldMultiType) UnmarshalJSON(b []byte) error {
 
 func (f *FieldMultiType) MarshalJSON() ([]byte, error) {
 	if !f.isNullable && len(f.Type) == 1 {
-		return json.Marshal(f.Type[0])
+		return jsoniter.Marshal(f.Type[0])
 	}
 
 	if !f.isNullable {
-		return json.Marshal(f.Type)
+		return jsoniter.Marshal(f.Type)
 	}
 
-	return json.Marshal(append(f.Type, "null"))
+	return jsoniter.Marshal(append(f.Type, "null"))
 }
 
 func (f *FieldMultiType) First() string {

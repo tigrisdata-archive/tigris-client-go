@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"time"
 
@@ -305,7 +306,7 @@ func TestSearchIndex(t *testing.T) {
 func createSearchResponse(t *testing.T, doc interface{}) driver.SearchIndexResponse {
 	t.Helper()
 
-	d, err := json.Marshal(doc)
+	d, err := jsoniter.Marshal(doc)
 	require.NoError(t, err)
 	tm := time.Now()
 	return &api.SearchIndexResponse{
@@ -434,7 +435,7 @@ func TestSearchIndex_Search(t *testing.T) {
 		require.Nil(t, searchIter.err)
 		require.False(t, searchIter.Next(&rs))
 		require.NotNil(t, searchIter.err)
-		require.ErrorContains(t, searchIter.err, "cannot unmarshal string")
+		require.ErrorContains(t, searchIter.err, "readObjectStart")
 	})
 }
 

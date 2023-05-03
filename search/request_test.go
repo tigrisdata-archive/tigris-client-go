@@ -17,6 +17,7 @@ package search
 import (
 	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -169,7 +170,7 @@ func ExampleNewRequestBuilder() {
 
 func ExampleRequestBuilder_WithSearchFields() {
 	req := NewRequestBuilder().WithQuery("some text").WithSearchFields("field_1").Build()
-	b, err := json.Marshal(req.SearchFields)
+	b, err := jsoniter.Marshal(req.SearchFields)
 	if err != nil {
 		panic(err)
 	}

@@ -35,14 +35,10 @@ import (
 	"github.com/tigrisdata/tigris-client-go/search"
 	"github.com/tigrisdata/tigris-client-go/sort"
 	"github.com/tigrisdata/tigris-client-go/test"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var (
-	jm         = driver.JM
-	toDocument = driver.ToDocument
-)
+var toDocument = driver.ToDocument
 
 func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
 	t.Helper()
@@ -139,16 +135,16 @@ func TestCollectionBasic(t *testing.T) {
 	}
 
 	mdb := mock.NewMockDatabase(ctrl)
-	mtx := mock.NewMockTx(ctrl)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb).Times(2)
-	mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_2", jm(t, `{"title":"coll_2","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_3", jm(t, `{"title":"coll_3","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
-
-	mtx.EXPECT().Commit(ctx)
-	mtx.EXPECT().Rollback(ctx)
+	mdb.EXPECT().CreateOrUpdateCollections(gomock.Any(), driver.JAM(t, []string{
+		`{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},
+			"primary_key":["Key1"],"collection_type":"documents"}`,
+		`{"title":"coll_2","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},
+			"primary_key":["Key1"],"collection_type":"documents"}`,
+		`{"title":"coll_3","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},
+			"primary_key":["Key1"],"collection_type":"documents"}`,
+	}))
 
 	db, err := TestOpenDatabase(ctx, m, "db1", &Coll1{}, &Coll2{}, &Coll3{})
 	require.NoError(t, err)
@@ -241,10 +237,12 @@ func TestCollectionBasic(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, d1, pd)
 
-	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`), driver.Projection(`{"f1":true}`),
+	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`),
+		driver.Projection(`{"f1":true}`),
 		&driver.ReadOptions{Skip: 10},
 	).Return(&driver.ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, nil)
-	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"), fields.Include("f1"), &ReadOptions{Skip: 10})
+	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"), fields.Include("f1"),
+		&ReadOptions{Skip: 10})
 	require.NoError(t, err)
 	require.Equal(t, &ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, explain)
 
@@ -267,14 +265,15 @@ func TestCollection_Search(t *testing.T) {
 	}
 
 	mdb := mock.NewMockDatabase(ctrl)
-	mtx := mock.NewMockTx(ctrl)
 
 	m.EXPECT().UseDatabase("db1").Return(mdb)
-	mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"Key1":{"type":"string"},"Field1":{"type":"integer"}},"primary_key":["Key1"],"collection_type":"documents"}`))
-	mtx.EXPECT().Commit(ctx)
-	mtx.EXPECT().Rollback(ctx)
+	mdb.EXPECT().CreateOrUpdateCollections(gomock.Any(), driver.JAM(t,
+		[]string{`{"title":"coll_1","properties":{
+			"Key1":{"type":"string"},
+			"Field1":{"type":"integer"}},
+			"primary_key":["Key1"],
+			"collection_type":"documents"}`}))
 
 	db, err := TestOpenDatabase(ctx, m, "db1", &Coll1{})
 	require.NoError(t, err)
@@ -296,11 +295,14 @@ func TestCollection_Search(t *testing.T) {
 			WithOptions(&search.DefaultSearchOptions).
 			Build()
 		mdb.EXPECT().Search(ctx, "coll_1", &driver.SearchRequest{
-			Q:             sr.Q,
-			SearchFields:  []string{"field_1"},
-			Filter:        driver.Filter(`{"field_2":{"$eq":"some value"}}`),
-			Facet:         driver.Facet(`{"field_3":{"size":10}}`),
-			Sort:          driver.SortOrder{json.RawMessage(`{"field_1":"$asc"}`), json.RawMessage(`{"field_2":"$desc"}`)},
+			Q:            sr.Q,
+			SearchFields: []string{"field_1"},
+			Filter:       driver.Filter(`{"field_2":{"$eq":"some value"}}`),
+			Facet:        driver.Facet(`{"field_3":{"size":10}}`),
+			Sort: driver.SortOrder{
+				json.RawMessage(`{"field_1":"$asc"}`),
+				json.RawMessage(`{"field_2":"$desc"}`),
+			},
 			IncludeFields: []string{"field_4"},
 			ExcludeFields: nil,
 			Page:          sr.Options.Page,
@@ -546,75 +548,27 @@ func TestClientSchemaMigration(t *testing.T) {
 		Key2 string `json:"key_2" tigris:"primary_key"`
 	}
 
-	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
-
-	mc.EXPECT().BeginTransaction(gomock.Any(),
-		pm(&api.BeginTransactionRequest{
+	mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
-			Options: &api.TransactionOptions{},
-		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
-
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "test_schema_1",
-			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
+			Schemas: [][]byte{[]byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`)},
 			Options: &api.CollectionOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CreateOrUpdateCollectionResponse{}, nil
-		})
-
-	mc.EXPECT().CommitTransaction(gomock.Any(),
-		pm(&api.CommitTransactionRequest{
-			Project: "db1",
-		})).DoAndReturn(
-		func(ctx context.Context, r *api.CommitTransactionRequest) (*api.CommitTransactionResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CommitTransactionResponse{}, nil
-		})
+		})).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
 
 	_, err = TestOpenDatabase(ctx, drv, "db1", &testSchema1{})
 	require.NoError(t, err)
 
-	mc.EXPECT().BeginTransaction(gomock.Any(),
-		pm(&api.BeginTransactionRequest{
+	mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
-			Options: &api.TransactionOptions{},
-		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
-
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "test_schema_2",
-			Schema:  []byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"],"collection_type":"documents"}`),
+			Schemas: [][]byte{
+				//				[]byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
+				[]byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"],"collection_type":"documents"}`),
+			},
 			Options: &api.CollectionOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CreateOrUpdateCollectionResponse{}, nil
-		})
+		})).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
 
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "test_schema_1",
-			Schema:  []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
-			Options: &api.CollectionOptions{},
-		})).DoAndReturn(
-		func(ctx context.Context, _ *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CreateOrUpdateCollectionResponse{}, nil
-		})
-
-	mc.EXPECT().CommitTransaction(gomock.Any(),
-		pm(&api.CommitTransactionRequest{
-			Project: "db1",
-		})).DoAndReturn(
-		func(ctx context.Context, _ *api.CommitTransactionRequest) (*api.CommitTransactionResponse, error) {
-			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
-			return &api.CommitTransactionResponse{}, nil
-		})
-
-	_, err = TestOpenDatabase(ctx, drv, "db1", &testSchema1{}, &testSchema2{})
+	_, err = TestOpenDatabase(ctx, drv, "db1" /*&testSchema1{},*/, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string
@@ -633,47 +587,25 @@ func TestClientSchemaMigration(t *testing.T) {
 		Key1 string `tigris:"primary_key"`
 	}
 
-	mc.EXPECT().BeginTransaction(gomock.Any(),
-		pm(&api.BeginTransactionRequest{
+	mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
-			Options: &api.TransactionOptions{},
-		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
-
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "coll_1",
-			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
+			Schemas: [][]byte{[]byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`)},
 			Options: &api.CollectionOptions{},
-		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
-	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
-
-	mc.EXPECT().CommitTransaction(gomock.Any(),
-		pm(&api.CommitTransactionRequest{
-			Project: "db1",
-		})).Return(&api.CommitTransactionResponse{}, nil)
+		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) {
+	}).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
 
 	db, err := OpenDatabase(ctx, cfg, &Coll1{})
 	require.NoError(t, err)
 	require.NotNil(t, db)
 
-	mc.EXPECT().BeginTransaction(gomock.Any(),
-		pm(&api.BeginTransactionRequest{
+	mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
-			Options: &api.TransactionOptions{},
-		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
-
-	mc.EXPECT().CreateOrUpdateCollection(gomock.Any(),
-		pm(&api.CreateOrUpdateCollectionRequest{
-			Project: "db1", Collection: "coll_1",
-			Schema:  []byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`),
+			Schemas: [][]byte{[]byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`)},
 			Options: &api.CollectionOptions{},
-		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionRequest) {
-	}).Return(&api.CreateOrUpdateCollectionResponse{}, nil)
-
-	mc.EXPECT().CommitTransaction(gomock.Any(),
-		pm(&api.CommitTransactionRequest{
-			Project: "db1",
-		})).Return(&api.CommitTransactionResponse{}, nil)
+		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) {
+	}).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
 
 	db = MustOpenDatabase(ctx, cfg, &Coll1{})
 	require.NotNil(t, db)

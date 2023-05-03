@@ -524,13 +524,13 @@ func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, _ *Collection
 	resp, err := c.api.TigrisListCollections(ctx, c.db, &apiHTTP.TigrisListCollectionsParams{
 		Branch: &c.branch,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var l apiHTTP.ListCollectionsResponse
 
-	if err := respDecode(resp.Body, &l); err != nil {
+	if err = respDecode(resp.Body, &l); err != nil {
 		return nil, err
 	}
 
@@ -560,7 +560,7 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 
 	var d apiHTTP.DescribeCollectionResponse
 
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err = respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -583,6 +583,32 @@ func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 		Options:    c.convertCollectionOptions(nil),
 	})
 	return HTTPError(err, resp)
+}
+
+func (c *httpCRUD) createOrUpdateCollectionsWithOptions(ctx context.Context, schemas []Schema, options *CreateCollectionOptions) (*CreateOrUpdateCollectionsResponse, error) {
+	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
+
+	resp, err := c.api.TigrisCreateOrUpdateCollections(ctx, c.db, apiHTTP.TigrisCreateOrUpdateCollectionsJSONRequestBody{
+		Branch:     &c.branch,
+		Schemas:    (*[]json.RawMessage)(unsafe.Pointer(&schemas)),
+		OnlyCreate: &options.OnlyCreate,
+		Options:    c.convertCollectionOptions(nil),
+	})
+
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r CreateOrUpdateCollectionsResponse
+	if err = respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	if r.Error != nil {
+		err = api.Errorf(r.Error.Code, r.Error.Message)
+	}
+
+	return &r, err
 }
 
 func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, collection string, options *CollectionOptions) error {
@@ -609,7 +635,7 @@ func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, doc
 	}
 
 	var d InsertResponse
-	if err := dmlRespDecode(resp.Body, &d); err != nil {
+	if err = dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -630,7 +656,7 @@ func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, do
 	}
 
 	var d ReplaceResponse
-	if err := dmlRespDecode(resp.Body, &d); err != nil {
+	if err = dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -652,7 +678,7 @@ func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, fil
 	}
 
 	var d UpdateResponse
-	if err := dmlRespDecode(resp.Body, &d); err != nil {
+	if err = dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -673,7 +699,7 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 	}
 
 	var d DeleteResponse
-	if err := dmlRespDecode(resp.Body, &d); err != nil {
+	if err = dmlRespDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 

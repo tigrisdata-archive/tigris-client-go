@@ -51,6 +51,36 @@ func JM(t *testing.T, expected string) gomock.Matcher {
 	return gomock.GotFormatterAdapter(j, j)
 }
 
+type JSONArrMatcher struct {
+	T        *testing.T
+	Expected []string
+}
+
+func (matcher *JSONArrMatcher) Matches(actual any) bool {
+	act, err := json.Marshal(actual)
+	require.NoError(matcher.T, err)
+	exp, err := json.Marshal(actual)
+	require.NoError(matcher.T, err)
+
+	assert.JSONEq(matcher.T, string(exp), string(act))
+
+	return true
+}
+
+func (matcher *JSONArrMatcher) String() string {
+	return fmt.Sprintf("JSONMatcher: %+v", matcher.Expected)
+}
+
+func (matcher *JSONArrMatcher) Got(actual any) string {
+	return fmt.Sprintf("JSONArrMatcher: %+v", actual)
+}
+
+// JAM = JSON Array Matcher.
+func JAM(t *testing.T, expected []string) gomock.Matcher {
+	j := &JSONArrMatcher{T: t, Expected: expected}
+	return gomock.GotFormatterAdapter(j, j)
+}
+
 func ToDocument(t *testing.T, doc interface{}) Document {
 	b, err := json.Marshal(doc)
 	require.NoError(t, err)

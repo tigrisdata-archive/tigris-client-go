@@ -363,6 +363,26 @@ func (mr *MockTxMockRecorder) CreateOrUpdateCollection(arg0, arg1, arg2 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCollection", reflect.TypeOf((*MockTx)(nil).CreateOrUpdateCollection), varargs...)
 }
 
+// CreateOrUpdateCollections mocks base method.
+func (m *MockTx) CreateOrUpdateCollections(arg0 context.Context, arg1 []driver.Schema, arg2 ...*driver.CreateCollectionOptions) (*driver.CreateOrUpdateCollectionsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateOrUpdateCollections", varargs...)
+	ret0, _ := ret[0].(*driver.CreateOrUpdateCollectionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateOrUpdateCollections indicates an expected call of CreateOrUpdateCollections.
+func (mr *MockTxMockRecorder) CreateOrUpdateCollections(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCollections", reflect.TypeOf((*MockTx)(nil).CreateOrUpdateCollections), varargs...)
+}
+
 // Delete mocks base method.
 func (m *MockTx) Delete(arg0 context.Context, arg1 string, arg2 driver.Filter, arg3 ...*driver.DeleteOptions) (*driver.DeleteResponse, error) {
 	m.ctrl.T.Helper()
@@ -695,6 +715,26 @@ func (mr *MockDatabaseMockRecorder) CreateOrUpdateCollection(arg0, arg1, arg2 in
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCollection", reflect.TypeOf((*MockDatabase)(nil).CreateOrUpdateCollection), varargs...)
+}
+
+// CreateOrUpdateCollections mocks base method.
+func (m *MockDatabase) CreateOrUpdateCollections(arg0 context.Context, arg1 []driver.Schema, arg2 ...*driver.CreateCollectionOptions) (*driver.CreateOrUpdateCollectionsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateOrUpdateCollections", varargs...)
+	ret0, _ := ret[0].(*driver.CreateOrUpdateCollectionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateOrUpdateCollections indicates an expected call of CreateOrUpdateCollections.
+func (mr *MockDatabaseMockRecorder) CreateOrUpdateCollections(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCollections", reflect.TypeOf((*MockDatabase)(nil).CreateOrUpdateCollections), varargs...)
 }
 
 // Delete mocks base method.

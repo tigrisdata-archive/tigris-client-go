@@ -134,6 +134,9 @@ type Database interface {
 	CreateOrUpdateCollection(ctx context.Context, collection string, schema Schema,
 		options ...*CreateCollectionOptions) error
 
+	// CreateOrUpdateCollections creates batch of collections
+	CreateOrUpdateCollections(ctx context.Context, schema []Schema, options ...*CreateCollectionOptions) (*CreateOrUpdateCollectionsResponse, error)
+
 	// DropCollection deletes the collection and all documents it contains.
 	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
 
@@ -300,6 +303,17 @@ func (c *driverCRUD) CreateOrUpdateCollection(ctx context.Context, collection st
 	}
 
 	return c.createOrUpdateCollectionWithOptions(ctx, collection, schema, opts.(*CreateCollectionOptions))
+}
+
+func (c *driverCRUD) CreateOrUpdateCollections(ctx context.Context, schema []Schema,
+	options ...*CreateCollectionOptions,
+) (*CreateOrUpdateCollectionsResponse, error) {
+	opts, err := validateOptionsParam(options, &CreateCollectionOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return c.createOrUpdateCollectionsWithOptions(ctx, schema, opts.(*CreateCollectionOptions))
 }
 
 func (c *driverCRUD) DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error {

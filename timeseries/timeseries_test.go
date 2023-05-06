@@ -29,10 +29,7 @@ import (
 	"github.com/tigrisdata/tigris-client-go/tigris"
 )
 
-var (
-	jm         = driver.JM
-	toDocument = driver.ToDocument
-)
+var toDocument = driver.ToDocument
 
 func TestTimeseries(t *testing.T) {
 	type Coll1 struct {
@@ -48,14 +45,10 @@ func TestTimeseries(t *testing.T) {
 	mdrv := mock.NewMockDriver(ctrl)
 
 	mdb := mock.NewMockDatabase(ctrl)
-	mtx := mock.NewMockTx(ctrl)
 
 	mdrv.EXPECT().UseDatabase("db1").Return(mdb)
-	mdb.EXPECT().BeginTx(gomock.Any()).Return(mtx, nil)
 
-	mtx.EXPECT().CreateOrUpdateCollection(gomock.Any(), "coll_1", jm(t, `{"title":"coll_1","properties":{"timestamp":{"type":"string", "format":"date-time", "autoGenerate":true},"id":{"type":"string", "format":"uuid", "autoGenerate":true},"field1":{"type":"string"}},"primary_key":["timestamp", "id"],"collection_type":"documents"}`))
-	mtx.EXPECT().Commit(ctx)
-	mtx.EXPECT().Rollback(ctx)
+	mdb.EXPECT().CreateOrUpdateCollections(gomock.Any(), driver.JAM(t, []string{`{"title":"coll_1","properties":{"timestamp":{"type":"string", "format":"date-time", "autoGenerate":true},"id":{"type":"string", "format":"uuid", "autoGenerate":true},"field1":{"type":"string"}},"primary_key":["timestamp", "id"],"collection_type":"documents"}`}))
 
 	db, err := tigris.TestOpenDatabase(ctx, mdrv, "db1", &Coll1{})
 	require.NoError(t, err)

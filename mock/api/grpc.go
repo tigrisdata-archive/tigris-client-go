@@ -65,6 +65,21 @@ func (mr *MockTigrisServerMockRecorder) BuildCollectionIndex(arg0, arg1 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildCollectionIndex", reflect.TypeOf((*MockTigrisServer)(nil).BuildCollectionIndex), arg0, arg1)
 }
 
+// BuildSearchIndex mocks base method.
+func (m *MockTigrisServer) BuildSearchIndex(arg0 context.Context, arg1 *api.BuildCollectionSearchIndexRequest) (*api.BuildCollectionSearchIndexResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuildSearchIndex", arg0, arg1)
+	ret0, _ := ret[0].(*api.BuildCollectionSearchIndexResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BuildSearchIndex indicates an expected call of BuildSearchIndex.
+func (mr *MockTigrisServerMockRecorder) BuildSearchIndex(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildSearchIndex", reflect.TypeOf((*MockTigrisServer)(nil).BuildSearchIndex), arg0, arg1)
+}
+
 // CommitTransaction mocks base method.
 func (m *MockTigrisServer) CommitTransaction(arg0 context.Context, arg1 *api.CommitTransactionRequest) (*api.CommitTransactionResponse, error) {
 	m.ctrl.T.Helper()
@@ -138,6 +153,21 @@ func (m *MockTigrisServer) CreateOrUpdateCollection(arg0 context.Context, arg1 *
 func (mr *MockTigrisServerMockRecorder) CreateOrUpdateCollection(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCollection", reflect.TypeOf((*MockTigrisServer)(nil).CreateOrUpdateCollection), arg0, arg1)
+}
+
+// CreateOrUpdateCollections mocks base method.
+func (m *MockTigrisServer) CreateOrUpdateCollections(arg0 context.Context, arg1 *api.CreateOrUpdateCollectionsRequest) (*api.CreateOrUpdateCollectionsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateOrUpdateCollections", arg0, arg1)
+	ret0, _ := ret[0].(*api.CreateOrUpdateCollectionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateOrUpdateCollections indicates an expected call of CreateOrUpdateCollections.
+func (mr *MockTigrisServerMockRecorder) CreateOrUpdateCollections(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCollections", reflect.TypeOf((*MockTigrisServer)(nil).CreateOrUpdateCollections), arg0, arg1)
 }
 
 // CreateProject mocks base method.
@@ -549,6 +579,21 @@ func (m *MockAuthServer) ListInvitations(arg0 context.Context, arg1 *api.ListInv
 func (mr *MockAuthServerMockRecorder) ListInvitations(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListInvitations", reflect.TypeOf((*MockAuthServer)(nil).ListInvitations), arg0, arg1)
+}
+
+// ListUsers mocks base method.
+func (m *MockAuthServer) ListUsers(arg0 context.Context, arg1 *api.ListUsersRequest) (*api.ListUsersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUsers", arg0, arg1)
+	ret0, _ := ret[0].(*api.ListUsersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUsers indicates an expected call of ListUsers.
+func (mr *MockAuthServerMockRecorder) ListUsers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockAuthServer)(nil).ListUsers), arg0, arg1)
 }
 
 // VerifyInvitation mocks base method.

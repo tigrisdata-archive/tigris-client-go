@@ -162,6 +162,23 @@ type BuildCollectionIndexResponse struct {
 	Indexes *[]CollectionIndex `json:"indexes,omitempty"`
 }
 
+// BuildCollectionSearchIndexRequest defines model for BuildCollectionSearchIndexRequest.
+type BuildCollectionSearchIndexRequest struct {
+	// Branch Optionally specify a database branch name to perform operation on
+	Branch *string `json:"branch,omitempty"`
+
+	// Collection Name of the collection.
+	Collection *string `json:"collection,omitempty"`
+
+	// Project Project name whose db is under target to index documents.
+	Project *string `json:"project,omitempty"`
+}
+
+// BuildCollectionSearchIndexResponse defines model for BuildCollectionSearchIndexResponse.
+type BuildCollectionSearchIndexResponse struct {
+	Status *string `json:"status,omitempty"`
+}
+
 // CacheMetadata defines model for CacheMetadata.
 type CacheMetadata struct {
 	// Name Cache name
@@ -335,6 +352,12 @@ type CreateCacheResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// CreateCollectionStatus defines model for CreateCollectionStatus.
+type CreateCollectionStatus struct {
+	// Status An enum with value set as "created" or "updated"
+	Status *string `json:"status,omitempty"`
+}
+
 // CreateDocumentRequest defines model for CreateDocumentRequest.
 type CreateDocumentRequest struct {
 	// Documents An array of documents to be created or replaced. Each document is a JSON object.
@@ -423,6 +446,31 @@ type CreateOrUpdateCollectionResponse struct {
 
 	// Status An enum with value set as "created" or "updated"
 	Status *string `json:"status,omitempty"`
+}
+
+// CreateOrUpdateCollectionsRequest defines model for CreateOrUpdateCollectionsRequest.
+type CreateOrUpdateCollectionsRequest struct {
+	// Branch Optionally specify a database branch name to perform operation on
+	Branch     *string `json:"branch,omitempty"`
+	OnlyCreate *bool   `json:"only_create,omitempty"`
+
+	// Options Collection requests modifying options.
+	Options *CollectionOptions `json:"options,omitempty"`
+
+	// Schemas collections to create.
+	Schemas *[]json.RawMessage `json:"schemas,omitempty"`
+}
+
+// CreateOrUpdateCollectionsResponse defines model for CreateOrUpdateCollectionsResponse.
+type CreateOrUpdateCollectionsResponse struct {
+	// Error The Error type defines a logical error model
+	Error *Error `json:"error,omitempty"`
+
+	// FailedAtIndex In the case, when API returns an error this is an index in the "schemas" field which failed.
+	FailedAtIndex *int32 `json:"failedAtIndex,omitempty"`
+
+	// Resp A detailed response message.
+	Resp *[]CreateCollectionStatus `json:"resp,omitempty"`
 }
 
 // CreateOrUpdateIndexRequest defines model for CreateOrUpdateIndexRequest.
@@ -1037,6 +1085,9 @@ type Invitation struct {
 
 	// TigrisNamespace invited namespace
 	TigrisNamespace *string `json:"tigris_namespace,omitempty"`
+
+	// TigrisNamespaceName invited namespace (display friendly)
+	TigrisNamespaceName *string `json:"tigris_namespace_name,omitempty"`
 }
 
 // InvitationInfo defines model for InvitationInfo.
@@ -1157,6 +1208,11 @@ type ListProjectsResponse struct {
 // ListSubscriptionResponse defines model for ListSubscriptionResponse.
 type ListSubscriptionResponse struct {
 	Devices *[]string `json:"devices,omitempty"`
+}
+
+// ListUsersResponse defines model for ListUsersResponse.
+type ListUsersResponse struct {
+	Users *[]User `json:"users,omitempty"`
 }
 
 // Match defines model for Match.
@@ -1751,6 +1807,15 @@ type UpdateUserMetadataResponse struct {
 	Value       *map[string]interface{} `json:"value,omitempty"`
 }
 
+// User defines model for User.
+type User struct {
+	CreatedAt *int64  `json:"created_at,omitempty"`
+	Email     *string `json:"email,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	Picture   *string `json:"picture,omitempty"`
+	Role      *string `json:"role,omitempty"`
+}
+
 // VerifyInvitationRequest defines model for VerifyInvitationRequest.
 type VerifyInvitationRequest struct {
 	// Code code
@@ -1767,6 +1832,9 @@ type VerifyInvitationResponse struct {
 
 	// TigrisNamespace if successful - which namespace this user belongs to
 	TigrisNamespace *string `json:"tigris_namespace,omitempty"`
+
+	// TigrisNamespaceName if successful - which namespace this user belongs to
+	TigrisNamespaceName *string `json:"tigris_namespace_name,omitempty"`
 }
 
 // WriteOptions Additional options to modify write requests.
@@ -1935,6 +2003,9 @@ type TigrisCreateBranchJSONRequestBody = CreateBranchRequest
 // TigrisDeleteBranchJSONRequestBody defines body for TigrisDeleteBranch for application/json ContentType.
 type TigrisDeleteBranchJSONRequestBody = DeleteBranchRequest
 
+// TigrisCreateOrUpdateCollectionsJSONRequestBody defines body for TigrisCreateOrUpdateCollections for application/json ContentType.
+type TigrisCreateOrUpdateCollectionsJSONRequestBody = CreateOrUpdateCollectionsRequest
+
 // TigrisCreateOrUpdateCollectionJSONRequestBody defines body for TigrisCreateOrUpdateCollection for application/json ContentType.
 type TigrisCreateOrUpdateCollectionJSONRequestBody = CreateOrUpdateCollectionRequest
 
@@ -1967,6 +2038,9 @@ type TigrisReplaceJSONRequestBody = ReplaceRequest
 
 // TigrisSearchJSONRequestBody defines body for TigrisSearch for application/json ContentType.
 type TigrisSearchJSONRequestBody = SearchRequest
+
+// TigrisBuildSearchIndexJSONRequestBody defines body for TigrisBuildSearchIndex for application/json ContentType.
+type TigrisBuildSearchIndexJSONRequestBody = BuildCollectionSearchIndexRequest
 
 // TigrisUpdateJSONRequestBody defines body for TigrisUpdate for application/json ContentType.
 type TigrisUpdateJSONRequestBody = UpdateRequest
@@ -2109,6 +2183,9 @@ type ClientInterface interface {
 	AuthVerifyInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	AuthVerifyInvitation(ctx context.Context, body AuthVerifyInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AuthListUsers request
+	AuthListUsers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// AuthGetAccessToken request with any body
 	AuthGetAccessTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2259,6 +2336,11 @@ type ClientInterface interface {
 	// TigrisListCollections request
 	TigrisListCollections(ctx context.Context, project string, params *TigrisListCollectionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// TigrisCreateOrUpdateCollections request with any body
+	TigrisCreateOrUpdateCollectionsWithBody(ctx context.Context, project string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisCreateOrUpdateCollections(ctx context.Context, project string, body TigrisCreateOrUpdateCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// TigrisCreateOrUpdateCollection request with any body
 	TigrisCreateOrUpdateCollectionWithBody(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2313,6 +2395,11 @@ type ClientInterface interface {
 	TigrisSearchWithBody(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	TigrisSearch(ctx context.Context, project string, collection string, body TigrisSearchJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TigrisBuildSearchIndex request with any body
+	TigrisBuildSearchIndexWithBody(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisBuildSearchIndex(ctx context.Context, project string, collection string, body TigrisBuildSearchIndexJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// TigrisUpdate request with any body
 	TigrisUpdateWithBody(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2498,6 +2585,18 @@ func (c *Client) AuthVerifyInvitationWithBody(ctx context.Context, contentType s
 
 func (c *Client) AuthVerifyInvitation(ctx context.Context, body AuthVerifyInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAuthVerifyInvitationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AuthListUsers(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthListUsersRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -3192,6 +3291,30 @@ func (c *Client) TigrisListCollections(ctx context.Context, project string, para
 	return c.Client.Do(req)
 }
 
+func (c *Client) TigrisCreateOrUpdateCollectionsWithBody(ctx context.Context, project string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateOrUpdateCollectionsRequestWithBody(c.Server, project, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisCreateOrUpdateCollections(ctx context.Context, project string, body TigrisCreateOrUpdateCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateOrUpdateCollectionsRequest(c.Server, project, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) TigrisCreateOrUpdateCollectionWithBody(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewTigrisCreateOrUpdateCollectionRequestWithBody(c.Server, project, collection, contentType, body)
 	if err != nil {
@@ -3446,6 +3569,30 @@ func (c *Client) TigrisSearchWithBody(ctx context.Context, project string, colle
 
 func (c *Client) TigrisSearch(ctx context.Context, project string, collection string, body TigrisSearchJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewTigrisSearchRequest(c.Server, project, collection, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisBuildSearchIndexWithBody(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisBuildSearchIndexRequestWithBody(c.Server, project, collection, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisBuildSearchIndex(ctx context.Context, project string, collection string, body TigrisBuildSearchIndexJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisBuildSearchIndexRequest(c.Server, project, collection, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4123,6 +4270,33 @@ func NewAuthVerifyInvitationRequestWithBody(server string, contentType string, b
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewAuthListUsersRequest generates requests for AuthListUsers
+func NewAuthListUsersRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/auth/namespace/users")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -5841,6 +6015,53 @@ func NewTigrisListCollectionsRequest(server string, project string, params *Tigr
 	return req, nil
 }
 
+// NewTigrisCreateOrUpdateCollectionsRequest calls the generic TigrisCreateOrUpdateCollections builder with application/json body
+func NewTigrisCreateOrUpdateCollectionsRequest(server string, project string, body TigrisCreateOrUpdateCollectionsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisCreateOrUpdateCollectionsRequestWithBody(server, project, "application/json", bodyReader)
+}
+
+// NewTigrisCreateOrUpdateCollectionsRequestWithBody generates requests for TigrisCreateOrUpdateCollections with any type of body
+func NewTigrisCreateOrUpdateCollectionsRequestWithBody(server string, project string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "project", runtime.ParamLocationPath, project)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/projects/%s/database/collections/createOrUpdate", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewTigrisCreateOrUpdateCollectionRequest calls the generic TigrisCreateOrUpdateCollection builder with application/json body
 func NewTigrisCreateOrUpdateCollectionRequest(server string, project string, collection string, body TigrisCreateOrUpdateCollectionJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -6416,6 +6637,60 @@ func NewTigrisSearchRequestWithBody(server string, project string, collection st
 	}
 
 	operationPath := fmt.Sprintf("/v1/projects/%s/database/collections/%s/documents/search", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTigrisBuildSearchIndexRequest calls the generic TigrisBuildSearchIndex builder with application/json body
+func NewTigrisBuildSearchIndexRequest(server string, project string, collection string, body TigrisBuildSearchIndexJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisBuildSearchIndexRequestWithBody(server, project, collection, "application/json", bodyReader)
+}
+
+// NewTigrisBuildSearchIndexRequestWithBody generates requests for TigrisBuildSearchIndex with any type of body
+func NewTigrisBuildSearchIndexRequestWithBody(server string, project string, collection string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "project", runtime.ParamLocationPath, project)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "collection", runtime.ParamLocationPath, collection)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/projects/%s/database/collections/%s/documents/search/index", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -7908,6 +8183,9 @@ type ClientWithResponsesInterface interface {
 
 	AuthVerifyInvitationWithResponse(ctx context.Context, body AuthVerifyInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthVerifyInvitationResponse, error)
 
+	// AuthListUsers request
+	AuthListUsersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*AuthListUsersResponse, error)
+
 	// AuthGetAccessToken request with any body
 	AuthGetAccessTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthGetAccessTokenResponse, error)
 
@@ -8057,6 +8335,11 @@ type ClientWithResponsesInterface interface {
 	// TigrisListCollections request
 	TigrisListCollectionsWithResponse(ctx context.Context, project string, params *TigrisListCollectionsParams, reqEditors ...RequestEditorFn) (*TigrisListCollectionsResponse, error)
 
+	// TigrisCreateOrUpdateCollections request with any body
+	TigrisCreateOrUpdateCollectionsWithBodyWithResponse(ctx context.Context, project string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionsResponse, error)
+
+	TigrisCreateOrUpdateCollectionsWithResponse(ctx context.Context, project string, body TigrisCreateOrUpdateCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionsResponse, error)
+
 	// TigrisCreateOrUpdateCollection request with any body
 	TigrisCreateOrUpdateCollectionWithBodyWithResponse(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionResponse, error)
 
@@ -8111,6 +8394,11 @@ type ClientWithResponsesInterface interface {
 	TigrisSearchWithBodyWithResponse(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisSearchResponse, error)
 
 	TigrisSearchWithResponse(ctx context.Context, project string, collection string, body TigrisSearchJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisSearchResponse, error)
+
+	// TigrisBuildSearchIndex request with any body
+	TigrisBuildSearchIndexWithBodyWithResponse(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisBuildSearchIndexResponse, error)
+
+	TigrisBuildSearchIndexWithResponse(ctx context.Context, project string, collection string, body TigrisBuildSearchIndexJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisBuildSearchIndexResponse, error)
 
 	// TigrisUpdate request with any body
 	TigrisUpdateWithBodyWithResponse(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisUpdateResponse, error)
@@ -8308,6 +8596,29 @@ func (r AuthVerifyInvitationResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r AuthVerifyInvitationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type AuthListUsersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListUsersResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r AuthListUsersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AuthListUsersResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -9119,6 +9430,29 @@ func (r TigrisListCollectionsResponse) StatusCode() int {
 	return 0
 }
 
+type TigrisCreateOrUpdateCollectionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateOrUpdateCollectionsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisCreateOrUpdateCollectionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisCreateOrUpdateCollectionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type TigrisCreateOrUpdateCollectionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9366,6 +9700,29 @@ func (r TigrisSearchResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r TigrisSearchResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TigrisBuildSearchIndexResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *BuildCollectionSearchIndexResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisBuildSearchIndexResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisBuildSearchIndexResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -10007,6 +10364,15 @@ func (c *ClientWithResponses) AuthVerifyInvitationWithResponse(ctx context.Conte
 	return ParseAuthVerifyInvitationResponse(rsp)
 }
 
+// AuthListUsersWithResponse request returning *AuthListUsersResponse
+func (c *ClientWithResponses) AuthListUsersWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*AuthListUsersResponse, error) {
+	rsp, err := c.AuthListUsers(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthListUsersResponse(rsp)
+}
+
 // AuthGetAccessTokenWithBodyWithResponse request with arbitrary body returning *AuthGetAccessTokenResponse
 func (c *ClientWithResponses) AuthGetAccessTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthGetAccessTokenResponse, error) {
 	rsp, err := c.AuthGetAccessTokenWithBody(ctx, contentType, body, reqEditors...)
@@ -10498,6 +10864,23 @@ func (c *ClientWithResponses) TigrisListCollectionsWithResponse(ctx context.Cont
 	return ParseTigrisListCollectionsResponse(rsp)
 }
 
+// TigrisCreateOrUpdateCollectionsWithBodyWithResponse request with arbitrary body returning *TigrisCreateOrUpdateCollectionsResponse
+func (c *ClientWithResponses) TigrisCreateOrUpdateCollectionsWithBodyWithResponse(ctx context.Context, project string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionsResponse, error) {
+	rsp, err := c.TigrisCreateOrUpdateCollectionsWithBody(ctx, project, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisCreateOrUpdateCollectionsResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisCreateOrUpdateCollectionsWithResponse(ctx context.Context, project string, body TigrisCreateOrUpdateCollectionsJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionsResponse, error) {
+	rsp, err := c.TigrisCreateOrUpdateCollections(ctx, project, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisCreateOrUpdateCollectionsResponse(rsp)
+}
+
 // TigrisCreateOrUpdateCollectionWithBodyWithResponse request with arbitrary body returning *TigrisCreateOrUpdateCollectionResponse
 func (c *ClientWithResponses) TigrisCreateOrUpdateCollectionWithBodyWithResponse(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateOrUpdateCollectionResponse, error) {
 	rsp, err := c.TigrisCreateOrUpdateCollectionWithBody(ctx, project, collection, contentType, body, reqEditors...)
@@ -10683,6 +11066,23 @@ func (c *ClientWithResponses) TigrisSearchWithResponse(ctx context.Context, proj
 		return nil, err
 	}
 	return ParseTigrisSearchResponse(rsp)
+}
+
+// TigrisBuildSearchIndexWithBodyWithResponse request with arbitrary body returning *TigrisBuildSearchIndexResponse
+func (c *ClientWithResponses) TigrisBuildSearchIndexWithBodyWithResponse(ctx context.Context, project string, collection string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisBuildSearchIndexResponse, error) {
+	rsp, err := c.TigrisBuildSearchIndexWithBody(ctx, project, collection, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisBuildSearchIndexResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisBuildSearchIndexWithResponse(ctx context.Context, project string, collection string, body TigrisBuildSearchIndexJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisBuildSearchIndexResponse, error) {
+	rsp, err := c.TigrisBuildSearchIndex(ctx, project, collection, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisBuildSearchIndexResponse(rsp)
 }
 
 // TigrisUpdateWithBodyWithResponse request with arbitrary body returning *TigrisUpdateResponse
@@ -11161,6 +11561,39 @@ func ParseAuthVerifyInvitationResponse(rsp *http.Response) (*AuthVerifyInvitatio
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest VerifyInvitationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAuthListUsersResponse parses an HTTP response from a AuthListUsersWithResponse call
+func ParseAuthListUsersResponse(rsp *http.Response) (*AuthListUsersResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AuthListUsersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListUsersResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -12333,6 +12766,39 @@ func ParseTigrisListCollectionsResponse(rsp *http.Response) (*TigrisListCollecti
 	return response, nil
 }
 
+// ParseTigrisCreateOrUpdateCollectionsResponse parses an HTTP response from a TigrisCreateOrUpdateCollectionsWithResponse call
+func ParseTigrisCreateOrUpdateCollectionsResponse(rsp *http.Response) (*TigrisCreateOrUpdateCollectionsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisCreateOrUpdateCollectionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateOrUpdateCollectionsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseTigrisCreateOrUpdateCollectionResponse parses an HTTP response from a TigrisCreateOrUpdateCollectionWithResponse call
 func ParseTigrisCreateOrUpdateCollectionResponse(rsp *http.Response) (*TigrisCreateOrUpdateCollectionResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -12679,6 +13145,39 @@ func ParseTigrisSearchResponse(rsp *http.Response) (*TigrisSearchResponse, error
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest StreamingSearchResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseTigrisBuildSearchIndexResponse parses an HTTP response from a TigrisBuildSearchIndexWithResponse call
+func ParseTigrisBuildSearchIndexResponse(rsp *http.Response) (*TigrisBuildSearchIndexResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisBuildSearchIndexResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BuildCollectionSearchIndexResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

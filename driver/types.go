@@ -119,6 +119,8 @@ type (
 	DescribeCollectionResponse api.DescribeCollectionResponse
 	CreateBranchResponse       api.CreateBranchResponse
 	DeleteBranchResponse       api.DeleteBranchResponse
+
+	CreateOrUpdateCollectionsResponse api.CreateOrUpdateCollectionsResponse
 )
 
 type (

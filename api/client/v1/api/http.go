@@ -376,13 +376,37 @@ type CreateDocumentResponse struct {
 	Status *[]DocStatus `json:"status,omitempty"`
 }
 
+// CreateGlobalAppKeyRequest Request creation of global app key
+type CreateGlobalAppKeyRequest struct {
+	// Description A human readable app description
+	Description *string `json:"description,omitempty"`
+
+	// Name A human readable app name
+	Name *string `json:"name,omitempty"`
+}
+
+// CreateGlobalAppKeyResponse CreateGlobalAppKeyResponse returns created global app key
+type CreateGlobalAppKeyResponse struct {
+	// CreatedAppKey The global AppKey
+	CreatedAppKey *GlobalAppKey `json:"created_app_key,omitempty"`
+}
+
 // CreateInvitationsRequest defines model for CreateInvitationsRequest.
 type CreateInvitationsRequest struct {
 	Invitations *[]InvitationInfo `json:"invitations,omitempty"`
 }
 
 // CreateInvitationsResponse defines model for CreateInvitationsResponse.
-type CreateInvitationsResponse = map[string]interface{}
+type CreateInvitationsResponse struct {
+	// Count number of invitations created
+	Count *int32 `json:"count,omitempty"`
+
+	// Message human friendly message
+	Message *string `json:"message,omitempty"`
+
+	// Status machine friendly status = created
+	Status *string `json:"status,omitempty"`
+}
 
 // CreateNamespaceRequest defines model for CreateNamespaceRequest.
 type CreateNamespaceRequest struct {
@@ -602,6 +626,18 @@ type DeleteDocumentResponse struct {
 	Status *[]DocStatus `json:"status,omitempty"`
 }
 
+// DeleteGlobalAppKeyRequest Request deletion of an global app key
+type DeleteGlobalAppKeyRequest struct {
+	// Id app_key id
+	Id *string `json:"id,omitempty"`
+}
+
+// DeleteGlobalAppKeyResponse AppKeys returns the flag to convey if global app key was deleted
+type DeleteGlobalAppKeyResponse struct {
+	// Deleted status flag for delete operation
+	Deleted *bool `json:"deleted,omitempty"`
+}
+
 // DeleteIndexRequest defines model for DeleteIndexRequest.
 type DeleteIndexRequest struct {
 	// Name index name.
@@ -627,7 +663,13 @@ type DeleteInvitationsRequest struct {
 }
 
 // DeleteInvitationsResponse defines model for DeleteInvitationsResponse.
-type DeleteInvitationsResponse = map[string]interface{}
+type DeleteInvitationsResponse struct {
+	// Message human friendly message
+	Message *string `json:"message,omitempty"`
+
+	// Status machine friendly status = deleted
+	Status *string `json:"status,omitempty"`
+}
 
 // DeleteNamespaceResponse defines model for DeleteNamespaceResponse.
 type DeleteNamespaceResponse struct {
@@ -947,6 +989,33 @@ type GetUserMetadataResponse struct {
 	Value       *[]byte `json:"value,omitempty"`
 }
 
+// GlobalAppKey The global AppKey
+type GlobalAppKey struct {
+	// CreatedAt Created at
+	CreatedAt *int64 `json:"created_at,omitempty"`
+
+	// CreatedBy Created by
+	CreatedBy *string `json:"created_by,omitempty"`
+
+	// Description A human readable app description
+	Description *string `json:"description,omitempty"`
+
+	// Id Generated client id
+	Id *string `json:"id,omitempty"`
+
+	// Name A human readable app name
+	Name *string `json:"name,omitempty"`
+
+	// Secret Generated app secret
+	Secret *string `json:"secret,omitempty"`
+
+	// UpdatedAt Updated at
+	UpdatedAt *int64 `json:"updated_at,omitempty"`
+
+	// UpdatedBy Updated by
+	UpdatedBy *string `json:"updated_by,omitempty"`
+}
+
 // GroupedSearchHits defines model for GroupedSearchHits.
 type GroupedSearchHits struct {
 	GroupKeys *[]string    `json:"group_keys,omitempty"`
@@ -1171,6 +1240,11 @@ type ListCachesResponse struct {
 type ListCollectionsResponse struct {
 	// Collections List of the collections info in the database.
 	Collections *[]CollectionInfo `json:"collections,omitempty"`
+}
+
+// ListGlobalAppKeysResponse ListGlobalAppKeysResponse returns one or more visible global app keys to user
+type ListGlobalAppKeysResponse struct {
+	AppKeys *[]GlobalAppKey `json:"app_keys,omitempty"`
 }
 
 // ListIndexesResponse defines model for ListIndexesResponse.
@@ -1496,6 +1570,18 @@ type RotateAppKeyResponse struct {
 	AppKey *AppKey `json:"app_key,omitempty"`
 }
 
+// RotateGlobalAppKeySecretRequest Request rotation of an app key secret
+type RotateGlobalAppKeySecretRequest struct {
+	// Id global app key id
+	Id *string `json:"id,omitempty"`
+}
+
+// RotateGlobalAppKeySecretResponse RotateGlobalAppKeySecretResponse returns the new app key with rotated secret
+type RotateGlobalAppKeySecretResponse struct {
+	// AppKey The global AppKey
+	AppKey *GlobalAppKey `json:"app_key,omitempty"`
+}
+
 // SearchFacet defines model for SearchFacet.
 type SearchFacet struct {
 	Counts *[]FacetCount `json:"counts,omitempty"`
@@ -1741,6 +1827,24 @@ type UpdateDocumentResponse struct {
 	Status *[]DocStatus `json:"status,omitempty"`
 }
 
+// UpdateGlobalAppKeyRequest To update the description of the global app key
+type UpdateGlobalAppKeyRequest struct {
+	// Description A new human readable app description
+	Description *string `json:"description,omitempty"`
+
+	// Id app key id - this is not allowed to update
+	Id *string `json:"id,omitempty"`
+
+	// Name A new human readable app name
+	Name *string `json:"name,omitempty"`
+}
+
+// UpdateGlobalAppKeyResponse Returns response for updating the global app key description
+type UpdateGlobalAppKeyResponse struct {
+	// UpdatedAppKey The global AppKey
+	UpdatedAppKey *GlobalAppKey `json:"updated_app_key,omitempty"`
+}
+
 // UpdateNamespaceMetadataRequest Request update of namespace metadata
 type UpdateNamespaceMetadataRequest struct {
 	MetadataKey *string                 `json:"metadataKey,omitempty"`
@@ -1927,6 +2031,18 @@ type SearchGetParams struct {
 	// Ids document id.
 	Ids *[]string `form:"ids,omitempty" json:"ids,omitempty"`
 }
+
+// TigrisCreateGlobalAppKeyJSONRequestBody defines body for TigrisCreateGlobalAppKey for application/json ContentType.
+type TigrisCreateGlobalAppKeyJSONRequestBody = CreateGlobalAppKeyRequest
+
+// TigrisDeleteGlobalAppKeyJSONRequestBody defines body for TigrisDeleteGlobalAppKey for application/json ContentType.
+type TigrisDeleteGlobalAppKeyJSONRequestBody = DeleteGlobalAppKeyRequest
+
+// TigrisRotateGlobalAppKeySecretJSONRequestBody defines body for TigrisRotateGlobalAppKeySecret for application/json ContentType.
+type TigrisRotateGlobalAppKeySecretJSONRequestBody = RotateGlobalAppKeySecretRequest
+
+// TigrisUpdateGlobalAppKeyJSONRequestBody defines body for TigrisUpdateGlobalAppKey for application/json ContentType.
+type TigrisUpdateGlobalAppKeyJSONRequestBody = UpdateGlobalAppKeyRequest
 
 // AuthCreateInvitationsJSONRequestBody defines body for AuthCreateInvitations for application/json ContentType.
 type AuthCreateInvitationsJSONRequestBody = CreateInvitationsRequest
@@ -2166,6 +2282,29 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// TigrisListGlobalAppKeys request
+	TigrisListGlobalAppKeys(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TigrisCreateGlobalAppKey request with any body
+	TigrisCreateGlobalAppKeyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisCreateGlobalAppKey(ctx context.Context, body TigrisCreateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TigrisDeleteGlobalAppKey request with any body
+	TigrisDeleteGlobalAppKeyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisDeleteGlobalAppKey(ctx context.Context, body TigrisDeleteGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TigrisRotateGlobalAppKeySecret request with any body
+	TigrisRotateGlobalAppKeySecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisRotateGlobalAppKeySecret(ctx context.Context, body TigrisRotateGlobalAppKeySecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TigrisUpdateGlobalAppKey request with any body
+	TigrisUpdateGlobalAppKeyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TigrisUpdateGlobalAppKey(ctx context.Context, body TigrisUpdateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// AuthCreateInvitations request with any body
 	AuthCreateInvitationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2509,6 +2648,114 @@ type ClientInterface interface {
 	SearchCreateOrUpdateIndexWithBody(ctx context.Context, project string, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	SearchCreateOrUpdateIndex(ctx context.Context, project string, name string, body SearchCreateOrUpdateIndexJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) TigrisListGlobalAppKeys(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisListGlobalAppKeysRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisCreateGlobalAppKeyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateGlobalAppKeyRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisCreateGlobalAppKey(ctx context.Context, body TigrisCreateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisCreateGlobalAppKeyRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisDeleteGlobalAppKeyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDeleteGlobalAppKeyRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisDeleteGlobalAppKey(ctx context.Context, body TigrisDeleteGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisDeleteGlobalAppKeyRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisRotateGlobalAppKeySecretWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisRotateGlobalAppKeySecretRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisRotateGlobalAppKeySecret(ctx context.Context, body TigrisRotateGlobalAppKeySecretJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisRotateGlobalAppKeySecretRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisUpdateGlobalAppKeyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisUpdateGlobalAppKeyRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TigrisUpdateGlobalAppKey(ctx context.Context, body TigrisUpdateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTigrisUpdateGlobalAppKeyRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) AuthCreateInvitationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -4105,6 +4352,193 @@ func (c *Client) SearchCreateOrUpdateIndex(ctx context.Context, project string, 
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewTigrisListGlobalAppKeysRequest generates requests for TigrisListGlobalAppKeys
+func NewTigrisListGlobalAppKeysRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/apps/keys")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewTigrisCreateGlobalAppKeyRequest calls the generic TigrisCreateGlobalAppKey builder with application/json body
+func NewTigrisCreateGlobalAppKeyRequest(server string, body TigrisCreateGlobalAppKeyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisCreateGlobalAppKeyRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewTigrisCreateGlobalAppKeyRequestWithBody generates requests for TigrisCreateGlobalAppKey with any type of body
+func NewTigrisCreateGlobalAppKeyRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/apps/keys/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTigrisDeleteGlobalAppKeyRequest calls the generic TigrisDeleteGlobalAppKey builder with application/json body
+func NewTigrisDeleteGlobalAppKeyRequest(server string, body TigrisDeleteGlobalAppKeyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisDeleteGlobalAppKeyRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewTigrisDeleteGlobalAppKeyRequestWithBody generates requests for TigrisDeleteGlobalAppKey with any type of body
+func NewTigrisDeleteGlobalAppKeyRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/apps/keys/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTigrisRotateGlobalAppKeySecretRequest calls the generic TigrisRotateGlobalAppKeySecret builder with application/json body
+func NewTigrisRotateGlobalAppKeySecretRequest(server string, body TigrisRotateGlobalAppKeySecretJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisRotateGlobalAppKeySecretRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewTigrisRotateGlobalAppKeySecretRequestWithBody generates requests for TigrisRotateGlobalAppKeySecret with any type of body
+func NewTigrisRotateGlobalAppKeySecretRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/apps/keys/rotate")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTigrisUpdateGlobalAppKeyRequest calls the generic TigrisUpdateGlobalAppKey builder with application/json body
+func NewTigrisUpdateGlobalAppKeyRequest(server string, body TigrisUpdateGlobalAppKeyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTigrisUpdateGlobalAppKeyRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewTigrisUpdateGlobalAppKeyRequestWithBody generates requests for TigrisUpdateGlobalAppKey with any type of body
+func NewTigrisUpdateGlobalAppKeyRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/apps/keys/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewAuthCreateInvitationsRequest calls the generic AuthCreateInvitations builder with application/json body
@@ -8165,6 +8599,29 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// TigrisListGlobalAppKeys request
+	TigrisListGlobalAppKeysWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisListGlobalAppKeysResponse, error)
+
+	// TigrisCreateGlobalAppKey request with any body
+	TigrisCreateGlobalAppKeyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateGlobalAppKeyResponse, error)
+
+	TigrisCreateGlobalAppKeyWithResponse(ctx context.Context, body TigrisCreateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateGlobalAppKeyResponse, error)
+
+	// TigrisDeleteGlobalAppKey request with any body
+	TigrisDeleteGlobalAppKeyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDeleteGlobalAppKeyResponse, error)
+
+	TigrisDeleteGlobalAppKeyWithResponse(ctx context.Context, body TigrisDeleteGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDeleteGlobalAppKeyResponse, error)
+
+	// TigrisRotateGlobalAppKeySecret request with any body
+	TigrisRotateGlobalAppKeySecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisRotateGlobalAppKeySecretResponse, error)
+
+	TigrisRotateGlobalAppKeySecretWithResponse(ctx context.Context, body TigrisRotateGlobalAppKeySecretJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisRotateGlobalAppKeySecretResponse, error)
+
+	// TigrisUpdateGlobalAppKey request with any body
+	TigrisUpdateGlobalAppKeyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisUpdateGlobalAppKeyResponse, error)
+
+	TigrisUpdateGlobalAppKeyWithResponse(ctx context.Context, body TigrisUpdateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisUpdateGlobalAppKeyResponse, error)
+
 	// AuthCreateInvitations request with any body
 	AuthCreateInvitationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthCreateInvitationsResponse, error)
 
@@ -8508,6 +8965,121 @@ type ClientWithResponsesInterface interface {
 	SearchCreateOrUpdateIndexWithBodyWithResponse(ctx context.Context, project string, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SearchCreateOrUpdateIndexResponse, error)
 
 	SearchCreateOrUpdateIndexWithResponse(ctx context.Context, project string, name string, body SearchCreateOrUpdateIndexJSONRequestBody, reqEditors ...RequestEditorFn) (*SearchCreateOrUpdateIndexResponse, error)
+}
+
+type TigrisListGlobalAppKeysResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListGlobalAppKeysResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisListGlobalAppKeysResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisListGlobalAppKeysResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TigrisCreateGlobalAppKeyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateGlobalAppKeyResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisCreateGlobalAppKeyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisCreateGlobalAppKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TigrisDeleteGlobalAppKeyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DeleteGlobalAppKeyResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisDeleteGlobalAppKeyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisDeleteGlobalAppKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TigrisRotateGlobalAppKeySecretResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RotateGlobalAppKeySecretResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisRotateGlobalAppKeySecretResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisRotateGlobalAppKeySecretResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TigrisUpdateGlobalAppKeyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UpdateGlobalAppKeyResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r TigrisUpdateGlobalAppKeyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TigrisUpdateGlobalAppKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type AuthCreateInvitationsResponse struct {
@@ -10304,6 +10876,83 @@ func (r SearchCreateOrUpdateIndexResponse) StatusCode() int {
 	return 0
 }
 
+// TigrisListGlobalAppKeysWithResponse request returning *TigrisListGlobalAppKeysResponse
+func (c *ClientWithResponses) TigrisListGlobalAppKeysWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*TigrisListGlobalAppKeysResponse, error) {
+	rsp, err := c.TigrisListGlobalAppKeys(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisListGlobalAppKeysResponse(rsp)
+}
+
+// TigrisCreateGlobalAppKeyWithBodyWithResponse request with arbitrary body returning *TigrisCreateGlobalAppKeyResponse
+func (c *ClientWithResponses) TigrisCreateGlobalAppKeyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisCreateGlobalAppKeyResponse, error) {
+	rsp, err := c.TigrisCreateGlobalAppKeyWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisCreateGlobalAppKeyResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisCreateGlobalAppKeyWithResponse(ctx context.Context, body TigrisCreateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisCreateGlobalAppKeyResponse, error) {
+	rsp, err := c.TigrisCreateGlobalAppKey(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisCreateGlobalAppKeyResponse(rsp)
+}
+
+// TigrisDeleteGlobalAppKeyWithBodyWithResponse request with arbitrary body returning *TigrisDeleteGlobalAppKeyResponse
+func (c *ClientWithResponses) TigrisDeleteGlobalAppKeyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisDeleteGlobalAppKeyResponse, error) {
+	rsp, err := c.TigrisDeleteGlobalAppKeyWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisDeleteGlobalAppKeyResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisDeleteGlobalAppKeyWithResponse(ctx context.Context, body TigrisDeleteGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisDeleteGlobalAppKeyResponse, error) {
+	rsp, err := c.TigrisDeleteGlobalAppKey(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisDeleteGlobalAppKeyResponse(rsp)
+}
+
+// TigrisRotateGlobalAppKeySecretWithBodyWithResponse request with arbitrary body returning *TigrisRotateGlobalAppKeySecretResponse
+func (c *ClientWithResponses) TigrisRotateGlobalAppKeySecretWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisRotateGlobalAppKeySecretResponse, error) {
+	rsp, err := c.TigrisRotateGlobalAppKeySecretWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisRotateGlobalAppKeySecretResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisRotateGlobalAppKeySecretWithResponse(ctx context.Context, body TigrisRotateGlobalAppKeySecretJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisRotateGlobalAppKeySecretResponse, error) {
+	rsp, err := c.TigrisRotateGlobalAppKeySecret(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisRotateGlobalAppKeySecretResponse(rsp)
+}
+
+// TigrisUpdateGlobalAppKeyWithBodyWithResponse request with arbitrary body returning *TigrisUpdateGlobalAppKeyResponse
+func (c *ClientWithResponses) TigrisUpdateGlobalAppKeyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TigrisUpdateGlobalAppKeyResponse, error) {
+	rsp, err := c.TigrisUpdateGlobalAppKeyWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisUpdateGlobalAppKeyResponse(rsp)
+}
+
+func (c *ClientWithResponses) TigrisUpdateGlobalAppKeyWithResponse(ctx context.Context, body TigrisUpdateGlobalAppKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*TigrisUpdateGlobalAppKeyResponse, error) {
+	rsp, err := c.TigrisUpdateGlobalAppKey(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTigrisUpdateGlobalAppKeyResponse(rsp)
+}
+
 // AuthCreateInvitationsWithBodyWithResponse request with arbitrary body returning *AuthCreateInvitationsResponse
 func (c *ClientWithResponses) AuthCreateInvitationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthCreateInvitationsResponse, error) {
 	rsp, err := c.AuthCreateInvitationsWithBody(ctx, contentType, body, reqEditors...)
@@ -11444,6 +12093,171 @@ func (c *ClientWithResponses) SearchCreateOrUpdateIndexWithResponse(ctx context.
 		return nil, err
 	}
 	return ParseSearchCreateOrUpdateIndexResponse(rsp)
+}
+
+// ParseTigrisListGlobalAppKeysResponse parses an HTTP response from a TigrisListGlobalAppKeysWithResponse call
+func ParseTigrisListGlobalAppKeysResponse(rsp *http.Response) (*TigrisListGlobalAppKeysResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisListGlobalAppKeysResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListGlobalAppKeysResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseTigrisCreateGlobalAppKeyResponse parses an HTTP response from a TigrisCreateGlobalAppKeyWithResponse call
+func ParseTigrisCreateGlobalAppKeyResponse(rsp *http.Response) (*TigrisCreateGlobalAppKeyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisCreateGlobalAppKeyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateGlobalAppKeyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseTigrisDeleteGlobalAppKeyResponse parses an HTTP response from a TigrisDeleteGlobalAppKeyWithResponse call
+func ParseTigrisDeleteGlobalAppKeyResponse(rsp *http.Response) (*TigrisDeleteGlobalAppKeyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisDeleteGlobalAppKeyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeleteGlobalAppKeyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseTigrisRotateGlobalAppKeySecretResponse parses an HTTP response from a TigrisRotateGlobalAppKeySecretWithResponse call
+func ParseTigrisRotateGlobalAppKeySecretResponse(rsp *http.Response) (*TigrisRotateGlobalAppKeySecretResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisRotateGlobalAppKeySecretResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RotateGlobalAppKeySecretResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseTigrisUpdateGlobalAppKeyResponse parses an HTTP response from a TigrisUpdateGlobalAppKeyWithResponse call
+func ParseTigrisUpdateGlobalAppKeyResponse(rsp *http.Response) (*TigrisUpdateGlobalAppKeyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TigrisUpdateGlobalAppKeyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UpdateGlobalAppKeyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseAuthCreateInvitationsResponse parses an HTTP response from a AuthCreateInvitationsWithResponse call

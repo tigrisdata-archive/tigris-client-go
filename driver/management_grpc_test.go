@@ -62,7 +62,9 @@ func TestGRPCAuthDriver(t *testing.T) {
 	drv, managementClient, mockServers, cancel := SetupMgmtGRPCTests(t, &config.Driver{})
 	defer cancel()
 	testDriverAuth(t, drv, managementClient, mockServers.API, mockServers.Auth, mockServers.Mgmt)
+	testGlobalAppKeys(t, drv, mockServers.API)
 	testDriverAuthNegative(t, drv, managementClient, mockServers.API, mockServers.Mgmt)
+	testGlobalGlobalAppKeysNegative(t, drv, mockServers.API)
 }
 
 func TestGRPCDriverCredentials(t *testing.T) {

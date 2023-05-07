@@ -59,6 +59,11 @@ const (
 	Tigris_DeleteBranch_FullMethodName              = "/tigrisdata.v1.Tigris/DeleteBranch"
 	Tigris_ListBranches_FullMethodName              = "/tigrisdata.v1.Tigris/ListBranches"
 	Tigris_DescribeCollection_FullMethodName        = "/tigrisdata.v1.Tigris/DescribeCollection"
+	Tigris_CreateGlobalAppKey_FullMethodName        = "/tigrisdata.v1.Tigris/CreateGlobalAppKey"
+	Tigris_UpdateGlobalAppKey_FullMethodName        = "/tigrisdata.v1.Tigris/UpdateGlobalAppKey"
+	Tigris_DeleteGlobalAppKey_FullMethodName        = "/tigrisdata.v1.Tigris/DeleteGlobalAppKey"
+	Tigris_ListGlobalAppKeys_FullMethodName         = "/tigrisdata.v1.Tigris/ListGlobalAppKeys"
+	Tigris_RotateGlobalAppKeySecret_FullMethodName  = "/tigrisdata.v1.Tigris/RotateGlobalAppKeySecret"
 	Tigris_CreateAppKey_FullMethodName              = "/tigrisdata.v1.Tigris/CreateAppKey"
 	Tigris_UpdateAppKey_FullMethodName              = "/tigrisdata.v1.Tigris/UpdateAppKey"
 	Tigris_DeleteAppKey_FullMethodName              = "/tigrisdata.v1.Tigris/DeleteAppKey"
@@ -153,6 +158,16 @@ type TigrisClient interface {
 	ListBranches(ctx context.Context, in *ListBranchesRequest, opts ...grpc.CallOption) (*ListBranchesResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(ctx context.Context, in *DescribeCollectionRequest, opts ...grpc.CallOption) (*DescribeCollectionResponse, error)
+	// Create a global app key.
+	CreateGlobalAppKey(ctx context.Context, in *CreateGlobalAppKeyRequest, opts ...grpc.CallOption) (*CreateGlobalAppKeyResponse, error)
+	// Update the description of the global app key.
+	UpdateGlobalAppKey(ctx context.Context, in *UpdateGlobalAppKeyRequest, opts ...grpc.CallOption) (*UpdateGlobalAppKeyResponse, error)
+	// Delete an global app key.
+	DeleteGlobalAppKey(ctx context.Context, in *DeleteGlobalAppKeyRequest, opts ...grpc.CallOption) (*DeleteGlobalAppKeyResponse, error)
+	// Lists all the global app keys visible to requesting actor.
+	ListGlobalAppKeys(ctx context.Context, in *ListGlobalAppKeysRequest, opts ...grpc.CallOption) (*ListGlobalAppKeysResponse, error)
+	// Endpoint is used to rotate the secret for the app key.
+	RotateGlobalAppKeySecret(ctx context.Context, in *RotateGlobalAppKeySecretRequest, opts ...grpc.CallOption) (*RotateGlobalAppKeySecretResponse, error)
 	// Create an app key.
 	CreateAppKey(ctx context.Context, in *CreateAppKeyRequest, opts ...grpc.CallOption) (*CreateAppKeyResponse, error)
 	// Update the description of an app key.
@@ -453,6 +468,51 @@ func (c *tigrisClient) DescribeCollection(ctx context.Context, in *DescribeColle
 	return out, nil
 }
 
+func (c *tigrisClient) CreateGlobalAppKey(ctx context.Context, in *CreateGlobalAppKeyRequest, opts ...grpc.CallOption) (*CreateGlobalAppKeyResponse, error) {
+	out := new(CreateGlobalAppKeyResponse)
+	err := c.cc.Invoke(ctx, Tigris_CreateGlobalAppKey_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) UpdateGlobalAppKey(ctx context.Context, in *UpdateGlobalAppKeyRequest, opts ...grpc.CallOption) (*UpdateGlobalAppKeyResponse, error) {
+	out := new(UpdateGlobalAppKeyResponse)
+	err := c.cc.Invoke(ctx, Tigris_UpdateGlobalAppKey_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) DeleteGlobalAppKey(ctx context.Context, in *DeleteGlobalAppKeyRequest, opts ...grpc.CallOption) (*DeleteGlobalAppKeyResponse, error) {
+	out := new(DeleteGlobalAppKeyResponse)
+	err := c.cc.Invoke(ctx, Tigris_DeleteGlobalAppKey_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) ListGlobalAppKeys(ctx context.Context, in *ListGlobalAppKeysRequest, opts ...grpc.CallOption) (*ListGlobalAppKeysResponse, error) {
+	out := new(ListGlobalAppKeysResponse)
+	err := c.cc.Invoke(ctx, Tigris_ListGlobalAppKeys_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tigrisClient) RotateGlobalAppKeySecret(ctx context.Context, in *RotateGlobalAppKeySecretRequest, opts ...grpc.CallOption) (*RotateGlobalAppKeySecretResponse, error) {
+	out := new(RotateGlobalAppKeySecretResponse)
+	err := c.cc.Invoke(ctx, Tigris_RotateGlobalAppKeySecret_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tigrisClient) CreateAppKey(ctx context.Context, in *CreateAppKeyRequest, opts ...grpc.CallOption) (*CreateAppKeyResponse, error) {
 	out := new(CreateAppKeyResponse)
 	err := c.cc.Invoke(ctx, Tigris_CreateAppKey_FullMethodName, in, out, opts...)
@@ -585,6 +645,16 @@ type TigrisServer interface {
 	ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error)
 	// Returns the information related to the collection. This can be used to retrieve the schema or size of the collection.
 	DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error)
+	// Create a global app key.
+	CreateGlobalAppKey(context.Context, *CreateGlobalAppKeyRequest) (*CreateGlobalAppKeyResponse, error)
+	// Update the description of the global app key.
+	UpdateGlobalAppKey(context.Context, *UpdateGlobalAppKeyRequest) (*UpdateGlobalAppKeyResponse, error)
+	// Delete an global app key.
+	DeleteGlobalAppKey(context.Context, *DeleteGlobalAppKeyRequest) (*DeleteGlobalAppKeyResponse, error)
+	// Lists all the global app keys visible to requesting actor.
+	ListGlobalAppKeys(context.Context, *ListGlobalAppKeysRequest) (*ListGlobalAppKeysResponse, error)
+	// Endpoint is used to rotate the secret for the app key.
+	RotateGlobalAppKeySecret(context.Context, *RotateGlobalAppKeySecretRequest) (*RotateGlobalAppKeySecretResponse, error)
 	// Create an app key.
 	CreateAppKey(context.Context, *CreateAppKeyRequest) (*CreateAppKeyResponse, error)
 	// Update the description of an app key.
@@ -678,6 +748,21 @@ func (UnimplementedTigrisServer) ListBranches(context.Context, *ListBranchesRequ
 }
 func (UnimplementedTigrisServer) DescribeCollection(context.Context, *DescribeCollectionRequest) (*DescribeCollectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeCollection not implemented")
+}
+func (UnimplementedTigrisServer) CreateGlobalAppKey(context.Context, *CreateGlobalAppKeyRequest) (*CreateGlobalAppKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateGlobalAppKey not implemented")
+}
+func (UnimplementedTigrisServer) UpdateGlobalAppKey(context.Context, *UpdateGlobalAppKeyRequest) (*UpdateGlobalAppKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateGlobalAppKey not implemented")
+}
+func (UnimplementedTigrisServer) DeleteGlobalAppKey(context.Context, *DeleteGlobalAppKeyRequest) (*DeleteGlobalAppKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteGlobalAppKey not implemented")
+}
+func (UnimplementedTigrisServer) ListGlobalAppKeys(context.Context, *ListGlobalAppKeysRequest) (*ListGlobalAppKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListGlobalAppKeys not implemented")
+}
+func (UnimplementedTigrisServer) RotateGlobalAppKeySecret(context.Context, *RotateGlobalAppKeySecretRequest) (*RotateGlobalAppKeySecretResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RotateGlobalAppKeySecret not implemented")
 }
 func (UnimplementedTigrisServer) CreateAppKey(context.Context, *CreateAppKeyRequest) (*CreateAppKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAppKey not implemented")
@@ -1180,6 +1265,96 @@ func _Tigris_DescribeCollection_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Tigris_CreateGlobalAppKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateGlobalAppKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).CreateGlobalAppKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Tigris_CreateGlobalAppKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).CreateGlobalAppKey(ctx, req.(*CreateGlobalAppKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_UpdateGlobalAppKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateGlobalAppKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).UpdateGlobalAppKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Tigris_UpdateGlobalAppKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).UpdateGlobalAppKey(ctx, req.(*UpdateGlobalAppKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_DeleteGlobalAppKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteGlobalAppKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).DeleteGlobalAppKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Tigris_DeleteGlobalAppKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).DeleteGlobalAppKey(ctx, req.(*DeleteGlobalAppKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_ListGlobalAppKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListGlobalAppKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).ListGlobalAppKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Tigris_ListGlobalAppKeys_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).ListGlobalAppKeys(ctx, req.(*ListGlobalAppKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tigris_RotateGlobalAppKeySecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RotateGlobalAppKeySecretRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TigrisServer).RotateGlobalAppKeySecret(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Tigris_RotateGlobalAppKeySecret_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TigrisServer).RotateGlobalAppKeySecret(ctx, req.(*RotateGlobalAppKeySecretRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Tigris_CreateAppKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateAppKeyRequest)
 	if err := dec(in); err != nil {
@@ -1372,6 +1547,26 @@ var Tigris_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DescribeCollection",
 			Handler:    _Tigris_DescribeCollection_Handler,
+		},
+		{
+			MethodName: "CreateGlobalAppKey",
+			Handler:    _Tigris_CreateGlobalAppKey_Handler,
+		},
+		{
+			MethodName: "UpdateGlobalAppKey",
+			Handler:    _Tigris_UpdateGlobalAppKey_Handler,
+		},
+		{
+			MethodName: "DeleteGlobalAppKey",
+			Handler:    _Tigris_DeleteGlobalAppKey_Handler,
+		},
+		{
+			MethodName: "ListGlobalAppKeys",
+			Handler:    _Tigris_ListGlobalAppKeys_Handler,
+		},
+		{
+			MethodName: "RotateGlobalAppKeySecret",
+			Handler:    _Tigris_RotateGlobalAppKeySecret_Handler,
 		},
 		{
 			MethodName: "CreateAppKey",

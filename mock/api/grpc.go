@@ -140,6 +140,21 @@ func (mr *MockTigrisServerMockRecorder) CreateBranch(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBranch", reflect.TypeOf((*MockTigrisServer)(nil).CreateBranch), arg0, arg1)
 }
 
+// CreateGlobalAppKey mocks base method.
+func (m *MockTigrisServer) CreateGlobalAppKey(arg0 context.Context, arg1 *api.CreateGlobalAppKeyRequest) (*api.CreateGlobalAppKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateGlobalAppKey", arg0, arg1)
+	ret0, _ := ret[0].(*api.CreateGlobalAppKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateGlobalAppKey indicates an expected call of CreateGlobalAppKey.
+func (mr *MockTigrisServerMockRecorder) CreateGlobalAppKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGlobalAppKey", reflect.TypeOf((*MockTigrisServer)(nil).CreateGlobalAppKey), arg0, arg1)
+}
+
 // CreateOrUpdateCollection mocks base method.
 func (m *MockTigrisServer) CreateOrUpdateCollection(arg0 context.Context, arg1 *api.CreateOrUpdateCollectionRequest) (*api.CreateOrUpdateCollectionResponse, error) {
 	m.ctrl.T.Helper()
@@ -228,6 +243,21 @@ func (m *MockTigrisServer) DeleteBranch(arg0 context.Context, arg1 *api.DeleteBr
 func (mr *MockTigrisServerMockRecorder) DeleteBranch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBranch", reflect.TypeOf((*MockTigrisServer)(nil).DeleteBranch), arg0, arg1)
+}
+
+// DeleteGlobalAppKey mocks base method.
+func (m *MockTigrisServer) DeleteGlobalAppKey(arg0 context.Context, arg1 *api.DeleteGlobalAppKeyRequest) (*api.DeleteGlobalAppKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGlobalAppKey", arg0, arg1)
+	ret0, _ := ret[0].(*api.DeleteGlobalAppKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteGlobalAppKey indicates an expected call of DeleteGlobalAppKey.
+func (mr *MockTigrisServerMockRecorder) DeleteGlobalAppKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGlobalAppKey", reflect.TypeOf((*MockTigrisServer)(nil).DeleteGlobalAppKey), arg0, arg1)
 }
 
 // DeleteProject mocks base method.
@@ -380,6 +410,21 @@ func (mr *MockTigrisServerMockRecorder) ListCollections(arg0, arg1 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCollections", reflect.TypeOf((*MockTigrisServer)(nil).ListCollections), arg0, arg1)
 }
 
+// ListGlobalAppKeys mocks base method.
+func (m *MockTigrisServer) ListGlobalAppKeys(arg0 context.Context, arg1 *api.ListGlobalAppKeysRequest) (*api.ListGlobalAppKeysResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListGlobalAppKeys", arg0, arg1)
+	ret0, _ := ret[0].(*api.ListGlobalAppKeysResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListGlobalAppKeys indicates an expected call of ListGlobalAppKeys.
+func (mr *MockTigrisServerMockRecorder) ListGlobalAppKeys(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListGlobalAppKeys", reflect.TypeOf((*MockTigrisServer)(nil).ListGlobalAppKeys), arg0, arg1)
+}
+
 // ListProjects mocks base method.
 func (m *MockTigrisServer) ListProjects(arg0 context.Context, arg1 *api.ListProjectsRequest) (*api.ListProjectsResponse, error) {
 	m.ctrl.T.Helper()
@@ -454,6 +499,21 @@ func (mr *MockTigrisServerMockRecorder) RotateAppKeySecret(arg0, arg1 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RotateAppKeySecret", reflect.TypeOf((*MockTigrisServer)(nil).RotateAppKeySecret), arg0, arg1)
 }
 
+// RotateGlobalAppKeySecret mocks base method.
+func (m *MockTigrisServer) RotateGlobalAppKeySecret(arg0 context.Context, arg1 *api.RotateGlobalAppKeySecretRequest) (*api.RotateGlobalAppKeySecretResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RotateGlobalAppKeySecret", arg0, arg1)
+	ret0, _ := ret[0].(*api.RotateGlobalAppKeySecretResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RotateGlobalAppKeySecret indicates an expected call of RotateGlobalAppKeySecret.
+func (mr *MockTigrisServerMockRecorder) RotateGlobalAppKeySecret(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RotateGlobalAppKeySecret", reflect.TypeOf((*MockTigrisServer)(nil).RotateGlobalAppKeySecret), arg0, arg1)
+}
+
 // Search mocks base method.
 func (m *MockTigrisServer) Search(arg0 *api.SearchRequest, arg1 api.Tigris_SearchServer) error {
 	m.ctrl.T.Helper()
@@ -496,6 +556,21 @@ func (m *MockTigrisServer) UpdateAppKey(arg0 context.Context, arg1 *api.UpdateAp
 func (mr *MockTigrisServerMockRecorder) UpdateAppKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAppKey", reflect.TypeOf((*MockTigrisServer)(nil).UpdateAppKey), arg0, arg1)
+}
+
+// UpdateGlobalAppKey mocks base method.
+func (m *MockTigrisServer) UpdateGlobalAppKey(arg0 context.Context, arg1 *api.UpdateGlobalAppKeyRequest) (*api.UpdateGlobalAppKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateGlobalAppKey", arg0, arg1)
+	ret0, _ := ret[0].(*api.UpdateGlobalAppKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateGlobalAppKey indicates an expected call of UpdateGlobalAppKey.
+func (mr *MockTigrisServerMockRecorder) UpdateGlobalAppKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateGlobalAppKey", reflect.TypeOf((*MockTigrisServer)(nil).UpdateGlobalAppKey), arg0, arg1)
 }
 
 // MockAuthServer is a mock of AuthServer interface.

@@ -165,6 +165,7 @@ func (e *Error) As(i any) bool {
 
 type (
 	AppKey        api.AppKey
+	GlobalAppKey  api.GlobalAppKey
 	TokenResponse api.GetAccessTokenResponse
 	Namespace     api.NamespaceInfo
 

@@ -68,6 +68,12 @@ type Driver interface {
 	UpdateAppKey(ctx context.Context, project string, id string, name string, description string) (*AppKey, error)
 	ListAppKeys(ctx context.Context, project string) ([]*AppKey, error)
 	RotateAppKeySecret(ctx context.Context, project string, id string) (*AppKey, error)
+
+	CreateGlobalAppKey(ctx context.Context, name string, description string) (*GlobalAppKey, error)
+	DeleteGlobalAppKey(ctx context.Context, id string) error
+	UpdateGlobalAppKey(ctx context.Context, id string, name string, description string) (*GlobalAppKey, error)
+	ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, error)
+	RotateGlobalAppKeySecret(ctx context.Context, id string) (*GlobalAppKey, error)
 }
 
 // Tx object is used to atomically modify documents.

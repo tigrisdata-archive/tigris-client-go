@@ -65,6 +65,8 @@ func TestGRPCAuthDriver(t *testing.T) {
 	testGlobalAppKeys(t, drv, mockServers.API)
 	testDriverAuthNegative(t, drv, managementClient, mockServers.API, mockServers.Mgmt)
 	testGlobalGlobalAppKeysNegative(t, drv, mockServers.API)
+	testInvitations(t, managementClient, mockServers.Auth)
+	testInvitationsNegative(t, managementClient, mockServers.Auth)
 }
 
 func TestGRPCDriverCredentials(t *testing.T) {

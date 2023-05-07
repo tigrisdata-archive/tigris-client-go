@@ -28,6 +28,12 @@ type Management interface {
 	CreateNamespace(ctx context.Context, name string) error
 	ListNamespaces(ctx context.Context) ([]*Namespace, error)
 
+	CreateInvitations(ctx context.Context, invitations []*InvitationInfo) error
+	DeleteInvitations(ctx context.Context, email string, status string) error
+	ListInvitations(ctx context.Context, status string) ([]*Invitation, error)
+	VerifyInvitation(ctx context.Context, email string, code string) error
+	ListUsers(ctx context.Context) ([]*User, error)
+
 	Close() error
 }
 

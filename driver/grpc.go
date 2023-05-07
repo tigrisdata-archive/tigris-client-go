@@ -731,6 +731,76 @@ func (c *grpcDriver) GetAccessToken(ctx context.Context, clientID string, client
 	return (*TokenResponse)(r), nil
 }
 
+func (c *grpcDriver) CreateInvitations(ctx context.Context, invitations []*InvitationInfo) error {
+	invs := make([]*api.InvitationInfo, 0, len(invitations))
+	for _, a := range invitations {
+		invs = append(invs, (*api.InvitationInfo)(a))
+	}
+
+	_, err := c.auth.CreateInvitations(ctx, &api.CreateInvitationsRequest{
+		Invitations: invs,
+	})
+	if err != nil {
+		return GRPCError(err)
+	}
+
+	return nil
+}
+
+func (c *grpcDriver) DeleteInvitations(ctx context.Context, email string, status string) error {
+	_, err := c.auth.DeleteInvitations(ctx, &api.DeleteInvitationsRequest{
+		Email:  email,
+		Status: &status,
+	})
+	if err != nil {
+		return GRPCError(err)
+	}
+
+	return nil
+}
+
+func (c *grpcDriver) ListInvitations(ctx context.Context, status string) ([]*Invitation, error) {
+	resp, err := c.auth.ListInvitations(ctx, &api.ListInvitationsRequest{
+		Status: &status,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	invs := make([]*Invitation, 0, len(resp.Invitations))
+	for _, a := range resp.Invitations {
+		invs = append(invs, (*Invitation)(a))
+	}
+
+	return invs, nil
+}
+
+func (c *grpcDriver) VerifyInvitation(ctx context.Context, email string, code string) error {
+	_, err := c.auth.VerifyInvitation(ctx, &api.VerifyInvitationRequest{
+		Email: email,
+		Code:  code,
+	})
+	if err != nil {
+		return GRPCError(err)
+	}
+
+	return nil
+}
+
+func (c *grpcDriver) ListUsers(ctx context.Context) ([]*User, error) {
+	resp, err := c.auth.ListUsers(ctx, &api.ListUsersRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	users := make([]*User, 0, len(resp.Users))
+	for _, a := range resp.Users {
+		users = append(users, (*User)(a))
+	}
+
+	return users, nil
+}
+
 func (c *grpcDriver) CreateNamespace(ctx context.Context, name string) error {
 	_, err := c.mgmt.CreateNamespace(ctx, &api.CreateNamespaceRequest{Name: name})
 	if err != nil {

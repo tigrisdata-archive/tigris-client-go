@@ -1159,6 +1159,85 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, cl
 	return &tr, nil
 }
 
+func (c *httpDriver) CreateInvitations(ctx context.Context, invitations []*InvitationInfo) error {
+	invs := make([]apiHTTP.InvitationInfo, 0, len(invitations))
+	for _, a := range invitations {
+		invs = append(invs, apiHTTP.InvitationInfo{
+			Email:                &a.Email,
+			InvitationSentByName: &a.InvitationSentByName,
+			Role:                 &a.Role,
+		})
+	}
+
+	resp, err := c.api.AuthCreateInvitations(ctx, apiHTTP.AuthCreateInvitationsJSONRequestBody{
+		Invitations: &invs,
+	})
+	if err = HTTPError(err, resp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *httpDriver) DeleteInvitations(ctx context.Context, email string, status string) error {
+	resp, err := c.api.AuthDeleteInvitations(ctx, apiHTTP.AuthDeleteInvitationsJSONRequestBody{
+		Email:  &email,
+		Status: &status,
+	})
+
+	return HTTPError(err, resp)
+}
+
+func (c *httpDriver) ListInvitations(ctx context.Context, status string) ([]*Invitation, error) {
+	resp, err := c.api.AuthListInvitations(ctx, &apiHTTP.AuthListInvitationsParams{
+		Status: &status,
+	})
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r api.ListInvitationsResponse
+	if err := respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	invs := make([]*Invitation, 0, len(r.Invitations))
+	for _, a := range r.Invitations {
+		invs = append(invs, (*Invitation)(a))
+	}
+
+	return invs, nil
+}
+
+func (c *httpDriver) VerifyInvitation(ctx context.Context, email string, code string) error {
+	resp, err := c.api.AuthVerifyInvitation(ctx, apiHTTP.AuthVerifyInvitationJSONRequestBody{
+		Email: &email,
+		Code:  &code,
+	})
+
+	return HTTPError(err, resp)
+}
+
+func (c *httpDriver) ListUsers(ctx context.Context) ([]*User, error) {
+	resp, err := c.api.AuthListUsers(ctx)
+
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r api.ListUsersResponse
+	if err := respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	users := make([]*User, 0, len(r.Users))
+	for _, a := range r.Users {
+		users = append(users, (*User)(a))
+	}
+
+	return users, nil
+}
+
 func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
 	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONRequestBody{Name: &name})
 	if err := HTTPError(err, resp); err != nil {

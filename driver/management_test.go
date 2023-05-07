@@ -441,3 +441,248 @@ func testGetInfo(t *testing.T, c Driver, mc *mock.MockObservabilityServer) {
 	_, err = c.Info(ctx)
 	require.Error(t, err)
 }
+
+func testInvitations(t *testing.T, m Management, ma *mock.MockAuthServer) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	t.Run("create_invitations", func(t *testing.T) {
+		ma.EXPECT().CreateInvitations(gomock.Any(),
+			pm(&api.CreateInvitationsRequest{
+				Invitations: []*api.InvitationInfo{
+					{
+						Email:                "email1",
+						Role:                 "role1",
+						InvitationSentByName: "inv_by_name1",
+					},
+					{
+						Email:                "email2",
+						Role:                 "role2",
+						InvitationSentByName: "inv_by_name2",
+					},
+				},
+			})).Return(&api.CreateInvitationsResponse{
+			Status:  "created",
+			Message: "msg1",
+			Count:   2,
+		}, nil)
+
+		err := m.CreateInvitations(ctx, []*InvitationInfo{
+			{
+				Email:                "email1",
+				Role:                 "role1",
+				InvitationSentByName: "inv_by_name1",
+			},
+			{
+				Email:                "email2",
+				Role:                 "role2",
+				InvitationSentByName: "inv_by_name2",
+			},
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("delete_invitations", func(t *testing.T) {
+		status := "status1"
+
+		ma.EXPECT().DeleteInvitations(gomock.Any(),
+			pm(&api.DeleteInvitationsRequest{
+				Email:  "email1",
+				Status: &status,
+			}),
+		).Return(&api.DeleteInvitationsResponse{Status: "deleted", Message: "msg1"}, nil)
+
+		err := m.DeleteInvitations(ctx, "email1", "status1")
+		require.NoError(t, err)
+	})
+
+	t.Run("verify_invitations", func(t *testing.T) {
+		ma.EXPECT().VerifyInvitation(gomock.Any(),
+			pm(&api.VerifyInvitationRequest{
+				Email: "email1",
+				Code:  "code1",
+			}),
+		).Return(&api.VerifyInvitationResponse{
+			TigrisNamespace:     "ns1",
+			TigrisNamespaceName: "ns_name1",
+			Role:                "role1",
+		}, nil)
+
+		err := m.VerifyInvitation(ctx, "email1", "code1")
+		require.NoError(t, err)
+	})
+
+	t.Run("list_invitations", func(t *testing.T) {
+		status := "status1"
+		ma.EXPECT().ListInvitations(gomock.Any(),
+			pm(&api.ListInvitationsRequest{
+				Status: &status,
+			}),
+		).Return(&api.ListInvitationsResponse{
+			Invitations: []*api.Invitation{
+				{
+					Email:               "email1",
+					Role:                "role1",
+					Status:              "status1",
+					TigrisNamespace:     "ns1",
+					TigrisNamespaceName: "ns_name1",
+					CreatedBy:           "created_by1",
+					CreatedByName:       "created_by_name1",
+					ExpirationTime:      12345,
+				},
+				{
+					Email:               "email2",
+					Role:                "role2",
+					Status:              "status2",
+					TigrisNamespace:     "ns2",
+					TigrisNamespaceName: "ns_name2",
+					CreatedBy:           "created_by2",
+					CreatedByName:       "created_by_name2",
+					ExpirationTime:      22345,
+				},
+			},
+		}, nil)
+
+		invs, err := m.ListInvitations(ctx, "status1")
+		require.NoError(t, err)
+
+		require.Equal(t, []*Invitation{
+			{
+				Email:               "email1",
+				Role:                "role1",
+				Status:              "status1",
+				TigrisNamespace:     "ns1",
+				TigrisNamespaceName: "ns_name1",
+				CreatedBy:           "created_by1",
+				CreatedByName:       "created_by_name1",
+				ExpirationTime:      12345,
+			},
+			{
+				Email:               "email2",
+				Role:                "role2",
+				Status:              "status2",
+				TigrisNamespace:     "ns2",
+				TigrisNamespaceName: "ns_name2",
+				CreatedBy:           "created_by2",
+				CreatedByName:       "created_by_name2",
+				ExpirationTime:      22345,
+			},
+		}, invs)
+	})
+
+	t.Run("list_users", func(t *testing.T) {
+		ma.EXPECT().ListUsers(gomock.Any(),
+			pm(&api.ListUsersRequest{}),
+		).Return(&api.ListUsersResponse{
+			Users: []*api.User{
+				{
+					Email:     "email1",
+					Name:      "name1",
+					CreatedAt: 12345,
+					Picture:   "pic1",
+					Role:      "role1",
+				},
+				{
+					Email:     "email2",
+					Name:      "name2",
+					CreatedAt: 22345,
+					Picture:   "pic2",
+					Role:      "role2",
+				},
+			},
+		}, nil)
+		users, err := m.ListUsers(ctx)
+		require.NoError(t, err)
+		require.Equal(t, []*User{
+			{
+				Email:     "email1",
+				Name:      "name1",
+				CreatedAt: 12345,
+				Picture:   "pic1",
+				Role:      "role1",
+			},
+			{
+				Email:     "email2",
+				Name:      "name2",
+				CreatedAt: 22345,
+				Picture:   "pic2",
+				Role:      "role2",
+			},
+		}, users)
+	})
+}
+
+func testInvitationsNegative(t *testing.T, m Management, ma *mock.MockAuthServer) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	t.Run("create_invitations", func(t *testing.T) {
+		ma.EXPECT().CreateInvitations(gomock.Any(),
+			pm(&api.CreateInvitationsRequest{
+				Invitations: []*api.InvitationInfo{
+					{
+						Email:                "email1",
+						Role:                 "role1",
+						InvitationSentByName: "inv_by_name1",
+					},
+				},
+			})).Return(nil, fmt.Errorf("some error"))
+
+		err := m.CreateInvitations(ctx, []*InvitationInfo{
+			{
+				Email:                "email1",
+				Role:                 "role1",
+				InvitationSentByName: "inv_by_name1",
+			},
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("delete_invitations", func(t *testing.T) {
+		status := "status1"
+
+		ma.EXPECT().DeleteInvitations(gomock.Any(),
+			pm(&api.DeleteInvitationsRequest{
+				Email:  "email1",
+				Status: &status,
+			}),
+		).Return(nil, fmt.Errorf("some error"))
+
+		err := m.DeleteInvitations(ctx, "email1", "status1")
+		require.Error(t, err)
+	})
+
+	t.Run("verify_invitations", func(t *testing.T) {
+		ma.EXPECT().VerifyInvitation(gomock.Any(),
+			pm(&api.VerifyInvitationRequest{
+				Email: "email1",
+				Code:  "code1",
+			}),
+		).Return(nil, fmt.Errorf("some error"))
+
+		err := m.VerifyInvitation(ctx, "email1", "code1")
+		require.Error(t, err)
+	})
+
+	t.Run("list_invitations", func(t *testing.T) {
+		status := "status1"
+		ma.EXPECT().ListInvitations(gomock.Any(),
+			pm(&api.ListInvitationsRequest{
+				Status: &status,
+			}),
+		).Return(nil, fmt.Errorf("some error"))
+
+		_, err := m.ListInvitations(ctx, "status1")
+		require.Error(t, err)
+	})
+
+	t.Run("list_users", func(t *testing.T) {
+		ma.EXPECT().ListUsers(gomock.Any(),
+			pm(&api.ListUsersRequest{}),
+		).Return(nil, nil)
+		_, err := m.ListUsers(ctx)
+		require.Error(t, err)
+	})
+}

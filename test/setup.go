@@ -49,6 +49,7 @@ var (
 		apiPathPrefix + ("/management/*"),
 		apiPathPrefix + ("/observability/*"),
 		apiPathPrefix + ("/auth/*"),
+		apiPathPrefix + ("/apps/*"),
 	}
 )
 

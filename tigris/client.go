@@ -58,7 +58,7 @@ func driverConfig(cfg *Config) *config.Driver {
 		Token:        cfg.Token,
 		Protocol:     cfg.Protocol,
 
-		SkipSchemaValidation: true,
+		SkipSchemaValidation: false,
 	}
 }
 

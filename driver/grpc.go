@@ -650,6 +650,66 @@ func (c *grpcDriver) RotateAppKeySecret(ctx context.Context, project string, id 
 	return (*AppKey)(r.AppKey), nil
 }
 
+func (c *grpcDriver) CreateGlobalAppKey(ctx context.Context, name string, description string) (*GlobalAppKey, error) {
+	r, err := c.api.CreateGlobalAppKey(ctx, &api.CreateGlobalAppKeyRequest{Name: name, Description: description})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	if r.CreatedAppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return (*GlobalAppKey)(r.CreatedAppKey), nil
+}
+
+func (c *grpcDriver) DeleteGlobalAppKey(ctx context.Context, id string) error {
+	_, err := c.api.DeleteGlobalAppKey(ctx, &api.DeleteGlobalAppKeyRequest{Id: id})
+
+	return GRPCError(err)
+}
+
+func (c *grpcDriver) UpdateGlobalAppKey(ctx context.Context, id string, name string, description string,
+) (*GlobalAppKey, error) {
+	r, err := c.api.UpdateGlobalAppKey(ctx, &api.UpdateGlobalAppKeyRequest{Id: id, Name: name, Description: description})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	if r.UpdatedAppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return (*GlobalAppKey)(r.UpdatedAppKey), nil
+}
+
+func (c *grpcDriver) ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, error) {
+	r, err := c.api.ListGlobalAppKeys(ctx, &api.ListGlobalAppKeysRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	applications := make([]*GlobalAppKey, 0, len(r.AppKeys))
+	for _, a := range r.GetAppKeys() {
+		applications = append(applications, (*GlobalAppKey)(a))
+	}
+
+	return applications, nil
+}
+
+func (c *grpcDriver) RotateGlobalAppKeySecret(ctx context.Context, id string) (*GlobalAppKey, error) {
+	r, err := c.api.RotateGlobalAppKeySecret(ctx, &api.RotateGlobalAppKeySecretRequest{Id: id})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	if r.AppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return (*GlobalAppKey)(r.AppKey), nil
+}
+
 func (c *grpcDriver) GetAccessToken(ctx context.Context, clientID string, clientSecret string,
 	refreshToken string,
 ) (*TokenResponse, error) {
@@ -669,6 +729,76 @@ func (c *grpcDriver) GetAccessToken(ctx context.Context, clientID string, client
 	}
 
 	return (*TokenResponse)(r), nil
+}
+
+func (c *grpcDriver) CreateInvitations(ctx context.Context, invitations []*InvitationInfo) error {
+	invs := make([]*api.InvitationInfo, 0, len(invitations))
+	for _, a := range invitations {
+		invs = append(invs, (*api.InvitationInfo)(a))
+	}
+
+	_, err := c.auth.CreateInvitations(ctx, &api.CreateInvitationsRequest{
+		Invitations: invs,
+	})
+	if err != nil {
+		return GRPCError(err)
+	}
+
+	return nil
+}
+
+func (c *grpcDriver) DeleteInvitations(ctx context.Context, email string, status string) error {
+	_, err := c.auth.DeleteInvitations(ctx, &api.DeleteInvitationsRequest{
+		Email:  email,
+		Status: &status,
+	})
+	if err != nil {
+		return GRPCError(err)
+	}
+
+	return nil
+}
+
+func (c *grpcDriver) ListInvitations(ctx context.Context, status string) ([]*Invitation, error) {
+	resp, err := c.auth.ListInvitations(ctx, &api.ListInvitationsRequest{
+		Status: &status,
+	})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	invs := make([]*Invitation, 0, len(resp.Invitations))
+	for _, a := range resp.Invitations {
+		invs = append(invs, (*Invitation)(a))
+	}
+
+	return invs, nil
+}
+
+func (c *grpcDriver) VerifyInvitation(ctx context.Context, email string, code string) error {
+	_, err := c.auth.VerifyInvitation(ctx, &api.VerifyInvitationRequest{
+		Email: email,
+		Code:  code,
+	})
+	if err != nil {
+		return GRPCError(err)
+	}
+
+	return nil
+}
+
+func (c *grpcDriver) ListUsers(ctx context.Context) ([]*User, error) {
+	resp, err := c.auth.ListUsers(ctx, &api.ListUsersRequest{})
+	if err != nil {
+		return nil, GRPCError(err)
+	}
+
+	users := make([]*User, 0, len(resp.Users))
+	for _, a := range resp.Users {
+		users = append(users, (*User)(a))
+	}
+
+	return users, nil
 }
 
 func (c *grpcDriver) CreateNamespace(ctx context.Context, name string) error {

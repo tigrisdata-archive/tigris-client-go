@@ -65,6 +65,21 @@ func (mr *MockDriverMockRecorder) CreateAppKey(arg0, arg1, arg2, arg3 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAppKey", reflect.TypeOf((*MockDriver)(nil).CreateAppKey), arg0, arg1, arg2, arg3)
 }
 
+// CreateGlobalAppKey mocks base method.
+func (m *MockDriver) CreateGlobalAppKey(arg0 context.Context, arg1, arg2 string) (*driver.GlobalAppKey, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateGlobalAppKey", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*driver.GlobalAppKey)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateGlobalAppKey indicates an expected call of CreateGlobalAppKey.
+func (mr *MockDriverMockRecorder) CreateGlobalAppKey(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGlobalAppKey", reflect.TypeOf((*MockDriver)(nil).CreateGlobalAppKey), arg0, arg1, arg2)
+}
+
 // CreateProject mocks base method.
 func (m *MockDriver) CreateProject(arg0 context.Context, arg1 string, arg2 ...*driver.CreateProjectOptions) (*driver.CreateProjectResponse, error) {
 	m.ctrl.T.Helper()
@@ -97,6 +112,20 @@ func (m *MockDriver) DeleteAppKey(arg0 context.Context, arg1, arg2 string) error
 func (mr *MockDriverMockRecorder) DeleteAppKey(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAppKey", reflect.TypeOf((*MockDriver)(nil).DeleteAppKey), arg0, arg1, arg2)
+}
+
+// DeleteGlobalAppKey mocks base method.
+func (m *MockDriver) DeleteGlobalAppKey(arg0 context.Context, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGlobalAppKey", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteGlobalAppKey indicates an expected call of DeleteGlobalAppKey.
+func (mr *MockDriverMockRecorder) DeleteGlobalAppKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGlobalAppKey", reflect.TypeOf((*MockDriver)(nil).DeleteGlobalAppKey), arg0, arg1)
 }
 
 // DeleteProject mocks base method.
@@ -184,6 +213,21 @@ func (mr *MockDriverMockRecorder) ListAppKeys(arg0, arg1 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppKeys", reflect.TypeOf((*MockDriver)(nil).ListAppKeys), arg0, arg1)
 }
 
+// ListGlobalAppKeys mocks base method.
+func (m *MockDriver) ListGlobalAppKeys(arg0 context.Context) ([]*driver.GlobalAppKey, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListGlobalAppKeys", arg0)
+	ret0, _ := ret[0].([]*driver.GlobalAppKey)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListGlobalAppKeys indicates an expected call of ListGlobalAppKeys.
+func (mr *MockDriverMockRecorder) ListGlobalAppKeys(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListGlobalAppKeys", reflect.TypeOf((*MockDriver)(nil).ListGlobalAppKeys), arg0)
+}
+
 // ListProjects mocks base method.
 func (m *MockDriver) ListProjects(arg0 context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -214,6 +258,21 @@ func (mr *MockDriverMockRecorder) RotateAppKeySecret(arg0, arg1, arg2 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RotateAppKeySecret", reflect.TypeOf((*MockDriver)(nil).RotateAppKeySecret), arg0, arg1, arg2)
 }
 
+// RotateGlobalAppKeySecret mocks base method.
+func (m *MockDriver) RotateGlobalAppKeySecret(arg0 context.Context, arg1 string) (*driver.GlobalAppKey, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RotateGlobalAppKeySecret", arg0, arg1)
+	ret0, _ := ret[0].(*driver.GlobalAppKey)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RotateGlobalAppKeySecret indicates an expected call of RotateGlobalAppKeySecret.
+func (mr *MockDriverMockRecorder) RotateGlobalAppKeySecret(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RotateGlobalAppKeySecret", reflect.TypeOf((*MockDriver)(nil).RotateGlobalAppKeySecret), arg0, arg1)
+}
+
 // UpdateAppKey mocks base method.
 func (m *MockDriver) UpdateAppKey(arg0 context.Context, arg1, arg2, arg3, arg4 string) (*driver.AppKey, error) {
 	m.ctrl.T.Helper()
@@ -227,6 +286,21 @@ func (m *MockDriver) UpdateAppKey(arg0 context.Context, arg1, arg2, arg3, arg4 s
 func (mr *MockDriverMockRecorder) UpdateAppKey(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAppKey", reflect.TypeOf((*MockDriver)(nil).UpdateAppKey), arg0, arg1, arg2, arg3, arg4)
+}
+
+// UpdateGlobalAppKey mocks base method.
+func (m *MockDriver) UpdateGlobalAppKey(arg0 context.Context, arg1, arg2, arg3 string) (*driver.GlobalAppKey, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateGlobalAppKey", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*driver.GlobalAppKey)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateGlobalAppKey indicates an expected call of UpdateGlobalAppKey.
+func (mr *MockDriverMockRecorder) UpdateGlobalAppKey(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateGlobalAppKey", reflect.TypeOf((*MockDriver)(nil).UpdateGlobalAppKey), arg0, arg1, arg2, arg3)
 }
 
 // UseDatabase mocks base method.

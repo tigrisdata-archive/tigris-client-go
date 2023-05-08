@@ -17,9 +17,12 @@
 package driver
 
 import (
+	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/tigrisdata/tigris-client-go/config"
+	"github.com/tigrisdata/tigris-client-go/test"
 )
 
 func TestHTTPObservabilityDriver(t *testing.T) {
@@ -27,4 +30,16 @@ func TestHTTPObservabilityDriver(t *testing.T) {
 	defer cancel()
 	testDriverObservability(t, client, mockServers.O11y)
 	testDriverObservabilityNegative(t, client, mockServers.O11y)
+}
+
+func TestNewO11yHTTP(t *testing.T) {
+	_, cancel := test.SetupTests(t, 4)
+	defer cancel()
+
+	DefaultProtocol = HTTP
+	cfg := config.Driver{URL: test.HTTPURL(4)}
+	client, err := NewObservability(context.Background(), &cfg)
+	require.NoError(t, err)
+
+	_ = client.Close()
 }

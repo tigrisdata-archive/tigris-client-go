@@ -16,6 +16,9 @@ package driver
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/tigrisdata/tigris-client-go/config"
 )
 
 // Observability declares Tigris Observability APIs.
@@ -26,7 +29,6 @@ type Observability interface {
 	Close() error
 }
 
-/*
 // NewObservability instantiates observability API client.
 func NewObservability(ctx context.Context, cfg *config.Driver) (Observability, error) {
 	var err error
@@ -53,4 +55,3 @@ func NewObservability(ctx context.Context, cfg *config.Driver) (Observability, e
 
 	return o11y, nil
 }
-*/

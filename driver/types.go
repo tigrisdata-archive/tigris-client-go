@@ -34,8 +34,8 @@ const (
 	EnvProject      = "TIGRIS_PROJECT"
 	EnvDBBranch     = "TIGRIS_DB_BRANCH"
 
-	Version   = "v1.0.0"
-	UserAgent = "tigris-client-go/" + Version
+	ClientVersion = "v1.0.0"
+	UserAgent     = "tigris-client-go/" + ClientVersion
 
 	tokenRequestTimeout = 15 * time.Second
 )
@@ -46,6 +46,8 @@ var (
 
 	// TokenURLOverride Only used in tests to point auth to proper HTTP port in GRPC tests.
 	TokenURLOverride string
+
+	HeaderSchemaVersionValue []string
 )
 
 type (

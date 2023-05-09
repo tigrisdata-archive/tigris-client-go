@@ -97,6 +97,7 @@ func TestGRPCHeaders(t *testing.T) {
 	defer cancel()
 
 	testSchemaSignOffHeader(t, mc, c)
+	testSchemaVersion(t, mc, c)
 }
 
 func TestNewDriverGRPC(t *testing.T) {

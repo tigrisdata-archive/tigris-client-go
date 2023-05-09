@@ -47,7 +47,7 @@ func newDatabase(name string, driver driver.Driver) *Database {
 // This method is only needed if collections need to be created dynamically,
 // all static collections are created by OpenDatabase.
 func (db *Database) CreateCollections(ctx context.Context, model schema.Model, models ...schema.Model) error {
-	schemas, err := schema.FromCollectionModels(schema.Documents, model, models...)
+	schemas, err := schema.FromCollectionModels(SchemaVersion, schema.Documents, model, models...)
 	if err != nil {
 		return fmt.Errorf("error parsing model schema: %w", err)
 	}
@@ -92,6 +92,21 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 		return db.createCollectionsFromSchemasLow(ctx, tx.tx, schemas)
 	}
 
+	if SchemaVersion != 0 {
+		dtx, err := db.driver.UseDatabase(db.name).BeginTx(ctx)
+		if err != nil {
+			return err
+		}
+
+		defer func() { _ = dtx.Rollback(ctx) }()
+
+		if err = db.createCollectionsFromSchemasLow(ctx, dtx, schemas); err != nil {
+			return err
+		}
+
+		return dtx.Commit(ctx)
+	}
+
 	return db.createCollectionsFromSchemasLow(ctx, nil, schemas)
 }
 
@@ -134,6 +149,8 @@ func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 	if getTxCtx(ctx) != nil {
 		return nil, ErrNotTransactional
 	}
+
+	driver.SetSchemaVersion(SchemaVersion)
 
 	d, err := driver.NewDriver(ctx, driverConfig(cfg))
 	if err != nil {

@@ -29,6 +29,8 @@ import (
 
 const DefaultBranch = "main"
 
+var SchemaVersion int
+
 type Config struct {
 	TLS          *tls.Config `json:"tls,omitempty"`
 	ClientID     string      `json:"client_id,omitempty"`

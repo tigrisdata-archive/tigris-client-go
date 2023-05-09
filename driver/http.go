@@ -189,6 +189,7 @@ func setHeaders(ctx context.Context, req *http.Request) error {
 	req.Header["Host"] = []string{req.Host}
 	req.Header["User-Agent"] = []string{UserAgent}
 	req.Header["Accept"] = []string{"*/*"}
+	req.Header[api.HeaderSchemaVersion] = HeaderSchemaVersionValue
 
 	if v := ctx.Value(txCtxKey{}); v != nil {
 		txCtx := v.(*api.TransactionCtx)

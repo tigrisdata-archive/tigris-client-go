@@ -1,0 +1,23 @@
+name: release
+on:
+  push:
+    branches:
+      - "alpha"
+      - "beta"
+      - "rc"
+      - "release"
+jobs:
+  test:
+    uses: ./.github/workflows/go-test.yaml
+  release:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --debug

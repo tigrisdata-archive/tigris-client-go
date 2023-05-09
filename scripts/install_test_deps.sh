@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2022 Tigris Data, Inc.
+# Copyright 2022-2023 Tigris Data, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ set -ex
 
 export GO111MODULE=on
 
-go install github.com/golang/mock/mockgen@v1.6.0
-curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.44.0
+go install github.com/golang/mock/mockgen@v1
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" latest
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if command -v brew > /dev/null 2>&1; then

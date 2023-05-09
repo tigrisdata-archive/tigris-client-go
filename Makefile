@@ -1,56 +1,64 @@
-VERSION=1.0.0
-GIT_HASH=$(shell [ ! -d .git ] || git rev-parse --short HEAD)
+VERSION=$(shell git describe --tags --always)
 GO_SRC=$(shell find . -name "*.go" -not -name "*_test.go")
 API_DIR=api
 V=v1
 GEN_DIR=${API_DIR}/server/${V}
+PROTO_DIR=${API_DIR}/proto/server/${V}
 
-BUILD_PARAM=-tags=release -ldflags "-X 'main.Version=$(VERSION)' -X 'main.BuildHash=$(GIT_HASH)'" $(shell printenv BUILD_PARAM)
-TEST_PARAM=-cover -race -tags=test $(shell printenv TEST_PARAM)
+#BUILD_PARAM=-tags=tigris_grpc,release -ldflags "-X 'github.com/tigrisdata/tigris-client-go/main.Version=$(VERSION)'" $(shell printenv BUILD_PARAM)
+TEST_PARAM=-cover -race $(shell printenv TEST_PARAM)
+
+SERVICES = api health auth observability management
 
 all: generate ${GO_SRC}
 	#go build ${BUILD_PARAM} .
 
-${GEN_DIR}/%.proto ${GEN_DIR}/%_openapi.yaml:
+${PROTO_DIR}/%.proto:
+	git submodule update --init --recursive --rebase
+
+# separated from above to avoid error of mixing implicit and normal rules
+${PROTO_DIR}/openapi.yaml:
 	git submodule update --init --recursive --rebase
 
 upgrade_api:
 	git submodule update --remote --recursive --rebase
 
 # generate GRPC client/server, openapi spec, http server
-${GEN_DIR}/%.pb.go: ${GEN_DIR}/%.proto
-	protoc -Iapi --go_out=${API_DIR} --go_opt=paths=source_relative \
-		--go-grpc_out=${API_DIR} --go-grpc_opt=require_unimplemented_servers=false,paths=source_relative \
-		--grpc-gateway_out=${API_DIR} --grpc-gateway_opt=paths=source_relative,allow_delete_body=true \
-		$<
+${GEN_DIR}/%.pb.go ${GEN_DIR}/%.pb.gw.go: ${PROTO_DIR}/%.proto
+	make -C api/proto generate GEN_DIR=../../${GEN_DIR} API_DIR=..
 
 # generate Go HTTP client from openapi spec
-${API_DIR}/client/${V}/%/http.go: ${GEN_DIR}/%_openapi.yaml
-	/bin/bash scripts/fix_openapi.sh ${GEN_DIR}/$(*F)_openapi.yaml /tmp/$(*F)_openapi.yaml
-	mkdir -p ${API_DIR}/client/${V}/$(*F)
-	oapi-codegen -package api -generate "client, types, spec" \
-		-o ${API_DIR}/client/${V}/$(*F)/http.go \
-		/tmp/$(*F)_openapi.yaml
+${API_DIR}/client/${V}/api/http.go: ${PROTO_DIR}/openapi.yaml scripts/fix_openapi.sh
+	mkdir -p ${API_DIR}/client/${V}/api
+	/bin/bash scripts/fix_openapi.sh ${PROTO_DIR}/openapi.yaml /tmp/openapi.yaml
+	oapi-codegen --old-config-style -package api -generate "client, types" \
+		-o ${API_DIR}/client/${V}/api/http.go \
+		/tmp/openapi.yaml
 
-generate: ${GEN_DIR}/user.pb.go ${GEN_DIR}/health.pb.go ${API_DIR}/client/${V}/user/http.go
+generate: $(SERVICES:%=$(GEN_DIR)/%.pb.go) ${API_DIR}/client/${V}/api/http.go
 
-mock: generate
-	mkdir -p mock
-	mockgen -source=api/server/v1/user_grpc.pb.go -package=mock >mock/user_grpc.go
+mock/api/grpc.go mock/driver.go: $(SERVICES:%=$(GEN_DIR)/%.pb.go) driver/driver.go driver/search.go
+	mkdir -p mock/api
+	mockgen -package mock -destination mock/driver.go github.com/tigrisdata/tigris-client-go/driver \
+		Driver,Tx,Database,Iterator,SearchResultIterator,SearchClient,SearchIndexResultIterator
+	mockgen -package api -destination mock/api/grpc.go github.com/tigrisdata/tigris-client-go/api/server/v1 \
+		TigrisServer,AuthServer,ManagementServer,ObservabilityServer,SearchServer
+
+mock: mock/api/grpc.go mock/driver.go
 
 lint:
+	yq --exit-status 'tag == "!!map" or tag== "!!seq"' .github/workflows/*.yaml
 	shellcheck scripts/*
-	# golangci-lint run #FIXME: doesn't work with go1.18beta1
+	golangci-lint run --fix
 
-go.sum: go.mod mock generate
+go.sum: go.mod generate mock
 	go mod download
 
-test: go.sum generate mock lint
-	go test $(TEST_PARAM) ./...
+test: go.sum generate mock
+	go test -tags tigris_grpc,tigris_http $(TEST_PARAM) ./...
 
-clean:
-	rm -f api/server/${V}/*.pb.go \
-		api/server/${V}/*.pb.gw.go \
-		api/client/${V}/*/http.go
-	rm -rf mock
-	find api -type d -empty -delete
+test-all: go.sum generate mock
+	go test -tags tigris_grpc,tigris_http $(TEST_PARAM) ./...
+	go test -tags tigris_grpc $(TEST_PARAM) ./...
+	go test -tags tigris_http $(TEST_PARAM) ./...
+	go test $(TEST_PARAM) ./...

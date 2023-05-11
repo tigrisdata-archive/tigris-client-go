@@ -39,6 +39,10 @@ func TestUpdateBasic(t *testing.T) {
 		{"set_nested", Set("a.b.c", 123), `{"$set":{"a.b.c":123}}`, nil},
 		{"unset_nested", Unset("a.b.c"), `{"$unset":{"a.b.c":null}}`, nil},
 		{"set.unset_duplicate", Set("a1", 123).Unset("b1").Set("a1", 123).Unset("b1"), `{"$set":{"a1":123},"$unset":{"b1":null}}`, nil},
+		{"increment", Increment("a", 123), `{"$increment":{"a":123}}`, nil},
+		{"decrement", Decrement("a", 123), `{"$decrement":{"a":123}}`, nil},
+		{"multiply", Multiply("a", 123), `{"$multiply":{"a":123}}`, nil},
+		{"divide", Divide("a", 123), `{"$divide":{"a":123}}`, nil},
 	}
 
 	for _, v := range cases {

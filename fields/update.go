@@ -27,18 +27,30 @@ import (
 )
 
 type Update struct {
-	built  driver.Update
-	SetF   map[string]interface{} `json:"$set,omitempty"`
-	UnsetF map[string]interface{} `json:"$unset,omitempty"`
+	built      driver.Update
+	SetF       map[string]interface{} `json:"$set,omitempty"`
+	UnsetF     map[string]interface{} `json:"$unset,omitempty"`
+	IncrementF map[string]float64     `json:"$increment,omitempty"`
+	DecrementF map[string]float64     `json:"$decrement,omitempty"`
+	MultiplyF  map[string]float64     `json:"$multiply,omitempty"`
+	DivideF    map[string]float64     `json:"$divide,omitempty"`
 }
 
 // UpdateBuilder returns and object to construct the update field of Update API.
 func UpdateBuilder() *Update {
-	return &Update{SetF: map[string]interface{}{}, UnsetF: map[string]interface{}{}}
+	return &Update{
+		SetF:       map[string]interface{}{},
+		UnsetF:     map[string]interface{}{},
+		IncrementF: make(map[string]float64),
+		DecrementF: make(map[string]float64),
+		MultiplyF:  make(map[string]float64),
+		DivideF:    make(map[string]float64),
+	}
 }
 
 func (u *Update) Build() (*Update, error) {
-	if len(u.SetF) == 0 && len(u.UnsetF) == 0 {
+	if len(u.SetF) == 0 && len(u.UnsetF) == 0 && len(u.IncrementF) == 0 &&
+		len(u.DecrementF) == 0 && len(u.MultiplyF) == 0 && len(u.DivideF) == 0 {
 		return nil, fmt.Errorf("empty update")
 	}
 
@@ -76,6 +88,46 @@ func (u *Update) Unset(field string) *Update {
 	return u
 }
 
+// Increment instructs operation to increment given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field + value
+func (u *Update) Increment(field string, value float64) *Update {
+	u.IncrementF[field] = value
+
+	return u
+}
+
+// Decrement instructs operation to decrement given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field - value
+func (u *Update) Decrement(field string, value float64) *Update {
+	u.DecrementF[field] = value
+
+	return u
+}
+
+// Multiply instructs operation to multiply given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field * value
+func (u *Update) Multiply(field string, value float64) *Update {
+	u.MultiplyF[field] = value
+
+	return u
+}
+
+// Divide instructs operation to increment given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field / value
+func (u *Update) Divide(field string, value float64) *Update {
+	u.DivideF[field] = value
+
+	return u
+}
+
 // Set instructs operation to set given field to the provided value
 // The result is equivalent to
 //
@@ -94,6 +146,50 @@ func Set(field string, value interface{}) *Update {
 func Unset(field string) *Update {
 	u := UpdateBuilder()
 	u.UnsetF[field] = nil
+
+	return u
+}
+
+// Increment instructs operation to increment given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field + value
+func Increment(field string, value float64) *Update {
+	u := UpdateBuilder()
+	u.IncrementF[field] = value
+
+	return u
+}
+
+// Decrement instructs operation to decrement given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field - value
+func Decrement(field string, value float64) *Update {
+	u := UpdateBuilder()
+	u.DecrementF[field] = value
+
+	return u
+}
+
+// Multiply instructs operation to multiply given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field * value
+func Multiply(field string, value float64) *Update {
+	u := UpdateBuilder()
+	u.MultiplyF[field] = value
+
+	return u
+}
+
+// Divide instructs operation to divide given field in the document by the provided value
+// The result is equivalent to
+//
+//	field = field / value
+func Divide(field string, value float64) *Update {
+	u := UpdateBuilder()
+	u.DivideF[field] = value
 
 	return u
 }

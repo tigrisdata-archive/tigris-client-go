@@ -47,10 +47,12 @@ func TestUpdateBasic(t *testing.T) {
 		{"decrement.decrement", Decrement("a", 123).Decrement("b", 42), `{"$decrement":{"a":123,"b":42}}`, nil},
 		{"multiply.multiply", Multiply("a", 123).Multiply("b", 42), `{"$multiply":{"a":123,"b":42}}`, nil},
 		{"divide.divide", Divide("a", 123).Divide("b", 42), `{"$divide":{"a":123,"b":42}}`, nil},
-		{name: "all",
+		{
+			name: "all",
 			fields: Set("a1", 123).Increment("a", 1231).Decrement("a", 1232).
 				Multiply("a", 1233).Divide("a", 1234),
-			exp: `{"$set":{"a1":123},"$increment":{"a":1231},"$decrement":{"a":1232},"$multiply":{"a":1233},"$divide":{"a":1234}}`},
+			exp: `{"$set":{"a1":123},"$increment":{"a":1231},"$decrement":{"a":1232},"$multiply":{"a":1233},"$divide":{"a":1234}}`,
+		},
 	}
 
 	for _, v := range cases {

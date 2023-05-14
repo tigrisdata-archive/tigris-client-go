@@ -28,12 +28,15 @@ func TestGt(t *testing.T) {
 		expr Expr
 		exp  string
 	}{
+		{"int", GtInt("f", 0), `{"f":{"$gt":0}}`},
+		{"int", GtInt("f", -1), `{"f":{"$gt":-1}}`},
 		{"int", GtInt("f", 12345), `{"f":{"$gt":12345}}`},
 		{"int32", GtInt32("f", 12345), `{"f":{"$gt":12345}}`},
 		{"int64", GtInt64("f", 123456789012), `{"f":{"$gt":123456789012}}`},
 		{"float32", GtFloat32("f", 12345.67), `{"f":{"$gt":12345.67}}`},
 		{"float64", GtFloat64("f", 123456789012.34), `{"f":{"$gt":123456789012.34}}`},
 		{"string", GtString("f", "1234"), `{"f":{"$gt":"1234"}}`},
+		{"string0", GtString("f", ""), `{"f":{"$gt":""}}`},
 		{"bytes", GtBytes("f", []byte("123")), `{"f":{"$gt":"MTIz"}}`},
 		{"time", GtTime("f", time.Time{}), `{"f":{"$gt":"0001-01-01T00:00:00Z"}}`},
 		{

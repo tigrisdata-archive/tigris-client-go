@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/tigrisdata/tigris-client-go/code"
 	"github.com/tigrisdata/tigris-client-go/filter"
 	"github.com/tigrisdata/tigris-client-go/search"
@@ -267,5 +268,43 @@ func ExampleIterator_Array() {
 
 	for k, v := range arr {
 		fmt.Fprintf(os.Stderr, "doc %v = %+v\n", k, v)
+	}
+}
+
+func ExampleGetJoin() {
+	ctx := context.TODO()
+
+	type User struct {
+		ID   uuid.UUID
+		Name string
+	}
+
+	type Order struct {
+		ID     uuid.UUID
+		UserID uuid.UUID
+		Price  float64
+	}
+
+	db := tigris.MustOpenDatabase(ctx, &tigris.Config{Project: "db1"}, &User{}, &Order{})
+
+	join := tigris.GetJoin[User, Order](db, "ID", "UserID")
+
+	it, err := join.Read(ctx, filter.All) // return all users
+	if err != nil {
+		panic(err)
+	}
+
+	var (
+		user   User
+		orders []*Order
+	)
+
+	// iterate the users with corresponding orders
+	for it.Next(&user, &orders) {
+		fmt.Printf("User: %s", user.Name)
+
+		for _, o := range orders {
+			fmt.Printf("Order: %f", o.Price)
+		}
 	}
 }

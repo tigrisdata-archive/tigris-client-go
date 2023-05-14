@@ -62,17 +62,17 @@ func (matcher *JSONMatcher) String() string {
 func (*JSONMatcher) Got(actual any) string {
 	switch t := actual.(type) {
 	case string:
-		return fmt.Sprintf("JSONMatcher[string]: %v", t)
+		return fmt.Sprintf(" JSONMatcher: %v [string]", t)
 	case []byte:
-		return fmt.Sprintf("JSONMatcher[byte]: %v", string(t))
+		return fmt.Sprintf(" JSONMatcher: %v [byte]", string(t))
 	case Filter:
-		return fmt.Sprintf("JSONMatcher[Filter]: %v", string(t))
+		return fmt.Sprintf(" JSONMatcher: %v [Filter]", string(t))
 	case Projection:
-		return fmt.Sprintf("JSONMatcher[Projection]: %v", string(t))
+		return fmt.Sprintf(" JSONMatcher: %v [Projection]", string(t))
 	case Schema:
-		return fmt.Sprintf("JSONMatcher[Schema]: %v", string(t))
+		return fmt.Sprintf(" JSONMatcher: %v [Schema]", string(t))
 	default:
-		return fmt.Sprintf("JSONMatcher[%v]: %v", reflect.TypeOf(t), t)
+		return fmt.Sprintf(" JSONMatcher: %v [%v]", reflect.TypeOf(t), t)
 	}
 }
 

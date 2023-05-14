@@ -28,12 +28,15 @@ func TestLte(t *testing.T) {
 		expr Expr
 		exp  string
 	}{
+		{"int0", LteInt("f", 0), `{"f":{"$lte":0}}`},
+		{"intNeg", LteInt32("f", -1), `{"f":{"$lte":-1}}`},
 		{"int", LteInt("f", 12345), `{"f":{"$lte":12345}}`},
 		{"int32", LteInt32("f", 12345), `{"f":{"$lte":12345}}`},
 		{"int64", LteInt64("f", 123456789012), `{"f":{"$lte":123456789012}}`},
 		{"float32", LteFloat32("f", 12345.67), `{"f":{"$lte":12345.67}}`},
 		{"float64", LteFloat64("f", 123456789012.34), `{"f":{"$lte":123456789012.34}}`},
 		{"string", LteString("f", "1234"), `{"f":{"$lte":"1234"}}`},
+		{"string0", LteString("f", ""), `{"f":{"$lte":""}}`},
 		{"bytes", LteBytes("f", []byte("123")), `{"f":{"$lte":"MTIz"}}`},
 		{"time", LteTime("f", time.Time{}), `{"f":{"$lte":"0001-01-01T00:00:00Z"}}`},
 		{

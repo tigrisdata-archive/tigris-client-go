@@ -324,7 +324,7 @@ func FromStatusError(err error) *TigrisError {
 }
 
 // Errorf constructs TigrisError.
-func Errorf(c Code, format string, a ...interface{}) *TigrisError {
+func Errorf(c Code, format string, a ...any) *TigrisError {
 	if c == Code_OK {
 		return nil
 	}

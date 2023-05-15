@@ -67,28 +67,22 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 			},
 		}
 
-		mc.EXPECT().Search(
-			pm(&api.SearchIndexRequest{
-				Project:       "p1",
-				Index:         "c1",
-				Q:             "search text",
-				SearchFields:  []string{"field_1"},
-				Facet:         []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
-				IncludeFields: nil,
-				ExcludeFields: nil,
-				Sort:          []byte(`[{"sort_1":"desc"}]`),
-				Filter:        []byte(`{"filter_1":"desc"}`),
-				PageSize:      12,
-				Page:          3,
-				Vector:        json.RawMessage(`{"vec_field1":[1.1,2.2]}`),
-			}), gomock.Any()).DoAndReturn(func(r *api.SearchIndexRequest, srv api.Search_SearchServer) error {
-			err := srv.Send(&searchResp)
-			require.NoError(t, err)
+		sReqExp := &api.SearchIndexRequest{
+			Project:       "p1",
+			Index:         "c1",
+			Q:             "search text",
+			SearchFields:  []string{"field_1"},
+			Facet:         []byte(`{"field_1":{"size":10},"field_2":{"size":10}}`),
+			IncludeFields: nil,
+			ExcludeFields: nil,
+			Sort:          []byte(`[{"sort_1":"desc"}]`),
+			Filter:        []byte(`{"filter_1":"desc"}`),
+			PageSize:      12,
+			Page:          3,
+			Vector:        json.RawMessage(`{"vec_field1":[1.1,2.2]}`),
+		}
 
-			return &api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}
-		})
-
-		sit, err := search.Search(ctx, "c1", &SearchRequest{
+		sReq := &SearchRequest{
 			Q:            "search text",
 			SearchFields: []string{"field_1"},
 			Facet:        Facet(`{"field_1":{"size":10},"field_2":{"size":10}}`),
@@ -97,7 +91,16 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 			PageSize:     12,
 			Page:         3,
 			Vector:       Vector(`{"vec_field1":[1.1,2.2]}`),
+		}
+
+		mc.EXPECT().Search(pm(sReqExp), gomock.Any()).DoAndReturn(func(r *api.SearchIndexRequest, srv api.Search_SearchServer) error {
+			err := srv.Send(&searchResp)
+			require.NoError(t, err)
+
+			return &api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}
 		})
+
+		sit, err := search.Search(ctx, "c1", sReq)
 		require.NoError(t, err)
 
 		var r SearchIndexResponse
@@ -115,6 +118,20 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 
 		require.False(t, sit.Next(&r))
 		require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}}, sit.Err())
+
+		sit.Close()
+
+		mc.EXPECT().Search(pm(sReqExp), gomock.Any()).
+			DoAndReturn(func(r *api.SearchIndexRequest, srv api.Search_SearchServer) error {
+				return nil
+			})
+
+		sit, err = search.Search(ctx, "c1", sReq)
+		require.NoError(t, err)
+
+		sit.Close()
+
+		require.False(t, sit.Next(&r))
 	})
 
 	t.Run("create_or_update_index", func(t *testing.T) {

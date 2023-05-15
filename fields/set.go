@@ -109,7 +109,7 @@ func (u *Update) SetInt64(field string, value int64) *Update {
 //
 //	field = value
 func (u *Update) SetInt(field string, value int) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }
 
 // SetInt32 instructs update to set given field to the provided value
@@ -117,7 +117,7 @@ func (u *Update) SetInt(field string, value int) *Update {
 //
 //	field = value
 func (u *Update) SetInt32(field string, value int32) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }
 
 // SetString instructs update to set given field to the provided value
@@ -125,7 +125,7 @@ func (u *Update) SetInt32(field string, value int32) *Update {
 //
 //	field = value
 func (u *Update) SetString(field string, value string) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }
 
 // SetBytes instructs update to set given field to the provided value
@@ -133,7 +133,7 @@ func (u *Update) SetString(field string, value string) *Update {
 //
 //	field = value
 func (u *Update) SetBytes(field string, value []byte) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }
 
 // SetFloat32 instructs update to set given field to the provided value
@@ -141,7 +141,7 @@ func (u *Update) SetBytes(field string, value []byte) *Update {
 //
 //	field = value
 func (u *Update) SetFloat32(field string, value float32) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }
 
 // SetFloat64 instructs update to set given field to the provided value
@@ -149,7 +149,7 @@ func (u *Update) SetFloat32(field string, value float32) *Update {
 //
 //	field = value
 func (u *Update) SetFloat64(field string, value float64) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }
 
 // SetTime composes 'equal' operation. from time.Time value.
@@ -157,7 +157,7 @@ func (u *Update) SetFloat64(field string, value float64) *Update {
 //
 //	field = value
 func (u *Update) SetTime(field string, value time.Time) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }
 
 // SetUUID composes 'equal' operation. from uuid.UUID value.
@@ -165,5 +165,5 @@ func (u *Update) SetTime(field string, value time.Time) *Update {
 //
 //	field = value
 func (u *Update) SetUUID(field string, value uuid.UUID) *Update {
-	return Set(field, value)
+	return u.Set(field, value)
 }

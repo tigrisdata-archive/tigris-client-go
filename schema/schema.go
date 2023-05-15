@@ -72,7 +72,7 @@ const (
 )
 
 // Model represents types supported as collection models.
-type Model interface{}
+type Model any
 
 // PrimitiveFieldType represents types supported by non-composite fields.
 type PrimitiveFieldType interface {
@@ -159,7 +159,7 @@ type SearchSource struct {
 }
 
 // DatabaseModelName returns name of the database derived from the given database model.
-func DatabaseModelName(s interface{}) string {
+func DatabaseModelName(s any) string {
 	t := reflect.TypeOf(s)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -171,7 +171,7 @@ func DatabaseModelName(s interface{}) string {
 // ModelName returns name of the collection derived from the given collection model type.
 // The name is snake case pluralized.
 // If the original name ends with digit then it's not pluralized.
-func ModelName(s interface{}) string {
+func ModelName(s any) string {
 	t := reflect.TypeOf(s)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -384,7 +384,7 @@ func traverseFields(prefix string, t reflect.Type, fields map[string]*Field, pk 
 	return nil
 }
 
-func fromCollectionModel(schemaVersion int, model interface{}, typ string) (*Schema, error) {
+func fromCollectionModel(schemaVersion int, model any, typ string) (*Schema, error) {
 	t := reflect.TypeOf(model)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -487,7 +487,7 @@ func FromCollectionModels(schemaVersion int, tp string, model Model, models ...M
 }
 
 // FromDatabaseModel converts provided database model to collections schema structures.
-func FromDatabaseModel(dbModel interface{}) (string, map[string]*Schema, error) {
+func FromDatabaseModel(dbModel any) (string, map[string]*Schema, error) {
 	t := reflect.TypeOf(dbModel)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()

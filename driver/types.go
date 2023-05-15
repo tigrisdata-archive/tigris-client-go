@@ -149,7 +149,7 @@ type Error struct {
 	*api.TigrisError
 }
 
-func NewError(c api.Code, format string, a ...interface{}) *Error {
+func NewError(c api.Code, format string, a ...any) *Error {
 	if c == api.Code_OK {
 		return nil
 	}

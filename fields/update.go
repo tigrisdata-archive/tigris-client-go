@@ -28,19 +28,19 @@ import (
 
 type Update struct {
 	built      driver.Update
-	SetF       map[string]interface{} `json:"$set,omitempty"`
-	UnsetF     map[string]interface{} `json:"$unset,omitempty"`
-	IncrementF map[string]float64     `json:"$increment,omitempty"`
-	DecrementF map[string]float64     `json:"$decrement,omitempty"`
-	MultiplyF  map[string]float64     `json:"$multiply,omitempty"`
-	DivideF    map[string]float64     `json:"$divide,omitempty"`
+	SetF       map[string]any     `json:"$set,omitempty"`
+	UnsetF     map[string]any     `json:"$unset,omitempty"`
+	IncrementF map[string]float64 `json:"$increment,omitempty"`
+	DecrementF map[string]float64 `json:"$decrement,omitempty"`
+	MultiplyF  map[string]float64 `json:"$multiply,omitempty"`
+	DivideF    map[string]float64 `json:"$divide,omitempty"`
 }
 
 // UpdateBuilder returns and object to construct the update field of Update API.
 func UpdateBuilder() *Update {
 	return &Update{
-		SetF:       map[string]interface{}{},
-		UnsetF:     map[string]interface{}{},
+		SetF:       map[string]any{},
+		UnsetF:     map[string]any{},
 		IncrementF: make(map[string]float64),
 		DecrementF: make(map[string]float64),
 		MultiplyF:  make(map[string]float64),
@@ -72,7 +72,7 @@ func (u *Update) Built() driver.Update {
 // The result is equivalent to
 //
 //	field = value
-func (u *Update) Set(field string, value interface{}) *Update {
+func (u *Update) Set(field string, value any) *Update {
 	u.SetF[field] = value
 
 	return u
@@ -132,7 +132,7 @@ func (u *Update) Divide(field string, value float64) *Update {
 // The result is equivalent to
 //
 //	field = value
-func Set(field string, value interface{}) *Update {
+func Set(field string, value any) *Update {
 	u := UpdateBuilder()
 	u.SetF[field] = value
 

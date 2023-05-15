@@ -107,15 +107,12 @@ type httpDriver struct {
 	cfg      *config.Driver
 }
 
-func respDecode(body io.ReadCloser, v interface{}) error {
+func respDecode(body io.ReadCloser, v any) error {
 	defer func() {
 		_ = body.Close()
 	}()
 
-	if err := json.NewDecoder(body).Decode(v); err != nil {
-		return err
-	}
-	return nil
+	return json.NewDecoder(body).Decode(v)
 }
 
 type metadata struct {
@@ -143,7 +140,7 @@ func newRespMetadata(m *metadata) *api.ResponseMetadata {
 }
 
 // convert timestamps from response metadata to timestamppb.Timestamp.
-func dmlRespDecode(body io.ReadCloser, v interface{}) error {
+func dmlRespDecode(body io.ReadCloser, v any) error {
 	r := struct {
 		Metadata      metadata
 		Status        string `json:"status,omitempty"`
@@ -258,7 +255,7 @@ func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions,
 	return drv, drv, drv, nil
 }
 
-func (c *httpDriver) Close() error {
+func (*httpDriver) Close() error {
 	return nil
 }
 
@@ -404,7 +401,7 @@ func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project strin
 	return &r, nil
 }
 
-func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
+func (*httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
 	return &apiHTTP.CollectionOptions{}
 }
 
@@ -487,7 +484,7 @@ func (c *httpCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 	}, nil
 }
 
-func (c *httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
+func (*httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
 	if o != nil {
 		return &apiHTTP.WriteOptions{}
 	}
@@ -510,7 +507,7 @@ func (c *httpCRUD) convertDeleteOptions(o *DeleteOptions) *apiHTTP.DeleteRequest
 	return &apiHTTP.DeleteRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
-func (c *httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOptions {
+func (*httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOptions {
 	opts := apiHTTP.ReadRequestOptions{
 		Skip:   &i.Skip,
 		Limit:  &i.Limit,
@@ -1173,11 +1170,8 @@ func (c *httpDriver) CreateInvitations(ctx context.Context, invitations []*Invit
 	resp, err := c.api.AuthCreateInvitations(ctx, apiHTTP.AuthCreateInvitationsJSONRequestBody{
 		Invitations: &invs,
 	})
-	if err = HTTPError(err, resp); err != nil {
-		return err
-	}
 
-	return nil
+	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) DeleteInvitations(ctx context.Context, email string, status string) error {
@@ -1241,11 +1235,7 @@ func (c *httpDriver) ListUsers(ctx context.Context) ([]*User, error) {
 
 func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
 	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONRequestBody{Name: &name})
-	if err := HTTPError(err, resp); err != nil {
-		return err
-	}
-
-	return nil
+	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {

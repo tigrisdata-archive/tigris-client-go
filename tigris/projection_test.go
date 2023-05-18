@@ -404,5 +404,29 @@ func TestProjectionBasic(t *testing.T) {
 		ma, err := pt.ReadOne(ctx, filter.All)
 		require.NoError(t, err)
 		require.Equal(t, &usr.MailingAddress, ma)
+
+		mdb.EXPECT().Read(ctx, "users",
+			driver.Filter(`{}`),
+			driver.Projection(`{"mailing_address":true}`),
+		).Return(mit, nil)
+
+		mit.EXPECT().Close()
+		mit.EXPECT().Err().Return(nil)
+		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, usr)).Return(false)
+
+		_, err = pt.ReadOne(ctx, filter.All)
+		require.Equal(t, ErrNotFound, err)
+
+		mdb.EXPECT().Read(ctx, "users",
+			driver.Filter(`{}`),
+			driver.Projection(`{"mailing_address":true}`),
+		).Return(mit, nil)
+
+		mit.EXPECT().Close()
+		mit.EXPECT().Next(&dd).SetArg(0, toDocument(t, usr)).Return(false)
+		mit.EXPECT().Err()
+
+		_, err = pt.ReadOne(ctx, filter.All)
+		require.Equal(t, ErrNotFound, err)
 	})
 }

@@ -64,6 +64,7 @@ func TestHTTPHeaders(t *testing.T) {
 	defer cancel()
 
 	testSchemaSignOffHeader(t, mc, c)
+	testSchemaVersion(t, mc, c)
 }
 
 func TestHTTPError(t *testing.T) {

@@ -107,15 +107,12 @@ type httpDriver struct {
 	cfg      *config.Driver
 }
 
-func respDecode(body io.ReadCloser, v interface{}) error {
+func respDecode(body io.ReadCloser, v any) error {
 	defer func() {
 		_ = body.Close()
 	}()
 
-	if err := json.NewDecoder(body).Decode(v); err != nil {
-		return err
-	}
-	return nil
+	return json.NewDecoder(body).Decode(v)
 }
 
 type metadata struct {
@@ -143,7 +140,7 @@ func newRespMetadata(m *metadata) *api.ResponseMetadata {
 }
 
 // convert timestamps from response metadata to timestamppb.Timestamp.
-func dmlRespDecode(body io.ReadCloser, v interface{}) error {
+func dmlRespDecode(body io.ReadCloser, v any) error {
 	r := struct {
 		Metadata      metadata
 		Status        string `json:"status,omitempty"`
@@ -189,6 +186,7 @@ func setHeaders(ctx context.Context, req *http.Request) error {
 	req.Header["Host"] = []string{req.Host}
 	req.Header["User-Agent"] = []string{UserAgent}
 	req.Header["Accept"] = []string{"*/*"}
+	req.Header[api.HeaderSchemaVersion] = HeaderSchemaVersionValue
 
 	if v := ctx.Value(txCtxKey{}); v != nil {
 		txCtx := v.(*api.TransactionCtx)
@@ -257,7 +255,7 @@ func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions,
 	return drv, drv, drv, nil
 }
 
-func (c *httpDriver) Close() error {
+func (*httpDriver) Close() error {
 	return nil
 }
 
@@ -324,7 +322,8 @@ func (c *httpDriver) Health(ctx context.Context) (*HealthResponse, error) {
 	return &i, nil
 }
 
-func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
+func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project string, options *DescribeProjectOptions,
+) (*DescribeDatabaseResponse, error) {
 	resp, err := c.api.TigrisDescribeDatabase(ctx, project, apiHTTP.TigrisDescribeDatabaseJSONRequestBody{
 		SchemaFormat: &options.SchemaFormat,
 		Branch:       &c.cfg.Branch,
@@ -362,7 +361,8 @@ func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project str
 	return &r, nil
 }
 
-func (c *httpDriver) createProjectWithOptions(ctx context.Context, project string, _ *CreateProjectOptions) (*CreateProjectResponse, error) {
+func (c *httpDriver) createProjectWithOptions(ctx context.Context, project string, _ *CreateProjectOptions,
+) (*CreateProjectResponse, error) {
 	resp, err := c.api.TigrisCreateProject(ctx, project, apiHTTP.TigrisCreateProjectJSONRequestBody{})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
@@ -381,7 +381,8 @@ func (c *httpDriver) createProjectWithOptions(ctx context.Context, project strin
 	return &r, nil
 }
 
-func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project string, _ *DeleteProjectOptions) (*DeleteProjectResponse, error) {
+func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project string, _ *DeleteProjectOptions,
+) (*DeleteProjectResponse, error) {
 	resp, err := c.api.TigrisDeleteProject(ctx, project, apiHTTP.TigrisDeleteProjectJSONRequestBody{})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
@@ -400,7 +401,7 @@ func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project strin
 	return &r, nil
 }
 
-func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
+func (*httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
 	return &apiHTTP.CollectionOptions{}
 }
 
@@ -483,7 +484,7 @@ func (c *httpCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 	}, nil
 }
 
-func (c *httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
+func (*httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
 	if o != nil {
 		return &apiHTTP.WriteOptions{}
 	}
@@ -506,7 +507,7 @@ func (c *httpCRUD) convertDeleteOptions(o *DeleteOptions) *apiHTTP.DeleteRequest
 	return &apiHTTP.DeleteRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
-func (c *httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOptions {
+func (*httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOptions {
 	opts := apiHTTP.ReadRequestOptions{
 		Skip:   &i.Skip,
 		Limit:  &i.Limit,
@@ -549,7 +550,9 @@ func (c *httpCRUD) listCollectionsWithOptions(ctx context.Context, _ *Collection
 	return collections, nil
 }
 
-func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection string, options *DescribeCollectionOptions) (*DescribeCollectionResponse, error) {
+func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection string,
+	options *DescribeCollectionOptions,
+) (*DescribeCollectionResponse, error) {
 	resp, err := c.api.TigrisDescribeCollection(ctx, c.db, collection, apiHTTP.TigrisDescribeCollectionJSONRequestBody{
 		Branch:       &c.branch,
 		SchemaFormat: &options.SchemaFormat,
@@ -621,7 +624,8 @@ func (c *httpCRUD) dropCollectionWithOptions(ctx context.Context, collection str
 	return HTTPError(err, resp)
 }
 
-func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions) (*InsertResponse, error) {
+func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, docs []Document, options *InsertOptions,
+) (*InsertResponse, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisInsert(ctx, c.db, collection, apiHTTP.TigrisInsertJSONRequestBody{
@@ -642,7 +646,8 @@ func (c *httpCRUD) insertWithOptions(ctx context.Context, collection string, doc
 	return &d, nil
 }
 
-func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions) (*ReplaceResponse, error) {
+func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, docs []Document, options *ReplaceOptions,
+) (*ReplaceResponse, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisReplace(ctx, c.db, collection, apiHTTP.TigrisReplaceJSONRequestBody{
@@ -663,7 +668,9 @@ func (c *httpCRUD) replaceWithOptions(ctx context.Context, collection string, do
 	return &d, nil
 }
 
-func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update, options *UpdateOptions) (*UpdateResponse, error) {
+func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, filter Filter, fields Update,
+	options *UpdateOptions,
+) (*UpdateResponse, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisUpdate(ctx, c.db, collection, apiHTTP.TigrisUpdateJSONRequestBody{
@@ -685,7 +692,8 @@ func (c *httpCRUD) updateWithOptions(ctx context.Context, collection string, fil
 	return &d, nil
 }
 
-func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions) (*DeleteResponse, error) {
+func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, filter Filter, options *DeleteOptions,
+) (*DeleteResponse, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisDelete(ctx, c.db, collection, apiHTTP.TigrisDeleteJSONRequestBody{
@@ -706,7 +714,9 @@ func (c *httpCRUD) deleteWithOptions(ctx context.Context, collection string, fil
 	return &d, nil
 }
 
-func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (Iterator, error) {
+func (c *httpCRUD) readWithOptions(ctx context.Context, collection string, filter Filter, fields Projection,
+	options *ReadOptions,
+) (Iterator, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisRead(ctx, c.db, collection, apiHTTP.TigrisReadJSONRequestBody{
@@ -748,7 +758,9 @@ func (c *httpCRUD) countWithOptions(ctx context.Context, collection string, filt
 	return PtrToInt64(r.Count), nil
 }
 
-func (c *httpCRUD) explainWithOptions(ctx context.Context, collection string, filter Filter, fields Projection, options *ReadOptions) (*ExplainResponse, error) {
+func (c *httpCRUD) explainWithOptions(ctx context.Context, collection string, filter Filter, fields Projection,
+	options *ReadOptions,
+) (*ExplainResponse, error) {
 	ctx = setHTTPTxCtx(ctx, c.txCtx, c.cookies)
 
 	resp, err := c.api.TigrisExplain(ctx, c.db, collection, apiHTTP.TigrisReadJSONRequestBody{
@@ -897,21 +909,29 @@ func (g *httpSearchReader) close() error {
 	return g.closer.Close()
 }
 
-func (c *httpDriver) CreateAppKey(ctx context.Context, project string, name string, description string) (*AppKey, error) {
-	resp, err := c.api.TigrisCreateAppKey(ctx, project, apiHTTP.TigrisCreateAppKeyJSONRequestBody{Name: &name, Description: &description})
+func (c *httpDriver) CreateAppKey(ctx context.Context, project string, name string, description string,
+) (*AppKey, error) {
+	resp, err := c.api.TigrisCreateAppKey(ctx, project, apiHTTP.TigrisCreateAppKeyJSONRequestBody{
+		Name:        &name,
+		Description: &description,
+	})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var app struct {
-		CreatedAppKey AppKey `json:"created_app_key"`
+		CreatedAppKey *AppKey `json:"created_app_key"`
 	}
 
 	if err := respDecode(resp.Body, &app); err != nil {
 		return nil, err
 	}
 
-	return &app.CreatedAppKey, nil
+	if app.CreatedAppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return app.CreatedAppKey, nil
 }
 
 func (c *httpDriver) DeleteAppKey(ctx context.Context, project string, id string) error {
@@ -920,21 +940,29 @@ func (c *httpDriver) DeleteAppKey(ctx context.Context, project string, id string
 	return HTTPError(err, resp)
 }
 
-func (c *httpDriver) UpdateAppKey(ctx context.Context, project string, id string, name string, description string) (*AppKey, error) {
-	resp, err := c.api.TigrisUpdateAppKey(ctx, project, apiHTTP.TigrisUpdateAppKeyJSONRequestBody{Id: &id, Name: &name, Description: &description})
+func (c *httpDriver) UpdateAppKey(ctx context.Context, project string, id string, name string, description string,
+) (*AppKey, error) {
+	resp, err := c.api.TigrisUpdateAppKey(ctx, project, apiHTTP.TigrisUpdateAppKeyJSONRequestBody{
+		Id:   &id,
+		Name: &name, Description: &description,
+	})
 	if err := HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var app struct {
-		UpdatedAppKey AppKey `json:"updated_app_key"`
+		UpdatedAppKey *AppKey `json:"updated_app_key"`
 	}
 
-	if err := respDecode(resp.Body, &app); err != nil {
+	if err = respDecode(resp.Body, &app); err != nil {
 		return nil, err
 	}
 
-	return &app.UpdatedAppKey, nil
+	if app.UpdatedAppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return app.UpdatedAppKey, nil
 }
 
 func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey, error) {
@@ -947,7 +975,7 @@ func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey
 		AppKeys []*AppKey `json:"app_keys"`
 	}
 
-	if err := respDecode(resp.Body, &apps); err != nil {
+	if err = respDecode(resp.Body, &apps); err != nil {
 		return nil, err
 	}
 
@@ -961,21 +989,121 @@ func (c *httpDriver) RotateAppKeySecret(ctx context.Context, project string, id 
 	}
 
 	var app struct {
-		AppKey AppKey `json:"app_key"`
+		AppKey *AppKey `json:"app_key"`
 	}
 
-	if err := respDecode(resp.Body, &app); err != nil {
+	if err = respDecode(resp.Body, &app); err != nil {
 		return nil, err
 	}
 
-	return &app.AppKey, nil
+	if app.AppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return app.AppKey, nil
 }
 
-func (c *httpDriver) GetAccessToken(ctx context.Context, clientID string, clientSecret string, refreshToken string) (*TokenResponse, error) {
+func (c *httpDriver) CreateGlobalAppKey(ctx context.Context, name string, description string) (*GlobalAppKey, error) {
+	resp, err := c.api.TigrisCreateGlobalAppKey(ctx, apiHTTP.TigrisCreateGlobalAppKeyJSONRequestBody{
+		Name:        &name,
+		Description: &description,
+	})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var app struct {
+		CreatedAppKey *GlobalAppKey `json:"created_app_key"`
+	}
+
+	if err = respDecode(resp.Body, &app); err != nil {
+		return nil, err
+	}
+
+	if app.CreatedAppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return app.CreatedAppKey, nil
+}
+
+func (c *httpDriver) DeleteGlobalAppKey(ctx context.Context, id string) error {
+	resp, err := c.api.TigrisDeleteGlobalAppKey(ctx, apiHTTP.TigrisDeleteGlobalAppKeyJSONRequestBody{Id: &id})
+
+	return HTTPError(err, resp)
+}
+
+func (c *httpDriver) UpdateGlobalAppKey(ctx context.Context, id string, name string, description string,
+) (*GlobalAppKey, error) {
+	resp, err := c.api.TigrisUpdateGlobalAppKey(ctx, apiHTTP.TigrisUpdateGlobalAppKeyJSONRequestBody{
+		Id:   &id,
+		Name: &name, Description: &description,
+	})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var app struct {
+		UpdatedAppKey *GlobalAppKey `json:"updated_app_key"`
+	}
+
+	if err = respDecode(resp.Body, &app); err != nil {
+		return nil, err
+	}
+
+	if app.UpdatedAppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return app.UpdatedAppKey, nil
+}
+
+func (c *httpDriver) ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, error) {
+	resp, err := c.api.TigrisListGlobalAppKeys(ctx)
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var apps struct {
+		GlobalAppKeys []*GlobalAppKey `json:"app_keys"`
+	}
+
+	if err := respDecode(resp.Body, &apps); err != nil {
+		return nil, err
+	}
+
+	return apps.GlobalAppKeys, nil
+}
+
+func (c *httpDriver) RotateGlobalAppKeySecret(ctx context.Context, id string) (*GlobalAppKey, error) {
+	resp, err := c.api.TigrisRotateGlobalAppKeySecret(ctx, apiHTTP.TigrisRotateGlobalAppKeySecretJSONRequestBody{Id: &id})
+	if err := HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var app struct {
+		AppKey *GlobalAppKey `json:"app_key"`
+	}
+
+	if err = respDecode(resp.Body, &app); err != nil {
+		return nil, err
+	}
+
+	if app.AppKey == nil {
+		return nil, Error{TigrisError: api.Errorf(api.Code_INTERNAL, "empty response")}
+	}
+
+	return app.AppKey, nil
+}
+
+func (c *httpDriver) GetAccessToken(ctx context.Context, clientID string, clientSecret string, refreshToken string,
+) (*TokenResponse, error) {
 	return getAccessToken(ctx, c.tokenURL, c.cfg, clientID, clientSecret, refreshToken)
 }
 
-func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, clientID string, clientSecret string, refreshToken string) (*TokenResponse, error) {
+func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, clientID string, clientSecret string,
+	refreshToken string,
+) (*TokenResponse, error) {
 	data := url.Values{
 		"client_id":     {clientID},
 		"client_secret": {clientSecret},
@@ -1029,13 +1157,85 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, cl
 	return &tr, nil
 }
 
-func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
-	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONRequestBody{Name: &name})
-	if err := HTTPError(err, resp); err != nil {
-		return err
+func (c *httpDriver) CreateInvitations(ctx context.Context, invitations []*InvitationInfo) error {
+	invs := make([]apiHTTP.InvitationInfo, 0, len(invitations))
+	for _, a := range invitations {
+		invs = append(invs, apiHTTP.InvitationInfo{
+			Email:                &a.Email,
+			InvitationSentByName: &a.InvitationSentByName,
+			Role:                 &a.Role,
+		})
 	}
 
-	return nil
+	resp, err := c.api.AuthCreateInvitations(ctx, apiHTTP.AuthCreateInvitationsJSONRequestBody{
+		Invitations: &invs,
+	})
+
+	return HTTPError(err, resp)
+}
+
+func (c *httpDriver) DeleteInvitations(ctx context.Context, email string, status string) error {
+	resp, err := c.api.AuthDeleteInvitations(ctx, apiHTTP.AuthDeleteInvitationsJSONRequestBody{
+		Email:  &email,
+		Status: &status,
+	})
+
+	return HTTPError(err, resp)
+}
+
+func (c *httpDriver) ListInvitations(ctx context.Context, status string) ([]*Invitation, error) {
+	resp, err := c.api.AuthListInvitations(ctx, &apiHTTP.AuthListInvitationsParams{
+		Status: &status,
+	})
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r api.ListInvitationsResponse
+	if err := respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	invs := make([]*Invitation, 0, len(r.Invitations))
+	for _, a := range r.Invitations {
+		invs = append(invs, (*Invitation)(a))
+	}
+
+	return invs, nil
+}
+
+func (c *httpDriver) VerifyInvitation(ctx context.Context, email string, code string) error {
+	resp, err := c.api.AuthVerifyInvitation(ctx, apiHTTP.AuthVerifyInvitationJSONRequestBody{
+		Email: &email,
+		Code:  &code,
+	})
+
+	return HTTPError(err, resp)
+}
+
+func (c *httpDriver) ListUsers(ctx context.Context) ([]*User, error) {
+	resp, err := c.api.AuthListUsers(ctx)
+
+	if err = HTTPError(err, resp); err != nil {
+		return nil, err
+	}
+
+	var r api.ListUsersResponse
+	if err := respDecode(resp.Body, &r); err != nil {
+		return nil, err
+	}
+
+	users := make([]*User, 0, len(r.Users))
+	for _, a := range r.Users {
+		users = append(users, (*User)(a))
+	}
+
+	return users, nil
+}
+
+func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
+	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONRequestBody{Name: &name})
+	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {

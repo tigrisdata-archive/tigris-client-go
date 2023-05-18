@@ -41,6 +41,16 @@ func appEqual(t *testing.T, exp *api.AppKey, act *AppKey) {
 	require.Equal(t, exp.Description, act.Description)
 }
 
+func globalAppKeyEqual(t *testing.T, exp *api.GlobalAppKey, act *GlobalAppKey) {
+	t.Helper()
+
+	require.Equal(t, exp.Id, act.Id)
+	require.Equal(t, exp.Name, act.Name)
+	require.Equal(t, exp.CreatedAt, act.CreatedAt)
+	require.Equal(t, exp.CreatedBy, act.CreatedBy)
+	require.Equal(t, exp.Description, act.Description)
+}
+
 func testDriverAuthNegative(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisServer, mc *mock.MockManagementServer) {
 	t.Helper()
 
@@ -62,6 +72,13 @@ func testDriverAuthNegative(t *testing.T, drv Driver, m Management, mt *mock.Moc
 	_, err = drv.UpdateAppKey(ctx, project1, "upd_id1", "upd_app1", "upd_description1")
 	require.Error(t, err)
 
+	mt.EXPECT().UpdateAppKey(gomock.Any(),
+		pm(&api.UpdateAppKeyRequest{Id: "upd_id1", Project: project1, Name: "upd_app1", Description: "upd_description1"})).Return(
+		&api.UpdateAppKeyResponse{UpdatedAppKey: &api.AppKey{Id: "id1"}}, fmt.Errorf("some error"))
+
+	_, err = drv.UpdateAppKey(ctx, project1, "upd_id1", "upd_app1", "upd_description1")
+	require.Error(t, err)
+
 	mt.EXPECT().ListAppKeys(gomock.Any(),
 		pm(&api.ListAppKeysRequest{Project: project1})).Return(
 		nil, fmt.Errorf("some error"))
@@ -72,6 +89,13 @@ func testDriverAuthNegative(t *testing.T, drv Driver, m Management, mt *mock.Moc
 	mt.EXPECT().RotateAppKeySecret(gomock.Any(),
 		pm(&api.RotateAppKeyRequest{Id: "ras_id1", Project: project1})).Return(
 		&api.RotateAppKeyResponse{AppKey: nil}, nil)
+
+	_, err = drv.RotateAppKeySecret(ctx, project1, "ras_id1")
+	require.Error(t, err)
+
+	mt.EXPECT().RotateAppKeySecret(gomock.Any(),
+		pm(&api.RotateAppKeyRequest{Id: "ras_id1", Project: project1})).Return(
+		&api.RotateAppKeyResponse{AppKey: &api.AppKey{Id: "id1"}}, fmt.Errorf("some error"))
 
 	_, err = drv.RotateAppKeySecret(ctx, project1, "ras_id1")
 	require.Error(t, err)
@@ -91,7 +115,9 @@ func testDriverAuthNegative(t *testing.T, drv Driver, m Management, mt *mock.Moc
 	require.Error(t, err)
 }
 
-func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisServer, ma *mock.MockAuthServer, mc *mock.MockManagementServer) {
+func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisServer, ma *mock.MockAuthServer,
+	mc *mock.MockManagementServer,
+) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -168,7 +194,10 @@ func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisS
 	appEqual(t, lapp2, app)
 
 	ma.EXPECT().GetAccessToken(gomock.Any(),
-		pm(&api.GetAccessTokenRequest{ClientId: "client_id1", ClientSecret: "secret1", GrantType: api.GrantType_CLIENT_CREDENTIALS})).Return(
+		pm(&api.GetAccessTokenRequest{
+			ClientId: "client_id1", ClientSecret: "secret1",
+			GrantType: api.GrantType_CLIENT_CREDENTIALS,
+		})).Return(
 		&api.GetAccessTokenResponse{AccessToken: "access_token1", RefreshToken: "refresh_token1"}, nil)
 
 	token, err := m.GetAccessToken(ctx, "client_id1", "secret1", "")
@@ -177,7 +206,10 @@ func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisS
 	require.Equal(t, "refresh_token1", token.RefreshToken)
 
 	ma.EXPECT().GetAccessToken(gomock.Any(),
-		pm(&api.GetAccessTokenRequest{ClientId: "", ClientSecret: "", RefreshToken: "refresh_token_req", GrantType: api.GrantType_REFRESH_TOKEN})).Return(
+		pm(&api.GetAccessTokenRequest{
+			ClientId: "", ClientSecret: "", RefreshToken: "refresh_token_req",
+			GrantType: api.GrantType_REFRESH_TOKEN,
+		})).Return(
 		&api.GetAccessTokenResponse{AccessToken: "access_token2", RefreshToken: "refresh_token2"}, nil)
 
 	token, err = m.GetAccessToken(ctx, "", "", "refresh_token_req")
@@ -212,13 +244,141 @@ func testDriverAuth(t *testing.T, drv Driver, m Management, mt *mock.MockTigrisS
 	require.NoError(t, err)
 }
 
+func testGlobalAppKeys(t *testing.T, drv Driver, mt *mock.MockTigrisServer) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	capp := &api.GlobalAppKey{Id: "id1", Name: "app1", Description: "desc1", CreatedAt: 111, CreatedBy: "cby", Secret: "secret"}
+
+	mt.EXPECT().CreateGlobalAppKey(gomock.Any(),
+		pm(&api.CreateGlobalAppKeyRequest{Name: "app1", Description: "description1"})).Return(
+		&api.CreateGlobalAppKeyResponse{CreatedAppKey: capp}, nil)
+
+	app, err := drv.CreateGlobalAppKey(ctx, "app1", "description1")
+	require.NoError(t, err)
+
+	globalAppKeyEqual(t, capp, app)
+
+	mt.EXPECT().DeleteGlobalAppKey(gomock.Any(),
+		pm(&api.DeleteGlobalAppKeyRequest{Id: "del_id1"})).Return(
+		&api.DeleteGlobalAppKeyResponse{Deleted: true}, nil)
+
+	err = drv.DeleteGlobalAppKey(ctx, "del_id1")
+	require.NoError(t, err)
+
+	uapp := &api.GlobalAppKey{Id: "upd_id1", Name: "upd_app1", Description: "upd_desc1", UpdatedAt: 222, UpdatedBy: "uby"}
+
+	mt.EXPECT().UpdateGlobalAppKey(gomock.Any(),
+		pm(&api.UpdateGlobalAppKeyRequest{Id: "upd_id1", Name: "upd_app1", Description: "upd_description1"})).Return(
+		&api.UpdateGlobalAppKeyResponse{UpdatedAppKey: uapp}, nil)
+
+	app, err = drv.UpdateGlobalAppKey(ctx, "upd_id1", "upd_app1", "upd_description1")
+	require.NoError(t, err)
+
+	globalAppKeyEqual(t, uapp, app)
+
+	lapp1 := &api.GlobalAppKey{
+		Id: "list_id1", Name: "list_app1", Description: "list_desc1", UpdatedAt: 222,
+		UpdatedBy: "uby", CreatedAt: 111, CreatedBy: "cby",
+	}
+	lapp2 := &api.GlobalAppKey{
+		Id: "list_id2", Name: "list_app2", Description: "list_desc2", UpdatedAt: 222222,
+		UpdatedBy: "uby2", CreatedAt: 111222, CreatedBy: "cby2",
+	}
+	lapp3 := &api.GlobalAppKey{
+		Id: "list_id3", Name: "list_app3", Description: "list_desc3", UpdatedAt: 222333,
+		UpdatedBy: "uby3", CreatedAt: 111333, CreatedBy: "cby3",
+	}
+
+	mt.EXPECT().ListGlobalAppKeys(gomock.Any(),
+		pm(&api.ListGlobalAppKeysRequest{})).Return(
+		&api.ListGlobalAppKeysResponse{AppKeys: []*api.GlobalAppKey{lapp1, lapp2, lapp3}}, nil)
+
+	list, err := drv.ListGlobalAppKeys(ctx)
+	require.NoError(t, err)
+
+	require.Equal(t, 3, len(list))
+	globalAppKeyEqual(t, lapp1, list[0])
+	globalAppKeyEqual(t, lapp2, list[1])
+	globalAppKeyEqual(t, lapp3, list[2])
+
+	mt.EXPECT().ListGlobalAppKeys(gomock.Any(),
+		pm(&api.ListGlobalAppKeysRequest{})).Return(
+		&api.ListGlobalAppKeysResponse{}, nil)
+
+	list, err = drv.ListGlobalAppKeys(ctx)
+	require.NoError(t, err)
+	require.Equal(t, 0, len(list))
+
+	mt.EXPECT().RotateGlobalAppKeySecret(gomock.Any(),
+		pm(&api.RotateGlobalAppKeySecretRequest{Id: "ras_id1"})).Return(
+		&api.RotateGlobalAppKeySecretResponse{AppKey: lapp2}, nil)
+
+	app, err = drv.RotateGlobalAppKeySecret(ctx, "ras_id1")
+	require.NoError(t, err)
+
+	globalAppKeyEqual(t, lapp2, app)
+}
+
+func testGlobalGlobalAppKeysNegative(t *testing.T, drv Driver, mt *mock.MockTigrisServer) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	mt.EXPECT().CreateGlobalAppKey(gomock.Any(),
+		pm(&api.CreateGlobalAppKeyRequest{Name: "app1", Description: "description1"})).Return(
+		&api.CreateGlobalAppKeyResponse{CreatedAppKey: nil}, nil)
+
+	_, err := drv.CreateGlobalAppKey(ctx, "app1", "description1")
+	require.Error(t, err)
+
+	mt.EXPECT().UpdateGlobalAppKey(gomock.Any(),
+		pm(&api.UpdateGlobalAppKeyRequest{Id: "upd_id1", Name: "upd_app1", Description: "upd_description1"})).Return(
+		&api.UpdateGlobalAppKeyResponse{UpdatedAppKey: nil}, nil)
+
+	_, err = drv.UpdateGlobalAppKey(ctx, "upd_id1", "upd_app1", "upd_description1")
+	require.Error(t, err)
+
+	mt.EXPECT().UpdateGlobalAppKey(gomock.Any(),
+		pm(&api.UpdateGlobalAppKeyRequest{Id: "upd_id1", Name: "upd_app1", Description: "upd_description1"})).Return(
+		&api.UpdateGlobalAppKeyResponse{UpdatedAppKey: &api.GlobalAppKey{Id: "id1"}}, fmt.Errorf("some error"))
+
+	_, err = drv.UpdateGlobalAppKey(ctx, "upd_id1", "upd_app1", "upd_description1")
+	require.Error(t, err)
+
+	mt.EXPECT().ListGlobalAppKeys(gomock.Any(),
+		pm(&api.ListGlobalAppKeysRequest{})).Return(
+		nil, fmt.Errorf("some error"))
+
+	_, err = drv.ListGlobalAppKeys(ctx)
+	require.Error(t, err)
+
+	mt.EXPECT().RotateGlobalAppKeySecret(gomock.Any(),
+		pm(&api.RotateGlobalAppKeySecretRequest{Id: "ras_id1"})).Return(
+		&api.RotateGlobalAppKeySecretResponse{AppKey: nil}, nil)
+
+	_, err = drv.RotateGlobalAppKeySecret(ctx, "ras_id1")
+	require.Error(t, err)
+
+	mt.EXPECT().RotateGlobalAppKeySecret(gomock.Any(),
+		pm(&api.RotateGlobalAppKeySecretRequest{Id: "ras_id1"})).Return(
+		&api.RotateGlobalAppKeySecretResponse{AppKey: &api.GlobalAppKey{Id: "id1"}}, fmt.Errorf("some error"))
+
+	_, err = drv.RotateGlobalAppKeySecret(ctx, "ras_id1")
+	require.Error(t, err)
+}
+
 func testDriverToken(t *testing.T, d Driver, mc *mock.MockTigrisServer, mca *mock.MockAuthServer, token string, getToken bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if getToken {
 		mca.EXPECT().GetAccessToken(gomock.Any(),
-			pm(&api.GetAccessTokenRequest{ClientId: "client_id_test", ClientSecret: "client_secret_test", GrantType: api.GrantType_CLIENT_CREDENTIALS})).Return(
+			pm(&api.GetAccessTokenRequest{
+				ClientId: "client_id_test", ClientSecret: "client_secret_test",
+				GrantType: api.GrantType_CLIENT_CREDENTIALS,
+			})).Return(
 			&api.GetAccessTokenResponse{AccessToken: token, RefreshToken: "refresh_token1", ExpiresIn: 11}, nil)
 	}
 
@@ -280,4 +440,249 @@ func testGetInfo(t *testing.T, c Driver, mc *mock.MockObservabilityServer) {
 
 	_, err = c.Info(ctx)
 	require.Error(t, err)
+}
+
+func testInvitations(t *testing.T, m Management, ma *mock.MockAuthServer) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	t.Run("create_invitations", func(t *testing.T) {
+		ma.EXPECT().CreateInvitations(gomock.Any(),
+			pm(&api.CreateInvitationsRequest{
+				Invitations: []*api.InvitationInfo{
+					{
+						Email:                "email1",
+						Role:                 "role1",
+						InvitationSentByName: "inv_by_name1",
+					},
+					{
+						Email:                "email2",
+						Role:                 "role2",
+						InvitationSentByName: "inv_by_name2",
+					},
+				},
+			})).Return(&api.CreateInvitationsResponse{
+			Status:  "created",
+			Message: "msg1",
+			Count:   2,
+		}, nil)
+
+		err := m.CreateInvitations(ctx, []*InvitationInfo{
+			{
+				Email:                "email1",
+				Role:                 "role1",
+				InvitationSentByName: "inv_by_name1",
+			},
+			{
+				Email:                "email2",
+				Role:                 "role2",
+				InvitationSentByName: "inv_by_name2",
+			},
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("delete_invitations", func(t *testing.T) {
+		status := "status1"
+
+		ma.EXPECT().DeleteInvitations(gomock.Any(),
+			pm(&api.DeleteInvitationsRequest{
+				Email:  "email1",
+				Status: &status,
+			}),
+		).Return(&api.DeleteInvitationsResponse{Status: "deleted", Message: "msg1"}, nil)
+
+		err := m.DeleteInvitations(ctx, "email1", "status1")
+		require.NoError(t, err)
+	})
+
+	t.Run("verify_invitations", func(t *testing.T) {
+		ma.EXPECT().VerifyInvitation(gomock.Any(),
+			pm(&api.VerifyInvitationRequest{
+				Email: "email1",
+				Code:  "code1",
+			}),
+		).Return(&api.VerifyInvitationResponse{
+			TigrisNamespace:     "ns1",
+			TigrisNamespaceName: "ns_name1",
+			Role:                "role1",
+		}, nil)
+
+		err := m.VerifyInvitation(ctx, "email1", "code1")
+		require.NoError(t, err)
+	})
+
+	t.Run("list_invitations", func(t *testing.T) {
+		status := "status1"
+		ma.EXPECT().ListInvitations(gomock.Any(),
+			pm(&api.ListInvitationsRequest{
+				Status: &status,
+			}),
+		).Return(&api.ListInvitationsResponse{
+			Invitations: []*api.Invitation{
+				{
+					Email:               "email1",
+					Role:                "role1",
+					Status:              "status1",
+					TigrisNamespace:     "ns1",
+					TigrisNamespaceName: "ns_name1",
+					CreatedBy:           "created_by1",
+					CreatedByName:       "created_by_name1",
+					ExpirationTime:      12345,
+				},
+				{
+					Email:               "email2",
+					Role:                "role2",
+					Status:              "status2",
+					TigrisNamespace:     "ns2",
+					TigrisNamespaceName: "ns_name2",
+					CreatedBy:           "created_by2",
+					CreatedByName:       "created_by_name2",
+					ExpirationTime:      22345,
+				},
+			},
+		}, nil)
+
+		invs, err := m.ListInvitations(ctx, "status1")
+		require.NoError(t, err)
+
+		require.Equal(t, []*Invitation{
+			{
+				Email:               "email1",
+				Role:                "role1",
+				Status:              "status1",
+				TigrisNamespace:     "ns1",
+				TigrisNamespaceName: "ns_name1",
+				CreatedBy:           "created_by1",
+				CreatedByName:       "created_by_name1",
+				ExpirationTime:      12345,
+			},
+			{
+				Email:               "email2",
+				Role:                "role2",
+				Status:              "status2",
+				TigrisNamespace:     "ns2",
+				TigrisNamespaceName: "ns_name2",
+				CreatedBy:           "created_by2",
+				CreatedByName:       "created_by_name2",
+				ExpirationTime:      22345,
+			},
+		}, invs)
+	})
+
+	t.Run("list_users", func(t *testing.T) {
+		ma.EXPECT().ListUsers(gomock.Any(),
+			pm(&api.ListUsersRequest{}),
+		).Return(&api.ListUsersResponse{
+			Users: []*api.User{
+				{
+					Email:     "email1",
+					Name:      "name1",
+					CreatedAt: 12345,
+					Picture:   "pic1",
+					Role:      "role1",
+				},
+				{
+					Email:     "email2",
+					Name:      "name2",
+					CreatedAt: 22345,
+					Picture:   "pic2",
+					Role:      "role2",
+				},
+			},
+		}, nil)
+		users, err := m.ListUsers(ctx)
+		require.NoError(t, err)
+		require.Equal(t, []*User{
+			{
+				Email:     "email1",
+				Name:      "name1",
+				CreatedAt: 12345,
+				Picture:   "pic1",
+				Role:      "role1",
+			},
+			{
+				Email:     "email2",
+				Name:      "name2",
+				CreatedAt: 22345,
+				Picture:   "pic2",
+				Role:      "role2",
+			},
+		}, users)
+	})
+}
+
+func testInvitationsNegative(t *testing.T, m Management, ma *mock.MockAuthServer) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	t.Run("create_invitations", func(t *testing.T) {
+		ma.EXPECT().CreateInvitations(gomock.Any(),
+			pm(&api.CreateInvitationsRequest{
+				Invitations: []*api.InvitationInfo{
+					{
+						Email:                "email1",
+						Role:                 "role1",
+						InvitationSentByName: "inv_by_name1",
+					},
+				},
+			})).Return(nil, fmt.Errorf("some error"))
+
+		err := m.CreateInvitations(ctx, []*InvitationInfo{
+			{
+				Email:                "email1",
+				Role:                 "role1",
+				InvitationSentByName: "inv_by_name1",
+			},
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("delete_invitations", func(t *testing.T) {
+		status := "status1"
+
+		ma.EXPECT().DeleteInvitations(gomock.Any(),
+			pm(&api.DeleteInvitationsRequest{
+				Email:  "email1",
+				Status: &status,
+			}),
+		).Return(nil, fmt.Errorf("some error"))
+
+		err := m.DeleteInvitations(ctx, "email1", "status1")
+		require.Error(t, err)
+	})
+
+	t.Run("verify_invitations", func(t *testing.T) {
+		ma.EXPECT().VerifyInvitation(gomock.Any(),
+			pm(&api.VerifyInvitationRequest{
+				Email: "email1",
+				Code:  "code1",
+			}),
+		).Return(nil, fmt.Errorf("some error"))
+
+		err := m.VerifyInvitation(ctx, "email1", "code1")
+		require.Error(t, err)
+	})
+
+	t.Run("list_invitations", func(t *testing.T) {
+		status := "status1"
+		ma.EXPECT().ListInvitations(gomock.Any(),
+			pm(&api.ListInvitationsRequest{
+				Status: &status,
+			}),
+		).Return(nil, fmt.Errorf("some error"))
+
+		_, err := m.ListInvitations(ctx, "status1")
+		require.Error(t, err)
+	})
+
+	t.Run("list_users", func(t *testing.T) {
+		ma.EXPECT().ListUsers(gomock.Any(),
+			pm(&api.ListUsersRequest{}),
+		).Return(nil, nil)
+		_, err := m.ListUsers(ctx)
+		require.Error(t, err)
+	})
 }

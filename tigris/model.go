@@ -32,9 +32,9 @@ type metadataSetter interface {
 type Metadata struct {
 	// These fields are automatically populated from
 	// request metadata
-	createdAt time.Time `json:"-"`
-	updatedAt time.Time `json:"-"`
-	deletedAt time.Time `json:"-"`
+	createdAt time.Time
+	updatedAt time.Time
+	deletedAt time.Time
 }
 
 // Model contains document metadata

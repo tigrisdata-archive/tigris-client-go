@@ -17,7 +17,6 @@ package driver
 import (
 	"encoding/json"
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"unsafe"
 
@@ -34,7 +33,7 @@ type JSONMatcher struct {
 	Expected []byte
 }
 
-func (matcher *JSONMatcher) Matches(actual interface{}) bool {
+func (matcher *JSONMatcher) Matches(actual any) bool {
 	return assert.JSONEq(matcher.T, string(matcher.Expected), string(actual.(Schema)))
 }
 
@@ -42,7 +41,7 @@ func (matcher *JSONMatcher) String() string {
 	return fmt.Sprintf("JSONMatcher: %v", string(matcher.Expected))
 }
 
-func (matcher *JSONMatcher) Got(actual interface{}) string {
+func (*JSONMatcher) Got(actual any) string {
 	ptr := unsafe.Pointer(&actual)
 	return fmt.Sprintf("JSONMatcher: %v", string(*(*[]byte)(ptr)))
 }
@@ -72,7 +71,7 @@ func (matcher *JSONArrMatcher) String() string {
 	return fmt.Sprintf("JSONMatcher: %+v", matcher.Expected)
 }
 
-func (matcher *JSONArrMatcher) Got(actual any) string {
+func (*JSONArrMatcher) Got(actual any) string {
 	return fmt.Sprintf("JSONArrMatcher: %+v", actual)
 }
 
@@ -82,8 +81,8 @@ func JAM(t *testing.T, expected []string) gomock.Matcher {
 	return gomock.GotFormatterAdapter(j, j)
 }
 
-func ToDocument(t *testing.T, doc interface{}) Document {
-	b, err := jsoniter.Marshal(doc)
+func ToDocument(t *testing.T, doc any) Document {
+	b, err := json.Marshal(doc)
 	require.NoError(t, err)
 
 	return b
@@ -93,7 +92,7 @@ type ProtoMatcher struct {
 	Message proto.Message
 }
 
-func (matcher *ProtoMatcher) Matches(actual interface{}) bool {
+func (matcher *ProtoMatcher) Matches(actual any) bool {
 	message, ok := actual.(proto.Message)
 	if !ok {
 		return false

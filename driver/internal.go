@@ -16,6 +16,7 @@ package driver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -41,6 +42,12 @@ type driverWithOptions interface {
 	UpdateAppKey(ctx context.Context, project string, id string, name string, description string) (*AppKey, error)
 	ListAppKeys(ctx context.Context, project string) ([]*AppKey, error)
 	RotateAppKeySecret(ctx context.Context, project string, id string) (*AppKey, error)
+
+	CreateGlobalAppKey(ctx context.Context, name string, description string) (*GlobalAppKey, error)
+	DeleteGlobalAppKey(ctx context.Context, id string) error
+	UpdateGlobalAppKey(ctx context.Context, id string, name string, description string) (*GlobalAppKey, error)
+	ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, error)
+	RotateGlobalAppKeySecret(ctx context.Context, id string) (*GlobalAppKey, error)
 
 	Close() error
 }
@@ -143,4 +150,8 @@ func PtrToInt32(b *int32) int32 {
 		return 0
 	}
 	return *b
+}
+
+func SetSchemaVersion(v int) {
+	HeaderSchemaVersionValue = []string{fmt.Sprintf("%d", v)}
 }

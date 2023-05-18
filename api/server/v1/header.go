@@ -29,6 +29,8 @@ const (
 	// values. For ex, 0.1 means 100milliseconds.
 	HeaderRequestTimeout = "Request-Timeout"
 
+	HeaderAccept = "Accept"
+
 	HeaderAccessControlAllowOrigin = "Access-Control-Allow-Origin"
 	HeaderAuthorization            = "authorization"
 
@@ -37,16 +39,19 @@ const (
 
 	HeaderPrefix = "Tigris-"
 
-	HeaderTxID          = "Tigris-Tx-Id"
-	HeaderTxOrigin      = "Tigris-Tx-Origin"
-	grpcGatewayPrefix   = "Grpc-Gateway-"
-	HeaderSchemaSignOff = "Tigris-Schema-Sign-Off"
+	HeaderTxID                      = "Tigris-Tx-Id"
+	HeaderTxOrigin                  = "Tigris-Tx-Origin"
+	grpcGatewayPrefix               = "Grpc-Gateway-"
+	HeaderSchemaSignOff             = "Tigris-Schema-Sign-Off"
+	HeaderSchemaVersion             = "Tigris-Schema-Version"
+	HeaderBypassAuthCache           = "Tigris-Bypass-Auth-Cache" // #nosec G101
+	HeaderReadSearchDataFromStorage = "Tigris-Search-Read-From-Storage"
 )
 
 func CustomMatcher(key string) (string, bool) {
 	key = textproto.CanonicalMIMEHeaderKey(key)
 	switch key {
-	case HeaderRequestTimeout, HeaderAccessControlAllowOrigin, SetCookie, Cookie:
+	case HeaderRequestTimeout, HeaderAccessControlAllowOrigin, SetCookie, Cookie, HeaderAccept:
 		return key, true
 	default:
 		if strings.HasPrefix(key, HeaderPrefix) {
@@ -62,4 +67,8 @@ func GetHeader(ctx context.Context, header string) string {
 	}
 
 	return metautils.ExtractIncoming(ctx).Get(grpcGatewayPrefix + header)
+}
+
+func GetNonGRPCGatewayHeader(ctx context.Context, header string) string {
+	return metautils.ExtractIncoming(ctx).Get(header)
 }

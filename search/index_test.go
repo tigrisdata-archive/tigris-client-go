@@ -303,7 +303,7 @@ func TestSearchIndex(t *testing.T) {
 	require.Equal(t, fmt.Errorf("error2"), err)
 }
 
-func createSearchResponse(t *testing.T, doc interface{}) driver.SearchIndexResponse {
+func createSearchResponse(t *testing.T, doc any) driver.SearchIndexResponse {
 	t.Helper()
 
 	d, err := jsoniter.Marshal(doc)

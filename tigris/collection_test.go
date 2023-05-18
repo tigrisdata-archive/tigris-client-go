@@ -40,7 +40,7 @@ import (
 
 var toDocument = driver.ToDocument
 
-func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
+func createSearchResponse(t *testing.T, doc any) driver.SearchResponse {
 	t.Helper()
 
 	d, err := json.Marshal(doc)
@@ -243,6 +243,16 @@ func TestCollectionBasic(t *testing.T) {
 	).Return(&driver.ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, nil)
 	explain, err := c.Explain(ctx, filter.Eq("Key1", "aaa"), fields.Include("f1"),
 		&ReadOptions{Skip: 10})
+	require.NoError(t, err)
+	require.Equal(t, &ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, explain)
+
+	// test sorting options
+	mdb.EXPECT().Explain(ctx, "coll_1", driver.Filter(`{"Key1":{"$eq":"aaa"}}`),
+		driver.Projection(`{"f1":true}`),
+		&driver.ReadOptions{Skip: 10, Sort: []byte(`[{"sort1":"$asc"}]`)},
+	).Return(&driver.ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, nil)
+	explain, err = c.Explain(ctx, filter.Eq("Key1", "aaa"), fields.Include("f1"),
+		&ReadOptions{Skip: 10, Sort: sort.Ascending("sort1")})
 	require.NoError(t, err)
 	require.Equal(t, &ExplainResponse{Collection: "coll_1", Sorting: "sort1"}, explain)
 
@@ -562,23 +572,23 @@ func TestClientSchemaMigration(t *testing.T) {
 		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
 			Schemas: [][]byte{
-				//				[]byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
+				// []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
 				[]byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"],"collection_type":"documents"}`),
 			},
 			Options: &api.CollectionOptions{},
 		})).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
 
-	_, err = TestOpenDatabase(ctx, drv, "db1" /*&testSchema1{},*/, &testSchema2{})
+	_, err = TestOpenDatabase(ctx, drv, "db1" /* &testSchema1{},*/, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string
-	_, err = schema.FromCollectionModels(schema.Documents, &m)
+	_, err = schema.FromCollectionModels(1, schema.Documents, &m)
 	require.Error(t, err)
 	_, _, err = schema.FromDatabaseModel(&m)
 	require.Error(t, err)
 
 	var i int
-	_, err = schema.FromCollectionModels(schema.Documents, &i)
+	_, err = schema.FromCollectionModels(1, schema.Documents, &i)
 	require.Error(t, err)
 	_, _, err = schema.FromDatabaseModel(&i)
 	require.Error(t, err)
@@ -603,6 +613,35 @@ func TestClientSchemaMigration(t *testing.T) {
 		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
 			Schemas: [][]byte{[]byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`)},
+			Options: &api.CollectionOptions{},
+		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) {
+	}).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
+
+	db = MustOpenDatabase(ctx, cfg, &Coll1{})
+	require.NotNil(t, db)
+
+	SchemaVersion = 11
+	defer func() {
+		SchemaVersion = 0
+	}()
+
+	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Project: "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
+
+	mc.EXPECT().CommitTransaction(gomock.Any(),
+		pm(&api.CommitTransactionRequest{
+			Project: "db1",
+		})).Return(&api.CommitTransactionResponse{}, nil)
+
+	mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+		pm(&api.CreateOrUpdateCollectionsRequest{
+			Project: "db1",
+			Schemas: [][]byte{[]byte(`{"version":11,"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`)},
 			Options: &api.CollectionOptions{},
 		})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) {
 	}).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)

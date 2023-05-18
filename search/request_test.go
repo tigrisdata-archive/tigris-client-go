@@ -164,7 +164,7 @@ func TestFacetQuery_Built(t *testing.T) {
 
 func ExampleNewRequestBuilder() {
 	req := NewRequestBuilder().WithQuery("my search text").Build()
-	fmt.Println(req.Q)
+	_, _ = fmt.Println(req.Q)
 	// Output: my search text
 }
 
@@ -174,6 +174,6 @@ func ExampleRequestBuilder_WithSearchFields() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(b))
+	_, _ = fmt.Println(string(b))
 	// Output: {"field_1":true}
 }

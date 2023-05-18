@@ -1316,3 +1316,62 @@ func testSchemaSignOffHeader(t *testing.T, mc *mock.MockTigrisServer, c Driver) 
 	_, err = tx.Insert(ctx, "c1", doc1)
 	require.Error(t, err)
 }
+
+func testSchemaVersion(t *testing.T, mc *mock.MockTigrisServer, c Driver) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	txCtx := &api.TransactionCtx{Id: "tx_id1", Origin: "origin_id1"}
+	setMetadata(ctx, txCtx, meta.MD{})
+
+	doc1 := []Document{Document(`{"K1":"vK2","K2":1,"D1":"vD3"}`)}
+
+	SetSchemaVersion(10)
+
+	defer func() {
+		SetSchemaVersion(0)
+	}()
+
+	mc.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Project:    "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.InsertRequestOptions{},
+		})).DoAndReturn(
+		func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
+			require.Equal(t, "10", api.GetHeader(ctx, api.HeaderSchemaVersion))
+
+			return nil, fmt.Errorf("error")
+		})
+
+	_, err := c.UseDatabase("db1").Insert(ctx, "c1", doc1)
+	require.Error(t, err)
+
+	mc.EXPECT().BeginTransaction(gomock.Any(),
+		pm(&api.BeginTransactionRequest{
+			Project: "db1",
+			Options: &api.TransactionOptions{},
+		})).Return(&api.BeginTransactionResponse{TxCtx: txCtx}, nil)
+
+	tx, err := c.UseDatabase("db1").BeginTx(ctx, &TxOptions{})
+	require.NoError(t, err)
+
+	mc.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Project:    "db1",
+			Collection: "c1",
+			Documents:  *(*[][]byte)(unsafe.Pointer(&doc1)),
+			Options:    &api.InsertRequestOptions{},
+		})).DoAndReturn(
+		func(ctx context.Context, r *api.InsertRequest) (*api.InsertResponse, error) {
+			require.True(t, proto.Equal(txCtx, api.GetTransaction(ctx)))
+
+			require.Equal(t, "10", api.GetHeader(ctx, api.HeaderSchemaVersion))
+
+			return nil, fmt.Errorf("error")
+		})
+
+	_, err = tx.Insert(ctx, "c1", doc1)
+	require.Error(t, err)
+}

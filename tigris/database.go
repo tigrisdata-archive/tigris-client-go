@@ -32,14 +32,14 @@ import (
 // top level GetTxCollection(ctx, tx) function should be used
 // instead of method of Tx interface.
 type Database struct {
-	name   string
 	driver driver.Driver
+	name   string
 }
 
-func newDatabase(name string, driver driver.Driver) *Database {
+func newDatabase(name string, drv driver.Driver) *Database {
 	return &Database{
 		name:   name,
-		driver: driver,
+		driver: drv,
 	}
 }
 
@@ -47,9 +47,32 @@ func newDatabase(name string, driver driver.Driver) *Database {
 // This method is only needed if collections need to be created dynamically,
 // all static collections are created by OpenDatabase.
 func (db *Database) CreateCollections(ctx context.Context, model schema.Model, models ...schema.Model) error {
-	schemas, err := schema.FromCollectionModels(schema.Documents, model, models...)
+	schemas, err := schema.FromCollectionModels(SchemaVersion, schema.Documents, model, models...)
 	if err != nil {
 		return fmt.Errorf("error parsing model schema: %w", err)
+	}
+
+	return db.createCollectionsFromSchemas(ctx, schemas)
+}
+
+// CreateCollection creates collection in the Database using provided collection model and optional name.
+// This method is only needed if collection need to be created dynamically,
+// all static collections are created by OpenDatabase.
+func (db *Database) CreateCollection(ctx context.Context, model schema.Model, name ...string) error {
+	schemas, err := schema.FromCollectionModels(SchemaVersion, schema.Documents, model)
+	if err != nil {
+		return fmt.Errorf("error parsing model schema: %w", err)
+	}
+
+	if len(name) > 1 {
+		return fmt.Errorf("only one name parameter allowed")
+	}
+
+	if len(name) == 1 {
+		// there only one schema
+		for _, v := range schemas {
+			v.Name = name[0]
+		}
 	}
 
 	return db.createCollectionsFromSchemas(ctx, schemas)
@@ -59,6 +82,7 @@ func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driv
 	schemas := make([]driver.Schema, len(inSchemas))
 
 	var i int
+
 	for _, v := range inSchemas {
 		sch, err := schema.Build(v)
 		if err != nil {
@@ -70,11 +94,13 @@ func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driv
 	}
 
 	var err error
+
 	if tx != nil {
 		_, err = tx.CreateOrUpdateCollections(ctx, schemas)
 	} else {
 		_, err = db.driver.UseDatabase(db.name).CreateOrUpdateCollections(ctx, schemas)
 	}
+
 	if err != nil {
 		return err
 	}
@@ -90,6 +116,21 @@ func (db *Database) createCollectionsFromSchemas(ctx context.Context, schemas ma
 	// Run in existing transaction
 	if tx := getTxCtx(ctx); tx != nil {
 		return db.createCollectionsFromSchemasLow(ctx, tx.tx, schemas)
+	}
+
+	if SchemaVersion != 0 {
+		dtx, err := db.driver.UseDatabase(db.name).BeginTx(ctx)
+		if err != nil {
+			return err
+		}
+
+		defer func() { _ = dtx.Rollback(ctx) }()
+
+		if err = db.createCollectionsFromSchemasLow(ctx, dtx, schemas); err != nil {
+			return err
+		}
+
+		return dtx.Commit(ctx)
 	}
 
 	return db.createCollectionsFromSchemasLow(ctx, nil, schemas)
@@ -135,6 +176,8 @@ func OpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 		return nil, ErrNotTransactional
 	}
 
+	driver.SetSchemaVersion(SchemaVersion)
+
 	d, err := driver.NewDriver(ctx, driverConfig(cfg))
 	if err != nil {
 		return nil, err
@@ -154,10 +197,16 @@ func MustOpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 }
 
 // GetCollection returns collection object corresponding to collection model T.
-func GetCollection[T schema.Model](db *Database) *Collection[T] {
+func GetCollection[T schema.Model](db *Database, name ...string) *Collection[T] {
 	var m T
-	name := schema.ModelName(&m)
-	return getNamedCollection[T](db, name)
+
+	nm := schema.ModelName(&m)
+
+	if len(name) > 0 {
+		nm = name[0]
+	}
+
+	return getNamedCollection[T](db, nm)
 }
 
 func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {

@@ -29,8 +29,8 @@ type metadataSetter interface {
 type Metadata struct {
 	// These fields are automatically populated from
 	// request metadata
-	createdAt time.Time `json:"-"`
-	updatedAt time.Time `json:"-"`
+	createdAt time.Time
+	updatedAt time.Time
 }
 
 func newMetadata(c time.Time, u time.Time) Metadata {

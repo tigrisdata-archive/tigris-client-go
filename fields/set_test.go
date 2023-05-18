@@ -50,27 +50,31 @@ func TestSet(t *testing.T) {
 
 func TestSetScoped(t *testing.T) {
 	u := UpdateBuilder()
-	cases := []struct {
-		name string
-		upd  *Update
-		exp  string
-	}{
-		{"int", u.SetInt("f", 123), `{"$set":{"f":123}}`},
-		{"int32", u.SetInt32("f", 12345), `{"$set":{"f":12345}}`},
-		{"int64", u.SetInt64("f", 123456789012), `{"$set":{"f":123456789012}}`},
-		{"float32", u.SetFloat32("f", 12345.67), `{"$set":{"f":12345.67}}`},
-		{"float64", u.SetFloat64("f", 123456789012.34), `{"$set":{"f":123456789012.34}}`},
-		{"string", u.SetString("f", "1234"), `{"$set":{"f":"1234"}}`},
-		{"bytes", u.SetBytes("f", []byte("123")), `{"$set":{"f":"MTIz"}}`},
-		{"time", u.SetTime("f", time.Time{}), `{"$set":{"f":"0001-01-01T00:00:00Z"}}`},
-		{"uuid", u.SetUUID("f", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36")), `{"$set":{"f":"11111111-00b6-4eb5-a64d-351be56afe36"}}`},
-	}
 
-	for _, v := range cases {
-		t.Run(v.name, func(t *testing.T) {
-			act, err := v.upd.Build()
-			require.NoError(t, err)
-			require.Equal(t, v.exp, string(act.Built()))
-		})
-	}
+	u.SetInt("f1", 123)
+	u.SetInt32("f2", 12345)
+	u.SetInt64("f3", 123456789012)
+	u.SetFloat32("f4", 12345.67)
+	u.SetFloat64("f5", 123456789012.34)
+	u.SetString("f6", "1234")
+	u.SetBytes("f7", []byte("123"))
+	u.SetTime("f8", time.Time{})
+	u.SetUUID("f9", uuid.MustParse("11111111-00b6-4eb5-a64d-351be56afe36"))
+
+	exp := `{
+	"$set":{
+		"f1":123,
+		"f2":12345, 
+		"f3":123456789012,
+		"f4":12345.67,
+		"f5":123456789012.34,
+		"f6":"1234",
+		"f7":"MTIz",
+		"f8":"0001-01-01T00:00:00Z",
+		"f9":"11111111-00b6-4eb5-a64d-351be56afe36"
+	}}`
+
+	act, err := u.Build()
+	require.NoError(t, err)
+	require.JSONEq(t, exp, string(act.Built()))
 }

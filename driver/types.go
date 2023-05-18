@@ -34,8 +34,8 @@ const (
 	EnvProject      = "TIGRIS_PROJECT"
 	EnvDBBranch     = "TIGRIS_DB_BRANCH"
 
-	Version   = "v1.0.0"
-	UserAgent = "tigris-client-go/" + Version
+	ClientVersion = "v1.0.0"
+	UserAgent     = "tigris-client-go/" + ClientVersion
 
 	tokenRequestTimeout = 15 * time.Second
 )
@@ -46,6 +46,8 @@ var (
 
 	// TokenURLOverride Only used in tests to point auth to proper HTTP port in GRPC tests.
 	TokenURLOverride string
+
+	HeaderSchemaVersionValue []string
 )
 
 type (
@@ -147,7 +149,7 @@ type Error struct {
 	*api.TigrisError
 }
 
-func NewError(c api.Code, format string, a ...interface{}) *Error {
+func NewError(c api.Code, format string, a ...any) *Error {
 	if c == api.Code_OK {
 		return nil
 	}
@@ -164,9 +166,13 @@ func (e *Error) As(i any) bool {
 }
 
 type (
-	AppKey        api.AppKey
-	TokenResponse api.GetAccessTokenResponse
-	Namespace     api.NamespaceInfo
+	AppKey         api.AppKey
+	GlobalAppKey   api.GlobalAppKey
+	TokenResponse  api.GetAccessTokenResponse
+	Namespace      api.NamespaceInfo
+	User           api.User
+	Invitation     api.Invitation
+	InvitationInfo api.InvitationInfo
 
 	QuotaLimits api.QuotaLimitsResponse
 	QuotaUsage  api.QuotaUsageResponse

@@ -25,7 +25,7 @@ import (
 
 type (
 	Operand map[string]comparison
-	value   interface{}
+	value   any
 )
 
 type comparison struct {
@@ -47,7 +47,7 @@ const (
 var All = Expr{}
 
 type (
-	Expr   map[string]interface{}
+	Expr   map[string]any
 	Filter = Expr
 )
 
@@ -80,32 +80,32 @@ func Eq[T schema.PrimitiveFieldType](field string, value T) Expr {
 /*
 // Ne composes 'not equal' operation.
 // Result is equivalent to: field != value
-func Ne(field string, value interface{}) Expr {
+func Ne(field string, value any) Expr {
 	return Expr{field: comparison{Ne: value}}
 }
 */
 
 // Gt composes 'greater than' operation.
 // Result is equivalent to: field > value.
-func Gt(field string, value interface{}) Expr {
+func Gt(field string, value any) Expr {
 	return Expr{field: comparison{Gt: value}}
 }
 
 // Gte composes 'greater than or equal' operation.
 // Result is equivalent to: field >= value.
-func Gte(field string, value interface{}) Expr {
+func Gte(field string, value any) Expr {
 	return Expr{field: comparison{Gte: value}}
 }
 
 // Lt composes 'less than' operation.
 // Result is equivalent to: field < value.
-func Lt(field string, value interface{}) Expr {
+func Lt(field string, value any) Expr {
 	return Expr{field: comparison{Lt: value}}
 }
 
 // Lte composes 'less than or equal' operation.
 // Result is equivalent to: field <= value.
-func Lte(field string, value interface{}) Expr {
+func Lte(field string, value any) Expr {
 	return Expr{field: comparison{Lte: value}}
 }
 

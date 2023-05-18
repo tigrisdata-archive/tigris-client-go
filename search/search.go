@@ -49,7 +49,7 @@ func NewSearch(name string, search driver.SearchClient) *Search {
 // This method is only needed if indexes need to be created dynamically,
 // all static indexes are created by OpenSearch.
 func (s *Search) CreateIndexes(ctx context.Context, model schema.Model, models ...schema.Model) error {
-	schemas, err := schema.FromCollectionModels(schema.Search, model, models...)
+	schemas, err := schema.FromCollectionModels(0, schema.Search, model, models...)
 	if err != nil {
 		return fmt.Errorf("error parsing model schema: %w", err)
 	}

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//revive:disable:unhandled-error
 package timeseries_test
 
 import (

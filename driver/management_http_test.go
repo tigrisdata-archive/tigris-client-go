@@ -31,6 +31,11 @@ func TestHTTPAuthDriver(t *testing.T) {
 	drv, managementClient, mockServers, cancel := SetupMgmtHTTPTests(t, &config.Driver{})
 	defer cancel()
 	testDriverAuth(t, drv, managementClient, mockServers.API, mockServers.Auth, mockServers.Mgmt)
+	testGlobalAppKeys(t, drv, mockServers.API)
+	testDriverAuthNegative(t, drv, managementClient, mockServers.API, mockServers.Mgmt)
+	testGlobalGlobalAppKeysNegative(t, drv, mockServers.API)
+	testInvitations(t, managementClient, mockServers.Auth)
+	testInvitationsNegative(t, managementClient, mockServers.Auth)
 }
 
 func TestHTTPGetInfo(t *testing.T) {

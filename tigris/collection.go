@@ -228,7 +228,7 @@ func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filte
 		return nil, fmt.Errorf("API expecting options but received null")
 	}
 
-	var sortOrderbytes []byte = nil
+	var sortOrderbytes []byte
 	if options.Sort != nil {
 		sortOrder, err := options.Sort.Built()
 		if err != nil {
@@ -365,7 +365,7 @@ func (c *Collection[T]) Explain(ctx context.Context, filter filter.Filter, field
 		return nil, err
 	}
 
-	var sortOrderbytes []byte = nil
+	var sortOrderbytes []byte
 	if options.Sort != nil {
 		sortOrder, err := options.Sort.Built()
 		if err != nil {

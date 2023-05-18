@@ -17,6 +17,7 @@ package schema
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -221,7 +222,7 @@ func TestCollectionSchema(t *testing.T) {
 	}
 
 	cases := []struct {
-		input  interface{}
+		input  any
 		output *Schema
 		err    error
 	}{
@@ -391,18 +392,21 @@ func TestCollectionSchema(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(reflect.TypeOf(c.input).Name(), func(t *testing.T) {
-			schema, err := fromCollectionModel(c.input, Documents)
-			assert.Equal(t, c.err, err)
+			schema, err := fromCollectionModel(3, c.input, Documents)
+			require.Equal(t, c.err, err)
 			if schema != nil {
 				assert.Equal(t, Documents, schema.CollectionType)
 				c.output.CollectionType = Documents
+
+				assert.Equal(t, 3, schema.Version)
+				schema.Version = 0
+				assert.Equal(t, c.output, schema)
 			}
-			assert.Equal(t, c.output, schema)
 		})
 	}
 
 	t.Run("build", func(t *testing.T) {
-		s, err := fromCollectionModel(allTypes{}, Documents)
+		s, err := fromCollectionModel(5, allTypes{}, Documents)
 		require.NoError(t, err)
 
 		assert.Equal(t, Documents, s.CollectionType)
@@ -411,21 +415,21 @@ func TestCollectionSchema(t *testing.T) {
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.JSONEq(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"},"maxItems":3},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
+		require.Equal(t, `{"version":5,"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"},"maxItems":3},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {
-		s, err := FromCollectionModels(Documents, pk{}, pk1{})
+		s, err := FromCollectionModels(7, Documents, pk{}, pk1{})
 		require.NoError(t, err)
 
 		assert.Equal(t, map[string]*Schema{
-			"pks":  {Name: "pks", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
-			"pk_1": {Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
+			"pks":  {Version: 7, Name: "pks", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
+			"pk_1": {Version: 7, Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
 		}, s)
 	})
 
 	t.Run("duplicate_pk_index", func(t *testing.T) {
-		_, err := FromCollectionModels(Documents, pkDup{})
+		_, err := FromCollectionModels(9, Documents, pkDup{})
 		if err.Error() == "duplicate primary key index 1 set for key_1 and key_2" {
 			require.Equal(t, err, fmt.Errorf("duplicate primary key index 1 set for key_1 and key_2"))
 		} else {
@@ -465,13 +469,14 @@ func TestTags(t *testing.T) {
 		FieldDefaultUUID uuid.UUID `json:"def_uuid" tigris:"default:uuid()"`
 	}
 
-	schema, err := fromCollectionModel(TestDefaults{}, Documents)
+	schema, err := fromCollectionModel(11, TestDefaults{}, Documents)
 	assert.Equal(t, nil, err)
 
 	b, err := schema.Build()
 	require.NoError(t, err)
 	exp := `{
 	"title":"test_defaults",
+	"version": 11,
 	"properties":{
 		"ID":{"type":"string","format":"uuid","autoGenerate":true},
 		"def_bool":{"type":"boolean","default":true},
@@ -520,8 +525,8 @@ func TestDefaultsNegative(t *testing.T) {
 		{"int", "integer", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "strconv.ParseInt: parsing \"vbn\": invalid syntax")},
 		{"float", "number", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "strconv.ParseFloat: parsing \"vbn\": invalid syntax")},
 		{"bool", "boolean", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid bool value: vbn")},
-		{"array", "array", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "[]interface {}: decode slice: expect [ or n, but found v, error found in #1 byte of ...|vbn|..., bigger context ...|vbn|...")},
-		{"object", "object", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "ReadMapCB: expect { or n, but found v, error found in #1 byte of ...|vbn|..., bigger context ...|vbn|...")},
+		{"array", "array", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid character 'v' looking for beginning of value")},
+		{"object", "object", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid character 'v' looking for beginning of value")},
 	}
 
 	for _, c := range cases {
@@ -546,9 +551,11 @@ func TestDatabaseSchema(t *testing.T) {
 		c2 *Coll2
 		c3 []Coll2
 		C4 []*Coll2 `json:"coll_4"`
+		C5 Coll2    `tigris:"- "`
+		C6 Coll2    `tigris:"version:5"`
 	}
 
-	_ = DB1{c1: Coll1{}, c2: &Coll2{}, c3: []Coll2{}, C4: []*Coll2{}}
+	_ = DB1{c1: Coll1{}, c2: &Coll2{}, c3: []Coll2{}, C4: []*Coll2{}, C5: Coll2{}, C6: Coll2{}}
 
 	type DB3 struct {
 		Coll1
@@ -559,26 +566,33 @@ func TestDatabaseSchema(t *testing.T) {
 		int64
 	}
 
+	type DB5 struct {
+		C6 *Coll2 `tigris:"version:asdf"`
+	}
+
 	_ = DB4{1}
+	_ = DB5{C6: &Coll2{}}
 
 	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
 	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
 	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	c6 := Schema{Version: 5, Name: "C6", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 
 	var i int64
 
 	cases := []struct {
-		input  interface{}
+		input  any
 		name   string
 		output map[string]*Schema
 		err    error
 	}{
-		{DB1{}, "DB1", map[string]*Schema{"c1": &c1, "c2": &c2, "c3": &c3, "coll_4": &c4}, nil},
+		{DB1{}, "DB1", map[string]*Schema{"c1": &c1, "c2": &c2, "c3": &c3, "coll_4": &c4, "C6": &c6}, nil},
 		{&DB3{}, "DB3", map[string]*Schema{"Coll1": &coll1}, nil},
 		{DB4{}, "", nil, fmt.Errorf("model should be of struct type, not int64")},
 		{i, "", nil, fmt.Errorf("database model should be of struct type containing collection models types as fields")},
+		{DB5{}, "", nil, &strconv.NumError{Func: "Atoi", Num: "asdf", Err: strconv.ErrSyntax}},
 	}
 	for _, c := range cases {
 		t.Run(reflect.TypeOf(c.input).Name(), func(t *testing.T) {

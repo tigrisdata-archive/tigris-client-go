@@ -19,7 +19,7 @@ import (
 )
 
 // Iterator is used to iterate search documents.
-type Iterator[T interface{}] struct {
+type Iterator[T any] struct {
 	Iterator driver.SearchIndexResultIterator
 	err      error
 }

@@ -33,4 +33,5 @@ type Driver struct {
 	PingInterval time.Duration `json:"ping_interval_ms,omitempty"`
 
 	SkipSchemaValidation bool `json:"skip_schema_validation,omitempty"`
+	DisableSearch        bool `json:"disable_search,omitempty"`
 }

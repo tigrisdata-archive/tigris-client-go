@@ -124,6 +124,10 @@ func (c *grpcDriver) UseDatabase(project string) Database {
 		md = meta.Join(md, meta.Pairs(api.HeaderSchemaSignOff, "true"))
 	}
 
+	if c.cfg.DisableSearch {
+		md = meta.Join(md, meta.Pairs(api.HeaderDisableSearch, "true"))
+	}
+
 	if len(HeaderSchemaVersionValue) > 0 {
 		md = meta.Join(md, meta.Pairs(api.HeaderSchemaVersion, HeaderSchemaVersionValue[0]))
 	}

@@ -43,15 +43,17 @@ const (
 	HeaderTxOrigin                  = "Tigris-Tx-Origin"
 	grpcGatewayPrefix               = "Grpc-Gateway-"
 	HeaderSchemaSignOff             = "Tigris-Schema-Sign-Off"
+	HeaderDisableSearch             = "Tigris-Disable-Search"
 	HeaderSchemaVersion             = "Tigris-Schema-Version"
 	HeaderBypassAuthCache           = "Tigris-Bypass-Auth-Cache" // #nosec G101
 	HeaderReadSearchDataFromStorage = "Tigris-Search-Read-From-Storage"
+	HeaderServerTiming              = "Server-Timing"
 )
 
 func CustomMatcher(key string) (string, bool) {
 	key = textproto.CanonicalMIMEHeaderKey(key)
 	switch key {
-	case HeaderRequestTimeout, HeaderAccessControlAllowOrigin, SetCookie, Cookie, HeaderAccept:
+	case HeaderRequestTimeout, HeaderAccessControlAllowOrigin, SetCookie, Cookie, HeaderAccept, HeaderServerTiming:
 		return key, true
 	default:
 		if strings.HasPrefix(key, HeaderPrefix) {

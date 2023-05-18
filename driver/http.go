@@ -240,9 +240,20 @@ func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions,
 		httpClient = &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
 	}
 
-	hf := setHeaders
-	if config.SkipSchemaValidation {
-		hf = setHeadersSkipSchema
+	hf := func(ctx context.Context, req *http.Request) error {
+		if err := setHeaders(ctx, req); err != nil {
+			return err
+		}
+
+		if config.SkipSchemaValidation {
+			req.Header[api.HeaderSchemaSignOff] = []string{"true"}
+		}
+
+		if config.DisableSearch {
+			req.Header[api.HeaderDisableSearch] = []string{"true"}
+		}
+
+		return nil
 	}
 
 	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(hf))
@@ -269,7 +280,7 @@ func (c *httpDriver) UseSearch(project string) SearchClient {
 
 func (c *httpDriver) ListProjects(ctx context.Context) ([]string, error) {
 	resp, err := c.api.TigrisListProjects(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -294,7 +305,7 @@ func (c *httpDriver) ListProjects(ctx context.Context) ([]string, error) {
 
 func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
 	resp, err := c.api.ObservabilityGetInfo(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -309,7 +320,7 @@ func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
 
 func (c *httpDriver) Health(ctx context.Context) (*HealthResponse, error) {
 	resp, err := c.api.HealthAPIHealth(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -328,7 +339,7 @@ func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project str
 		SchemaFormat: &options.SchemaFormat,
 		Branch:       &c.cfg.Branch,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -364,7 +375,7 @@ func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project str
 func (c *httpDriver) createProjectWithOptions(ctx context.Context, project string, _ *CreateProjectOptions,
 ) (*CreateProjectResponse, error) {
 	resp, err := c.api.TigrisCreateProject(ctx, project, apiHTTP.TigrisCreateProjectJSONRequestBody{})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -384,7 +395,7 @@ func (c *httpDriver) createProjectWithOptions(ctx context.Context, project strin
 func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project string, _ *DeleteProjectOptions,
 ) (*DeleteProjectResponse, error) {
 	resp, err := c.api.TigrisDeleteProject(ctx, project, apiHTTP.TigrisDeleteProjectJSONRequestBody{})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -557,7 +568,7 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 		Branch:       &c.branch,
 		SchemaFormat: &options.SchemaFormat,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -915,7 +926,7 @@ func (c *httpDriver) CreateAppKey(ctx context.Context, project string, name stri
 		Name:        &name,
 		Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -946,7 +957,7 @@ func (c *httpDriver) UpdateAppKey(ctx context.Context, project string, id string
 		Id:   &id,
 		Name: &name, Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -967,7 +978,7 @@ func (c *httpDriver) UpdateAppKey(ctx context.Context, project string, id string
 
 func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey, error) {
 	resp, err := c.api.TigrisListAppKeys(ctx, project)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -984,7 +995,7 @@ func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey
 
 func (c *httpDriver) RotateAppKeySecret(ctx context.Context, project string, id string) (*AppKey, error) {
 	resp, err := c.api.TigrisRotateAppKeySecret(ctx, project, apiHTTP.TigrisRotateAppKeySecretJSONRequestBody{Id: &id})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1008,7 +1019,7 @@ func (c *httpDriver) CreateGlobalAppKey(ctx context.Context, name string, descri
 		Name:        &name,
 		Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1039,7 +1050,7 @@ func (c *httpDriver) UpdateGlobalAppKey(ctx context.Context, id string, name str
 		Id:   &id,
 		Name: &name, Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1060,7 +1071,7 @@ func (c *httpDriver) UpdateGlobalAppKey(ctx context.Context, id string, name str
 
 func (c *httpDriver) ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, error) {
 	resp, err := c.api.TigrisListGlobalAppKeys(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1077,7 +1088,7 @@ func (c *httpDriver) ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, er
 
 func (c *httpDriver) RotateGlobalAppKeySecret(ctx context.Context, id string) (*GlobalAppKey, error) {
 	resp, err := c.api.TigrisRotateGlobalAppKeySecret(ctx, apiHTTP.TigrisRotateGlobalAppKeySecretJSONRequestBody{Id: &id})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 

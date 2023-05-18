@@ -130,6 +130,7 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 		sit, err = search.Search(ctx, "c1", sReq)
 		require.NoError(t, err)
 
+		time.Sleep(100 * time.Millisecond)
 		sit.Close()
 
 		require.False(t, sit.Next(&r))

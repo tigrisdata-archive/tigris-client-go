@@ -41,7 +41,8 @@ type Config struct {
 	Project      string      `json:"project,omitempty"`
 	Branch       string      `json:"branch,omitempty"`
 	// MustExist if set skips implicit database creation
-	MustExist bool
+	MustExist     bool
+	DisableSearch bool
 }
 
 // Client responsible for connecting to the server and opening a database.
@@ -52,13 +53,14 @@ type Client struct {
 
 func driverConfig(cfg *Config) *config.Driver {
 	return &config.Driver{
-		TLS:          cfg.TLS,
-		URL:          cfg.URL,
-		ClientID:     cfg.ClientID,
-		ClientSecret: cfg.ClientSecret,
-		Branch:       cfg.Branch,
-		Token:        cfg.Token,
-		Protocol:     cfg.Protocol,
+		TLS:           cfg.TLS,
+		URL:           cfg.URL,
+		ClientID:      cfg.ClientID,
+		ClientSecret:  cfg.ClientSecret,
+		Branch:        cfg.Branch,
+		Token:         cfg.Token,
+		Protocol:      cfg.Protocol,
+		DisableSearch: cfg.DisableSearch,
 
 		SkipSchemaValidation: false,
 	}

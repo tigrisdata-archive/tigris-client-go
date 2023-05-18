@@ -17,6 +17,7 @@ package driver
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"testing"
 	"time"
 
@@ -120,6 +121,18 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 		require.Equal(t, &Error{&api.TigrisError{Code: api.Code_DATA_LOSS, Message: "error_stream"}}, sit.Err())
 
 		sit.Close()
+
+		mc.EXPECT().Search(pm(sReqExp), gomock.Any()).
+			DoAndReturn(func(r *api.SearchIndexRequest, srv api.Search_SearchServer) error {
+				return io.EOF
+			})
+
+		sit, err = search.Search(ctx, "c1", sReq)
+		require.NoError(t, err)
+
+		sit.Close()
+
+		require.False(t, sit.Next(&r))
 	})
 
 	t.Run("create_or_update_index", func(t *testing.T) {

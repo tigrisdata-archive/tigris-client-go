@@ -266,6 +266,14 @@ type grpcCRUD struct {
 func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (txWithOptions, error) {
 	var respHeaders meta.MD // variable to store header and trailer
 
+	md := meta.Join(c.metadata)
+
+	if len(HeaderSchemaVersionValue) > 0 {
+		md = meta.Join(md, meta.Pairs(api.HeaderSchemaVersion, HeaderSchemaVersionValue[0]))
+	}
+
+	ctx = meta.NewOutgoingContext(ctx, md)
+
 	resp, err := c.api.BeginTransaction(ctx, &api.BeginTransactionRequest{
 		Project: c.db,
 		Branch:  c.branch,
@@ -279,16 +287,10 @@ func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
 	}
 
-	md := meta.Join(c.metadata)
-
 	if respHeaders.Get(SetCookieHeaderKey) != nil {
 		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
 			md = meta.Join(md, meta.Pairs(CookieHeaderKey, incomingCookie))
 		}
-	}
-
-	if len(HeaderSchemaVersionValue) > 0 {
-		md = meta.Join(md, meta.Pairs(api.HeaderSchemaVersion, HeaderSchemaVersionValue[0]))
 	}
 
 	return &grpcCRUD{db: c.db, branch: c.branch, api: c.api, txCtx: resp.GetTxCtx(), metadata: md}, nil

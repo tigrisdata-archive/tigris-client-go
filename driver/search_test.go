@@ -17,6 +17,7 @@ package driver
 import (
 	"context"
 	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"time"
 
@@ -105,10 +106,10 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 		assert.True(t, sit.Next(&r))
 		require.NoError(t, sit.Err())
 
-		res, err := json.Marshal(r)
+		res, err := jsoniter.Marshal(r)
 		require.NoError(t, err)
 
-		exp, err := json.Marshal(&searchResp)
+		exp, err := jsoniter.Marshal(&searchResp)
 		require.NoError(t, err)
 
 		require.JSONEq(t, string(exp), string(res))

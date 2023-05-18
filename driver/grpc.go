@@ -18,9 +18,9 @@ package driver
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"io"
 	"strings"
 	"unsafe"
@@ -539,7 +539,7 @@ func (c *grpcCRUD) search(ctx context.Context, collection string, req *SearchReq
 	var err error
 
 	if req.Sort != nil {
-		if b, err = json.Marshal(req.Sort); err != nil {
+		if b, err = jsoniter.Marshal(req.Sort); err != nil {
 			return nil, err
 		}
 	}

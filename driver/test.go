@@ -17,6 +17,7 @@ package driver
 import (
 	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"unsafe"
 
@@ -82,7 +83,7 @@ func JAM(t *testing.T, expected []string) gomock.Matcher {
 }
 
 func ToDocument(t *testing.T, doc interface{}) Document {
-	b, err := json.Marshal(doc)
+	b, err := jsoniter.Marshal(doc)
 	require.NoError(t, err)
 
 	return b

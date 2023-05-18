@@ -115,6 +115,15 @@ func TestDriverConfigPrecedence(t *testing.T) {
 	// default
 	assert.Equal(t, config.Driver{URL: "api.preview.tigrisdata.cloud", Protocol: DefaultProtocol}, *res)
 
+	t.Setenv(EnvURI, "host2:234")
+
+	res, err = initConfig(&cfg)
+	assert.NoError(t, err)
+	assert.Equal(t, config.Driver{
+		URL:      "host2:234",
+		Protocol: DefaultProtocol,
+	}, *res)
+
 	// env have precedence over default
 	t.Setenv(EnvToken, "token1")
 	t.Setenv(EnvClientID, "client1")
@@ -133,7 +142,7 @@ func TestDriverConfigPrecedence(t *testing.T) {
 		TLS:          cTLS,
 	}, *res)
 
-	// config have precedence over config
+	// config have precedence over env
 	cfg.URL = "url.config"
 	cfg.ClientID = "client_id2"
 	cfg.ClientSecret = "client_secret2"

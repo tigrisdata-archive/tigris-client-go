@@ -31,6 +31,7 @@ const (
 	EnvToken        = "TIGRIS_TOKEN"         //nolint:golint,gosec
 	EnvProtocol     = "TIGRIS_PROTOCOL"
 	EnvURL          = "TIGRIS_URL"
+	EnvURI          = "TIGRIS_URI"
 	EnvProject      = "TIGRIS_PROJECT"
 	EnvDBBranch     = "TIGRIS_DB_BRANCH"
 

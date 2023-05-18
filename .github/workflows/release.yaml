@@ -2,10 +2,8 @@ name: release
 on:
   push:
     branches:
-      - "alpha"
-      - "beta"
-      - "rc"
-      - "release"
+      - "next"
+      - "stable"
 jobs:
   test:
     uses: ./.github/workflows/go-test.yaml

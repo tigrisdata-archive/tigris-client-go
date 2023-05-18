@@ -117,7 +117,7 @@ func (it *Iterator[T]) Close() {
 }
 
 // SearchIterator is used to iterate search documents.
-type SearchIterator[T interface{}] struct {
+type SearchIterator[T any] struct {
 	Iterator driver.SearchResultIterator
 	err      error
 }

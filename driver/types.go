@@ -31,6 +31,7 @@ const (
 	EnvToken        = "TIGRIS_TOKEN"         //nolint:golint,gosec
 	EnvProtocol     = "TIGRIS_PROTOCOL"
 	EnvURL          = "TIGRIS_URL"
+	EnvURI          = "TIGRIS_URI"
 	EnvProject      = "TIGRIS_PROJECT"
 	EnvDBBranch     = "TIGRIS_DB_BRANCH"
 
@@ -149,7 +150,7 @@ type Error struct {
 	*api.TigrisError
 }
 
-func NewError(c api.Code, format string, a ...interface{}) *Error {
+func NewError(c api.Code, format string, a ...any) *Error {
 	if c == api.Code_OK {
 		return nil
 	}

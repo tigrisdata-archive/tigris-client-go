@@ -51,11 +51,7 @@ func (c *httpSearch) CreateOrUpdateIndex(ctx context.Context, name string, schem
 
 	var i apiHTTP.SearchCreateOrUpdateIndexResponse
 
-	if err := respDecode(resp.Body, &i); err != nil {
-		return err
-	}
-
-	return nil
+	return respDecode(resp.Body, &i)
 }
 
 func (c *httpSearch) GetIndex(ctx context.Context, name string) (*IndexInfo, error) {

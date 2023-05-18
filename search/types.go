@@ -50,7 +50,7 @@ func (e *Error) AsTigrisError(de *driver.Error) bool {
 	return true
 }
 
-func NewError(c code.Code, format string, a ...interface{}) *Error {
+func NewError(c code.Code, format string, a ...any) *Error {
 	if c == code.OK {
 		return nil
 	}

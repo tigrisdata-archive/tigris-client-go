@@ -93,9 +93,10 @@ func TestTxGRPCDriverNegative(t *testing.T) {
 }
 
 func TestGRPCHeaders(t *testing.T) {
-	c, mc, cancel := SetupGRPCTests(t, &config.Driver{SkipSchemaValidation: true})
+	c, mc, cancel := SetupGRPCTests(t, &config.Driver{SkipSchemaValidation: true, DisableSearch: true})
 	defer cancel()
 
+	testDisableSearchHeader(t, mc, c)
 	testSchemaSignOffHeader(t, mc, c)
 	testSchemaVersion(t, mc, c)
 }

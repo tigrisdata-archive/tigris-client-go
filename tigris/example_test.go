@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//revive:disable:unhandled-error,unexported-naming
 package tigris_test
 
 import (
@@ -137,6 +138,7 @@ func ExampleError() {
 	if errors.As(err, &ep) {
 		if ep.Code == code.AlreadyExists {
 			// handle duplicate key
+			return
 		}
 	}
 }

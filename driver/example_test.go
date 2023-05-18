@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//revive:disable:unhandled-error,unexported-naming
 package driver
 
 import (
@@ -61,7 +62,7 @@ func ExampleDriver() {
 
 	err := it.Err()
 	if errors.As(err, &e) && e.Code == api.Code_ALREADY_EXISTS {
-		// handle already exists error
+		panic(err)
 	}
 
 	_, _ = tx.Update(ctx, "c1", Filter(`{"F1":"V1"}`),

@@ -40,7 +40,7 @@ import (
 
 var toDocument = driver.ToDocument
 
-func createSearchResponse(t *testing.T, doc interface{}) driver.SearchResponse {
+func createSearchResponse(t *testing.T, doc any) driver.SearchResponse {
 	t.Helper()
 
 	d, err := json.Marshal(doc)
@@ -572,13 +572,13 @@ func TestClientSchemaMigration(t *testing.T) {
 		pm(&api.CreateOrUpdateCollectionsRequest{
 			Project: "db1",
 			Schemas: [][]byte{
-				//				[]byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
+				// []byte(`{"title":"test_schema_1","properties":{"key_1":{"type":"string"}},"primary_key":["key_1"],"collection_type":"documents"}`),
 				[]byte(`{"title":"test_schema_2","properties":{"key_2":{"type":"string"}},"primary_key":["key_2"],"collection_type":"documents"}`),
 			},
 			Options: &api.CollectionOptions{},
 		})).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
 
-	_, err = TestOpenDatabase(ctx, drv, "db1" /*&testSchema1{},*/, &testSchema2{})
+	_, err = TestOpenDatabase(ctx, drv, "db1" /* &testSchema1{},*/, &testSchema2{})
 	require.NoError(t, err)
 
 	var m map[string]string

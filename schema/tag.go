@@ -45,99 +45,99 @@ func tokenizeTag(tag string) (map[string]string, error) {
 	m := make(map[string]string)
 
 	const (
-		SpaceBeforeKey = iota
-		Key
-		SpaceAfterKey
-		SpaceBeforeValue
-		Value
-		QuotedValue
-		SpaceAfterValue
+		spaceBeforeKey = iota
+		stateKey
+		spaceAfterKey
+		spaceBeforeValue
+		value
+		quotedValue
+		spaceAfterValue
 	)
 
-	state := SpaceBeforeKey
+	state := spaceBeforeKey
 
 	var (
-		escaped    bool
-		key, value string
-		quote      int32
+		escaped  bool
+		key, val string
+		quote    int32
 	)
 
 	for i := 0; i < len(tag); {
 		s := int32(tag[i])
 
 		switch state {
-		case SpaceBeforeKey:
+		case spaceBeforeKey:
 			if s != ' ' {
-				state = Key
+				state = stateKey
 				continue
 			}
-		case Key:
+		case stateKey:
 			switch {
 			case s == ' ' || s == keyValueSeparator || s == tagsSeparator:
-				state = SpaceAfterKey
+				state = spaceAfterKey
 				continue
 			case (s < 'a' || s > 'z') && (s < 'A' || s > 'Z') && s != '_':
 				return nil, ErrInvalidKeyName
 			default:
 				key += string(s)
 			}
-		case SpaceAfterKey:
+		case spaceAfterKey:
 			if s != ' ' {
 				if s == tagsSeparator {
 					m[key] = "true"
 					key = ""
-					state = SpaceBeforeKey
+					state = spaceBeforeKey
 				} else if s == keyValueSeparator {
-					state = SpaceBeforeValue
+					state = spaceBeforeValue
 				}
 			}
-		case SpaceBeforeValue:
+		case spaceBeforeValue:
 			if s != ' ' {
-				state = Value
+				state = value
 				continue
 			}
-		case Value:
+		case value:
 			switch {
-			case len(value) == 0 && (s == '\'' || s == '"'):
+			case len(val) == 0 && (s == '\'' || s == '"'):
 				quote = s
-				state = QuotedValue
+				state = quotedValue
 			case s == tagsSeparator || s == ' ':
-				state = SpaceAfterValue
+				state = spaceAfterValue
 				continue
 			default:
-				value += string(s)
+				val += string(s)
 			}
-		case QuotedValue:
+		case quotedValue:
 			switch {
 			case s == '\\':
 				if escaped {
-					value += string('\\')
-					value += string('\\')
+					val += string('\\')
+					val += string('\\')
 				}
 				escaped = !escaped
 			case s == quote:
 				if !escaped {
-					state = SpaceAfterValue
+					state = spaceAfterValue
 				} else {
-					value += string(s)
+					val += string(s)
 					escaped = !escaped
 				}
 			default:
 				if escaped {
 					escaped = false
-					value += string('\\')
+					val += string('\\')
 				}
-				value += string(s)
+				val += string(s)
 			}
-		case SpaceAfterValue:
+		case spaceAfterValue:
 			if s != ' ' {
-				if s == tagsSeparator {
-					m[key] = value
-					key, value = "", ""
-					state = SpaceBeforeKey
-				} else {
+				if s != tagsSeparator {
 					return nil, ErrInvalidCharAfterValue
 				}
+
+				m[key] = val
+				key, val = "", ""
+				state = spaceBeforeKey
 			}
 		}
 
@@ -145,15 +145,15 @@ func tokenizeTag(tag string) (map[string]string, error) {
 	}
 
 	if len(key) > 0 {
-		if state == QuotedValue {
+		if state == quotedValue {
 			return nil, ErrMissingClosingQuote
 		}
 
-		if len(value) == 0 {
-			value = "true"
+		if len(val) == 0 {
+			val = "true"
 		}
 
-		m[key] = value
+		m[key] = val
 	}
 
 	return m, nil

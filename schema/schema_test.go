@@ -222,7 +222,7 @@ func TestCollectionSchema(t *testing.T) {
 	}
 
 	cases := []struct {
-		input  interface{}
+		input  any
 		output *Schema
 		err    error
 	}{
@@ -551,11 +551,11 @@ func TestDatabaseSchema(t *testing.T) {
 		c2 *Coll2
 		c3 []Coll2
 		C4 []*Coll2 `json:"coll_4"`
-		c5 Coll2    `tigris:"- "`
-		c6 Coll2    `tigris:"version:5"`
+		C5 Coll2    `tigris:"- "`
+		C6 Coll2    `tigris:"version:5"`
 	}
 
-	_ = DB1{c1: Coll1{}, c2: &Coll2{}, c3: []Coll2{}, C4: []*Coll2{}, c5: Coll2{}, c6: Coll2{}}
+	_ = DB1{c1: Coll1{}, c2: &Coll2{}, c3: []Coll2{}, C4: []*Coll2{}, C5: Coll2{}, C6: Coll2{}}
 
 	type DB3 struct {
 		Coll1
@@ -567,28 +567,28 @@ func TestDatabaseSchema(t *testing.T) {
 	}
 
 	type DB5 struct {
-		c6 *Coll2 `tigris:"version:asdf"`
+		C6 *Coll2 `tigris:"version:asdf"`
 	}
 
 	_ = DB4{1}
-	_ = DB5{c6: &Coll2{}}
+	_ = DB5{C6: &Coll2{}}
 
 	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
 	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
 	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
-	c6 := Schema{Version: 5, Name: "c6", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	c6 := Schema{Version: 5, Name: "C6", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 
 	var i int64
 
 	cases := []struct {
-		input  interface{}
+		input  any
 		name   string
 		output map[string]*Schema
 		err    error
 	}{
-		{DB1{}, "DB1", map[string]*Schema{"c1": &c1, "c2": &c2, "c3": &c3, "coll_4": &c4, "c6": &c6}, nil},
+		{DB1{}, "DB1", map[string]*Schema{"c1": &c1, "c2": &c2, "c3": &c3, "coll_4": &c4, "C6": &c6}, nil},
 		{&DB3{}, "DB3", map[string]*Schema{"Coll1": &coll1}, nil},
 		{DB4{}, "", nil, fmt.Errorf("model should be of struct type, not int64")},
 		{i, "", nil, fmt.Errorf("database model should be of struct type containing collection models types as fields")},

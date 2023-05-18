@@ -1,11 +1,7 @@
 branches:
-  - name: alpha
+  - name: next
     prerelease: true
-  - name: beta
-    prerelease: true
-  - name: rc
-    prerelease: true
-  - release
+  - stable
 plugins:
   - "@semantic-release/commit-analyzer"
   - "@semantic-release/release-notes-generator"

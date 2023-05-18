@@ -88,4 +88,40 @@ func TestDatabase(t *testing.T) {
 		require.Nil(t, resp)
 		require.Equal(t, &driver.Error{TigrisError: &api.TigrisError{Code: api.Code_NOT_FOUND, Message: "branch does not exist"}}, err1)
 	})
+
+	t.Run("create collection", func(t *testing.T) {
+		mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionsRequest{
+				Project: "db1",
+				Branch:  "staging",
+				Schemas: [][]byte{[]byte(`{"title":"coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`)},
+				Options: &api.CollectionOptions{},
+			})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) {
+		}).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
+
+		type Coll1 struct {
+			Key1 string `tigris:"primary_key:1"`
+		}
+
+		err1 := client.GetDatabase().CreateCollection(ctx, &Coll1{})
+		require.NoError(t, err1)
+
+		mc.EXPECT().CreateOrUpdateCollections(gomock.Any(),
+			pm(&api.CreateOrUpdateCollectionsRequest{
+				Project: "db1",
+				Branch:  "staging",
+				Schemas: [][]byte{[]byte(`{"title":"other_coll_1","properties":{"Key1":{"type":"string"}},"primary_key":["Key1"],"collection_type":"documents"}`)},
+				Options: &api.CollectionOptions{},
+			})).Do(func(ctx context.Context, r *api.CreateOrUpdateCollectionsRequest) {
+		}).Return(&api.CreateOrUpdateCollectionsResponse{}, nil)
+
+		err1 = client.GetDatabase().CreateCollection(ctx, &Coll1{}, "other_coll_1")
+		require.NoError(t, err1)
+
+		err1 = client.GetDatabase().CreateCollection(ctx, &Coll1{}, "other_coll_1", "multi_parameter_not_allowed")
+		require.Error(t, err1)
+
+		coll := GetCollection[Coll1](client.GetDatabase(), "other_coll_1")
+		require.Equal(t, "other_coll_1", coll.name)
+	})
 }

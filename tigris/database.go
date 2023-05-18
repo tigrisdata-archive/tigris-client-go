@@ -32,14 +32,14 @@ import (
 // top level GetTxCollection(ctx, tx) function should be used
 // instead of method of Tx interface.
 type Database struct {
-	name   string
 	driver driver.Driver
+	name   string
 }
 
-func newDatabase(name string, driver driver.Driver) *Database {
+func newDatabase(name string, drv driver.Driver) *Database {
 	return &Database{
 		name:   name,
-		driver: driver,
+		driver: drv,
 	}
 }
 
@@ -55,10 +55,34 @@ func (db *Database) CreateCollections(ctx context.Context, model schema.Model, m
 	return db.createCollectionsFromSchemas(ctx, schemas)
 }
 
+// CreateCollection creates collection in the Database using provided collection model and optional name.
+// This method is only needed if collection need to be created dynamically,
+// all static collections are created by OpenDatabase.
+func (db *Database) CreateCollection(ctx context.Context, model schema.Model, name ...string) error {
+	schemas, err := schema.FromCollectionModels(SchemaVersion, schema.Documents, model)
+	if err != nil {
+		return fmt.Errorf("error parsing model schema: %w", err)
+	}
+
+	if len(name) > 1 {
+		return fmt.Errorf("only one name parameter allowed")
+	}
+
+	if len(name) == 1 {
+		// there only one schema
+		for _, v := range schemas {
+			v.Name = name[0]
+		}
+	}
+
+	return db.createCollectionsFromSchemas(ctx, schemas)
+}
+
 func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driver.Tx, inSchemas map[string]*schema.Schema) error {
 	schemas := make([]driver.Schema, len(inSchemas))
 
 	var i int
+
 	for _, v := range inSchemas {
 		sch, err := schema.Build(v)
 		if err != nil {
@@ -70,11 +94,13 @@ func (db *Database) createCollectionsFromSchemasLow(ctx context.Context, tx driv
 	}
 
 	var err error
+
 	if tx != nil {
 		_, err = tx.CreateOrUpdateCollections(ctx, schemas)
 	} else {
 		_, err = db.driver.UseDatabase(db.name).CreateOrUpdateCollections(ctx, schemas)
 	}
+
 	if err != nil {
 		return err
 	}
@@ -171,10 +197,16 @@ func MustOpenDatabase(ctx context.Context, cfg *Config, models ...schema.Model,
 }
 
 // GetCollection returns collection object corresponding to collection model T.
-func GetCollection[T schema.Model](db *Database) *Collection[T] {
+func GetCollection[T schema.Model](db *Database, name ...string) *Collection[T] {
 	var m T
-	name := schema.ModelName(&m)
-	return getNamedCollection[T](db, name)
+
+	nm := schema.ModelName(&m)
+
+	if len(name) > 0 {
+		nm = name[0]
+	}
+
+	return getNamedCollection[T](db, nm)
 }
 
 func getNamedCollection[T schema.Model](db *Database, name string) *Collection[T] {

@@ -102,20 +102,17 @@ func HTTPError(err error, resp *http.Response) error {
 
 type httpDriver struct {
 	api *apiHTTP.ClientWithResponses
+	cfg *config.Driver
 
 	tokenURL string
-	cfg      *config.Driver
 }
 
-func respDecode(body io.ReadCloser, v interface{}) error {
+func respDecode(body io.ReadCloser, v any) error {
 	defer func() {
 		_ = body.Close()
 	}()
 
-	if err := json.NewDecoder(body).Decode(v); err != nil {
-		return err
-	}
-	return nil
+	return json.NewDecoder(body).Decode(v)
 }
 
 type metadata struct {
@@ -143,7 +140,7 @@ func newRespMetadata(m *metadata) *api.ResponseMetadata {
 }
 
 // convert timestamps from response metadata to timestamppb.Timestamp.
-func dmlRespDecode(body io.ReadCloser, v interface{}) error {
+func dmlRespDecode(body io.ReadCloser, v any) error {
 	r := struct {
 		Metadata      metadata
 		Status        string `json:"status,omitempty"`
@@ -171,16 +168,6 @@ func dmlRespDecode(body io.ReadCloser, v interface{}) error {
 	default:
 		return fmt.Errorf("unkknown response type")
 	}
-
-	return nil
-}
-
-func setHeadersSkipSchema(ctx context.Context, req *http.Request) error {
-	if err := setHeaders(ctx, req); err != nil {
-		return err
-	}
-
-	req.Header[api.HeaderSchemaSignOff] = []string{"true"}
 
 	return nil
 }
@@ -243,9 +230,20 @@ func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions,
 		httpClient = &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
 	}
 
-	hf := setHeaders
-	if config.SkipSchemaValidation {
-		hf = setHeadersSkipSchema
+	hf := func(ctx context.Context, req *http.Request) error {
+		if err := setHeaders(ctx, req); err != nil {
+			return err
+		}
+
+		if config.SkipSchemaValidation {
+			req.Header[api.HeaderSchemaSignOff] = []string{"true"}
+		}
+
+		if config.DisableSearch {
+			req.Header[api.HeaderDisableSearch] = []string{"true"}
+		}
+
+		return nil
 	}
 
 	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(hf))
@@ -258,7 +256,7 @@ func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions,
 	return drv, drv, drv, nil
 }
 
-func (c *httpDriver) Close() error {
+func (*httpDriver) Close() error {
 	return nil
 }
 
@@ -272,13 +270,13 @@ func (c *httpDriver) UseSearch(project string) SearchClient {
 
 func (c *httpDriver) ListProjects(ctx context.Context) ([]string, error) {
 	resp, err := c.api.TigrisListProjects(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var l api.ListProjectsResponse
 
-	if err := respDecode(resp.Body, &l); err != nil {
+	if err = respDecode(resp.Body, &l); err != nil {
 		return nil, err
 	}
 
@@ -297,13 +295,13 @@ func (c *httpDriver) ListProjects(ctx context.Context) ([]string, error) {
 
 func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
 	resp, err := c.api.ObservabilityGetInfo(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var i InfoResponse
 
-	if err := respDecode(resp.Body, &i); err != nil {
+	if err = respDecode(resp.Body, &i); err != nil {
 		return nil, err
 	}
 
@@ -312,13 +310,13 @@ func (c *httpDriver) Info(ctx context.Context) (*InfoResponse, error) {
 
 func (c *httpDriver) Health(ctx context.Context) (*HealthResponse, error) {
 	resp, err := c.api.HealthAPIHealth(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var i HealthResponse
 
-	if err := respDecode(resp.Body, &i); err != nil {
+	if err = respDecode(resp.Body, &i); err != nil {
 		return nil, err
 	}
 
@@ -331,13 +329,13 @@ func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project str
 		SchemaFormat: &options.SchemaFormat,
 		Branch:       &c.cfg.Branch,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var d apiHTTP.DescribeDatabaseResponse
 
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err = respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -367,13 +365,13 @@ func (c *httpDriver) describeProjectWithOptions(ctx context.Context, project str
 func (c *httpDriver) createProjectWithOptions(ctx context.Context, project string, _ *CreateProjectOptions,
 ) (*CreateProjectResponse, error) {
 	resp, err := c.api.TigrisCreateProject(ctx, project, apiHTTP.TigrisCreateProjectJSONRequestBody{})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var d apiHTTP.CreateProjectResponse
 
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err = respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -387,13 +385,13 @@ func (c *httpDriver) createProjectWithOptions(ctx context.Context, project strin
 func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project string, _ *DeleteProjectOptions,
 ) (*DeleteProjectResponse, error) {
 	resp, err := c.api.TigrisDeleteProject(ctx, project, apiHTTP.TigrisDeleteProjectJSONRequestBody{})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
 	var d apiHTTP.DeleteProjectResponse
 
-	if err := respDecode(resp.Body, &d); err != nil {
+	if err = respDecode(resp.Body, &d); err != nil {
 		return nil, err
 	}
 
@@ -404,7 +402,7 @@ func (c *httpDriver) deleteProjectWithOptions(ctx context.Context, project strin
 	return &r, nil
 }
 
-func (c *httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
+func (*httpCRUD) convertCollectionOptions(_ *CollectionOptions) *apiHTTP.CollectionOptions {
 	return &apiHTTP.CollectionOptions{}
 }
 
@@ -487,7 +485,7 @@ func (c *httpCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 	}, nil
 }
 
-func (c *httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
+func (*httpCRUD) convertWriteOptions(o *api.WriteOptions) *apiHTTP.WriteOptions {
 	if o != nil {
 		return &apiHTTP.WriteOptions{}
 	}
@@ -510,7 +508,7 @@ func (c *httpCRUD) convertDeleteOptions(o *DeleteOptions) *apiHTTP.DeleteRequest
 	return &apiHTTP.DeleteRequestOptions{WriteOptions: c.convertWriteOptions(o.WriteOptions)}
 }
 
-func (c *httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOptions {
+func (*httpCRUD) convertReadOptions(i *ReadOptions) *apiHTTP.ReadRequestOptions {
 	opts := apiHTTP.ReadRequestOptions{
 		Skip:   &i.Skip,
 		Limit:  &i.Limit,
@@ -560,7 +558,7 @@ func (c *httpCRUD) describeCollectionWithOptions(ctx context.Context, collection
 		Branch:       &c.branch,
 		SchemaFormat: &options.SchemaFormat,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -588,6 +586,7 @@ func (c *httpCRUD) createOrUpdateCollectionWithOptions(ctx context.Context, coll
 		OnlyCreate: &options.OnlyCreate,
 		Options:    c.convertCollectionOptions(nil),
 	})
+
 	return HTTPError(err, resp)
 }
 
@@ -778,7 +777,7 @@ func (c *httpCRUD) explainWithOptions(ctx context.Context, collection string, fi
 	}
 
 	var r ExplainResponse
-	if err := respDecode(resp.Body, &r); err != nil {
+	if err = respDecode(resp.Body, &r); err != nil {
 		return nil, err
 	}
 
@@ -793,7 +792,7 @@ func (c *httpCRUD) createBranch(ctx context.Context, name string) (*CreateBranch
 	}
 
 	var r apiHTTP.CreateBranchResponse
-	if err := respDecode(resp.Body, &r); err != nil {
+	if err = respDecode(resp.Body, &r); err != nil {
 		return nil, err
 	}
 
@@ -811,7 +810,7 @@ func (c *httpCRUD) deleteBranch(ctx context.Context, name string) (*DeleteBranch
 	}
 
 	var r apiHTTP.DeleteBranchResponse
-	if err := respDecode(resp.Body, &r); err != nil {
+	if err = respDecode(resp.Body, &r); err != nil {
 		return nil, err
 	}
 
@@ -918,7 +917,7 @@ func (c *httpDriver) CreateAppKey(ctx context.Context, project string, name stri
 		Name:        &name,
 		Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -926,7 +925,7 @@ func (c *httpDriver) CreateAppKey(ctx context.Context, project string, name stri
 		CreatedAppKey *AppKey `json:"created_app_key"`
 	}
 
-	if err := respDecode(resp.Body, &app); err != nil {
+	if err = respDecode(resp.Body, &app); err != nil {
 		return nil, err
 	}
 
@@ -949,7 +948,7 @@ func (c *httpDriver) UpdateAppKey(ctx context.Context, project string, id string
 		Id:   &id,
 		Name: &name, Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -970,7 +969,7 @@ func (c *httpDriver) UpdateAppKey(ctx context.Context, project string, id string
 
 func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey, error) {
 	resp, err := c.api.TigrisListAppKeys(ctx, project)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -987,7 +986,7 @@ func (c *httpDriver) ListAppKeys(ctx context.Context, project string) ([]*AppKey
 
 func (c *httpDriver) RotateAppKeySecret(ctx context.Context, project string, id string) (*AppKey, error) {
 	resp, err := c.api.TigrisRotateAppKeySecret(ctx, project, apiHTTP.TigrisRotateAppKeySecretJSONRequestBody{Id: &id})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1011,7 +1010,7 @@ func (c *httpDriver) CreateGlobalAppKey(ctx context.Context, name string, descri
 		Name:        &name,
 		Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1042,7 +1041,7 @@ func (c *httpDriver) UpdateGlobalAppKey(ctx context.Context, id string, name str
 		Id:   &id,
 		Name: &name, Description: &description,
 	})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1063,7 +1062,7 @@ func (c *httpDriver) UpdateGlobalAppKey(ctx context.Context, id string, name str
 
 func (c *httpDriver) ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, error) {
 	resp, err := c.api.TigrisListGlobalAppKeys(ctx)
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1071,7 +1070,7 @@ func (c *httpDriver) ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, er
 		GlobalAppKeys []*GlobalAppKey `json:"app_keys"`
 	}
 
-	if err := respDecode(resp.Body, &apps); err != nil {
+	if err = respDecode(resp.Body, &apps); err != nil {
 		return nil, err
 	}
 
@@ -1080,7 +1079,7 @@ func (c *httpDriver) ListGlobalAppKeys(ctx context.Context) ([]*GlobalAppKey, er
 
 func (c *httpDriver) RotateGlobalAppKeySecret(ctx context.Context, id string) (*GlobalAppKey, error) {
 	resp, err := c.api.TigrisRotateGlobalAppKeySecret(ctx, apiHTTP.TigrisRotateGlobalAppKeySecretJSONRequestBody{Id: &id})
-	if err := HTTPError(err, resp); err != nil {
+	if err = HTTPError(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -1173,11 +1172,8 @@ func (c *httpDriver) CreateInvitations(ctx context.Context, invitations []*Invit
 	resp, err := c.api.AuthCreateInvitations(ctx, apiHTTP.AuthCreateInvitationsJSONRequestBody{
 		Invitations: &invs,
 	})
-	if err = HTTPError(err, resp); err != nil {
-		return err
-	}
 
-	return nil
+	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) DeleteInvitations(ctx context.Context, email string, status string) error {
@@ -1198,7 +1194,7 @@ func (c *httpDriver) ListInvitations(ctx context.Context, status string) ([]*Inv
 	}
 
 	var r api.ListInvitationsResponse
-	if err := respDecode(resp.Body, &r); err != nil {
+	if err = respDecode(resp.Body, &r); err != nil {
 		return nil, err
 	}
 
@@ -1227,7 +1223,7 @@ func (c *httpDriver) ListUsers(ctx context.Context) ([]*User, error) {
 	}
 
 	var r api.ListUsersResponse
-	if err := respDecode(resp.Body, &r); err != nil {
+	if err = respDecode(resp.Body, &r); err != nil {
 		return nil, err
 	}
 
@@ -1241,11 +1237,7 @@ func (c *httpDriver) ListUsers(ctx context.Context) ([]*User, error) {
 
 func (c *httpDriver) CreateNamespace(ctx context.Context, name string) error {
 	resp, err := c.api.ManagementCreateNamespace(ctx, apiHTTP.ManagementCreateNamespaceJSONRequestBody{Name: &name})
-	if err := HTTPError(err, resp); err != nil {
-		return err
-	}
-
-	return nil
+	return HTTPError(err, resp)
 }
 
 func (c *httpDriver) ListNamespaces(ctx context.Context) ([]*Namespace, error) {

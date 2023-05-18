@@ -15,8 +15,8 @@
 package schema
 
 import (
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"strconv"
 	"strings"
 
@@ -171,14 +171,14 @@ func parseDefaultTag(f *Field, val string) error {
 	case typeObject:
 		var o map[string]any
 
-		if err := json.Unmarshal([]byte(val), &o); err != nil {
+		if err := jsoniter.Unmarshal([]byte(val), &o); err != nil {
 			return tagError(ErrInvalidDefaultTag, err.Error())
 		}
 
 		f.Default = o
 	case typeArray:
 		var a []any
-		if err := json.Unmarshal([]byte(val), &a); err != nil {
+		if err := jsoniter.Unmarshal([]byte(val), &a); err != nil {
 			return tagError(ErrInvalidDefaultTag, err.Error())
 		}
 

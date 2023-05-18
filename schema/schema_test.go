@@ -411,7 +411,7 @@ func TestCollectionSchema(t *testing.T) {
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"},"maxItems":3},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
+		require.JSONEq(t, `{"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"},"maxItems":3},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {
@@ -520,8 +520,8 @@ func TestDefaultsNegative(t *testing.T) {
 		{"int", "integer", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "strconv.ParseInt: parsing \"vbn\": invalid syntax")},
 		{"float", "number", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "strconv.ParseFloat: parsing \"vbn\": invalid syntax")},
 		{"bool", "boolean", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid bool value: vbn")},
-		{"array", "array", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid character 'v' looking for beginning of value")},
-		{"object", "object", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "invalid character 'v' looking for beginning of value")},
+		{"array", "array", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "[]interface {}: decode slice: expect [ or n, but found v, error found in #1 byte of ...|vbn|..., bigger context ...|vbn|...")},
+		{"object", "object", "vbn", fmt.Errorf("%w: %s", ErrInvalidDefaultTag, "ReadMapCB: expect { or n, but found v, error found in #1 byte of ...|vbn|..., bigger context ...|vbn|...")},
 	}
 
 	for _, c := range cases {

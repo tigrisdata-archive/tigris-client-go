@@ -26,8 +26,8 @@
 package schema
 
 import (
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"reflect"
 	"sort"
 	"strings"
@@ -248,7 +248,7 @@ func isPrimaryKeyType(tp string) bool {
 
 // Build converts structured schema to driver schema.
 func Build(sch *Schema) (driver.Schema, error) {
-	return json.Marshal(sch)
+	return jsoniter.Marshal(sch)
 }
 
 // Build converts structured schema to driver schema.

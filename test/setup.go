@@ -142,7 +142,11 @@ func SetupTests(t *testing.T, portShift int) (*MockServers, func()) {
 		MinVersion:   tls.VersionTLS12,
 	}
 
-	s := grpc.NewServer(grpc.Creds(credentials.NewTLS(tlsConfig)))
+	s := grpc.NewServer(grpc.Creds(credentials.NewTLS(tlsConfig)),
+		grpc.MaxRecvMsgSize(16777216),
+		grpc.MaxSendMsgSize(16777216),
+	)
+
 	api.RegisterTigrisServer(s, ms.API)
 	api.RegisterAuthServer(s, ms.Auth)
 	api.RegisterManagementServer(s, ms.Mgmt)

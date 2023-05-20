@@ -36,6 +36,7 @@ import (
 
 const (
 	DefaultGRPCPort = 443
+	MaxGRPCMsgSize  = 16777216
 )
 
 type grpcDriver struct {
@@ -79,6 +80,10 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOption
 		grpc.WithReturnConnectionError(),
 		grpc.WithUserAgent(UserAgent),
 		grpc.WithBlock(),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(MaxGRPCMsgSize),
+			grpc.MaxCallSendMsgSize(MaxGRPCMsgSize),
+		),
 	}
 
 	if config.TLS != nil || tokenSource != nil {

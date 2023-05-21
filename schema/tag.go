@@ -165,7 +165,7 @@ func tagError(err error, orig string) error {
 
 func parseDefaultTag(f *Field, val string) error {
 	// We only parse base JSON types and let server validate actual Tigris default values
-	switch f.Type {
+	switch f.Type.First() {
 	case typeString:
 		f.Default = val
 	case typeObject:
@@ -312,7 +312,7 @@ func parseTag(name string, tag string, field *Field, pk map[string]int) (bool, e
 				return false, fmt.Errorf("%w: vector field", ErrInvalidBoolTagValue)
 			}
 
-			if field.Type != typeArray {
+			if field.Type.First() != typeArray {
 				return false, fmt.Errorf("only array of type float64 can be annotated with vector tag")
 			}
 

@@ -86,14 +86,14 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOption
 		),
 	}
 
-	if config.TLS != nil || tokenSource != nil {
+	if (config.SkipLocalTLS && localURL(config.URL)) || (config.TLS == nil && tokenSource == nil) {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
 		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(config.TLS)))
 
 		if tokenSource != nil {
 			opts = append(opts, grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: tokenSource}))
 		}
-	} else {
-		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
 	conn, err := grpc.DialContext(ctx, config.URL, opts...)

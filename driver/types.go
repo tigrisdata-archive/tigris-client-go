@@ -34,6 +34,7 @@ const (
 	EnvURI          = "TIGRIS_URI"
 	EnvProject      = "TIGRIS_PROJECT"
 	EnvDBBranch     = "TIGRIS_DB_BRANCH"
+	EnvSkipLocalTLS = "TIGRIS_SKIP_LOCAL_TLS"
 
 	ClientVersion = "v1.0.0"
 	UserAgent     = "tigris-client-go/" + ClientVersion

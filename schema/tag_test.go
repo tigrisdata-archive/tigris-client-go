@@ -217,7 +217,7 @@ func TestParseTag(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			field := Field{Type: typeBoolean}
+			field := Field{Type: NewMultiType(typeBoolean)}
 			res, err := parseTag(c.name, c.tag, &field, nil)
 			assert.True(t, errors.Is(err, c.err))
 			assert.Equal(t, c.res, res)

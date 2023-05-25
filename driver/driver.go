@@ -480,6 +480,10 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 		cfg.URL = DefaultURL
 	}
 
+	if os.Getenv(EnvSkipLocalTLS) != "" {
+		cfg.SkipLocalTLS = true
+	}
+
 	sURL := cfg.URL
 
 	noScheme := !strings.Contains(sURL, "://")
@@ -511,7 +515,8 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	// Retain only host:port for connection
 	cfg.URL = u.Host
 
-	if cfg.TLS == nil && (cfg.ClientID != "" || cfg.ClientSecret != "" || cfg.Token != "" || u.Scheme == "https" || sec) {
+	if cfg.TLS == nil && (!cfg.SkipLocalTLS || !localURL(cfg.URL)) && (cfg.ClientID != "" || cfg.ClientSecret != "" ||
+		cfg.Token != "" || u.Scheme == "https" || sec) {
 		cfg.TLS = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 
@@ -593,4 +598,13 @@ func (c *driver) Close() error {
 	c.closeWg.Wait()
 
 	return c.driverWithOptions.Close()
+}
+
+func localURL(url string) bool {
+	return strings.HasPrefix(url, "localhost:") ||
+		strings.HasPrefix(url, "127.0.0.1:") ||
+		strings.HasPrefix(url, "http://localhost:") ||
+		strings.HasPrefix(url, "http://127.0.0.1:") ||
+		strings.HasPrefix(url, "[::1]") ||
+		strings.HasPrefix(url, "http://[::1]:")
 }

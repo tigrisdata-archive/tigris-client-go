@@ -246,7 +246,8 @@ func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions,
 		return nil
 	}
 
-	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient), apiHTTP.WithRequestEditorFn(hf))
+	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient),
+		apiHTTP.WithRequestEditorFn(hf))
 	if err != nil {
 		return nil, nil, nil, err
 	}

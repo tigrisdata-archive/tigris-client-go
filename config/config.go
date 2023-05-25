@@ -34,4 +34,5 @@ type Driver struct {
 
 	SkipSchemaValidation bool `json:"skip_schema_validation,omitempty"`
 	DisableSearch        bool `json:"disable_search,omitempty"`
+	SkipLocalTLS         bool `json:"skip_local_tls"`
 }

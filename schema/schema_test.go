@@ -15,6 +15,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -236,115 +237,115 @@ func TestCollectionSchema(t *testing.T) {
 		{pkInvalidTag{}, nil, fmt.Errorf("%w: %s", ErrPrimaryKeyIdx, "strconv.Atoi: parsing \"1:a\": invalid syntax")},
 		{InvalidVectorType{}, nil, fmt.Errorf("only array of type float64 can be annotated with vector tag")},
 		{input: noPK{}, output: &Schema{Name: "no_pks", Fields: map[string]*Field{
-			"ID":    {Type: typeString, Format: formatUUID, AutoGenerate: true},
-			"key_1": {Type: typeString},
+			"ID":    {Type: NewMultiType(typeString), Format: formatUUID, AutoGenerate: true},
+			"key_1": {Type: NewMultiType(typeString)},
 		}, PrimaryKey: []string{"ID"}}},
 		{input: pk{}, output: &Schema{Name: "pks", Fields: map[string]*Field{
-			"key_1": {Type: typeString},
+			"key_1": {Type: NewMultiType(typeString)},
 		}, PrimaryKey: []string{"key_1"}}},
 		{pk1{}, &Schema{Name: "pk_1", Fields: map[string]*Field{
-			"key_1": {Type: typeString},
+			"key_1": {Type: NewMultiType(typeString)},
 		}, PrimaryKey: []string{"key_1"}}, nil},
 		{pk2{}, &Schema{
 			Name: "pk_2", Fields: map[string]*Field{
-				"key_2": {Type: typeString}, "key_1": {Type: typeString},
+				"key_2": {Type: NewMultiType(typeString)}, "key_1": {Type: NewMultiType(typeString)},
 			},
 			PrimaryKey: []string{"key_1", "key_2"},
 		}, nil},
 		{pk3{}, &Schema{
 			Name: "pk_3", Fields: map[string]*Field{
-				"key_2": {Type: typeString}, "key_1": {Type: typeString}, "key_3": {Type: typeString},
+				"key_2": {Type: NewMultiType(typeString)}, "key_1": {Type: NewMultiType(typeString)}, "key_3": {Type: NewMultiType(typeString)},
 			},
 			PrimaryKey: []string{"key_1", "key_2", "key_3"},
 		}, nil},
 		{allTypes{}, &Schema{Name: "all_types", Fields: map[string]*Field{
-			"Tm":      {Type: typeString, Format: formatDateTime},
-			"TmPtr":   {Type: typeString, Format: formatDateTime},
-			"UUID":    {Type: typeString, Format: formatUUID},
-			"UUIDPtr": {Type: typeString, Format: formatUUID},
+			"Tm":      {Type: NewMultiType(typeString), Format: formatDateTime},
+			"TmPtr":   {Type: NewNullableMultiType(typeString), Format: formatDateTime},
+			"UUID":    {Type: NewMultiType(typeString), Format: formatUUID},
+			"UUIDPtr": {Type: NewNullableMultiType(typeString), Format: formatUUID},
 
-			"int_32": {Type: typeInteger, Format: formatInt32},
+			"int_32": {Type: NewMultiType(typeInteger), Format: formatInt32},
 
-			"int_64": {Type: typeInteger},
-			//			{Name: "uint_64", Type: typeInteger},
-			"int_1": {Type: typeInteger},
+			"int_64": {Type: NewMultiType(typeInteger)},
+			//			{Name: "uint_64", Type: NewMultiType(typeInteger)},
+			"int_1": {Type: NewMultiType(typeInteger)},
 
-			"bytes_1": {Type: typeString, Format: formatByte},
-			"bytes_2": {Type: typeString, Format: formatByte},
+			"bytes_1": {Type: NewMultiType(typeString), Format: formatByte},
+			"bytes_2": {Type: NewMultiType(typeString), Format: formatByte},
 
-			"float_32": {Type: typeNumber},
-			"float_64": {Type: typeNumber},
+			"float_32": {Type: NewMultiType(typeNumber)},
+			"float_64": {Type: NewMultiType(typeNumber)},
 
-			"bool_1": {Type: typeBoolean},
+			"bool_1": {Type: NewMultiType(typeBoolean)},
 
-			"string_1": {Type: typeString},
+			"string_1": {Type: NewMultiType(typeString)},
 
 			"data_1": {
-				Type: "object",
+				Type: NewMultiType(typeObject),
 				Fields: map[string]*Field{
-					"field_1": {Type: typeString},
+					"field_1": {Type: NewMultiType(typeString)},
 					"Nested": {
-						Type: "object",
+						Type: NewMultiType(typeObject),
 						Fields: map[string]*Field{
-							"ss_field_1": {Type: typeString},
+							"ss_field_1": {Type: NewMultiType(typeString)},
 						},
 					},
 				},
 			},
 
-			"slice_1": {Type: typeArray, Items: &Field{Type: typeString}},
-			"arr_1":   {Type: typeArray, MaxItems: 3, Items: &Field{Type: typeString}},
-			"map_1":   {Type: typeObject, AdditionalProperties: true},
+			"slice_1": {Type: NewMultiType(typeArray), Items: &Field{Type: NewMultiType(typeString)}},
+			"arr_1":   {Type: NewMultiType(typeArray), MaxItems: 3, Items: &Field{Type: NewMultiType(typeString)}},
+			"map_1":   {Type: NewMultiType(typeObject), AdditionalProperties: true},
 
 			"slice_2": {
-				Type: typeArray,
+				Type: NewMultiType(typeArray),
 				Items: &Field{
-					Type: "object",
+					Type: NewMultiType(typeObject),
 					Fields: map[string]*Field{
-						"field_1": {Type: typeString},
+						"field_1": {Type: NewMultiType(typeString)},
 						"Nested": {
-							Type: "object",
+							Type: NewMultiType(typeObject),
 							Fields: map[string]*Field{
-								"ss_field_1": {Type: typeString},
+								"ss_field_1": {Type: NewMultiType(typeString)},
 							},
 						},
 					},
 				},
 			},
-			"map_2":   {Type: typeObject, AdditionalProperties: true},
-			"map_any": {Type: typeObject, AdditionalProperties: true},
+			"map_2":   {Type: NewMultiType(typeObject), AdditionalProperties: true},
+			"map_any": {Type: NewMultiType(typeObject), AdditionalProperties: true},
 
 			// use original name if JSON tag name is not defined
-			"bool_123": {Type: typeBoolean},
-			"PtrStruct": {Type: typeObject, Fields: map[string]*Field{
+			"bool_123": {Type: NewMultiType(typeBoolean)},
+			"PtrStruct": {Type: NewNullableMultiType(typeObject), Fields: map[string]*Field{
 				"ss_field_1": {
-					Type: "string",
+					Type: NewMultiType(typeString),
 				},
 			}},
-			//	{Name: "DataEnc", Type: typeInteger, Tags: []string{"encrypted"}},
-			//	{Name: "DataPII", Type: typeInteger, Tags: []string{"pii"}},
+			//	{Name: "DataEnc", Type: NewMultiType(typeInteger), Tags: []string{"encrypted"}},
+			//	{Name: "DataPII", Type: NewMultiType(typeInteger), Tags: []string{"pii"}},
 		}, PrimaryKey: []string{"string_1"}}, nil},
 		{embModel{}, &Schema{
 			Name: "emb_models", Fields: map[string]*Field{
-				"ID": {Type: typeString, Format: formatUUID, AutoGenerate: true},
+				"ID": {Type: NewMultiType(typeString), Format: formatUUID, AutoGenerate: true},
 				"Sub": {
-					Type: "object",
+					Type: NewMultiType(typeObject),
 					Fields: map[string]*Field{
-						"Test_Field": {Type: typeInteger, AutoGenerate: true},
+						"Test_Field": {Type: NewMultiType(typeInteger), AutoGenerate: true},
 						"Tm": {
-							Type: "object",
+							Type: NewMultiType(typeObject),
 							Fields: map[string]*Field{
-								"Test_Field": {Type: typeInteger, AutoGenerate: true},
+								"Test_Field": {Type: NewMultiType(typeInteger), AutoGenerate: true},
 							},
 						},
 					},
 				},
-				"Test_Field": {Type: typeInteger, AutoGenerate: true},
-				"ss_field_1": {Type: typeString},
+				"Test_Field": {Type: NewMultiType(typeInteger), AutoGenerate: true},
+				"ss_field_1": {Type: NewMultiType(typeString)},
 				"Tm": {
-					Type: "object",
+					Type: NewMultiType(typeObject),
 					Fields: map[string]*Field{
-						"Test_Field": {Type: typeInteger, AutoGenerate: true},
+						"Test_Field": {Type: NewMultiType(typeInteger), AutoGenerate: true},
 					},
 				},
 			},
@@ -352,38 +353,38 @@ func TestCollectionSchema(t *testing.T) {
 		}, nil},
 		{embModelPK{}, &Schema{
 			Name: "emb_model_pks", Fields: map[string]*Field{
-				"ID":         {Type: typeInteger, AutoGenerate: true},
-				"ss_field_1": {Type: typeString},
+				"ID":         {Type: NewMultiType(typeInteger), AutoGenerate: true},
+				"ss_field_1": {Type: NewMultiType(typeString)},
 			},
 			PrimaryKey: []string{"ID", "ss_field_1"},
 		}, nil},
 		{autoGen{}, &Schema{
 			Name: "auto_gens", Fields: map[string]*Field{
-				"Field1": {Type: typeString, AutoGenerate: true},
-				"Field2": {Type: typeInteger, AutoGenerate: true},
-				"Field3": {Type: typeInteger, AutoGenerate: true},
-				"Field4": {Type: typeString, Format: formatUUID, AutoGenerate: true},
-				"Field5": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
+				"Field1": {Type: NewMultiType(typeString), AutoGenerate: true},
+				"Field2": {Type: NewMultiType(typeInteger), AutoGenerate: true},
+				"Field3": {Type: NewMultiType(typeInteger), AutoGenerate: true},
+				"Field4": {Type: NewMultiType(typeString), Format: formatUUID, AutoGenerate: true},
+				"Field5": {Type: NewMultiType(typeString), Format: formatDateTime, AutoGenerate: true},
 			},
 			PrimaryKey: []string{"Field1"},
 		}, nil},
 		{autoGenNeg{}, nil, fmt.Errorf("type cannot be autogenerated: bool")},
 		{autoID{}, &Schema{
 			Name: "auto_ids", Fields: map[string]*Field{
-				"ID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
+				"ID": {Type: NewMultiType(typeString), Format: formatDateTime, AutoGenerate: true},
 			},
 			PrimaryKey: []string{"ID"},
 		}, nil},
 		{autoID1{}, &Schema{
 			Name: "auto_id_1", Fields: map[string]*Field{
-				"id": {Type: typeInteger, AutoGenerate: true},
+				"id": {Type: NewMultiType(typeInteger), AutoGenerate: true},
 			},
 			PrimaryKey: []string{"id"},
 		}, nil},
 		{autoIDOverride{}, &Schema{
 			Name: "auto_id_overrides", Fields: map[string]*Field{
-				"RealID": {Type: typeString, Format: formatDateTime, AutoGenerate: true},
-				"ID":     {Type: typeString, Format: formatDateTime},
+				"RealID": {Type: NewMultiType(typeString), Format: formatDateTime, AutoGenerate: true},
+				"ID":     {Type: NewMultiType(typeString), Format: formatDateTime},
 			},
 			PrimaryKey: []string{"RealID"},
 		}, nil},
@@ -415,7 +416,15 @@ func TestCollectionSchema(t *testing.T) {
 		b, err := s.Build()
 		require.NoError(t, err)
 
-		require.Equal(t, `{"version":5,"title":"all_types","properties":{"PtrStruct":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":"string","format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":"string","format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"},"maxItems":3},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`, string(b))
+		res := `{"version":5,"title":"all_types","properties":{"PtrStruct":{"type":["object","null"],"properties":{"ss_field_1":{"type":"string"}}},"Tm":{"type":"string","format":"date-time"},"TmPtr":{"type":["string","null"],"format":"date-time"},"UUID":{"type":"string","format":"uuid"},"UUIDPtr":{"type":["string","null"],"format":"uuid"},"arr_1":{"type":"array","items":{"type":"string"},"maxItems":3},"bool_1":{"type":"boolean"},"bool_123":{"type":"boolean"},"bytes_1":{"type":"string","format":"byte"},"bytes_2":{"type":"string","format":"byte"},"data_1":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}},"float_32":{"type":"number"},"float_64":{"type":"number"},"int_1":{"type":"integer"},"int_32":{"type":"integer","format":"int32"},"int_64":{"type":"integer"},"map_1":{"type":"object","additionalProperties":true},"map_2":{"type":"object","additionalProperties":true},"map_any":{"type":"object","additionalProperties":true},"slice_1":{"type":"array","items":{"type":"string"}},"slice_2":{"type":"array","items":{"type":"object","properties":{"Nested":{"type":"object","properties":{"ss_field_1":{"type":"string"}}},"field_1":{"type":"string"}}}},"string_1":{"type":"string"}},"primary_key":["string_1"]}`
+		require.Equal(t, res, string(b))
+
+		var sch Schema
+
+		err = json.Unmarshal([]byte(res), &sch)
+		require.NoError(t, err)
+
+		require.Equal(t, s, &sch)
 	})
 
 	t.Run("multiple_models", func(t *testing.T) {
@@ -423,8 +432,8 @@ func TestCollectionSchema(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, map[string]*Schema{
-			"pks":  {Version: 7, Name: "pks", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
-			"pk_1": {Version: 7, Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: typeString}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
+			"pks":  {Version: 7, Name: "pks", Fields: map[string]*Field{"key_1": {Type: NewMultiType(typeString)}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
+			"pk_1": {Version: 7, Name: "pk_1", Fields: map[string]*Field{"key_1": {Type: NewMultiType(typeString)}}, PrimaryKey: []string{"key_1"}, CollectionType: Documents},
 		}, s)
 	})
 
@@ -531,7 +540,7 @@ func TestDefaultsNegative(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			err := parseDefaultTag(&Field{Type: c.tp}, c.input)
+			err := parseDefaultTag(&Field{Type: NewMultiType(c.tp)}, c.input)
 			assert.Equal(t, c.err, err)
 		})
 	}
@@ -573,12 +582,12 @@ func TestDatabaseSchema(t *testing.T) {
 	_ = DB4{1}
 	_ = DB5{C6: &Coll2{}}
 
-	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
-	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: "integer"}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
-	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
-	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
-	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
-	c6 := Schema{Version: 5, Name: "C6", Fields: map[string]*Field{"Key2": {Type: "integer"}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	coll1 := Schema{Name: "Coll1", Fields: map[string]*Field{"Key1": {Type: NewMultiType(typeInteger)}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
+	c1 := Schema{Name: "c1", Fields: map[string]*Field{"Key1": {Type: NewMultiType(typeInteger)}}, PrimaryKey: []string{"Key1"}, CollectionType: Documents}
+	c2 := Schema{Name: "c2", Fields: map[string]*Field{"Key2": {Type: NewMultiType(typeInteger)}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	c3 := Schema{Name: "c3", Fields: map[string]*Field{"Key2": {Type: NewMultiType(typeInteger)}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	c4 := Schema{Name: "coll_4", Fields: map[string]*Field{"Key2": {Type: NewMultiType(typeInteger)}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
+	c6 := Schema{Version: 5, Name: "C6", Fields: map[string]*Field{"Key2": {Type: NewMultiType(typeInteger)}}, PrimaryKey: []string{"Key2"}, CollectionType: Documents}
 
 	var i int64
 

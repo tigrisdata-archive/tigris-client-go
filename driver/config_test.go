@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tigrisdata/tigris-client-go/config"
 )
 
@@ -210,5 +211,35 @@ func TestDriverConfigProto(t *testing.T) {
 			assert.Equal(t, v.err, err)
 			assert.Equal(t, v.exp, cfg.Protocol)
 		})
+	}
+}
+
+func TestLocalURL(t *testing.T) {
+	// Test cases with local URLs that should return true
+	localURLs := []string{
+		"localhost:8080",
+		"127.0.0.1:8000",
+		"http://localhost:3000",
+		"http://127.0.0.1:5000",
+		"[::1]:8080",
+		"http://[::1]:8000",
+	}
+
+	for _, url := range localURLs {
+		require.True(t, localURL(url))
+	}
+
+	// Test cases with non-local URLs that should return false
+	nonLocalURLs := []string{
+		"example.com",
+		"http://example.com",
+		"www.google.com",
+		"http://www.google.com",
+		"127.0.0.1.5",
+		"localhost123",
+	}
+
+	for _, url := range nonLocalURLs {
+		require.False(t, localURL(url))
 	}
 }

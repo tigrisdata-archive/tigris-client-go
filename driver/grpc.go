@@ -67,6 +67,20 @@ func GRPCError(err error) error {
 	return &Error{api.FromStatusError(err)}
 }
 
+// this is a hack to skip TLS on local connection
+// when the token is set.
+type localPerRPCCred struct {
+	parent credentials.PerRPCCredentials
+}
+
+func (l *localPerRPCCred) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	return l.parent.GetRequestMetadata(ctx, uri...)
+}
+
+func (*localPerRPCCred) RequireTransportSecurity() bool {
+	return false
+}
+
 // newGRPCClient return Driver interface implementation using GRPC transport protocol.
 func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error) {
 	if !strings.Contains(config.URL, ":") {
@@ -86,15 +100,23 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOption
 		),
 	}
 
-	if (config.SkipLocalTLS && localURL(config.URL)) || (config.TLS == nil && tokenSource == nil) {
-		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	} else {
-		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(config.TLS)))
+	if tokenSource != nil {
+		var perRPCCreds credentials.PerRPCCredentials = oauth.TokenSource{TokenSource: tokenSource}
 
-		if tokenSource != nil {
-			opts = append(opts, grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: tokenSource}))
+		if config.SkipLocalTLS && localURL(config.URL) {
+			perRPCCreds = &localPerRPCCred{oauth.TokenSource{TokenSource: tokenSource}}
 		}
+
+		opts = append(opts, grpc.WithPerRPCCredentials(perRPCCreds))
 	}
+
+	transportCreds := insecure.NewCredentials()
+
+	if (!config.SkipLocalTLS || !localURL(config.URL)) && (config.TLS != nil || tokenSource != nil) {
+		transportCreds = credentials.NewTLS(config.TLS)
+	}
+
+	opts = append(opts, grpc.WithTransportCredentials(transportCreds))
 
 	conn, err := grpc.DialContext(ctx, config.URL, opts...)
 	if err != nil {

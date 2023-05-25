@@ -480,6 +480,10 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 		cfg.URL = DefaultURL
 	}
 
+	if os.Getenv(EnvSkipLocalTLS) != "" {
+		cfg.SkipLocalTLS = true
+	}
+
 	sURL := cfg.URL
 
 	noScheme := !strings.Contains(sURL, "://")

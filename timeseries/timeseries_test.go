@@ -16,7 +16,7 @@ package timeseries
 
 import (
 	"context"
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"time"
 
@@ -81,7 +81,7 @@ func TestTimeseries(t *testing.T) {
 	// test find after
 	mit := mock.NewMockIterator(ctrl)
 
-	b, err := json.Marshal(ts)
+	b, err := jsoniter.Marshal(ts)
 	require.NoError(t, err)
 
 	mdb.EXPECT().Read(ctx, "coll_1",
@@ -117,7 +117,7 @@ func TestTimeseries(t *testing.T) {
 	}
 
 	tsAfter := time.Now().Add(1 * time.Second)
-	b1, err := json.Marshal(tsAfter)
+	b1, err := jsoniter.Marshal(tsAfter)
 	require.NoError(t, err)
 
 	// test find before

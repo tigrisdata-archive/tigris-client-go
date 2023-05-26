@@ -17,6 +17,7 @@ package driver
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 
@@ -85,10 +86,27 @@ type txWithOptions interface {
 	Rollback(ctx context.Context) error
 }
 
+func isUnixSock(url string) bool {
+	return len(url) > 0 && (url[0] == '/' || url[0] == '.')
+}
+
+func getUnixHTTPDialer(url string) func(_ context.Context, _, _ string) (net.Conn, error) {
+	var dialer func(_ context.Context, _, _ string) (net.Conn, error)
+
+	if url[0] == '/' || url[0] == '.' {
+		dialer = func(_ context.Context, _, _ string) (net.Conn, error) {
+			return net.Dial("unix", url)
+		}
+	}
+
+	return dialer
+}
+
 // func configAuth(config *config.Driver) (*clientcredentials.Config, context.Context) {.
 func configAuth(cfg *config.Driver) (oauth2.TokenSource, *http.Client, string) {
 	tr := &http.Transport{
 		TLSClientConfig: cfg.TLS,
+		DialContext:     getUnixHTTPDialer(cfg.URL),
 	}
 
 	tokenURL := cfg.URL + "/v1/auth/token"

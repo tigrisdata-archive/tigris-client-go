@@ -209,25 +209,34 @@ func setHTTPTxCtx(ctx context.Context, txCtx *api.TransactionCtx, cookies []*htt
 }
 
 // newHTTPClient return Driver interface implementation using HTTP transport protocol.
-func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error) {
-	if !strings.Contains(config.URL, ":") {
-		if config.TLS != nil {
-			config.URL = fmt.Sprintf("%s:%d", config.URL, DefaultHTTPSPort)
+func newHTTPClient(_ context.Context, cfg *config.Driver) (driverWithOptions, Management, Observability, error) {
+	u := cfg.URL
+
+	if isUnixSock(u) {
+		u = "localhost"
+	} else if !strings.Contains(u, ":") {
+		if cfg.TLS != nil {
+			u = fmt.Sprintf("%s:%d", u, DefaultHTTPSPort)
 		} else {
-			config.URL = fmt.Sprintf("%s:%d", config.URL, DefaultHTTPPort)
+			u = fmt.Sprintf("%s:%d", u, DefaultHTTPPort)
 		}
 	}
 
-	if config.TLS != nil {
-		config.URL = "https://" + config.URL
+	if cfg.TLS != nil {
+		u = "https://" + u
 	} else {
-		config.URL = "http://" + config.URL
+		u = "http://" + u
 	}
 
-	_, httpClient, tokenURL := configAuth(config)
+	_, httpClient, tokenURL := configAuth(cfg)
 
 	if httpClient == nil {
-		httpClient = &http.Client{Transport: &http.Transport{TLSClientConfig: config.TLS}}
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: cfg.TLS,
+				DialContext:     getUnixHTTPDialer(cfg.URL),
+			},
+		}
 	}
 
 	hf := func(ctx context.Context, req *http.Request) error {
@@ -235,24 +244,24 @@ func newHTTPClient(_ context.Context, config *config.Driver) (driverWithOptions,
 			return err
 		}
 
-		if config.SkipSchemaValidation {
+		if cfg.SkipSchemaValidation {
 			req.Header[api.HeaderSchemaSignOff] = []string{"true"}
 		}
 
-		if config.DisableSearch {
+		if cfg.DisableSearch {
 			req.Header[api.HeaderDisableSearch] = []string{"true"}
 		}
 
 		return nil
 	}
 
-	c, err := apiHTTP.NewClientWithResponses(config.URL, apiHTTP.WithHTTPClient(httpClient),
+	c, err := apiHTTP.NewClientWithResponses(u, apiHTTP.WithHTTPClient(httpClient),
 		apiHTTP.WithRequestEditorFn(hf))
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	drv := &httpDriver{api: c, tokenURL: tokenURL, cfg: config}
+	drv := &httpDriver{api: c, tokenURL: tokenURL, cfg: cfg}
 
 	return drv, drv, drv, nil
 }

@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"time"
 
@@ -43,7 +44,7 @@ var toDocument = driver.ToDocument
 func createSearchResponse(t *testing.T, doc any) driver.SearchResponse {
 	t.Helper()
 
-	d, err := json.Marshal(doc)
+	d, err := jsoniter.Marshal(doc)
 	require.NoError(t, err)
 	tm := time.Now()
 	return &api.SearchResponse{

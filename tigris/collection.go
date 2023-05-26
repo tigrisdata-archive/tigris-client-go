@@ -16,8 +16,8 @@ package tigris
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 	"github.com/tigrisdata/tigris-client-go/code"
@@ -72,7 +72,7 @@ func (c *Collection[T]) Insert(ctx context.Context, docs ...*T) (*InsertResponse
 	bdocs := make([]driver.Document, len(docs))
 
 	for k, v := range docs {
-		if bdocs[k], err = json.Marshal(v); err != nil {
+		if bdocs[k], err = jsoniter.Marshal(v); err != nil {
 			return nil, err
 		}
 	}
@@ -107,7 +107,7 @@ func (c *Collection[T]) InsertOrReplace(ctx context.Context, docs ...*T) (*Inser
 	bdocs := make([]driver.Document, len(docs))
 
 	for k, v := range docs {
-		if bdocs[k], err = json.Marshal(v); err != nil {
+		if bdocs[k], err = jsoniter.Marshal(v); err != nil {
 			return nil, err
 		}
 	}
@@ -234,7 +234,7 @@ func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filte
 		if err != nil {
 			return nil, err
 		}
-		sortOrderbytes, err = json.Marshal(sortOrder)
+		sortOrderbytes, err = jsoniter.Marshal(sortOrder)
 		if err != nil {
 			return nil, err
 		}
@@ -371,7 +371,7 @@ func (c *Collection[T]) Explain(ctx context.Context, filter filter.Filter, field
 		if err != nil {
 			return nil, err
 		}
-		sortOrderbytes, err = json.Marshal(sortOrder)
+		sortOrderbytes, err = jsoniter.Marshal(sortOrder)
 		if err != nil {
 			return nil, err
 		}

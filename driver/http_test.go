@@ -60,9 +60,10 @@ func setupHTTPTests(t *testing.T, config *config.Driver) (Driver, *httpDriver, *
 }
 
 func TestHTTPHeaders(t *testing.T) {
-	c, mc, cancel := SetupHTTPTests(t, &config.Driver{SkipSchemaValidation: true})
+	c, mc, cancel := SetupHTTPTests(t, &config.Driver{SkipSchemaValidation: true, DisableSearch: true})
 	defer cancel()
 
+	testDisableSearchHeader(t, mc, c)
 	testSchemaSignOffHeader(t, mc, c)
 	testSchemaVersion(t, mc, c)
 }

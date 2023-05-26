@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tigrisdata/tigris-client-go/config"
 )
 
@@ -115,6 +116,15 @@ func TestDriverConfigPrecedence(t *testing.T) {
 	// default
 	assert.Equal(t, config.Driver{URL: "api.preview.tigrisdata.cloud", Protocol: DefaultProtocol}, *res)
 
+	t.Setenv(EnvURI, "host2:234")
+
+	res, err = initConfig(&cfg)
+	assert.NoError(t, err)
+	assert.Equal(t, config.Driver{
+		URL:      "host2:234",
+		Protocol: DefaultProtocol,
+	}, *res)
+
 	// env have precedence over default
 	t.Setenv(EnvToken, "token1")
 	t.Setenv(EnvClientID, "client1")
@@ -133,7 +143,7 @@ func TestDriverConfigPrecedence(t *testing.T) {
 		TLS:          cTLS,
 	}, *res)
 
-	// config have precedence over config
+	// config have precedence over env
 	cfg.URL = "url.config"
 	cfg.ClientID = "client_id2"
 	cfg.ClientSecret = "client_secret2"
@@ -201,5 +211,35 @@ func TestDriverConfigProto(t *testing.T) {
 			assert.Equal(t, v.err, err)
 			assert.Equal(t, v.exp, cfg.Protocol)
 		})
+	}
+}
+
+func TestLocalURL(t *testing.T) {
+	// Test cases with local URLs that should return true
+	localURLs := []string{
+		"localhost:8080",
+		"127.0.0.1:8000",
+		"http://localhost:3000",
+		"http://127.0.0.1:5000",
+		"[::1]:8080",
+		"http://[::1]:8000",
+	}
+
+	for _, url := range localURLs {
+		require.True(t, localURL(url))
+	}
+
+	// Test cases with non-local URLs that should return false
+	nonLocalURLs := []string{
+		"example.com",
+		"http://example.com",
+		"www.google.com",
+		"http://www.google.com",
+		"127.0.0.1.5",
+		"localhost123",
+	}
+
+	for _, url := range nonLocalURLs {
+		require.False(t, localURL(url))
 	}
 }

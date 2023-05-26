@@ -93,15 +93,16 @@ func TestTxGRPCDriverNegative(t *testing.T) {
 }
 
 func TestGRPCHeaders(t *testing.T) {
-	c, mc, cancel := SetupGRPCTests(t, &config.Driver{SkipSchemaValidation: true})
+	c, mc, cancel := SetupGRPCTests(t, &config.Driver{SkipSchemaValidation: true, DisableSearch: true})
 	defer cancel()
 
+	testDisableSearchHeader(t, mc, c)
 	testSchemaSignOffHeader(t, mc, c)
 	testSchemaVersion(t, mc, c)
 }
 
 func TestNewDriverGRPC(t *testing.T) {
-	_, cancel := test.SetupTests(t, 4)
+	ms, cancel := test.SetupTests(t, 4)
 	defer cancel()
 
 	DefaultProtocol = GRPC
@@ -114,6 +115,23 @@ func TestNewDriverGRPC(t *testing.T) {
 		MinVersion: tls.VersionTLS12,
 	}}
 	client, err := NewDriver(context.Background(), &cfg)
+	require.NoError(t, err)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	buf := make([]byte, 7*1024*1024)
+	arr := [][]byte{buf}
+
+	ms.API.EXPECT().Insert(gomock.Any(),
+		pm(&api.InsertRequest{
+			Project:    "db1",
+			Collection: "coll1",
+			Documents:  arr,
+			Options:    &api.InsertRequestOptions{},
+		})).Return(&api.InsertResponse{Status: "inserted"}, nil)
+
+	_, err = client.UseDatabase("db1").Insert(ctx, "coll1", []Document{buf})
 	require.NoError(t, err)
 
 	_ = client.Close()

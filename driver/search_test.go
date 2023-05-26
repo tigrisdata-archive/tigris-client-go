@@ -17,6 +17,7 @@ package driver
 import (
 	"context"
 	"encoding/json"
+	"io"
 	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"time"
@@ -124,12 +125,13 @@ func testSearchBasic(t *testing.T, c Driver, mc *mock.MockSearchServer) {
 
 		mc.EXPECT().Search(pm(sReqExp), gomock.Any()).
 			DoAndReturn(func(r *api.SearchIndexRequest, srv api.Search_SearchServer) error {
-				return nil
+				return io.EOF
 			})
 
 		sit, err = search.Search(ctx, "c1", sReq)
 		require.NoError(t, err)
 
+		time.Sleep(100 * time.Millisecond)
 		sit.Close()
 
 		require.False(t, sit.Next(&r))

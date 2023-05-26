@@ -36,6 +36,7 @@ import (
 
 const (
 	DefaultGRPCPort = 443
+	MaxGRPCMsgSize  = 16777216
 )
 
 type grpcDriver struct {
@@ -66,6 +67,20 @@ func GRPCError(err error) error {
 	return &Error{api.FromStatusError(err)}
 }
 
+// this is a hack to skip TLS on local connection
+// when the token is set.
+type localPerRPCCred struct {
+	parent credentials.PerRPCCredentials
+}
+
+func (l *localPerRPCCred) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	return l.parent.GetRequestMetadata(ctx, uri...)
+}
+
+func (*localPerRPCCred) RequireTransportSecurity() bool {
+	return false
+}
+
 // newGRPCClient return Driver interface implementation using GRPC transport protocol.
 func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error) {
 	if !strings.Contains(config.URL, ":") {
@@ -79,17 +94,29 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOption
 		grpc.WithReturnConnectionError(),
 		grpc.WithUserAgent(UserAgent),
 		grpc.WithBlock(),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(MaxGRPCMsgSize),
+			grpc.MaxCallSendMsgSize(MaxGRPCMsgSize),
+		),
 	}
 
-	if config.TLS != nil || tokenSource != nil {
-		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(config.TLS)))
+	if tokenSource != nil {
+		var perRPCCreds credentials.PerRPCCredentials = oauth.TokenSource{TokenSource: tokenSource}
 
-		if tokenSource != nil {
-			opts = append(opts, grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: tokenSource}))
+		if config.SkipLocalTLS && localURL(config.URL) {
+			perRPCCreds = &localPerRPCCred{oauth.TokenSource{TokenSource: tokenSource}}
 		}
-	} else {
-		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+		opts = append(opts, grpc.WithPerRPCCredentials(perRPCCreds))
 	}
+
+	transportCreds := insecure.NewCredentials()
+
+	if (!config.SkipLocalTLS || !localURL(config.URL)) && (config.TLS != nil || tokenSource != nil) {
+		transportCreds = credentials.NewTLS(config.TLS)
+	}
+
+	opts = append(opts, grpc.WithTransportCredentials(transportCreds))
 
 	conn, err := grpc.DialContext(ctx, config.URL, opts...)
 	if err != nil {
@@ -122,6 +149,10 @@ func (c *grpcDriver) UseDatabase(project string) Database {
 
 	if c.cfg.SkipSchemaValidation {
 		md = meta.Join(md, meta.Pairs(api.HeaderSchemaSignOff, "true"))
+	}
+
+	if c.cfg.DisableSearch {
+		md = meta.Join(md, meta.Pairs(api.HeaderDisableSearch, "true"))
 	}
 
 	if len(HeaderSchemaVersionValue) > 0 {
@@ -262,6 +293,14 @@ type grpcCRUD struct {
 func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (txWithOptions, error) {
 	var respHeaders meta.MD // variable to store header and trailer
 
+	md := meta.Join(c.metadata)
+
+	if len(HeaderSchemaVersionValue) > 0 {
+		md = meta.Join(md, meta.Pairs(api.HeaderSchemaVersion, HeaderSchemaVersionValue[0]))
+	}
+
+	ctx = meta.NewOutgoingContext(ctx, md)
+
 	resp, err := c.api.BeginTransaction(ctx, &api.BeginTransactionRequest{
 		Project: c.db,
 		Branch:  c.branch,
@@ -275,16 +314,10 @@ func (c *grpcCRUD) beginTxWithOptions(ctx context.Context, options *TxOptions) (
 		return nil, GRPCError(fmt.Errorf("empty transaction context in response"))
 	}
 
-	md := meta.Join(c.metadata)
-
 	if respHeaders.Get(SetCookieHeaderKey) != nil {
 		for _, incomingCookie := range respHeaders.Get(SetCookieHeaderKey) {
 			md = meta.Join(md, meta.Pairs(CookieHeaderKey, incomingCookie))
 		}
-	}
-
-	if len(HeaderSchemaVersionValue) > 0 {
-		md = meta.Join(md, meta.Pairs(api.HeaderSchemaVersion, HeaderSchemaVersionValue[0]))
 	}
 
 	return &grpcCRUD{db: c.db, branch: c.branch, api: c.api, txCtx: resp.GetTxCtx(), metadata: md}, nil

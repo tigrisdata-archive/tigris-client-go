@@ -471,11 +471,21 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	if cfg.URL == "" {
 		cfg.URL = os.Getenv(EnvURL)
 	}
+
+	if cfg.URL == "" {
+		cfg.URL = os.Getenv(EnvURI)
+	}
+
 	if cfg.URL == "" {
 		cfg.URL = DefaultURL
 	}
 
+	if os.Getenv(EnvSkipLocalTLS) != "" {
+		cfg.SkipLocalTLS = true
+	}
+
 	sURL := cfg.URL
+
 	noScheme := !strings.Contains(sURL, "://")
 	if noScheme {
 		if DefaultProtocol == "" {
@@ -495,6 +505,7 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	}
 
 	var sec bool
+
 	if sec, err = initProto(u.Scheme, &cfg); err != nil {
 		return nil, err
 	}
@@ -504,14 +515,15 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	// Retain only host:port for connection
 	cfg.URL = u.Host
 
-	if cfg.TLS == nil && (cfg.ClientID != "" || cfg.ClientSecret != "" || cfg.Token != "" || u.Scheme == "https" || sec) {
+	if cfg.TLS == nil && (!cfg.SkipLocalTLS || !localURL(cfg.URL)) && (cfg.ClientID != "" || cfg.ClientSecret != "" ||
+		cfg.Token != "" || u.Scheme == "https" || sec) {
 		cfg.TLS = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 
 	return &cfg, nil
 }
 
-type initDriverFunc func(ctx context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error)
+type initDriverFunc func(ctx context.Context, cfg *config.Driver) (driverWithOptions, Management, Observability, error)
 
 var drivers = map[string]initDriverFunc{}
 
@@ -541,14 +553,17 @@ func NewDriver(ctx context.Context, cfg *config.Driver) (Driver, error) {
 	}
 
 	wg, ch := startHealthPingLoop(cfg.PingInterval, drv)
+
 	return &driver{driverWithOptions: drv, closeCh: ch, closeWg: wg, cfg: cfg}, nil
 }
 
 func startHealthPingLoop(cfgInterval time.Duration, drv driverWithOptions) (*sync.WaitGroup, chan struct{}) {
 	var wg sync.WaitGroup
+
 	ch := make(chan struct{})
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -566,11 +581,15 @@ func startHealthPingLoop(cfgInterval time.Duration, drv driverWithOptions) (*syn
 			case <-ch:
 				return
 			}
+
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
 			_, _ = drv.Health(ctx)
+
 			cancel()
 		}
 	}()
+
 	return &wg, ch
 }
 
@@ -579,4 +598,13 @@ func (c *driver) Close() error {
 	c.closeWg.Wait()
 
 	return c.driverWithOptions.Close()
+}
+
+func localURL(url string) bool {
+	return strings.HasPrefix(url, "localhost:") ||
+		strings.HasPrefix(url, "127.0.0.1:") ||
+		strings.HasPrefix(url, "http://localhost:") ||
+		strings.HasPrefix(url, "http://127.0.0.1:") ||
+		strings.HasPrefix(url, "[::1]") ||
+		strings.HasPrefix(url, "http://[::1]:")
 }

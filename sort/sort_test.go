@@ -53,6 +53,13 @@ func TestNewSortOrder(t *testing.T) {
 		assert.Equal(t, map[string]string{"field_1": "$desc"}, o[0].ToSortOrder())
 		assert.Equal(t, map[string]string{"parent.field_2": "$asc"}, o[1].ToSortOrder())
 	})
+
+	t.Run("multiple sort orders opposite", func(t *testing.T) {
+		o := Ascending("field_1").Descending("parent.field_2")
+		assert.Len(t, o, 2)
+		assert.Equal(t, map[string]string{"field_1": "$asc"}, o[0].ToSortOrder())
+		assert.Equal(t, map[string]string{"parent.field_2": "$desc"}, o[1].ToSortOrder())
+	})
 }
 
 func TestExpr_Built(t *testing.T) {

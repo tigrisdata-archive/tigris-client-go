@@ -1152,7 +1152,7 @@ func getAccessToken(ctx context.Context, tokenURL string, cfg *config.Driver, cl
 
 	var tr TokenResponse
 
-	err = json.Unmarshal(body, &tr)
+	err = jsoniter.Unmarshal(body, &tr)
 	if err != nil {
 		return nil, api.Errorf(api.Code_INTERNAL, "failed to parse external response: reason = %s", err.Error())
 	}

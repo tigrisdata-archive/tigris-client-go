@@ -15,8 +15,8 @@
 package driver
 
 import (
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"testing"
 	"unsafe"
 
@@ -57,9 +57,9 @@ type JSONArrMatcher struct {
 }
 
 func (matcher *JSONArrMatcher) Matches(actual any) bool {
-	act, err := json.Marshal(actual)
+	act, err := jsoniter.Marshal(actual)
 	require.NoError(matcher.T, err)
-	exp, err := json.Marshal(actual)
+	exp, err := jsoniter.Marshal(actual)
 	require.NoError(matcher.T, err)
 
 	assert.JSONEq(matcher.T, string(exp), string(act))
@@ -82,7 +82,7 @@ func JAM(t *testing.T, expected []string) gomock.Matcher {
 }
 
 func ToDocument(t *testing.T, doc any) Document {
-	b, err := json.Marshal(doc)
+	b, err := jsoniter.Marshal(doc)
 	require.NoError(t, err)
 
 	return b

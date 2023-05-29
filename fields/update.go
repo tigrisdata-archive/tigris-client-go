@@ -20,8 +20,8 @@
 package fields
 
 import (
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
@@ -60,7 +60,7 @@ func (u *Update) Build() (*Update, error) {
 
 	var err error
 
-	u.built, err = json.Marshal(u)
+	u.built, err = jsoniter.Marshal(u)
 	return u, err
 }
 

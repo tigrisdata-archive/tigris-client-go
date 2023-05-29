@@ -39,7 +39,6 @@ import (
 	"github.com/gertd/go-pluralize"
 	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
@@ -619,14 +618,14 @@ func (f *FieldMultiType) UnmarshalJSON(b []byte) error {
 
 func (f *FieldMultiType) MarshalJSON() ([]byte, error) {
 	if !f.isNullable && len(f.Type) == 1 {
-		return json.Marshal(f.Type[0])
+		return jsoniter.Marshal(f.Type[0])
 	}
 
 	if !f.isNullable {
-		return json.Marshal(f.Type)
+		return jsoniter.Marshal(f.Type)
 	}
 
-	return json.Marshal(append(f.Type, "null"))
+	return jsoniter.Marshal(append(f.Type, "null"))
 }
 
 func (f *FieldMultiType) First() string {

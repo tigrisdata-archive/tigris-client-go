@@ -87,6 +87,10 @@ func TestDriverConfig(t *testing.T) {
 		{name: "https_localhost_with_port_token", url: "https://localhost:555?token=tkn1", cfg: &config.Driver{URL: "localhost:555", Protocol: HTTP, TLS: cTLS, Token: "tkn1"}},
 		{name: "https_ip_token", url: "https://127.0.0.1?token=tkn1", cfg: &config.Driver{URL: "127.0.0.1", Protocol: HTTP, TLS: cTLS, Token: "tkn1"}},
 		{name: "https_ip_with_port_token", url: "https://127.0.0.1:777?token=tkn1", cfg: &config.Driver{URL: "127.0.0.1:777", Protocol: HTTP, TLS: cTLS, Token: "tkn1"}},
+		{name: "unix_socket", url: "/var/lib/tigris/unix.sock", cfg: &config.Driver{URL: "/var/lib/tigris/unix.sock", Protocol: DefaultProtocol}},
+		{name: "unix_socket", url: "/var/lib/tigris/unix.sock", cfg: &config.Driver{URL: "/var/lib/tigris/unix.sock", Protocol: DefaultProtocol}},
+		{name: "unix_socket_scheme", url: "unix://localhost:/var/lib/tigris/unix.sock", cfg: &config.Driver{URL: "/var/lib/tigris/unix.sock", Protocol: DefaultProtocol}},
+		{name: "unix_socket_relative", url: "./tigris/unix.sock", cfg: &config.Driver{URL: "./tigris/unix.sock", Protocol: DefaultProtocol}},
 	}
 
 	for _, v := range cases {

@@ -141,7 +141,8 @@ type Database interface {
 		options ...*CreateCollectionOptions) error
 
 	// CreateOrUpdateCollections creates batch of collections
-	CreateOrUpdateCollections(ctx context.Context, schema []Schema, options ...*CreateCollectionOptions) (*CreateOrUpdateCollectionsResponse, error)
+	CreateOrUpdateCollections(ctx context.Context, schema []Schema,
+		options ...*CreateCollectionOptions) (*CreateOrUpdateCollectionsResponse, error)
 
 	// DropCollection deletes the collection and all documents it contains.
 	DropCollection(ctx context.Context, collection string, options ...*CollectionOptions) error
@@ -170,7 +171,8 @@ type driver struct {
 	cfg     *config.Driver
 }
 
-func (c *driver) CreateProject(ctx context.Context, project string, options ...*CreateProjectOptions) (*CreateProjectResponse, error) {
+func (c *driver) CreateProject(ctx context.Context, project string, options ...*CreateProjectOptions,
+) (*CreateProjectResponse, error) {
 	opts, err := validateOptionsParam(options, &CreateProjectOptions{})
 	if err != nil {
 		return nil, err
@@ -179,7 +181,8 @@ func (c *driver) CreateProject(ctx context.Context, project string, options ...*
 	return c.createProjectWithOptions(ctx, project, opts.(*CreateProjectOptions))
 }
 
-func (c *driver) DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions) (*DescribeDatabaseResponse, error) {
+func (c *driver) DescribeDatabase(ctx context.Context, project string, options ...*DescribeProjectOptions,
+) (*DescribeDatabaseResponse, error) {
 	opts, err := validateOptionsParam(options, &DescribeProjectOptions{})
 	if err != nil {
 		return nil, err
@@ -188,7 +191,8 @@ func (c *driver) DescribeDatabase(ctx context.Context, project string, options .
 	return c.describeProjectWithOptions(ctx, project, opts.(*DescribeProjectOptions))
 }
 
-func (c *driver) DeleteProject(ctx context.Context, project string, options ...*DeleteProjectOptions) (*DeleteProjectResponse, error) {
+func (c *driver) DeleteProject(ctx context.Context, project string, options ...*DeleteProjectOptions,
+) (*DeleteProjectResponse, error) {
 	opts, err := validateOptionsParam(options, &DeleteProjectOptions{})
 	if err != nil {
 		return nil, err
@@ -487,7 +491,7 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	sURL := cfg.URL
 
 	noScheme := !strings.Contains(sURL, "://")
-	if noScheme {
+	if noScheme && sURL[0] != '/' && sURL[0] != '.' {
 		if DefaultProtocol == "" {
 			sURL = strings.ToLower(GRPC) + "://" + sURL
 		} else {
@@ -500,7 +504,9 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 		return nil, err
 	}
 
-	if noScheme {
+	unix := u.Scheme == "unix" || isUnixSock(cfg.URL)
+
+	if noScheme || unix {
 		u.Scheme = ""
 	}
 
@@ -513,7 +519,11 @@ func initConfig(lCfg *config.Driver) (*config.Driver, error) {
 	initSecrets(u, &cfg)
 
 	// Retain only host:port for connection
-	cfg.URL = u.Host
+	if !unix {
+		cfg.URL = u.Host
+	} else {
+		cfg.URL = u.Path
+	}
 
 	if cfg.TLS == nil && (!cfg.SkipLocalTLS || !localURL(cfg.URL)) && (cfg.ClientID != "" || cfg.ClientSecret != "" ||
 		cfg.Token != "" || u.Scheme == "https" || sec) {
@@ -601,7 +611,7 @@ func (c *driver) Close() error {
 }
 
 func localURL(url string) bool {
-	return strings.HasPrefix(url, "localhost:") ||
+	return isUnixSock(url) || strings.HasPrefix(url, "localhost:") ||
 		strings.HasPrefix(url, "127.0.0.1:") ||
 		strings.HasPrefix(url, "http://localhost:") ||
 		strings.HasPrefix(url, "http://127.0.0.1:") ||

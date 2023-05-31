@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"strings"
 	"unsafe"
 
@@ -30,6 +31,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials/local"
 	"google.golang.org/grpc/credentials/oauth"
 	meta "google.golang.org/grpc/metadata"
 )
@@ -67,27 +69,13 @@ func GRPCError(err error) error {
 	return &Error{api.FromStatusError(err)}
 }
 
-// this is a hack to skip TLS on local connection
-// when the token is set.
-type localPerRPCCred struct {
-	parent credentials.PerRPCCredentials
-}
-
-func (l *localPerRPCCred) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return l.parent.GetRequestMetadata(ctx, uri...)
-}
-
-func (*localPerRPCCred) RequireTransportSecurity() bool {
-	return false
-}
-
 // newGRPCClient return Driver interface implementation using GRPC transport protocol.
-func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOptions, Management, Observability, error) {
-	if !strings.Contains(config.URL, ":") {
-		config.URL = fmt.Sprintf("%s:%d", config.URL, DefaultGRPCPort)
+func newGRPCClient(ctx context.Context, cfg *config.Driver) (driverWithOptions, Management, Observability, error) {
+	if !strings.Contains(cfg.URL, ":") && !isUnixSock(cfg.URL) {
+		cfg.URL = fmt.Sprintf("%s:%d", cfg.URL, DefaultGRPCPort)
 	}
 
-	tokenSource, _, _ := configAuth(config)
+	tokenSource, _, _ := configAuth(cfg)
 
 	opts := []grpc.DialOption{
 		grpc.FailOnNonTempDialError(true),
@@ -100,25 +88,32 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOption
 		),
 	}
 
+	if isUnixSock(cfg.URL) {
+		dialer := func(ctx context.Context, addr string) (net.Conn, error) {
+			var d net.Dialer
+			return d.DialContext(ctx, "unix", cfg.URL)
+		}
+
+		opts = append(opts, grpc.WithContextDialer(dialer))
+	}
+
 	if tokenSource != nil {
 		var perRPCCreds credentials.PerRPCCredentials = oauth.TokenSource{TokenSource: tokenSource}
-
-		if config.SkipLocalTLS && localURL(config.URL) {
-			perRPCCreds = &localPerRPCCred{oauth.TokenSource{TokenSource: tokenSource}}
-		}
 
 		opts = append(opts, grpc.WithPerRPCCredentials(perRPCCreds))
 	}
 
 	transportCreds := insecure.NewCredentials()
 
-	if (!config.SkipLocalTLS || !localURL(config.URL)) && (config.TLS != nil || tokenSource != nil) {
-		transportCreds = credentials.NewTLS(config.TLS)
+	if cfg.SkipLocalTLS && localURL(cfg.URL) {
+		transportCreds = local.NewCredentials()
+	} else if cfg.TLS != nil || tokenSource != nil {
+		transportCreds = credentials.NewTLS(cfg.TLS)
 	}
 
 	opts = append(opts, grpc.WithTransportCredentials(transportCreds))
 
-	conn, err := grpc.DialContext(ctx, config.URL, opts...)
+	conn, err := grpc.DialContext(ctx, cfg.URL, opts...)
 	if err != nil {
 		return nil, nil, nil, GRPCError(err)
 	}
@@ -131,7 +126,7 @@ func newGRPCClient(ctx context.Context, config *config.Driver) (driverWithOption
 		o11y:   api.NewObservabilityClient(conn),
 		health: api.NewHealthAPIClient(conn),
 		search: api.NewSearchClient(conn),
-		cfg:    config,
+		cfg:    cfg,
 	}
 
 	return drv, drv, drv, nil
@@ -141,6 +136,7 @@ func (c *grpcDriver) Close() error {
 	if c.conn == nil {
 		return nil
 	}
+
 	return GRPCError(c.conn.Close())
 }
 

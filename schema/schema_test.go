@@ -206,7 +206,7 @@ func TestCollectionSchema(t *testing.T) {
 		Map    map[string]string    `json:"map_1"`
 		Slice2 []subStruct          `json:"slice_2"`
 		Map2   map[string]subStruct `json:"map_2"`
-		Data2  subStructPK          `json:"data_2" tigris:"-"` // should be skipped
+		Data2  subStructPK          `json:"data_2"  tigris:"-"` // should be skipped
 		MapAny map[string]any       `json:"map_any"`
 
 		Bool123 bool `json:"bool_123"`
@@ -452,25 +452,25 @@ func TestTags(t *testing.T) {
 		Field1 string
 
 		FieldNestedIndexAndReq int `json:"field_nested_index_and_req" tigris:"required,index"`
-		FieldNestedIndex2      int `json:"field_nested_index2" tigris:"index"`
-		FieldNestedRequired    int `json:"field_nested_required" tigris:"required"`
-		FieldNestedRequired2   int `json:"field_nested_required2" tigris:"required"`
+		FieldNestedIndex2      int `json:"field_nested_index2"        tigris:"index"`
+		FieldNestedRequired    int `json:"field_nested_required"      tigris:"required"`
+		FieldNestedRequired2   int `json:"field_nested_required2"     tigris:"required"`
 	}
 
 	type TestDefaults struct {
 		FieldIndexAndReq  int      `json:"field_index_and_req" tigris:"required,index"`
-		FieldIndex2       int      `json:"field_index2" tigris:"index"`
-		FieldRequired     int      `json:"field_required" tigris:"required"`
-		FieldRequired2    int      `json:"field_required2" tigris:"required"`
-		FieldMaxLength    string   `json:"field_max_length" tigris:"maxLength:123"`
-		FieldDefaultBool  bool     `json:"def_bool" tigris:"default:true"`
-		FieldDefaultInt   int      `json:"def_int" tigris:"default:789"`
-		FieldDefaultFloat float64  `json:"def_float" tigris:"default:456.34"`
-		FieldDefaultStr   string   `json:"def_str" tigris:"default:str1"`
-		FieldDefaultStr1  string   `json:"def_str1" tigris:"default:'st\\'r2'"`
-		FieldDefaultArr   []string `json:"def_arr_str" tigris:"default:'[\"one\", \"two\"]'"`
-		FieldDefaultObj   struct1  `json:"def_obj_str" tigris:"default:'{\"Field1\":\"aaa\"}'"`
-		FieldSearchIndex  string   `json:"def_search_index" tigris:"searchIndex,sort,facet"`
+		FieldIndex2       int      `json:"field_index2"        tigris:"index"`
+		FieldRequired     int      `json:"field_required"      tigris:"required"`
+		FieldRequired2    int      `json:"field_required2"     tigris:"required"`
+		FieldMaxLength    string   `json:"field_max_length"    tigris:"maxLength:123"`
+		FieldDefaultBool  bool     `json:"def_bool"            tigris:"default:true"`
+		FieldDefaultInt   int      `json:"def_int"             tigris:"default:789"`
+		FieldDefaultFloat float64  `json:"def_float"           tigris:"default:456.34"`
+		FieldDefaultStr   string   `json:"def_str"             tigris:"default:str1"`
+		FieldDefaultStr1  string   `json:"def_str1"            tigris:"default:'st\\'r2'"`
+		FieldDefaultArr   []string `json:"def_arr_str"         tigris:"default:'[\"one\", \"two\"]'"`
+		FieldDefaultObj   struct1  `json:"def_obj_str"         tigris:"default:'{\"Field1\":\"aaa\"}'"`
+		FieldSearchIndex  string   `json:"def_search_index"    tigris:"searchIndex,sort,facet"`
 
 		VectorField [5]float64 `json:"vector_field" tigris:"vector"`
 

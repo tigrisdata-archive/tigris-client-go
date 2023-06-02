@@ -33,7 +33,7 @@ var BufSize = 16
 // Model is embeddable model with primary key for time-series collection.
 type Model struct {
 	Timestamp time.Time `json:"timestamp" tigris:"primaryKey:1,autoGenerate"`
-	ID        uuid.UUID `json:"id" tigris:"primaryKey:2,autoGenerate"`
+	ID        uuid.UUID `json:"id"        tigris:"primaryKey:2,autoGenerate"`
 }
 
 // Collection is buffered time-series collection.

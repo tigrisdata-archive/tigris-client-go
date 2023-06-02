@@ -149,7 +149,7 @@ func TestFacetQuery_Built(t *testing.T) {
 		f := NewFacetQueryBuilder().WithFields("field_1", "field_2").Build()
 		b, err := f.Built()
 		assert.Nil(t, err)
-		assert.Equal(t, "{\"field_1\":{\"size\":10},\"field_2\":{\"size\":10}}", string(b))
+		assert.JSONEq(t, `{"field_1":{"size":10},"field_2":{"size":10}}`, string(b))
 	})
 
 	t.Run("with vector search", func(t *testing.T) {

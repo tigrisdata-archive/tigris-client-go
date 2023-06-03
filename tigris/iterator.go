@@ -15,8 +15,7 @@
 package tigris
 
 import (
-	"encoding/json"
-
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
 	"github.com/tigrisdata/tigris-client-go/search"
 )
@@ -50,7 +49,7 @@ func (it *Iterator[T]) Next(doc *T) bool {
 	if it.unmarshaler != nil {
 		err = it.unmarshaler(b, &v)
 	} else {
-		err = json.Unmarshal(b, &v)
+		err = jsoniter.Unmarshal(b, &v)
 	}
 
 	if err != nil {

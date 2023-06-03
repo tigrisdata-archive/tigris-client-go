@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
@@ -46,7 +47,7 @@ var (
 func createSearchResponse(t *testing.T, doc any) driver.SearchResponse {
 	t.Helper()
 
-	d, err := json.Marshal(doc)
+	d, err := jsoniter.Marshal(doc)
 	require.NoError(t, err)
 	tm := time.Now()
 	return &api.SearchResponse{
@@ -384,7 +385,7 @@ func TestCollection_Search(t *testing.T) {
 		require.Nil(t, searchIter.err)
 		require.False(t, searchIter.Next(&rs))
 		require.NotNil(t, searchIter.err)
-		require.ErrorContains(t, searchIter.err, "cannot unmarshal string")
+		require.ErrorContains(t, searchIter.err, "error found in #1 byte of")
 	})
 }
 

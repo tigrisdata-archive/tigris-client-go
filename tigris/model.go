@@ -15,10 +15,10 @@
 package tigris
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
+	jsoniter "github.com/json-iterator/go"
 	api "github.com/tigrisdata/tigris-client-go/api/server/v1"
 )
 
@@ -96,5 +96,5 @@ func populateModelMetadata(umodel any, md *api.ResponseMetadata, keys []byte) er
 		return nil
 	}
 
-	return json.Unmarshal(keys, umodel)
+	return jsoniter.Unmarshal(keys, umodel)
 }

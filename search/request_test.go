@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"testing"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tigrisdata/tigris-client-go/driver"
@@ -169,7 +170,7 @@ func ExampleNewRequestBuilder() {
 
 func ExampleRequestBuilder_WithSearchFields() {
 	req := NewRequestBuilder().WithQuery("some text").WithSearchFields("field_1").Build()
-	b, err := json.Marshal(req.SearchFields)
+	b, err := jsoniter.Marshal(req.SearchFields)
 	if err != nil {
 		panic(err)
 	}

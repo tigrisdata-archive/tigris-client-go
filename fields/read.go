@@ -18,8 +18,7 @@
 package fields
 
 import (
-	"encoding/json"
-
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
 )
 
@@ -68,7 +67,7 @@ func (pr *Read) Build() (*Read, error) {
 
 	var err error
 
-	pr.built, err = json.Marshal(pr.fields)
+	pr.built, err = jsoniter.Marshal(pr.fields)
 
 	return pr, err
 }

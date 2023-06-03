@@ -38,7 +38,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var toDocument = driver.ToDocument
+var (
+	toDocument = driver.ToDocument
+	jm         = driver.JM
+)
 
 func createSearchResponse(t *testing.T, doc any) driver.SearchResponse {
 	t.Helper()
@@ -80,7 +83,7 @@ func TestGetSearchRequest(t *testing.T) {
 		assert.NotNil(t, out)
 		assert.Equal(t, in.Q, out.Q)
 		assert.Equal(t, []string{"field_1"}, out.SearchFields)
-		assert.Equal(t, driver.Filter(`{"field_2":{"$eq":"some value"}}`), out.Filter)
+		assert.JSONEq(t, `{"field_2":{"$eq":"some value"}}`, string(out.Filter))
 		assert.Equal(t, driver.Facet(`{"field_3":{"size":10}}`), out.Facet)
 		assert.Equal(t, in.ExcludeFields, out.ExcludeFields)
 		assert.Empty(t, out.IncludeFields)
@@ -165,7 +168,7 @@ func TestCollectionBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	mdb.EXPECT().Update(ctx, "coll_1",
-		driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
+		jm(t, `{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
 		driver.Update(`{"$set":{"Field1":345}}`))
 
 	_, err = c.Update(ctx, filter.Or(
@@ -178,8 +181,8 @@ func TestCollectionBasic(t *testing.T) {
 	mit := mock.NewMockIterator(ctrl)
 
 	mdb.EXPECT().Read(ctx, "coll_1",
-		driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
-		driver.Projection(`{"Field1":true,"Key1":false}`),
+		jm(t, `{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
+		jm(t, `{"Key1":false,"Field1":true}`),
 	).Return(mit, nil)
 
 	it, err := c.Read(ctx, filter.Or(
@@ -218,7 +221,7 @@ func TestCollectionBasic(t *testing.T) {
 	_, err = c.DeleteAll(ctx)
 	require.NoError(t, err)
 
-	mdb.EXPECT().Delete(ctx, "coll_1", driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`))
+	mdb.EXPECT().Delete(ctx, "coll_1", jm(t, `{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`))
 
 	_, err = c.Delete(ctx, filter.Or(
 		filter.Eq("Key1", "aaa"),
@@ -673,8 +676,8 @@ func TestCollection(t *testing.T) {
 
 	t.Run("read_limit_skip_offset", func(t *testing.T) {
 		mdb.EXPECT().Read(ctx, "coll_1",
-			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
-			driver.Projection(`{"Field1":true,"Key1":false}`),
+			jm(t, `{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
+			jm(t, `{"Key1":false,"Field1":true}`),
 			&driver.ReadOptions{
 				Limit:  111,
 				Skip:   222,
@@ -723,7 +726,7 @@ func TestCollection(t *testing.T) {
 				Limit:  111,
 				Skip:   222,
 				Offset: []byte("333"),
-				Sort:   []byte("[{\"Key1\":\"$asc\"},{\"Key2\":\"$desc\"}]"),
+				Sort:   []byte(`[{"Key1":"$asc"},{"Key2":"$desc"}]`),
 			},
 		).Return(mit, nil)
 		_, err := c.ReadWithOptions(ctx, filter.All,
@@ -740,7 +743,7 @@ func TestCollection(t *testing.T) {
 
 	t.Run("update_one", func(t *testing.T) {
 		mdb.EXPECT().Update(ctx, "coll_1",
-			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
+			jm(t, `{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
 			driver.Update(`{"$set":{"Field1":345}}`),
 			&driver.UpdateOptions{Limit: 1},
 		)
@@ -755,7 +758,7 @@ func TestCollection(t *testing.T) {
 
 	t.Run("delete_one", func(t *testing.T) {
 		mdb.EXPECT().Delete(ctx, "coll_1",
-			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
+			jm(t, `{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"ccc"}}]}`),
 			&driver.DeleteOptions{Limit: 1},
 		)
 
@@ -767,7 +770,7 @@ func TestCollection(t *testing.T) {
 
 	t.Run("count", func(t *testing.T) {
 		mdb.EXPECT().Count(ctx, "coll_1",
-			driver.Filter(`{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
+			jm(t, `{"$or":[{"Key1":{"$eq":"aaa"}},{"Key1":{"$eq":"bbb"}}]}`),
 		).Return(int64(789), nil)
 
 		cnt, err := c.Count(ctx, filter.Or(

@@ -16,8 +16,8 @@ package driver
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
-	"unsafe"
 
 	"github.com/golang/mock/gomock"
 	jsoniter "github.com/json-iterator/go"
@@ -30,7 +30,7 @@ import (
 
 type JSONMatcher struct {
 	T        *testing.T
-	Expected []byte
+	Expected string
 }
 
 func (matcher *JSONMatcher) Matches(actual any) bool {
@@ -40,22 +40,44 @@ func (matcher *JSONMatcher) Matches(actual any) bool {
 		s = string(t)
 	case Projection:
 		s = string(t)
+	case Filter:
+		s = string(t)
 	}
 
-	return assert.JSONEq(matcher.T, string(matcher.Expected), s)
+	if s == "" && matcher.Expected == "" {
+		return true
+	}
+
+	if s == "" {
+		panic("unknow type received in JSONMatcher")
+	}
+
+	return assert.JSONEq(matcher.T, matcher.Expected, s)
 }
 
 func (matcher *JSONMatcher) String() string {
-	return fmt.Sprintf("JSONMatcher: %v", string(matcher.Expected))
+	return fmt.Sprintf("JSONMatcher: %v", matcher.Expected)
 }
 
 func (*JSONMatcher) Got(actual any) string {
-	ptr := unsafe.Pointer(&actual)
-	return fmt.Sprintf("JSONMatcher: %v", string(*(*[]byte)(ptr)))
+	switch t := actual.(type) {
+	case string:
+		return fmt.Sprintf("JSONMatcher[string]: %v", t)
+	case []byte:
+		return fmt.Sprintf("JSONMatcher[byte]: %v", string(t))
+	case Filter:
+		return fmt.Sprintf("JSONMatcher[Filter]: %v", string(t))
+	case Projection:
+		return fmt.Sprintf("JSONMatcher[Projection]: %v", string(t))
+	case Schema:
+		return fmt.Sprintf("JSONMatcher[Schema]: %v", string(t))
+	default:
+		return fmt.Sprintf("JSONMatcher[%v]: %v", reflect.TypeOf(t), t)
+	}
 }
 
 func JM(t *testing.T, expected string) gomock.Matcher {
-	j := &JSONMatcher{T: t, Expected: []byte(expected)}
+	j := &JSONMatcher{T: t, Expected: expected}
 	return gomock.GotFormatterAdapter(j, j)
 }
 

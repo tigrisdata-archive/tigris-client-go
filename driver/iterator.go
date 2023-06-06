@@ -32,8 +32,8 @@ type streamReader interface {
 
 type readIterator struct {
 	streamReader
-	eof bool
 	err error
+	eof bool
 }
 
 func (i *readIterator) Next(d *Document) bool {
@@ -87,8 +87,8 @@ type searchStreamReader interface {
 
 type searchResultIterator struct {
 	searchStreamReader
-	eof bool
 	err error
+	eof bool
 }
 
 func (i *searchResultIterator) Next(r *SearchResponse) bool {
@@ -100,6 +100,7 @@ func (i *searchResultIterator) Next(r *SearchResponse) bool {
 	if errors.Is(err, io.EOF) {
 		i.eof = true
 		_ = i.close()
+
 		return false
 	}
 

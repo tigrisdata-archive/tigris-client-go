@@ -209,6 +209,38 @@ func (c *Collection[T]) Read(ctx context.Context, filter filter.Filter, fields .
 	return &Iterator[T]{Iterator: it}, nil
 }
 
+func setReadOptions(options *ReadOptions) (*driver.ReadOptions, error) {
+	opt := driver.ReadOptions{}
+
+	if options != nil {
+		var sortOrderbytes []byte
+
+		if options.Sort != nil {
+			var (
+				sortOrder driver.SortOrder
+				err       error
+			)
+
+			if sortOrder, err = options.Sort.Built(); err != nil {
+				return nil, err
+			}
+
+			sortOrderbytes, err = jsoniter.Marshal(sortOrder)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		opt.Limit = options.Limit
+		opt.Skip = options.Skip
+		opt.Offset = options.Offset
+		opt.Collation = (*api.Collation)(options.Collation)
+		opt.Sort = sortOrderbytes
+	}
+
+	return &opt, nil
+}
+
 // ReadWithOptions returns specific fields of the documents according to the filter.
 // It allows further configure returned documents by providing options:
 //
@@ -224,29 +256,13 @@ func (c *Collection[T]) ReadWithOptions(ctx context.Context, filter filter.Filte
 	if err != nil {
 		return nil, err
 	}
-	if options == nil {
-		return nil, fmt.Errorf("API expecting options but received null")
+
+	opt, err := setReadOptions(options)
+	if err != nil {
+		return nil, err
 	}
 
-	var sortOrderbytes []byte
-	if options.Sort != nil {
-		sortOrder, err := options.Sort.Built()
-		if err != nil {
-			return nil, err
-		}
-		sortOrderbytes, err = jsoniter.Marshal(sortOrder)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	it, err := getDB(ctx, c.db).Read(ctx, c.name, f, p, &driver.ReadOptions{
-		Limit:     options.Limit,
-		Skip:      options.Skip,
-		Offset:    options.Offset,
-		Collation: (*api.Collation)(options.Collation),
-		Sort:      sortOrderbytes,
-	})
+	it, err := getDB(ctx, c.db).Read(ctx, c.name, f, p, opt)
 	if err != nil {
 		return nil, err
 	}

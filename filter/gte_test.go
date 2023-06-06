@@ -28,12 +28,15 @@ func TestGte(t *testing.T) {
 		expr Expr
 		exp  string
 	}{
+		{"int0", GteInt("f", 0), `{"f":{"$gte":0}}`},
+		{"intNeg", GteInt32("f", -1), `{"f":{"$gte":-1}}`},
 		{"int", GteInt("f", 12345), `{"f":{"$gte":12345}}`},
 		{"int32", GteInt32("f", 12345), `{"f":{"$gte":12345}}`},
 		{"int64", GteInt64("f", 123456789012), `{"f":{"$gte":123456789012}}`},
 		{"float32", GteFloat32("f", 12345.67), `{"f":{"$gte":12345.67}}`},
 		{"float64", GteFloat64("f", 123456789012.34), `{"f":{"$gte":123456789012.34}}`},
 		{"string", GteString("f", "1234"), `{"f":{"$gte":"1234"}}`},
+		{"string0", GteString("f", ""), `{"f":{"$gte":""}}`},
 		{"bytes", GteBytes("f", []byte("123")), `{"f":{"$gte":"MTIz"}}`},
 		{"time", GteTime("f", time.Time{}), `{"f":{"$gte":"0001-01-01T00:00:00Z"}}`},
 		{

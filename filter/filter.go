@@ -20,7 +20,6 @@ package filter
 import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
-	"github.com/tigrisdata/tigris-client-go/schema"
 )
 
 type (
@@ -73,7 +72,7 @@ func Not(op Expr) Expr {
 
 // Eq composes 'equal' operation.
 // Result is equivalent to: field == value.
-func Eq[T schema.PrimitiveFieldType](field string, value T) Expr {
+func Eq(field string, value any) Expr {
 	return Expr{field: comparison{Eq: value}}
 }
 

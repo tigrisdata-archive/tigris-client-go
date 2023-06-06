@@ -85,7 +85,12 @@ type PrimitiveFieldType interface {
 		int | int32 | int64 |
 		float32 | float64 |
 		[]byte | time.Time | uuid.UUID |
-		bool
+		bool |
+		*string |
+		*int | *int32 | *int64 |
+		*float32 | *float64 |
+		*[]byte | *time.Time | *uuid.UUID |
+		*bool
 }
 
 var plural *pluralize.Client

@@ -17,6 +17,7 @@ package tigris
 import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tigrisdata/tigris-client-go/driver"
+	"github.com/tigrisdata/tigris-client-go/schema"
 	"github.com/tigrisdata/tigris-client-go/search"
 )
 
@@ -136,6 +137,7 @@ func (it *SearchIterator[T]) Next(res *search.Result[T]) bool {
 	if err := res.From(r); err != nil {
 		it.err = err
 		it.Close()
+
 		return false
 	}
 
@@ -148,10 +150,94 @@ func (it *SearchIterator[T]) Err() error {
 	if it.Iterator.Err() != nil {
 		return it.Iterator.Err()
 	}
+
 	return it.err
 }
 
 // Close closes Iterator stream.
 func (it *SearchIterator[T]) Close() {
 	it.Iterator.Close()
+}
+
+// JoinIterator is used to iterate documents
+// returned by streaming APIs.
+type JoinIterator[P schema.Model, C schema.Model] struct {
+	err error
+
+	sortedRes []*JoinResult[P, C]
+	ptr       int
+	options   *JoinOptions
+}
+
+// Next populates 'doc' with the next document in the iteration order
+// Returns false at the end of the stream or in the case of error.
+func (it *JoinIterator[P, C]) Next(parent *P, child *[]*C) bool {
+	for it.ptr < len(it.sortedRes) {
+		it.ptr++
+		k := it.sortedRes[it.ptr-1]
+
+		if it.options == nil || it.options.Type != InnerJoin || k.Child != nil {
+			*parent = *k.Parent
+			*child = k.Child
+
+			return true
+		}
+	}
+
+	return false
+}
+
+// Iterate calls provided function for every document in the result.
+// It's ia convenience to avoid common mistakes of not closing the
+// iterator and not checking the error from the iterator.
+func (it *JoinIterator[P, C]) Iterate(fn func(parent *P, child []*C) error) error {
+	defer it.Close()
+
+	var (
+		p P
+		c []*C
+	)
+
+	for it.Next(&p, &c) {
+		if err := fn(&p, c); err != nil {
+			return err
+		}
+	}
+
+	return it.Err()
+}
+
+type JoinResult[P schema.Model, C schema.Model] struct {
+	Parent *P
+	Child  []*C
+}
+
+// Array returns result of iteration as an array of documents.
+func (it *JoinIterator[P, C]) Array() ([]JoinResult[P, C], error) {
+	defer it.Close()
+
+	var (
+		child []*C
+		p     P
+		arr   []JoinResult[P, C]
+	)
+
+	for it.Next(&p, &child) {
+		arr = append(arr, JoinResult[P, C]{Parent: &p, Child: child})
+	}
+
+	if it.Err() != nil {
+		return nil, it.Err()
+	}
+
+	return arr, nil
+}
+
+// Err returns nil if iteration was successful,
+// otherwise return error details.
+func (it *JoinIterator[P, C]) Err() error {
+	return it.err
+}
+
+func (*JoinIterator[P, C]) Close() {
 }

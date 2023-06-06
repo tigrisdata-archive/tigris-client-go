@@ -23,17 +23,26 @@ import (
 )
 
 func TestEq(t *testing.T) {
+	s := "test"
+	i := 123
 	cases := []struct {
 		name string
 		expr Expr
 		exp  string
 	}{
+		{"ptr", Eq("f", &s), `{"f":{"$eq":"test"}}`},
+		{"ptrInt", Eq("f", &i), `{"f":{"$eq":123}}`},
+		{"null", Eq("f", (*string)(nil)), `{"f":{"$eq":null}}`},
+		{"nullInt", Eq("f", (*int)(nil)), `{"f":{"$eq":null}}`},
+		{"int0", EqInt("f", 0), `{"f":{"$eq":0}}`},
+		{"intNeg", EqInt("f", -1), `{"f":{"$eq":-1}}`},
 		{"int", EqInt("f", 12345), `{"f":{"$eq":12345}}`},
 		{"int32", EqInt32("f", 12345), `{"f":{"$eq":12345}}`},
 		{"int64", EqInt64("f", 123456789012), `{"f":{"$eq":123456789012}}`},
 		{"float32", EqFloat32("f", 12345.67), `{"f":{"$eq":12345.67}}`},
 		{"float64", EqFloat64("f", 123456789012.34), `{"f":{"$eq":123456789012.34}}`},
 		{"string", EqString("f", "1234"), `{"f":{"$eq":"1234"}}`},
+		{"string0", EqString("f", ""), `{"f":{"$eq":""}}`},
 		{"bytes", EqBytes("f", []byte("123")), `{"f":{"$eq":"MTIz"}}`},
 		{"time", EqTime("f", time.Time{}), `{"f":{"$eq":"0001-01-01T00:00:00Z"}}`},
 		{

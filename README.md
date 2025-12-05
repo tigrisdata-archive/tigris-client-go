@@ -1,3 +1,8 @@
+> ⚠️ **This repository is archived.**
+>
+> Tigris has pivoted from this database project to a new, globally distributed S3-compatible object storage service.
+> Learn more about the new product here: https://www.tigrisdata.com/
+
 # Tigris Go Client Library
 
 [![Go Report](https://goreportcard.com/badge/github.com/tigrisdata/tigris-client-go)](https://goreportcard.com/report/github.com/tigrisdata/tigris-client-go)
